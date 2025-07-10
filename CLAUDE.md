@@ -286,6 +286,8 @@ wandb.log_artifact(artifact)
 - [x] 完整测试框架构建
 - [x] 项目构建和开发工具配置
 - [x] 从 wandb 导入核心配置文件
+- [x] 项目结构对比分析
+- [ ] 添加缺失的功能模块
 - [ ] SDK 核心实现
 - [ ] 数据类型实现
 - [ ] 后端服务器开发
@@ -441,3 +443,181 @@ make serve         # 启动开发服务器
 - [hatchling 文档](https://hatch.pypa.io/latest/)
 - [nox 文档](https://nox.thea.codes/)
 - [ruff 文档](https://docs.astral.sh/ruff/)
+
+## 缺失功能模块分析
+
+通过对比 wandb 项目结构，TrackLab 需要添加以下关键模块：
+
+### 必需的核心模块
+
+#### 1. vendor/ - 第三方依赖管理
+```
+tracklab/vendor/
+├── __init__.py
+├── gql/                    # GraphQL 客户端 (简化版)
+│   ├── __init__.py
+│   ├── client.py
+│   └── transport.py
+├── watchdog/              # 文件监控库
+│   ├── __init__.py
+│   ├── observers.py
+│   └── events.py
+└── promise/               # 异步 Promise 实现
+    ├── __init__.py
+    └── promise.py
+```
+
+#### 2. filesync/ - 文件同步核心功能
+```
+tracklab/filesync/
+├── __init__.py
+├── dir_watcher.py         # 目录监控
+├── stats.py               # 文件统计
+├── step_prepare.py        # 文件准备步骤
+├── step_upload.py         # 文件上传步骤 (本地化)
+└── upload_job.py          # 上传任务管理
+```
+
+#### 3. plot/ - 基础可视化能力
+```
+tracklab/plot/
+├── __init__.py
+├── bar.py                 # 柱状图
+├── line.py                # 折线图
+├── scatter.py             # 散点图
+├── histogram.py           # 直方图
+├── confusion_matrix.py    # 混淆矩阵
+├── pr_curve.py           # PR 曲线
+├── roc_curve.py          # ROC 曲线
+├── custom_chart.py       # 自定义图表
+└── utils.py              # 绘图工具
+```
+
+#### 4. sync/ - 同步服务
+```
+tracklab/sync/
+├── __init__.py
+└── sync.py               # 本地同步实现
+```
+
+### 高级功能模块 (后续实现)
+
+#### 5. agents/ - 智能代理功能
+```
+tracklab/agents/
+├── __init__.py
+└── pyagent.py            # Python 代理实现
+```
+
+#### 6. automations/ - 自动化流程
+```
+tracklab/automations/
+├── __init__.py
+├── actions.py            # 自动化动作
+├── events.py             # 事件处理
+├── integrations.py       # 集成配置
+└── scopes.py            # 作用域管理
+```
+
+#### 7. launch/ - 任务启动管理
+```
+tracklab/launch/
+├── __init__.py
+├── _launch.py            # 启动核心
+├── agent/                # 代理管理
+│   ├── __init__.py
+│   └── agent.py
+├── builder/              # 构建器
+│   ├── __init__.py
+│   └── build.py
+└── runner/               # 运行器
+    ├── __init__.py
+    └── local_runner.py
+```
+
+#### 8. beta/ - 实验性功能
+```
+tracklab/beta/
+├── __init__.py
+└── workflows.py          # 工作流功能
+```
+
+#### 9. old/ - 向后兼容
+```
+tracklab/old/
+├── __init__.py
+├── README.md
+├── core.py               # 旧版核心
+├── settings.py           # 旧版设置
+└── summary.py            # 旧版摘要
+```
+
+### 扩展集成模块
+
+#### 10. integration/ 扩展
+在现有 `integration/torch.py` 基础上添加：
+```
+tracklab/integration/
+├── __init__.py
+├── torch.py              # (已存在)
+├── tensorflow/           # TensorFlow 集成
+│   ├── __init__.py
+│   └── estimator_hook.py
+├── keras/                # Keras 集成
+│   ├── __init__.py
+│   ├── keras.py
+│   └── callbacks/
+├── sklearn/              # Scikit-learn 集成
+│   ├── __init__.py
+│   ├── utils.py
+│   ├── calculate/        # 计算功能
+│   └── plot/            # 绘图功能
+├── lightgbm/            # LightGBM 集成
+│   ├── __init__.py
+│   └── lightgbm.py
+└── xgboost/             # XGBoost 集成
+    ├── __init__.py
+    └── xgboost.py
+```
+
+## 功能模块实现优先级
+
+### Phase 1: 核心功能 (立即实现)
+1. **vendor/** - 第三方依赖管理基础
+2. **filesync/** - 文件同步核心功能
+3. **plot/** - 基础可视化能力
+4. **sync/** - 本地同步服务
+
+### Phase 2: 基础集成 (第二阶段)
+5. **integration/扩展** - 常用 ML 框架集成
+6. **old/** - 向后兼容支持
+
+### Phase 3: 高级功能 (第三阶段)
+7. **agents/** - 智能代理
+8. **beta/** - 实验性功能
+
+### Phase 4: 企业功能 (第四阶段)
+9. **automations/** - 自动化流程
+10. **launch/** - 分布式任务管理
+
+## 实现指导原则
+
+### 1. 本地化适配
+- 所有云端功能改为本地实现
+- 简化复杂的分布式逻辑
+- 保持 API 兼容性
+
+### 2. 依赖管理
+- vendor/ 中的第三方库进行必要的简化
+- 移除不需要的云端依赖
+- 保留核心功能接口
+
+### 3. 功能简化
+- 专注于核心实验跟踪功能
+- 企业级功能可选实现
+- 保持代码可维护性
+
+### 4. 测试覆盖
+- 每个新模块都需要对应的测试
+- 保持与 wandb 行为的一致性
+- 添加本地化特性的专门测试
