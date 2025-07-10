@@ -189,3 +189,8 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 - [问题反馈](https://github.com/tracklab/tracklab/issues)
 
 ## ⭐ 如果对你有帮助，请给个 Star！
+
+## 作者
+
+**VocabVictor**  
+📧 wuzhongheng@smail.nju.edu.cn
