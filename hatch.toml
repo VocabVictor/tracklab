@@ -1,0 +1,43 @@
+[version]
+path = "tracklab/__init__.py"
+
+[build]
+include = [
+    "tracklab/__init__.py",
+    "tracklab/**/*.py",
+    "README.md",
+    "LICENSE",
+]
+
+[build.targets.sdist]
+include = [
+    "tracklab/**/*.py",
+    "tests/**/*.py",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+    "requirements*.txt",
+    "noxfile.py",
+    "hatch.toml",
+]
+exclude = [
+    "tests/assets/*.png",
+    "tests/assets/*.jpg",
+    "tests/assets/*.jpeg",
+    "tests/assets/*.pkl",
+    "tests/assets/*.json",
+    "tests/assets/*.csv",
+]
+
+[build.targets.wheel]
+include = [
+    "tracklab/**/*.py",
+    "README.md",
+    "LICENSE",
+]
+exclude = [
+    "tests/",
+    "docs/",
+    "*.pyc",
+    "__pycache__/",
+]

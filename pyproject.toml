@@ -1,0 +1,225 @@
+[build-system]
+requires = ["hatchling", "typing_extensions"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tracklab"
+dynamic = ["version"]
+description = "Local experiment tracking for machine learning - wandb compatible"
+authors = [{ name = "TrackLab Team", email = "tracklab@example.com" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+keywords = ["machine learning", "experiment tracking", "wandb", "local", "visualization"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "Click>=7.1,!=8.0.0",
+    "requests>=2.0.0,<3",
+    "psutil>=5.8.0",
+    "PyYAML",
+    "pydantic<3",
+    "typing_extensions>=4.8,<5",
+    "packaging",
+    "platformdirs",
+    "fastapi>=0.68.0",
+    "uvicorn[standard]>=0.15.0",
+    "sqlalchemy>=1.4.0",
+    "aiofiles>=0.7.0",
+    "python-multipart>=0.0.5",
+    "websockets>=10.0",
+    "plotly>=5.18.0",
+    "eval_type_backport; python_version < '3.10'",
+]
+
+[project.optional-dependencies]
+media = [
+    "numpy",
+    "moviepy>=1.0.0",
+    "imageio>=2.28.1",
+    "pillow",
+    "bokeh",
+    "soundfile",
+    "plotly>=5.18.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
+    "responses>=0.22.0",
+    "freezegun>=1.2.0",
+    "factory-boy>=3.2.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=2.15.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
+    "responses>=0.22.0",
+    "freezegun>=1.2.0",
+    "factory-boy>=3.2.0",
+    "psutil>=5.9.0",
+    "memory-profiler>=0.60.0",
+    "numpy>=1.21.0",
+    "pandas>=1.3.0",
+    "Pillow>=9.0.0",
+    "aiohttp>=3.8.0",
+    "aiofiles>=22.1.0",
+]
+
+[project.scripts]
+tracklab = "tracklab.cli.cli:cli"
+tl = "tracklab.cli.cli:cli"
+
+[project.urls]
+"Source" = "https://github.com/tracklab/tracklab"
+"Bug Reports" = "https://github.com/tracklab/tracklab/issues"
+"Documentation" = "https://tracklab.readthedocs.io/"
+
+[tool.hatch.version]
+path = "tracklab/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tracklab"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "tracklab/",
+    "tests/",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
+
+[tool.ruff]
+extend-exclude = [
+    "tracklab/vendor/**",
+    "tracklab/proto/**",
+]
+target-version = "py38"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "F",      # Pyflakes
+    "E",      # pycodestyle Error
+    "W",      # pycodestyle Warning
+    "B",      # flake8-bugbear
+    "I",      # isort
+    "N",      # pep8-naming
+    "D",      # pydocstyle
+    "C90",    # mccabe
+    "UP",     # pyupgrade
+    "T20",    # flake8-print
+    "RUF100", # unused-noqa
+]
+ignore = [
+    "B904",
+    "E501",
+    "D100", # Allow missing docstrings in modules
+    "D101", # Allow missing docstrings in classes
+    "D104", # Allow missing docstrings in packages
+    "D105", # Allow missing docstrings in magic methods
+    "D106", # Allow missing docstrings in nested classes
+    "D107", # Allow missing docstrings in __init__ methods
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "T20"]
+"**/__init__.py" = ["F401"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+warn_redundant_casts = true
+exclude = '''
+   (?x)(
+      tracklab/vendor/.
+   )
+'''
+
+[[tool.mypy.overrides]]
+module = "tracklab.*"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = [
+    "tracklab.integration.*",
+    "tracklab.apis.*",
+    "tracklab.proto.*",
+    "tracklab.cli.*",
+    "tracklab.plot.*",
+    "tracklab.vendor.*",
+]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+minversion = "6.0"
+console_output_style = "count"
+addopts = "-vvv --cov-config=pyproject.toml"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "functional: marks tests as functional tests",
+    "system: marks tests as system tests",
+    "unit: marks tests as unit tests",
+]
+timeout = 60
+log_format = "%(asctime)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+filterwarnings = ["ignore::DeprecationWarning", "error:ResourceWarning"]
+testpaths = "tests"
+norecursedirs = [
+    "vendor",
+    "tracklab/vendor",
+    ".*",
+    "build",
+    "dist",
+]
+
+[tool.coverage.paths]
+tracklab = ["tracklab/", "**/site-packages/tracklab/"]
+
+[tool.coverage.run]
+concurrency = ["multiprocessing", "thread"]
+omit = ["**/tracklab/vendor/**", "**/tracklab/proto/**"]
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:", "@abstractmethod"]
+omit = ["**/tracklab/vendor/**", "**/tracklab/proto/**"]
+ignore_errors = true
