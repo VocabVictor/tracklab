@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-# based on issue https://wandb.atlassian.net/browse/CLI-548
+# based on issue https://tracklab.atlassian.net/browse/CLI-548
 from math import sqrt
 
 from joblib import Parallel, delayed
 
-import wandb
+import tracklab
 
 
 def f(x):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.config.x = x
         for i in range(3):
             # Log metrics with wandb

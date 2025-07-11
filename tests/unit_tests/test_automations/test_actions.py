@@ -3,10 +3,10 @@ import json
 from hypothesis import given
 from hypothesis.strategies import dictionaries, sampled_from, text
 from pytest import mark
-from wandb._pydantic import IS_PYDANTIC_V2
-from wandb.automations import ActionType, SendNotification, SendWebhook
-from wandb.automations._generated import AlertSeverity, TriggeredActionType
-from wandb.sdk.wandb_alerts import AlertLevel
+from tracklab._pydantic import IS_PYDANTIC_V2
+from tracklab.automations import ActionType, SendNotification, SendWebhook
+from tracklab.automations._generated import AlertSeverity, TriggeredActionType
+from tracklab.sdk.wandb_alerts import AlertLevel
 
 from ._strategies import gql_ids, jsonables, printable_text
 
@@ -43,7 +43,7 @@ def test_public_action_type_enum_matches_generated():
 def test_notification_input_action_accepts_legacy_alert_args(
     integration_id, title, message, severity
 ):
-    """Notification actions accept legacy `wandb.Alert` kwargs for continuity/convenience."""
+    """Notification actions accept legacy `tracklab.Alert` kwargs for continuity/convenience."""
     # Instantiate directly by the actual field names
     obj_from_normal_args = SendNotification(
         integration_id=integration_id,
@@ -52,7 +52,7 @@ def test_notification_input_action_accepts_legacy_alert_args(
         severity=severity,
     )
 
-    # Instantiate by the legacy wandb.Alert arg names
+    # Instantiate by the legacy tracklab.Alert arg names
     obj_from_legacy_args = SendNotification(
         integration_id=integration_id,
         title=title,

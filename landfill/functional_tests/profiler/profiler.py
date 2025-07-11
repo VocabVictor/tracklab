@@ -3,7 +3,7 @@
 import torch
 from torch.nn.functional import log_softmax, max_pool2d, relu
 
-import wandb
+import tracklab
 
 
 def test_profiler():
@@ -50,12 +50,12 @@ def test_profiler():
         loss.backward()
         optimizer.step()
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.config.id = "profiler_sync_trace_files"
         with torch.profiler.profile(
             activities=[torch.profiler.ProfilerActivity.CPU],
             schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
-            on_trace_ready=wandb.profiler.torch_trace_handler(),
+            on_trace_ready=tracklab.profiler.torch_trace_handler(),
             record_shapes=True,
             with_stack=True,
         ) as prof:
@@ -65,7 +65,7 @@ def test_profiler():
                 train(batch_data)
                 prof.step()
 
-    wandb.finish()
+    tracklab.finish()
 
 
 if __name__ == "__main__":

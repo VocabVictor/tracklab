@@ -1,14 +1,14 @@
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch.environment.azure_environment import AzureEnvironment
-from wandb.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.environment.azure_environment import AzureEnvironment
+from tracklab.sdk.launch.errors import LaunchError
 
 
 def test_azure_environment_from_config(mocker):
     """Test AzureEnvironment class."""
     mocker.patch(
-        "wandb.sdk.launch.environment.azure_environment.DefaultAzureCredential",
+        "tracklab.sdk.launch.environment.azure_environment.DefaultAzureCredential",
         MagicMock(),
     )
     config = {
@@ -24,7 +24,7 @@ async def test_azure_upload_file(mocker, runner):
     """Test AzureEnvironment class."""
     credentials = MagicMock()
     mocker.patch(
-        "wandb.sdk.launch.environment.azure_environment.DefaultAzureCredential",
+        "tracklab.sdk.launch.environment.azure_environment.DefaultAzureCredential",
         credentials,
     )
     config = {
@@ -35,7 +35,7 @@ async def test_azure_upload_file(mocker, runner):
     blob_client = MagicMock()
     blob_client.upload_blob = MagicMock()
     mocker.patch(
-        "wandb.sdk.launch.environment.azure_environment.BlobClient",
+        "tracklab.sdk.launch.environment.azure_environment.BlobClient",
         return_value=blob_client,
     )
     azure = AzureEnvironment.from_config(config)
@@ -83,7 +83,7 @@ def test_parse_uri(uri, expected):
 async def test_azure_verify_storage_uri(mocker):
     """Check that we properly verify storage URIs."""
     mocker.patch(
-        "wandb.sdk.launch.environment.azure_environment.DefaultAzureCredential",
+        "tracklab.sdk.launch.environment.azure_environment.DefaultAzureCredential",
         MagicMock(),
     )
     config = {
@@ -94,7 +94,7 @@ async def test_azure_verify_storage_uri(mocker):
     blob_service_client = MagicMock()
     blob_service_client.get_container_client = MagicMock()
     mocker.patch(
-        "wandb.sdk.launch.environment.azure_environment.BlobServiceClient",
+        "tracklab.sdk.launch.environment.azure_environment.BlobServiceClient",
         return_value=blob_service_client,
     )
     azure = AzureEnvironment.from_config(config)

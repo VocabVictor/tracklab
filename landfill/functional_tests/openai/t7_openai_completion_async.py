@@ -2,7 +2,7 @@ import asyncio
 
 import openai
 
-from wandb.integration.openai import autolog as openai_autolog
+from tracklab.integration.openai import autolog as openai_autolog
 
 
 def main():

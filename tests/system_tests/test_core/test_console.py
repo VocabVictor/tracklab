@@ -4,14 +4,14 @@ import time
 
 import pytest
 import tqdm
-import wandb
+import tracklab
 from click.testing import CliRunner
-from wandb.cli import cli
-from wandb.sdk.lib import runid
+from tracklab.cli import cli
+from tracklab.sdk.lib import runid
 
 
 def test_console_wrap_raw(wandb_backend_spy):
-    with wandb.init(settings={"console": "wrap_raw"}) as run:
+    with tracklab.init(settings={"console": "wrap_raw"}) as run:
         print("Testing...")
         print("abc", end="")
         print("\rxyz", end="")
@@ -27,7 +27,7 @@ def test_console_wrap_raw(wandb_backend_spy):
 
 
 def test_offline_compression(user):
-    with wandb.init(settings={"console": "wrap_emu", "mode": "offline"}) as run:
+    with tracklab.init(settings={"console": "wrap_emu", "mode": "offline"}) as run:
         run_dir, run_id = run.dir, run.id
 
         for _ in tqdm.tqdm(range(100), ncols=139, ascii=" 123456789#"):
@@ -62,8 +62,8 @@ def test_offline_compression(user):
 
 @pytest.mark.timeout(300)
 def test_very_long_output(user):
-    # https://wandb.atlassian.net/browse/WB-5437
-    with wandb.init(
+    # https://tracklab.atlassian.net/browse/WB-5437
+    with tracklab.init(
         settings={
             # To test the TerminalEmulator, we do not use "wrap_raw".
             "console": "wrap_emu",
@@ -89,7 +89,7 @@ def test_very_long_output(user):
 def test_memory_leak2(user):
     # This appears to test this:
     #   https://github.com/wandb/wandb/pull/2111/files#r640819752
-    with wandb.init(settings={"console": "wrap_emu"}) as run:
+    with tracklab.init(settings={"console": "wrap_emu"}) as run:
         for _ in range(1000):
             print("ABCDEFGH")
         time.sleep(3)

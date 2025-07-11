@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 import google.api_core.exceptions
 import pytest
-from wandb.sdk.launch.registry.google_artifact_registry import GoogleArtifactRegistry
-from wandb.sdk.launch.utils import LaunchError
+from tracklab.sdk.launch.registry.google_artifact_registry import GoogleArtifactRegistry
+from tracklab.sdk.launch.utils import LaunchError
 
 
 @pytest.fixture

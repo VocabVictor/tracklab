@@ -3,7 +3,7 @@ import argparse
 
 import yea
 
-import wandb
+import tracklab
 
 
 def main():
@@ -12,12 +12,12 @@ def main():
     parser.add_argument("--num-scalers", type=int, default=10)
     args = parser.parse_args()
 
-    run = wandb.init()
+    run = tracklab.init()
     for i in range(args.num_epochs):
         data = {}
         for j in range(args.num_scalers):
             data[f"m-{j}"] = j * i
-        wandb.log(data)
+        tracklab.log(data)
     run.finish()
 
 

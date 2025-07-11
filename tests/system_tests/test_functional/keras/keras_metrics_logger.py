@@ -1,11 +1,11 @@
 import numpy as np
 import tensorflow as tf
-import wandb
-from wandb.integration.keras import WandbMetricsLogger
+import tracklab
+from tracklab.integration.keras import WandbMetricsLogger
 
 tf.keras.utils.set_random_seed(1234)
 
-run = wandb.init(project="keras")
+run = tracklab.init(project="keras")
 
 x = np.random.randint(255, size=(100, 28, 28, 1))
 y = np.random.randint(10, size=(100,))

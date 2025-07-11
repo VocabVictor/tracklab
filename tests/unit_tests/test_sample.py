@@ -1,8 +1,8 @@
 """sample tests."""
 
-import wandb
+import tracklab
 
-sample = wandb.wandb_sdk.internal.sample
+sample = tracklab.wandb_sdk.internal.sample
 
 
 def doit(num, samples=None):

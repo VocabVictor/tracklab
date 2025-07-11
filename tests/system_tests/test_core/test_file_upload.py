@@ -1,7 +1,7 @@
 import platform
 
 import pytest
-import wandb
+import tracklab
 
 
 @pytest.mark.parametrize(
@@ -21,7 +21,7 @@ import wandb
     ],
 )
 def test_upload_wandb_files(wandb_backend_spy, x_primary, files):
-    with wandb.init(settings=wandb.Settings(x_primary=x_primary)) as run:
+    with tracklab.init(settings=tracklab.Settings(x_primary=x_primary)) as run:
         pass
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -38,8 +38,8 @@ def test_upload_wandb_files(wandb_backend_spy, x_primary, files):
 )
 @pytest.mark.skipif(platform.system() != "Windows", reason="Windows only")
 def test_upload_wandb_files_windows_with_label(wandb_backend_spy, x_label, files):
-    with wandb.init(
-        settings=wandb.Settings(x_label=x_label, x_primary=False),
+    with tracklab.init(
+        settings=tracklab.Settings(x_label=x_label, x_primary=False),
     ) as run:
         pass
 
@@ -56,8 +56,8 @@ def test_upload_wandb_files_windows_with_label(wandb_backend_spy, x_label, files
 )
 @pytest.mark.skipif(platform.system() != "Windows", reason="Linux only")
 def test_upload_wandb_files_non_windows_with_label(wandb_backend_spy, x_label, files):
-    with wandb.init(
-        settings=wandb.Settings(x_label=x_label, x_primary=False),
+    with tracklab.init(
+        settings=tracklab.Settings(x_label=x_label, x_primary=False),
     ) as run:
         pass
 

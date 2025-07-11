@@ -3,10 +3,10 @@ import tempfile
 from pathlib import Path
 
 import pytest
-import wandb
-from wandb.apis.importers import validation
-from wandb.apis.importers.internals.internal import ImporterRun, RecordMaker
-from wandb.apis.importers.internals.util import for_each, parallelize
+import tracklab
+from tracklab.apis.importers import validation
+from tracklab.apis.importers.internals.internal import ImporterRun, RecordMaker
+from tracklab.apis.importers.internals.util import for_each, parallelize
 
 
 @pytest.fixture
@@ -171,13 +171,13 @@ def test_artifact_manifest_entry_mismatches(tmp_path, file_setup, expected_probl
     # Create and add file to source artifact
     src_path = tmp_path / src_filename
     src_path.write_text(src_content)
-    src_art = wandb.Artifact("src_artifact", type="dataset")
+    src_art = tracklab.Artifact("src_artifact", type="dataset")
     src_art.add_file(str(src_path))
 
     # Create and add file to destination artifact
     dst_path = tmp_path / dst_filename
     dst_path.write_text(dst_content)
-    dst_art = wandb.Artifact("dst_artifact", type="dataset")
+    dst_art = tracklab.Artifact("dst_artifact", type="dataset")
     dst_art.add_file(str(dst_path))
 
     # Compare artifacts and collect problems

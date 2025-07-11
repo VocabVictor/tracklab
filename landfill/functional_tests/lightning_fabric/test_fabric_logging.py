@@ -6,8 +6,8 @@ import lightning as l
 import torch
 from pl_base import FakeCIFAR10, SimpleNet, TableLoggingCallback
 
-import wandb
-from wandb.integration.lightning.fabric import WandbLogger
+import tracklab
+from tracklab.integration.lightning.fabric import WandbLogger
 
 
 def test_fabric_logging():
@@ -54,7 +54,7 @@ def test_fabric_logging():
     train_dataset.save()
     test_dataset.save()
 
-    data_art = wandb.Artifact(name="cifar10", type="dataset")
+    data_art = tracklab.Artifact(name="cifar10", type="dataset")
     data_art.add_dir(os.path.join(root_folder))
     logger.experiment.log_artifact(data_art)
 

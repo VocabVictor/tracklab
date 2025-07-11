@@ -1,5 +1,5 @@
 import pytest
-from wandb.sdk.artifacts.storage_handlers.s3_handler import S3Handler
+from tracklab.sdk.artifacts.storage_handlers.s3_handler import S3Handler
 
 COREWEAVE_ENDPOINT_TEST_CASES = [
     # Direct matches from the predefined list

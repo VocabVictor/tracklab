@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 
 import pytest
 from botocore.exceptions import ClientError
-from wandb.sdk.launch.environment.aws_environment import AwsEnvironment
-from wandb.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.environment.aws_environment import AwsEnvironment
+from tracklab.sdk.launch.errors import LaunchError
 
 
 def _get_environment():
@@ -26,9 +26,9 @@ def test_from_default(mocker) -> None:
     credentials.token = "token"
     session.get_credentials.return_value = credentials
     boto3.Session.return_value = session
-    mocker.patch("wandb.sdk.launch.environment.aws_environment.boto3", boto3)
+    mocker.patch("tracklab.sdk.launch.environment.aws_environment.boto3", boto3)
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.AwsEnvironment", MagicMock()
+        "tracklab.sdk.launch.environment.aws_environment.AwsEnvironment", MagicMock()
     )
     default_environment = AwsEnvironment.from_default(region="us-west-2")
     assert default_environment._region == "us-west-2"
@@ -49,7 +49,7 @@ async def test_verify_storage(mocker):
         return session
 
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
+        "tracklab.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
         _mock_get_session,
     )
     environment = _get_environment()
@@ -77,7 +77,7 @@ async def test_verify(mocker):
         return session
 
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
+        "tracklab.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
         _mock_get_session,
     )
     environment = _get_environment()
@@ -117,7 +117,7 @@ async def test_upload_directory(mocker):
         ),
     ]
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.os.walk",
+        "tracklab.sdk.launch.environment.aws_environment.os.walk",
         return_value=walk_output,
     )
     session = MagicMock()
@@ -129,11 +129,11 @@ async def test_upload_directory(mocker):
         return session
 
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
+        "tracklab.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
         _mock_get_session,
     )
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.os.path.isdir", return_value=True
+        "tracklab.sdk.launch.environment.aws_environment.os.path.isdir", return_value=True
     )
 
     environment = AwsEnvironment(
@@ -204,7 +204,7 @@ async def test_upload_invalid_path(mocker):
         await environment.upload_dir("invalid_path", "s3://bucket/key")
     assert "Source invalid_path does not exist." in str(e.value)
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.os.path.isdir",
+        "tracklab.sdk.launch.environment.aws_environment.os.path.isdir",
         return_value=True,
     )
     for path in ["s3a://bucket/key", "s3n://bucket/key"]:
@@ -223,11 +223,11 @@ async def test_upload_file(mocker):
         return session
 
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
+        "tracklab.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
         _mock_get_session,
     )
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.os.path.isfile", return_value=True
+        "tracklab.sdk.launch.environment.aws_environment.os.path.isfile", return_value=True
     )
     environment = _get_environment()
     await environment.upload_file("source_file", "s3://bucket/key")
@@ -265,7 +265,7 @@ async def test_get_partition(mocker, arn, partition, raises):
         return session
 
     mocker.patch(
-        "wandb.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
+        "tracklab.sdk.launch.environment.aws_environment.AwsEnvironment.get_session",
         _mock_get_session,
     )
     environment = _get_environment()

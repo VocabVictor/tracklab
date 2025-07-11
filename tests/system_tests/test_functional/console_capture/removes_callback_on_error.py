@@ -2,7 +2,7 @@
 
 import sys
 
-from wandb.sdk.lib import console_capture
+from tracklab.sdk.lib import console_capture
 
 num_calls = 0
 

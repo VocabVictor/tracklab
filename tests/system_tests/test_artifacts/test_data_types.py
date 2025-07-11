@@ -1,10 +1,10 @@
 import matplotlib
 import numpy as np
 import pytest
-import wandb
+import tracklab
 from wandb import data_types
-from wandb.sdk.data_types import _dtypes
-from wandb.sdk.internal import incremental_table_util
+from tracklab.sdk.data_types import _dtypes
+from tracklab.sdk.internal import incremental_table_util
 
 matplotlib.use("Agg")
 
@@ -13,13 +13,13 @@ data = np.random.randint(255, size=(1000))
 
 @pytest.fixture
 def sample_data():
-    artifact = wandb.Artifact("N", type="dataset")
+    artifact = tracklab.Artifact("N", type="dataset")
     artifact.save()
 
 
 def test_wb_value(user, sample_data, test_settings):
-    run = wandb.init(settings=test_settings())
-    local_art = wandb.Artifact("N", "T")
+    run = tracklab.init(settings=test_settings())
+    local_art = tracklab.Artifact("N", "T")
     public_art = run.use_artifact("N:latest")
 
     wbvalue = data_types.WBValue()
@@ -41,7 +41,7 @@ def test_wb_value(user, sample_data, test_settings):
         public_art,
     )
     assert isinstance(table, data_types.WBValue) and isinstance(
-        table, wandb.data_types.Table
+        table, tracklab.data_types.Table
     )
 
     type_mapping = data_types.WBValue.type_mapping()
@@ -57,12 +57,12 @@ def test_wb_value(user, sample_data, test_settings):
 def test_log_dataframe(user, test_settings):
     import pandas as pd
 
-    run = wandb.init(settings=test_settings())
+    run = tracklab.init(settings=test_settings())
     cv_results = pd.DataFrame(data={"test_col": [1, 2, 3], "test_col2": [4, 5, 6]})
     run.log({"results_df": cv_results})
     run.finish()
 
-    run = wandb.Api().run(f"uncategorized/{run.id}")
+    run = tracklab.Api().run(f"uncategorized/{run.id}")
     assert len(run.logged_artifacts()) == 1
 
 
@@ -72,8 +72,8 @@ def test_table_logged_from_run_with_special_characters_in_name(
 ):
     name_and_id = "random-run-id-=1234567-seed-0"  # Contains special characters
 
-    with wandb.init(name=name_and_id, id=name_and_id) as run:
-        table = wandb.Table(
+    with tracklab.init(name=name_and_id, id=name_and_id) as run:
+        table = tracklab.Table(
             ["col1", "col2", "col3"],
             [[1, 4.6, "hello"], [5, 4.5, "world"]],
             allow_mixed_types=True,
@@ -101,10 +101,10 @@ def test_reference_table_logging(
         ),
     )
 
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(
         columns=["a"],
-        data=[[wandb.Image(np.ones(shape=(32, 32)))]],
+        data=[[tracklab.Image(np.ones(shape=(32, 32)))]],
     )
     run.log({"logged_table": t})
     run.log({"logged_table": t})
@@ -125,16 +125,16 @@ def test_reference_table_artifacts(user, test_settings, wandb_backend_spy):
         ),
     )
 
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(
         columns=["a"],
-        data=[[wandb.Image(np.ones(shape=(32, 32)))]],
+        data=[[tracklab.Image(np.ones(shape=(32, 32)))]],
     )
 
-    art = wandb.Artifact("A", "dataset")
+    art = tracklab.Artifact("A", "dataset")
     art.add(t, "table")
     run.log_artifact(art)
-    art = wandb.Artifact("A", "dataset")
+    art = tracklab.Artifact("A", "dataset")
     art.add(t, "table")
     run.log_artifact(art)
 
@@ -142,29 +142,29 @@ def test_reference_table_artifacts(user, test_settings, wandb_backend_spy):
 
 
 def test_table_mutation_logging(user, test_settings, wandb_backend_spy):
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="MUTABLE")
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="MUTABLE")
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
-    t.add_data("No", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
     t.get_column("expected")
     run.log({"table": t})
     run.finish()
 
-    run = wandb.Api().run(f"uncategorized/{run.id}")
+    run = tracklab.Api().run(f"uncategorized/{run.id}")
     assert len(run.logged_artifacts()) == 3
 
 
 def test_incr_logging_initial_log(user, test_settings):
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
     run.finish()
-    api_run = wandb.Api().run(f"uncategorized/{run.id}")
+    api_run = tracklab.Api().run(f"uncategorized/{run.id}")
     assert len(api_run.logged_artifacts()) == 1
     assert t._last_logged_idx == 0
     assert t._artifact_target is not None
@@ -172,11 +172,11 @@ def test_incr_logging_initial_log(user, test_settings):
 
 
 def test_incr_logging_add_data_reset_state_and_increment_counter(user, test_settings):
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     run.finish()
     # _increment_num should only be incremented after data is added
     assert t._artifact_target is None
@@ -189,16 +189,16 @@ def test_incr_logging_add_data_reset_state_and_increment_counter(user, test_sett
 
 def test_incr_logging_multiple_logs(user, test_settings):
     """Test multiple logging operations on an incremental table."""
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
 
     # Initial log
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
 
     # Add more data and log again
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
-    t.add_data("No", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
 
     # Verify state after second log
@@ -207,8 +207,8 @@ def test_incr_logging_multiple_logs(user, test_settings):
     assert len(t._previous_increments_paths) == 1
 
     # Add more data and log again
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
-    t.add_data("No", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({"table": t})
     run.finish()
 
@@ -217,7 +217,7 @@ def test_incr_logging_multiple_logs(user, test_settings):
     assert t._increment_num == 2
     assert len(t._previous_increments_paths) == 2
 
-    api_run = wandb.Api().run(f"uncategorized/{run.id}")
+    api_run = tracklab.Api().run(f"uncategorized/{run.id}")
     assert len(api_run.logged_artifacts()) == 3
 
 
@@ -232,20 +232,20 @@ def test_using_incrementally_logged_table(user, test_settings, monkeypatch):
         return entry_name
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.incremental_table_util.get_entry_name", mock_get_entry_name
+        "tracklab.sdk.internal.incremental_table_util.get_entry_name", mock_get_entry_name
     )
 
     table_key = "test"
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({table_key: t})
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
-    t.add_data("No", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     run.log({table_key: t})
     run.finish()
 
-    run2 = wandb.init(settings=test_settings())
+    run2 = tracklab.init(settings=test_settings())
     art = run2.use_artifact(
         f"{incremental_table_util._get_artifact_name(run, table_key)}:latest"
     )
@@ -258,13 +258,13 @@ def test_using_incrementally_logged_table(user, test_settings, monkeypatch):
 
 def test_table_incremental_logging_empty(user, test_settings, wandb_backend_spy):
     """Test that empty incremental tables are handled correctly."""
-    run = wandb.init(settings=test_settings())
-    t = wandb.Table(columns=["a", "b"], log_mode="INCREMENTAL")
+    run = tracklab.init(settings=test_settings())
+    t = tracklab.Table(columns=["a", "b"], log_mode="INCREMENTAL")
     run.log({"table": t})  # Should handle empty table
     t.add_data("1", "first")
     run.log({"table": t})  # Should log first increment
     run.finish()
-    run = wandb.Api().run(f"uncategorized/{run.id}")
+    run = tracklab.Api().run(f"uncategorized/{run.id}")
 
     assert len(run.logged_artifacts()) == 2
 
@@ -276,15 +276,15 @@ def test_resumed_run_incremental_table(user, test_settings):
     We expect the incremental table to get the previous paths and
     increment num from the previously logged incremental table.
     """
-    run = wandb.init(settings=test_settings(), id="resume_test")
-    t = wandb.Table(columns=["a", "b"], log_mode="INCREMENTAL")
+    run = tracklab.init(settings=test_settings(), id="resume_test")
+    t = tracklab.Table(columns=["a", "b"], log_mode="INCREMENTAL")
     run.log({"table": t})
     t.add_data("1", "first")
     run.log({"table": t})
     run.finish()
 
-    resumed_run = wandb.init(settings=test_settings(), id="resume_test", resume="must")
-    t = wandb.Table(columns=["a", "b"], log_mode="INCREMENTAL")
+    resumed_run = tracklab.init(settings=test_settings(), id="resume_test", resume="must")
+    t = tracklab.Table(columns=["a", "b"], log_mode="INCREMENTAL")
     resumed_run.log({"table": t})
 
     assert len(t._previous_increments_paths) == 2
@@ -302,28 +302,28 @@ def test_resumed_run_nothing_prev_logged_to_key(user, test_settings):
     Test that incremental tables log normally in a resumed run when
     logged to a key that hasn't been logged to yet.
     """
-    run = wandb.init(settings=test_settings(), id="resume_test_2")
+    run = tracklab.init(settings=test_settings(), id="resume_test_2")
     run.log({"test": 0.5})
     run.finish()
 
-    resumed_run = wandb.init(
+    resumed_run = tracklab.init(
         settings=test_settings(), id="resume_test_2", resume="must"
     )
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
 
     # The increment should start at 0 because nothing was
     # logged on the key `table`
     assert t._increment_num == 0
 
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
 
     assert t._last_logged_idx == 1
 
     resumed_run.finish()
-    api_run = wandb.Api().run(f"uncategorized/{resumed_run.id}")
+    api_run = tracklab.Api().run(f"uncategorized/{resumed_run.id}")
 
     assert len(api_run.logged_artifacts()) == 2
 
@@ -333,32 +333,32 @@ def test_resumed_run_no_prev_incr_table_wbvalue(user, test_settings):
     Test that incremental tables log normally in a resumed run even if
     they weren't previously logged
     """
-    run = wandb.init(settings=test_settings(), id="resume_test_2")
-    regular_table = wandb.Table()
+    run = tracklab.init(settings=test_settings(), id="resume_test_2")
+    regular_table = tracklab.Table()
     run.log({"test": 0.5, "table": regular_table})
     run.finish()
 
-    resumed_run = wandb.init(
+    resumed_run = tracklab.init(
         settings=test_settings(), id="resume_test_2", resume="must"
     )
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
 
     # The increment should start at 0 because the last _type
     # on the summary on key `table` is not an incr table.
     assert t._increment_num == 0
 
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
-    t.add_data("No", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
-    t.add_data("No", "No", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "No", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
 
     assert t._last_logged_idx == 3
 
     resumed_run.finish()
-    api_run = wandb.Api().run(f"uncategorized/{resumed_run.id}")
+    api_run = tracklab.Api().run(f"uncategorized/{resumed_run.id}")
 
     assert len(api_run.logged_artifacts()) == 4
 
@@ -368,31 +368,31 @@ def test_resumed_run_no_prev_incr_table_nonwbvalue(user, test_settings):
     Test that incremental tables log normally in a resumed run even if
     they weren't previously logged
     """
-    run = wandb.init(settings=test_settings(), id="resume_test_2")
+    run = tracklab.init(settings=test_settings(), id="resume_test_2")
     run.log({"test": 0.5, "table": 0.5})
     run.finish()
 
-    resumed_run = wandb.init(
+    resumed_run = tracklab.init(
         settings=test_settings(), id="resume_test_2", resume="must"
     )
-    t = wandb.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
-    t.add_data("Yes", "No", wandb.Image(np.ones(shape=(32, 32))))
+    t = tracklab.Table(columns=["expected", "actual", "img"], log_mode="INCREMENTAL")
+    t.add_data("Yes", "No", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
 
     # The increment should start at 0 because the last value
     # on the summary on key `table` is not an incr table.
     assert t._increment_num == 0
 
-    t.add_data("Yes", "Yes", wandb.Image(np.ones(shape=(32, 32))))
-    t.add_data("No", "Yes", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("Yes", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "Yes", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
-    t.add_data("No", "No", wandb.Image(np.ones(shape=(32, 32))))
+    t.add_data("No", "No", tracklab.Image(np.ones(shape=(32, 32))))
     resumed_run.log({"table": t})
 
     assert t._last_logged_idx == 3
 
     resumed_run.finish()
-    api_run = wandb.Api().run(f"uncategorized/{resumed_run.id}")
+    api_run = tracklab.Api().run(f"uncategorized/{resumed_run.id}")
 
     assert len(api_run.logged_artifacts()) == 3
 
@@ -416,12 +416,12 @@ def test_resumed_run_incremental_table_ordering(user, test_settings, monkeypatch
         return entry_name
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.incremental_table_util.get_entry_name", mock_get_entry_name
+        "tracklab.sdk.internal.incremental_table_util.get_entry_name", mock_get_entry_name
     )
 
     # Initial run
-    run = wandb.init(settings=test_settings(), id="resume_order_test")
-    t = wandb.Table(columns=["step", "value"], log_mode="INCREMENTAL")
+    run = tracklab.init(settings=test_settings(), id="resume_order_test")
+    t = tracklab.Table(columns=["step", "value"], log_mode="INCREMENTAL")
 
     # First increment
     t.add_data(0, "first")
@@ -430,10 +430,10 @@ def test_resumed_run_incremental_table_ordering(user, test_settings, monkeypatch
     run.finish()
 
     # First resume
-    resumed_run1 = wandb.init(
+    resumed_run1 = tracklab.init(
         settings=test_settings(), id="resume_order_test", resume="must"
     )
-    t = wandb.Table(columns=["step", "value"], log_mode="INCREMENTAL")
+    t = tracklab.Table(columns=["step", "value"], log_mode="INCREMENTAL")
 
     # Second increment
     t.add_data(2, "third")
@@ -442,10 +442,10 @@ def test_resumed_run_incremental_table_ordering(user, test_settings, monkeypatch
     resumed_run1.finish()
 
     # Second resume
-    resumed_run2 = wandb.init(
+    resumed_run2 = tracklab.init(
         settings=test_settings(), id="resume_order_test", resume="must"
     )
-    t = wandb.Table(columns=["step", "value"], log_mode="INCREMENTAL")
+    t = tracklab.Table(columns=["step", "value"], log_mode="INCREMENTAL")
 
     # Third increment
     t.add_data(4, "fifth")
@@ -453,7 +453,7 @@ def test_resumed_run_incremental_table_ordering(user, test_settings, monkeypatch
     resumed_run2.log({"table": t})
     resumed_run2.finish()
 
-    verification_run = wandb.init(settings=test_settings())
+    verification_run = tracklab.init(settings=test_settings())
     art = verification_run.use_artifact(f"run-{resumed_run2.id}-incr-table:latest")
 
     expected_full_data = [
@@ -474,15 +474,15 @@ def test_resumed_run_incremental_table_ordering(user, test_settings, monkeypatch
 def test_incremental_tables_cannot_be_logged_on_multiple_runs(
     test_settings,
 ):
-    with wandb.init(settings=test_settings(), mode="offline") as run1:
-        incr_table = wandb.Table(columns=["step", "value"], log_mode="INCREMENTAL")
+    with tracklab.init(settings=test_settings(), mode="offline") as run1:
+        incr_table = tracklab.Table(columns=["step", "value"], log_mode="INCREMENTAL")
 
         incr_table.add_data(0, "0")
         run1.log({"table": incr_table})
         incr_table.add_data(1, "1")
         run1.log({"table": incr_table})
 
-    with wandb.init(settings=test_settings(), mode="offline") as run2:
+    with tracklab.init(settings=test_settings(), mode="offline") as run2:
         incr_table.add_data(2, "2")
         with pytest.raises(AssertionError):
             run2.log({"table": incr_table})

@@ -1,9 +1,9 @@
 from typing import Iterator
 
 import pytest
-from wandb.proto import wandb_internal_pb2 as pb
-from wandb.sdk.lib import printer as p
-from wandb.sdk.lib import progress
+from tracklab.proto import tracklab_internal_pb2 as pb
+from tracklab.sdk.lib import printer as p
+from tracklab.sdk.lib import progress
 
 
 @pytest.fixture()

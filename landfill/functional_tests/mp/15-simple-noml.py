@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import wandb
+import tracklab
 
-wandb.init()
+tracklab.init()
 print("somedata")
-wandb.log(dict(m1=1))
-wandb.log(dict(m2=2))
-wandb.finish()
+tracklab.log(dict(m1=1))
+tracklab.log(dict(m2=2))
+tracklab.finish()

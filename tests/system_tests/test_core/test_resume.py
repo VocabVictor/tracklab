@@ -1,15 +1,15 @@
 import numpy as np
 import pytest
-import wandb
-import wandb.errors
-from wandb.sdk.lib import runid
+import tracklab
+import tracklab.errors
+from tracklab.sdk.lib import runid
 
 
 @pytest.mark.parametrize("resume", ("allow", "never"))
 def test_resume__no_run__success(user, resume):
     _ = user  # Create a fake user for the test.
 
-    with wandb.init(resume=resume, id=runid.generate_id()) as run:
+    with tracklab.init(resume=resume, id=runid.generate_id()) as run:
         pass
 
     assert not run.resumed
@@ -18,15 +18,15 @@ def test_resume__no_run__success(user, resume):
 def test_resume_must__no_run__raises(user):
     _ = user  # Create a fake user for the test.
 
-    with pytest.raises(wandb.errors.UsageError):
-        wandb.init(resume="must", project="project")
+    with pytest.raises(tracklab.errors.UsageError):
+        tracklab.init(resume="must", project="project")
 
 
 @pytest.mark.parametrize("resume", ("allow", "must"))
 def test_resume__run_exists__success(wandb_backend_spy, resume):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log({"acc": 10}, step=15)
-    with wandb.init(resume=resume, id=run.id) as run:
+    with tracklab.init(resume=resume, id=run.id) as run:
         run.log({"acc": 15})
 
     assert run.resumed
@@ -39,17 +39,17 @@ def test_resume__run_exists__success(wandb_backend_spy, resume):
 def test_resume_never__run_exists__raises(user):
     _ = user  # Create a fake user for the test.
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         pass
 
-    with pytest.raises(wandb.errors.UsageError):
-        with wandb.init(resume="never", id=run.id):
+    with pytest.raises(tracklab.errors.UsageError):
+        with tracklab.init(resume="never", id=run.id):
             pass
 
 
 @pytest.mark.parametrize("resume", ("allow", "never", "must", True))
 def test_resume__offline__warns(resume, mock_wandb_log):
-    with wandb.init(mode="offline", resume=resume):
+    with tracklab.init(mode="offline", resume=resume):
         pass
 
     assert mock_wandb_log.warned(
@@ -90,17 +90,17 @@ def test_resume_runtime_calculation(user, wandb_backend_spy):
         ),
     )
 
-    with wandb.init(id=run_id, resume="must", project="runtime") as run:
+    with tracklab.init(id=run_id, resume="must", project="runtime") as run:
         assert run._start_runtime == 130
 
 
 def test_resume_tags_overwrite(user, test_settings):
-    run = wandb.init(project="tags", tags=["tag1", "tag2"], settings=test_settings())
+    run = tracklab.init(project="tags", tags=["tag1", "tag2"], settings=test_settings())
     run.tags += ("tag3",)
     run_id = run.id
     run.finish()
 
-    run = wandb.init(
+    run = tracklab.init(
         id=run_id,
         resume="must",
         project="tags",
@@ -113,23 +113,23 @@ def test_resume_tags_overwrite(user, test_settings):
 
 
 def test_resume_tags_preserve(user, test_settings):
-    run = wandb.init(project="tags", tags=["tag1", "tag2"], settings=test_settings())
+    run = tracklab.init(project="tags", tags=["tag1", "tag2"], settings=test_settings())
     run.tags += ("tag3",)
     run_id = run.id
     run.finish()
 
-    run = wandb.init(id=run_id, resume="must", project="tags", settings=test_settings())
+    run = tracklab.init(id=run_id, resume="must", project="tags", settings=test_settings())
     run.tags += ("tag7",)
     assert run.tags == ("tag1", "tag2", "tag3", "tag7")
     run.finish()
 
 
 def test_resume_tags_add_after_resume(user, test_settings):
-    run = wandb.init(project="tags", settings=test_settings())
+    run = tracklab.init(project="tags", settings=test_settings())
     run_id = run.id
     run.finish()
 
-    run = wandb.init(
+    run = tracklab.init(
         id=run_id,
         resume="must",
         project="tags",
@@ -141,11 +141,11 @@ def test_resume_tags_add_after_resume(user, test_settings):
 
 
 def test_resume_tags_add_at_resume(user, test_settings):
-    run = wandb.init(project="tags", settings=test_settings())
+    run = tracklab.init(project="tags", settings=test_settings())
     run_id = run.id
     run.finish()
 
-    run = wandb.init(
+    run = tracklab.init(
         id=run_id,
         resume="must",
         project="tags",
@@ -158,9 +158,9 @@ def test_resume_tags_add_at_resume(user, test_settings):
 
 
 def test_resume_output_log(wandb_backend_spy):
-    with wandb.init(
+    with tracklab.init(
         project="output",
-        settings=wandb.Settings(
+        settings=tracklab.Settings(
             console="auto",
             console_multipart=True,
         ),
@@ -168,11 +168,11 @@ def test_resume_output_log(wandb_backend_spy):
         run_id = run.id
         print(f"started {run_id}")
 
-    with wandb.init(
+    with tracklab.init(
         id=run_id,
         resume="must",
         project="output",
-        settings=wandb.Settings(
+        settings=tracklab.Settings(
             console="auto",
             console_multipart=True,
         ),
@@ -198,10 +198,10 @@ def test_resume_config_preserves_image_mask(user, wandb_backend_spy):
     mask_array[0, 0] = 1
     class_labels = {1: "square"}
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(
             {
-                "test_image": wandb.Image(
+                "test_image": tracklab.Image(
                     img_array,
                     masks={
                         "prediction": {
@@ -213,10 +213,10 @@ def test_resume_config_preserves_image_mask(user, wandb_backend_spy):
             }
         )
 
-    with wandb.init(id=run.id, resume="must") as run:
+    with tracklab.init(id=run.id, resume="must") as run:
         run.log(
             {
-                "test_image_after_resume": wandb.Image(
+                "test_image_after_resume": tracklab.Image(
                     img_array,
                     masks={
                         "prediction": {
@@ -238,18 +238,18 @@ def test_resume_config_preserves_image_mask(user, wandb_backend_spy):
 
 def test_resume_run_with_notes(user):
     notes = "do re mi fa sol la si"
-    with wandb.init(project="notes", notes=notes) as run:
+    with tracklab.init(project="notes", notes=notes) as run:
         run_id = run.id
 
-    with wandb.init(id=run_id, resume="must", project="notes") as run:
+    with tracklab.init(id=run_id, resume="must", project="notes") as run:
         assert run.notes == notes
 
 
 def test_resume_overwrite_notes(user):
     notes = "do re mi fa sol la si"
-    with wandb.init(project="notes", notes=notes) as run:
+    with tracklab.init(project="notes", notes=notes) as run:
         run_id = run.id
 
     new_notes = "c d e f g a b"
-    with wandb.init(id=run_id, resume="must", project="notes", notes=new_notes) as run:
+    with tracklab.init(id=run_id, resume="must", project="notes", notes=new_notes) as run:
         assert run.notes == new_notes

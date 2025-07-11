@@ -7,19 +7,19 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
-import wandb
+import tracklab
 from pyfakefs.fake_filesystem import FakeFilesystem
-from wandb.sdk.artifacts.artifact import Artifact
-from wandb.sdk.artifacts.artifact_file_cache import ArtifactFileCache
-from wandb.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
-from wandb.sdk.artifacts.staging import get_staging_dir
-from wandb.sdk.artifacts.storage_handler import StorageHandler
-from wandb.sdk.artifacts.storage_handlers.gcs_handler import GCSHandler
-from wandb.sdk.artifacts.storage_handlers.local_file_handler import LocalFileHandler
-from wandb.sdk.artifacts.storage_handlers.s3_handler import S3Handler
-from wandb.sdk.artifacts.storage_handlers.wb_artifact_handler import WBArtifactHandler
-from wandb.sdk.artifacts.storage_policy import StoragePolicy
-from wandb.sdk.lib.hashutil import ETag, md5_string
+from tracklab.sdk.artifacts.artifact import Artifact
+from tracklab.sdk.artifacts.artifact_file_cache import ArtifactFileCache
+from tracklab.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
+from tracklab.sdk.artifacts.staging import get_staging_dir
+from tracklab.sdk.artifacts.storage_handler import StorageHandler
+from tracklab.sdk.artifacts.storage_handlers.gcs_handler import GCSHandler
+from tracklab.sdk.artifacts.storage_handlers.local_file_handler import LocalFileHandler
+from tracklab.sdk.artifacts.storage_handlers.s3_handler import S3Handler
+from tracklab.sdk.artifacts.storage_handlers.wb_artifact_handler import WBArtifactHandler
+from tracklab.sdk.artifacts.storage_policy import StoragePolicy
+from tracklab.sdk.lib.hashutil import ETag, md5_string
 
 example_digest = md5_string("example")
 
@@ -210,7 +210,7 @@ def test_check_etag_obj_path_hashes_url_and_etag(
 def _cache_writer(artifact_file_cache):
     etag = "abcdef"
     _, _, opener = artifact_file_cache.check_etag_obj_path(
-        "http://wandb.ex/foo", etag, 10
+        "http://tracklab.ex/foo", etag, 10
     )
     with opener() as f:
         f.write("".join(random.choice("0123456") for _ in range(10)))
@@ -477,7 +477,7 @@ class FakePublicApi:
 def test_wbartifact_handler_load_path_nonlocal(monkeypatch):
     path = "foo/bar"
     uri = "wandb-artifact://deadbeef/path/to/file.json"
-    artifact = wandb.Artifact("test", type="dataset")
+    artifact = tracklab.Artifact("test", type="dataset")
     manifest_entry = ArtifactManifestEntry(
         path=path,
         ref=uri,
@@ -498,7 +498,7 @@ def test_wbartifact_handler_load_path_nonlocal(monkeypatch):
 def test_wbartifact_handler_load_path_local(monkeypatch):
     path = "foo/bar"
     uri = "wandb-artifact://deadbeef/path/to/file.json"
-    artifact = wandb.Artifact("test", type="dataset")
+    artifact = tracklab.Artifact("test", type="dataset")
     manifest_entry = ArtifactManifestEntry(
         path=path,
         ref=uri,
@@ -537,7 +537,7 @@ def test_storage_handler_incomplete():
     ush = UnfinishedStorageHandler()
 
     with pytest.raises(NotImplementedError):
-        ush.can_handle(parsed_url=urlparse("https://wandb.com"))
+        ush.can_handle(parsed_url=urlparse("https://tracklab.com"))
     with pytest.raises(NotImplementedError):
         ush.load_path(manifest_entry=None)
     with pytest.raises(NotImplementedError):
@@ -558,7 +558,7 @@ def test_unwritable_staging_dir(monkeypatch):
 
 def test_invalid_upload_policy():
     path = "foo/bar"
-    artifact = wandb.Artifact("test", type="dataset")
+    artifact = tracklab.Artifact("test", type="dataset")
     with pytest.raises(ValueError):
         artifact.add_file(local_path=path, name="file.json", policy="tmp")
     with pytest.raises(ValueError):

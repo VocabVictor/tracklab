@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 import pytest
 import requests
-import wandb.apis
-import wandb.env
+import tracklab.apis
+import tracklab.env
 
 
 @dataclasses.dataclass
@@ -70,12 +70,12 @@ def test_check_ssl_disabled(
     expect_disabled: bool,
 ):
     with patch.dict("os.environ", env):
-        assert expect_disabled == wandb.env.ssl_disabled()
+        assert expect_disabled == tracklab.env.ssl_disabled()
 
 
 @contextlib.contextmanager
 def disable_ssl_context():
-    reset = wandb.apis._disable_ssl()
+    reset = tracklab.apis._disable_ssl()
     try:
         yield
     finally:

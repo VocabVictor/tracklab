@@ -10,12 +10,12 @@ import pytest
 import rdkit.Chem
 import responses
 import torch
-import wandb
+import tracklab
 from bokeh.plotting import figure
 from PIL import Image
 from wandb import data_types
-from wandb.sdk.data_types import _dtypes
-from wandb.sdk.data_types.base_types.media import _numpy_arrays_to_lists
+from tracklab.sdk.data_types import _dtypes
+from tracklab.sdk.data_types.base_types.media import _numpy_arrays_to_lists
 
 
 def subdict(d, expected_dict):
@@ -61,25 +61,25 @@ def matplotlib_without_image():
 
 
 ###############################################################################
-# Test wandb.Histogram
+# Test tracklab.Histogram
 ###############################################################################
 
 
 def test_raw_data():
     data = np.random.randint(255, size=(1000))
 
-    wbhist = wandb.Histogram(data)
+    wbhist = tracklab.Histogram(data)
     assert len(wbhist.histogram) == 64
 
 
 def test_np_histogram():
     data = np.random.randint(255, size=(1000))
-    wbhist = wandb.Histogram(np_histogram=np.histogram(data))
+    wbhist = tracklab.Histogram(np_histogram=np.histogram(data))
     assert len(wbhist.histogram) == 10
 
 
 def test_manual_histogram():
-    wbhist = wandb.Histogram(
+    wbhist = tracklab.Histogram(
         np_histogram=(
             [1, 2, 4],
             [3, 10, 20, 0],
@@ -90,7 +90,7 @@ def test_manual_histogram():
 
 def test_invalid_histogram():
     with pytest.raises(ValueError):
-        wandb.Histogram(
+        tracklab.Histogram(
             np_histogram=(
                 [1, 2, 3],
                 [1],
@@ -99,7 +99,7 @@ def test_invalid_histogram():
 
 
 ###############################################################################
-# Test wandb.Image
+# Test tracklab.Image
 ###############################################################################
 
 
@@ -156,23 +156,23 @@ def standard_mask():
 def test_captions(
     image,
 ):
-    wbone = wandb.Image(image, caption="Cool")
-    wbtwo = wandb.Image(image, caption="Nice")
-    assert wandb.Image.all_captions([wbone, wbtwo]) == ["Cool", "Nice"]
+    wbone = tracklab.Image(image, caption="Cool")
+    wbtwo = tracklab.Image(image, caption="Nice")
+    assert tracklab.Image.all_captions([wbone, wbtwo]) == ["Cool", "Nice"]
 
 
 def test_bind_image(
     mock_run,
     image,
 ):
-    wb_image = wandb.Image(image)
+    wb_image = tracklab.Image(image)
     wb_image.bind_to_run(mock_run(), "stuff", 10)
     assert wb_image.is_bound()
 
 
 def test_image_accepts_other_images():
-    image_a = wandb.Image(np.random.random((300, 300, 3)))
-    image_b = wandb.Image(image_a)
+    image_a = tracklab.Image(np.random.random((300, 300, 3)))
+    image_b = tracklab.Image(image_a)
     assert image_a == image_b
 
 
@@ -182,7 +182,7 @@ def test_image_accepts_bounding_boxes(
     full_box,
 ):
     run = mock_run()
-    img = wandb.Image(
+    img = tracklab.Image(
         image,
         boxes={
             "predictions": {
@@ -226,7 +226,7 @@ def test_image_accepts_masks(
     image,
     standard_mask,
 ):
-    img = wandb.Image(
+    img = tracklab.Image(
         image,
         masks={
             "overlay": standard_mask,
@@ -245,7 +245,7 @@ def test_image_accepts_masks_without_class_labels(
     dissoc,
     standard_mask,
 ):
-    img = wandb.Image(
+    img = tracklab.Image(
         image,
         masks={
             "overlay": dissoc(standard_mask, "class_labels"),
@@ -263,19 +263,19 @@ def test_image_seq_to_json(
     image,
 ):
     run = mock_run()
-    wb_image = wandb.Image(image)
+    wb_image = tracklab.Image(image)
     wb_image.bind_to_run(run, "test", 0, 0)
-    _ = wandb.Image.seq_to_json([wb_image], run, "test", 0)
+    _ = tracklab.Image.seq_to_json([wb_image], run, "test", 0)
     assert os.path.exists(os.path.join(run.dir, "media", "images", "test_0_0.png"))
 
 
 def test_max_images(mock_run):
     run = mock_run()
     large_image = np.random.randint(255, size=(10, 10))
-    large_list = [wandb.Image(large_image)] * 200
+    large_list = [tracklab.Image(large_image)] * 200
     large_list[0].bind_to_run(run, "test2", 0, 0)
-    meta = wandb.Image.seq_to_json(
-        wandb.wandb_sdk.data_types.utils._prune_max_seq(large_list),
+    meta = tracklab.Image.seq_to_json(
+        tracklab.wandb_sdk.data_types.utils._prune_max_seq(large_list),
         run,
         "test2",
         0,
@@ -307,8 +307,8 @@ def test_image_refs(mock_reference_get_responses):
         body=b"test",
         headers={"etag": "testEtag", "content-length": "200"},
     )
-    image_obj = wandb.Image("http://nonexistent/puppy.jpg")
-    art = wandb.Artifact("image_ref_test", "images")
+    image_obj = tracklab.Image("http://nonexistent/puppy.jpg")
+    art = tracklab.Artifact("image_ref_test", "images")
     art.add(image_obj, "image_ref")
     image_expected = {
         "path": str(Path("media/images/75c13e5a637fb8052da9/puppy.jpg")),
@@ -337,46 +337,46 @@ def test_image_refs(mock_reference_get_responses):
 
 def test_guess_mode():
     image = np.random.randint(255, size=(28, 28, 3))
-    wbimg = wandb.Image(image)
+    wbimg = tracklab.Image(image)
     assert wbimg.image.mode == "RGB"
 
 
 def test_pil():
     pil = Image.new("L", (28, 28))
-    img = wandb.Image(pil)
+    img = tracklab.Image(pil)
     assert list(img.image.getdata()) == list(pil.getdata())
 
 
 def test_matplotlib_image():
     plt.plot([1, 2, 2, 4])
-    img = wandb.Image(plt)
+    img = tracklab.Image(plt)
     assert img.image.width == 640
 
 
 def test_matplotlib_image_with_multiple_axes():
     """Test multiple axis pyplot or figure references.
 
-    Ensure that wandb.Image constructor accepts a pyplot or figure reference when the
+    Ensure that tracklab.Image constructor accepts a pyplot or figure reference when the
     figure has multiple axes. Importantly, there is no requirement that any of the axes
     have plotted data.
     """
     for fig in matplotlib_multiple_axes_figures():
-        wandb.Image(fig)  # this should not error.
+        tracklab.Image(fig)  # this should not error.
 
     for _ in matplotlib_multiple_axes_figures():
-        wandb.Image(plt)  # this should not error.
+        tracklab.Image(plt)  # this should not error.
 
 
 def test_image_from_matplotlib_with_image():
-    """Ensure that wandb.Image constructor supports a pyplot when an image is passed."""
+    """Ensure that tracklab.Image constructor supports a pyplot when an image is passed."""
     # try the figure version
     fig = matplotlib_with_image()
-    wandb.Image(fig)  # this should not error.
+    tracklab.Image(fig)  # this should not error.
     plt.close()
 
     # try the plt version
     fig = matplotlib_with_image()
-    wandb.Image(plt)  # this should not error.
+    tracklab.Image(plt)  # this should not error.
     plt.close()
 
 
@@ -391,7 +391,7 @@ def test_fail_to_make_file(
         ValueError,
         match="is invalid. Please remove invalid filename characters",
     ):
-        wb_image = wandb.Image(image)
+        wb_image = tracklab.Image(image)
         wb_image.bind_to_run(mock_run(), "my key: an identifier", 0)
 
 
@@ -409,21 +409,21 @@ def test_image_bounding_boxes_with_pytorch_tensors():
         },
     ]
 
-    wandb.Image(image, boxes={"predictions": {"box_data": boxes}})
+    tracklab.Image(image, boxes={"predictions": {"box_data": boxes}})
 
 
 def test_image_masks_with_pytorch_tensors():
     image = np.random.randint(255, size=(4, 4, 3))
     mask = torch.from_numpy(np.array([[1, 0], [0, 1]]))
 
-    wandb.Image(image, masks={"predictions": {"mask_data": mask}})
+    tracklab.Image(image, masks={"predictions": {"mask_data": mask}})
 
 
 def test_image_normalize_neg1_to_1():
     # Sometimes images are represented with values in range [-1, 1].
     data = np.array([[-0.2, 0.6]])
 
-    transformed_data = wandb.Image(data).to_data_array()
+    transformed_data = tracklab.Image(data).to_data_array()
 
     assert transformed_data == [[102, 204]]
 
@@ -431,7 +431,7 @@ def test_image_normalize_neg1_to_1():
 def test_image_normalize_0_to_1():
     data = np.array([[0.2, 0.3]])
 
-    transformed_data = wandb.Image(data).to_data_array()
+    transformed_data = tracklab.Image(data).to_data_array()
 
     assert transformed_data == [[51, 76]]
 
@@ -439,7 +439,7 @@ def test_image_normalize_0_to_1():
 def test_image_normalize_clips_bad_range():
     data = np.array([[-9, 0.1, 100, 254.5, 270]])
 
-    transformed_data = wandb.Image(data).to_data_array()
+    transformed_data = tracklab.Image(data).to_data_array()
 
     assert transformed_data == [[0, 0, 100, 254, 255]]
 
@@ -452,34 +452,34 @@ def test_image_normalization_numpy_pytorch_equal(scale):
     img = np.random.uniform(low=0, high=1, size=[4, 4, 3]) * scale
     torch_img = torch.from_numpy(img.transpose(2, 0, 1))
 
-    wb_image = wandb.Image(img)
-    wb_image_torch = wandb.Image(torch_img)
+    wb_image = tracklab.Image(img)
+    wb_image_torch = tracklab.Image(torch_img)
 
     assert np.all(np.array(wb_image.image) == np.array(wb_image_torch.image))
 
 
 ################################################################################
-# Test wandb.Audio
+# Test tracklab.Audio
 ################################################################################
 
 
 def test_audio_sample_rates():
     audio1 = np.random.uniform(-1, 1, 44100)
     audio2 = np.random.uniform(-1, 1, 88200)
-    wbaudio1 = wandb.Audio(audio1, sample_rate=44100)
-    wbaudio2 = wandb.Audio(audio2, sample_rate=88200)
-    assert wandb.Audio.sample_rates([wbaudio1, wbaudio2]) == [44100, 88200]
+    wbaudio1 = tracklab.Audio(audio1, sample_rate=44100)
+    wbaudio2 = tracklab.Audio(audio2, sample_rate=88200)
+    assert tracklab.Audio.sample_rates([wbaudio1, wbaudio2]) == [44100, 88200]
     # test with missing sample rate
     with pytest.raises(ValueError):
-        wandb.Audio(audio1)
+        tracklab.Audio(audio1)
 
 
 def test_audio_durations():
     audio1 = np.random.uniform(-1, 1, 44100)
     audio2 = np.random.uniform(-1, 1, 88200)
-    wbaudio1 = wandb.Audio(audio1, sample_rate=44100)
-    wbaudio2 = wandb.Audio(audio2, sample_rate=44100)
-    assert wandb.Audio.durations([wbaudio1, wbaudio2]) == [1.0, 2.0]
+    wbaudio1 = tracklab.Audio(audio1, sample_rate=44100)
+    wbaudio2 = tracklab.Audio(audio2, sample_rate=44100)
+    assert tracklab.Audio.durations([wbaudio1, wbaudio2]) == [1.0, 2.0]
 
 
 def test_audio_captions():
@@ -488,25 +488,25 @@ def test_audio_captions():
     caption1 = "This is what a dog sounds like"
     caption2 = "This is what a chicken sounds like"
     # test with all captions
-    wbaudio1 = wandb.Audio(audio, sample_rate=sample_rate, caption=caption1)
-    wbaudio2 = wandb.Audio(audio, sample_rate=sample_rate, caption=caption2)
-    assert wandb.Audio.captions([wbaudio1, wbaudio2]) == [caption1, caption2]
+    wbaudio1 = tracklab.Audio(audio, sample_rate=sample_rate, caption=caption1)
+    wbaudio2 = tracklab.Audio(audio, sample_rate=sample_rate, caption=caption2)
+    assert tracklab.Audio.captions([wbaudio1, wbaudio2]) == [caption1, caption2]
     # test with no captions
-    wbaudio3 = wandb.Audio(audio, sample_rate=sample_rate)
-    wbaudio4 = wandb.Audio(audio, sample_rate=sample_rate)
-    assert wandb.Audio.captions([wbaudio3, wbaudio4]) is False
+    wbaudio3 = tracklab.Audio(audio, sample_rate=sample_rate)
+    wbaudio4 = tracklab.Audio(audio, sample_rate=sample_rate)
+    assert tracklab.Audio.captions([wbaudio3, wbaudio4]) is False
     # test with some captions
-    wbaudio5 = wandb.Audio(audio, sample_rate=sample_rate)
-    wbaudio6 = wandb.Audio(audio, sample_rate=sample_rate, caption=caption2)
-    assert wandb.Audio.captions([wbaudio5, wbaudio6]) == ["", caption2]
+    wbaudio5 = tracklab.Audio(audio, sample_rate=sample_rate)
+    wbaudio6 = tracklab.Audio(audio, sample_rate=sample_rate, caption=caption2)
+    assert tracklab.Audio.captions([wbaudio5, wbaudio6]) == ["", caption2]
 
 
 def test_audio_to_json(mock_run):
     run = mock_run()
     audio = np.zeros(44100)
-    audio_obj = wandb.Audio(audio, sample_rate=44100)
+    audio_obj = tracklab.Audio(audio, sample_rate=44100)
     audio_obj.bind_to_run(run, "test", 0)
-    meta = wandb.Audio.seq_to_json([audio_obj], run, "test", 0)
+    meta = tracklab.Audio.seq_to_json([audio_obj], run, "test", 0)
     assert os.path.exists(os.path.join(run.dir, meta["audio"][0]["path"]))
 
     meta_expected = {
@@ -525,10 +525,10 @@ def test_audio_to_json(mock_run):
 
 
 def test_audio_refs():
-    audio_obj = wandb.Audio(
+    audio_obj = tracklab.Audio(
         "https://wandb-artifacts-refs-public-test.s3-us-west-2.amazonaws.com/StarWars3.wav"
     )
-    art = wandb.Artifact("audio_ref_test", "dataset")
+    art = tracklab.Artifact("audio_ref_test", "dataset")
     art.add(audio_obj, "audio_ref")
 
     audio_expected = {
@@ -538,36 +538,36 @@ def test_audio_refs():
 
 
 ################################################################################
-# Test wandb.Plotly
+# Test tracklab.Plotly
 ################################################################################
 
 
 def test_matplotlib_plotly_with_multiple_axes():
-    """Test creating a wandb.Plotly object from a matplotlib figure with multiple axes.
+    """Test creating a tracklab.Plotly object from a matplotlib figure with multiple axes.
 
-    Ensures that wandb.Plotly constructor can accept a plotly figure reference in which
+    Ensures that tracklab.Plotly constructor can accept a plotly figure reference in which
     the figure has multiple axes. Importantly, there is no requirement that any of the
     axes have plotted data.
     """
     for fig in matplotlib_multiple_axes_figures():
-        wandb.Plotly(fig)  # this should not error.
+        tracklab.Plotly(fig)  # this should not error.
 
     for _ in matplotlib_multiple_axes_figures():
-        wandb.Plotly(plt)  # this should not error.
+        tracklab.Plotly(plt)  # this should not error.
 
 
 def test_plotly_from_matplotlib_with_image():
-    """Test erroring when a pyplot with image is passed to wandb.Plotly."""
+    """Test erroring when a pyplot with image is passed to tracklab.Plotly."""
     # try the figure version
     fig = matplotlib_with_image()
     with pytest.raises(ValueError):
-        wandb.Plotly(fig)
+        tracklab.Plotly(fig)
     plt.close()
 
     # try the plt version
     fig = matplotlib_with_image()
     with pytest.raises(ValueError):
-        wandb.Plotly(plt)
+        tracklab.Plotly(plt)
     plt.close()
 
 
@@ -578,11 +578,11 @@ def test_make_plot_media_from_matplotlib_without_image():
     image.
     """
     fig = matplotlib_without_image()
-    assert type(wandb.Plotly.make_plot_media(fig)) is wandb.Plotly
+    assert type(tracklab.Plotly.make_plot_media(fig)) is tracklab.Plotly
     plt.close()
 
     fig = matplotlib_without_image()
-    assert type(wandb.Plotly.make_plot_media(plt)) is wandb.Plotly
+    assert type(tracklab.Plotly.make_plot_media(plt)) is tracklab.Plotly
     plt.close()
 
 
@@ -593,16 +593,16 @@ def test_make_plot_media_from_matplotlib_with_image():
     image in the matplotlib figure.
     """
     fig = matplotlib_with_image()
-    assert type(wandb.Plotly.make_plot_media(fig)) is wandb.Image
+    assert type(tracklab.Plotly.make_plot_media(fig)) is tracklab.Image
     plt.close()
 
     fig = matplotlib_with_image()
-    assert type(wandb.Plotly.make_plot_media(plt)) is wandb.Image
+    assert type(tracklab.Plotly.make_plot_media(plt)) is tracklab.Image
     plt.close()
 
 
 ################################################################################
-# Test wandb.Bokeh
+# Test tracklab.Bokeh
 ################################################################################
 
 
@@ -629,21 +629,21 @@ def test_create_bokeh_plot(
     mock_run,
     bokeh_plot,
 ):
-    """Ensure that wandb.Bokeh constructor accepts a bokeh plot."""
+    """Ensure that tracklab.Bokeh constructor accepts a bokeh plot."""
     bp = bokeh_plot()
-    bp = wandb.data_types.Bokeh(bp)
+    bp = tracklab.data_types.Bokeh(bp)
     bp.bind_to_run(mock_run(), "bokeh", 0)
 
 
 ################################################################################
-# Test wandb.Video
+# Test tracklab.Video
 ################################################################################
 
 
 def test_video_numpy_gif(mock_run):
     run = mock_run()
     video = np.random.randint(255, size=(10, 3, 28, 28))
-    vid = wandb.Video(video, format="gif")
+    vid = tracklab.Video(video, format="gif")
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".gif")
 
@@ -651,7 +651,7 @@ def test_video_numpy_gif(mock_run):
 def test_video_numpy_mp4(mock_run):
     run = mock_run()
     video = np.random.randint(255, size=(10, 3, 28, 28))
-    vid = wandb.Video(video, format="mp4")
+    vid = tracklab.Video(video, format="mp4")
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".mp4")
 
@@ -659,7 +659,7 @@ def test_video_numpy_mp4(mock_run):
 def test_video_numpy_multi(mock_run):
     run = mock_run()
     video = np.random.random(size=(2, 10, 3, 28, 28))
-    vid = wandb.Video(video)
+    vid = tracklab.Video(video)
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".gif")
 
@@ -667,14 +667,14 @@ def test_video_numpy_multi(mock_run):
 def test_video_numpy_invalid():
     video = np.random.random(size=(3, 28, 28))
     with pytest.raises(ValueError):
-        wandb.Video(video)
+        tracklab.Video(video)
 
 
 def test_video_path(mock_run):
     run = mock_run()
     with open("video.mp4", "w") as f:
         f.write("00000")
-    vid = wandb.Video("video.mp4")
+    vid = tracklab.Video("video.mp4")
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".mp4")
 
@@ -683,11 +683,11 @@ def test_video_path_invalid():
     with open("video.avi", "w") as f:
         f.write("00000")
     with pytest.raises(ValueError):
-        wandb.Video("video.avi")
+        tracklab.Video("video.avi")
 
 
 ################################################################################
-# Test wandb.Molecule
+# Test tracklab.Molecule
 ################################################################################
 
 
@@ -695,9 +695,9 @@ def test_molecule(mock_run):
     run = mock_run()
     with open("test.pdb", "w") as f:
         f.write("00000")
-    mol = wandb.Molecule("test.pdb")
+    mol = tracklab.Molecule("test.pdb")
     mol.bind_to_run(run, "rad", "summary")
-    wandb.Molecule.seq_to_json([mol], run, "rad", "summary")
+    tracklab.Molecule.seq_to_json([mol], run, "rad", "summary")
 
     assert os.path.exists(mol._path)
 
@@ -706,90 +706,90 @@ def test_molecule_file(mock_run):
     run = mock_run()
     with open("test.pdb", "w") as f:
         f.write("00000")
-    mol = wandb.Molecule(open("test.pdb"))
+    mol = tracklab.Molecule(open("test.pdb"))
     mol.bind_to_run(run, "rad", "summary")
-    wandb.Molecule.seq_to_json([mol], run, "rad", "summary")
+    tracklab.Molecule.seq_to_json([mol], run, "rad", "summary")
 
     assert os.path.exists(mol._path)
 
 
 def test_molecule_from_smiles(mock_run):
-    """Ensure that wandb.Molecule.from_smiles supports valid SMILES molecule string representations."""
+    """Ensure that tracklab.Molecule.from_smiles supports valid SMILES molecule string representations."""
     run = mock_run()
-    mol = wandb.Molecule.from_smiles("CC(=O)Nc1ccc(O)cc1")
+    mol = tracklab.Molecule.from_smiles("CC(=O)Nc1ccc(O)cc1")
     mol.bind_to_run(run, "rad", "summary")
-    wandb.Molecule.seq_to_json([mol], run, "rad", "summary")
+    tracklab.Molecule.seq_to_json([mol], run, "rad", "summary")
 
     assert os.path.exists(mol._path)
 
 
 def test_molecule_from_invalid_smiles():
-    """Ensure that wandb.Molecule.from_smiles errs if passed an invalid SMILES string."""
+    """Ensure that tracklab.Molecule.from_smiles errs if passed an invalid SMILES string."""
     with pytest.raises(ValueError):
-        wandb.Molecule.from_smiles("TEST")
+        tracklab.Molecule.from_smiles("TEST")
 
 
 def test_molecule_from_rdkit_mol_object(mock_run):
-    """Ensure that wandb.Molecule.from_rdkit supports rdkit.Chem.rdchem.Mol objects."""
+    """Ensure that tracklab.Molecule.from_rdkit supports rdkit.Chem.rdchem.Mol objects."""
     run = mock_run()
-    mol = wandb.Molecule.from_rdkit(rdkit.Chem.MolFromSmiles("CC(=O)Nc1ccc(O)cc1"))
+    mol = tracklab.Molecule.from_rdkit(rdkit.Chem.MolFromSmiles("CC(=O)Nc1ccc(O)cc1"))
     mol.bind_to_run(run, "rad", "summary")
-    wandb.Molecule.seq_to_json([mol], run, "rad", "summary")
+    tracklab.Molecule.seq_to_json([mol], run, "rad", "summary")
 
     assert os.path.exists(mol._path)
 
 
 def test_molecule_from_rdkit_mol_file(mock_run):
-    """Ensure that wandb.Molecule.from_rdkit supports .mol files."""
+    """Ensure that tracklab.Molecule.from_rdkit supports .mol files."""
     run = mock_run()
     substance = rdkit.Chem.MolFromSmiles("CC(=O)Nc1ccc(O)cc1")
     mol_file_name = "test.mol"
     rdkit.Chem.rdmolfiles.MolToMolFile(substance, mol_file_name)
-    mol = wandb.Molecule.from_rdkit(mol_file_name)
+    mol = tracklab.Molecule.from_rdkit(mol_file_name)
     mol.bind_to_run(run, "rad", "summary")
-    wandb.Molecule.seq_to_json([mol], run, "rad", "summary")
+    tracklab.Molecule.seq_to_json([mol], run, "rad", "summary")
 
     assert os.path.exists(mol._path)
 
 
 def test_molecule_from_rdkit_invalid_input():
-    """Ensure that wandb.Molecule.from_rdkit errs on invalid input."""
+    """Ensure that tracklab.Molecule.from_rdkit errs on invalid input."""
     mol_file_name = "test"
     with pytest.raises(ValueError):
-        wandb.Molecule.from_rdkit(mol_file_name)
+        tracklab.Molecule.from_rdkit(mol_file_name)
 
 
 ################################################################################
-# Test wandb.Html
+# Test tracklab.Html
 ################################################################################
 
 
 def test_html_str(mock_run):
     run = mock_run()
     html_str = "<html><body><h1>Hello</h1></body></html>"
-    html = wandb.Html(html_str)
+    html = tracklab.Html(html_str)
     html.bind_to_run(run, "rad", "summary")
-    wandb.Html.seq_to_json([html], run, "rad", "summary")
+    tracklab.Html.seq_to_json([html], run, "rad", "summary")
     assert os.path.exists(html._path)
-    assert html == wandb.Html(html_str)
+    assert html == tracklab.Html(html_str)
 
 
 def test_html_styles():
     pre = (
         '<base target="_blank"><link rel="stylesheet" type="text/css" '
-        'href="https://app.wandb.ai/normalize.css" />'
+        'href="https://app.tracklab.ai/normalize.css" />'
     )
-    html = wandb.Html("<html><body><h1>Hello</h1></body></html>")
+    html = tracklab.Html("<html><body><h1>Hello</h1></body></html>")
     assert (
         html.html == "<html><head>" + pre + "</head><body><h1>Hello</h1></body></html>"
     )
-    html = wandb.Html("<html><head></head><body><h1>Hello</h1></body></html>")
+    html = tracklab.Html("<html><head></head><body><h1>Hello</h1></body></html>")
     assert (
         html.html == "<html><head>" + pre + "</head><body><h1>Hello</h1></body></html>"
     )
-    html = wandb.Html("<h1>Hello</h1>")
+    html = tracklab.Html("<h1>Hello</h1>")
     assert html.html == pre + "<h1>Hello</h1>"
-    html = wandb.Html("<h1>Hello</h1>", inject=False)
+    html = tracklab.Html("<h1>Hello</h1>", inject=False)
     assert html.html == "<h1>Hello</h1>"
 
 
@@ -797,9 +797,9 @@ def test_html_file(mock_run):
     run = mock_run()
     with open("test.html", "w") as f:
         f.write("<html><body><h1>Hello</h1></body></html>")
-    html = wandb.Html(open("test.html"))
+    html = tracklab.Html(open("test.html"))
     html.bind_to_run(run, "rad", "summary")
-    wandb.Html.seq_to_json([html, html], run, "rad", "summary")
+    tracklab.Html.seq_to_json([html, html], run, "rad", "summary")
 
     assert os.path.exists(html._path)
 
@@ -808,15 +808,15 @@ def test_html_file_path(mock_run):
     run = mock_run()
     with open("test.html", "w") as f:
         f.write("<html><body><h1>Hello</h1></body></html>")
-    html = wandb.Html("test.html")
+    html = tracklab.Html("test.html")
     html.bind_to_run(run, "rad", "summary")
-    wandb.Html.seq_to_json([html, html], run, "rad", "summary")
+    tracklab.Html.seq_to_json([html, html], run, "rad", "summary")
 
     assert os.path.exists(html._path)
 
 
 ################################################################################
-# Test wandb.Table
+# Test tracklab.Table
 ################################################################################
 
 
@@ -830,7 +830,7 @@ def table_data():
 
 
 def test_table_default():
-    table = wandb.Table()
+    table = tracklab.Table()
     table.add_data(
         "Some awesome text",
         "Positive",
@@ -856,7 +856,7 @@ def test_table_default():
     ["a", "b"],
     [
         (  # Invalid Type
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                     [4, 5, 6],
@@ -865,26 +865,26 @@ def test_table_default():
             {},
         ),
         (  # Mismatch Rows
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                     [4, 5, 6],
                 ]
             ),
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                 ]
             ),
         ),
         (  # Mismatch Columns
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                     [4, 5, 6],
                 ]
             ),
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                     [4, 5, 6],
@@ -893,25 +893,25 @@ def test_table_default():
             ),
         ),
         (  # Mismatch Types
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                 ]
             ),
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     ["1", "2", "3"],
                 ]
             ),
         ),
         (  # Mismatch Data
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                     [4, 5, 6],
                 ]
             ),
-            wandb.Table(
+            tracklab.Table(
                 data=[
                     [1, 2, 3],
                     [4, 5, 100],
@@ -927,13 +927,13 @@ def test_table_eq_debug_mismatch(a, b):
 
 
 def test_table_eq_debug_match():
-    a = wandb.Table(
+    a = tracklab.Table(
         data=[
             [1, 2, 3],
             [4, 5, 6],
         ]
     )
-    b = wandb.Table(
+    b = tracklab.Table(
         data=[
             [1, 2, 3],
             [4, 5, 6],
@@ -944,7 +944,7 @@ def test_table_eq_debug_match():
 
 
 def test_table_custom():
-    table = wandb.Table(["Foo", "Bar"])
+    table = tracklab.Table(["Foo", "Bar"])
     table.add_data("So", "Cool")
     table.add_row("&", "Rad")
     assert table._to_table_json() == {
@@ -952,12 +952,12 @@ def test_table_custom():
         "columns": ["Foo", "Bar"],
     }
     df = pd.DataFrame(columns=["Foo", "Bar"], data=[["So", "Cool"], ["&", "Rad"]])
-    table_df = wandb.Table(dataframe=df)
+    table_df = tracklab.Table(dataframe=df)
     assert table._to_table_json() == table_df._to_table_json()
 
 
 def test_table_init():
-    table = wandb.Table(
+    table = tracklab.Table(
         data=[
             ["Some awesome text", "Positive", "Negative"],
         ]
@@ -975,62 +975,62 @@ def test_table_init():
 
 
 def test_table_from_list(table_data):
-    table = wandb.Table(data=table_data)
+    table = tracklab.Table(data=table_data)
     assert table.data == table_data
 
     with pytest.raises(AssertionError):
         # raises when user accidentally overrides columns
-        table = wandb.Table(table_data)
+        table = tracklab.Table(table_data)
 
     with pytest.raises(AssertionError):
         # raises when user uses list in "dataframe"
-        table = wandb.Table(dataframe=table_data)
+        table = tracklab.Table(dataframe=table_data)
 
     # legacy
-    table = wandb.Table(rows=table_data)
+    table = tracklab.Table(rows=table_data)
     assert table.data == table_data
 
 
 def test_table_iterator(table_data):
-    table = wandb.Table(data=table_data)
+    table = tracklab.Table(data=table_data)
     for ndx, row in table.iterrows():
         assert row == table_data[ndx]
 
-    table = wandb.Table(data=[])
+    table = tracklab.Table(data=[])
     assert len([(ndx, row) for ndx, row in table.iterrows()]) == 0
 
 
 def test_table_from_numpy(table_data):
     np_data = np.array(table_data)
-    table = wandb.Table(data=np_data)
+    table = tracklab.Table(data=np_data)
     assert table.data == np_data.tolist()
 
     with pytest.raises(AssertionError):
         # raises when user accidentally overrides columns
-        table = wandb.Table(np_data)
+        table = tracklab.Table(np_data)
 
     with pytest.raises(AssertionError):
         # raises when user uses list in "dataframe"
-        table = wandb.Table(dataframe=np_data)
+        table = tracklab.Table(dataframe=np_data)
 
 
 def test_table_from_pandas(table_data):
     pd_data = pd.DataFrame(table_data)
-    table = wandb.Table(data=pd_data)
+    table = tracklab.Table(data=pd_data)
     assert table.data == table_data
 
     with pytest.raises(AssertionError):
         # raises when user accidentally overrides columns
-        table = wandb.Table(pd_data)
+        table = tracklab.Table(pd_data)
 
     # legacy
-    table = wandb.Table(dataframe=pd_data)
+    table = tracklab.Table(dataframe=pd_data)
     assert table.data == table_data
 
 
 def test_table_column_style():
     # Test Base Cases
-    table1 = wandb.Table(columns=[], data=[])
+    table1 = tracklab.Table(columns=[], data=[])
     table1.add_column("number", [1, 2, 3])
     table1.add_data(4)
     with pytest.raises(AssertionError):
@@ -1072,11 +1072,11 @@ def test_table_column_style():
     rand_1 = np.random.randint(256, size=(2, 2, 3))
     rand_2 = np.random.randint(256, size=(2, 2, 3))
     rand_3 = np.random.randint(256, size=(2, 2, 3))
-    img_1 = wandb.Image(rand_1, normalize=False)
-    img_2 = wandb.Image(rand_2, normalize=False)
-    img_3 = wandb.Image(rand_3, normalize=False)
+    img_1 = tracklab.Image(rand_1, normalize=False)
+    img_2 = tracklab.Image(rand_2, normalize=False)
+    img_3 = tracklab.Image(rand_3, normalize=False)
 
-    table2 = wandb.Table(columns=[], data=[])
+    table2 = tracklab.Table(columns=[], data=[])
     table2.add_column("np_data", [rand_1, rand_2])
     table2.add_column("image", [img_1, img_2])
     table2.add_data(rand_3, img_3)
@@ -1094,7 +1094,7 @@ def test_table_column_style():
         == np.array([rand_1, rand_2, rand_3])
     )
 
-    table3 = wandb.Table(columns=[], data=[])
+    table3 = tracklab.Table(columns=[], data=[])
     table3.add_column("table1_fk", table1.get_column("strings"))
     assert table3.get_column("table1_fk")[0]._table == table1
 
@@ -1103,7 +1103,7 @@ def test_ndarrays_in_tables():
     rows = 10
     d = 128
     c = 3
-    nda_table = wandb.Table(
+    nda_table = tracklab.Table(
         columns=["ndarray"], data=np.random.randint(255, size=(rows, 1, d, d, c))
     )
     nda_table.add_data(np.random.randint(255, size=(d, d, c)))
@@ -1122,7 +1122,7 @@ def test_ndarrays_in_tables():
         ]
     )
 
-    nda_table = wandb.Table(columns=[], data=[])
+    nda_table = tracklab.Table(columns=[], data=[])
     nda_table.add_column(
         "odd_col",
         [[[i], [i]] for i in range(rows)] + [np.random.randint(255, size=(2, 1))],
@@ -1148,7 +1148,7 @@ def test_ndarrays_in_tables():
 
 
 ################################################################################
-# Test wandb.Object3D
+# Test tracklab.Object3D
 ################################################################################
 
 
@@ -1195,9 +1195,9 @@ def test_object3d_numpy(
     point_cloud_3,
 ):
     run = mock_run()
-    obj1 = wandb.Object3D(point_cloud_1)
-    obj2 = wandb.Object3D(point_cloud_2)
-    obj3 = wandb.Object3D(point_cloud_3)
+    obj1 = tracklab.Object3D(point_cloud_1)
+    obj2 = tracklab.Object3D(point_cloud_2)
+    obj3 = tracklab.Object3D(point_cloud_3)
     obj1.bind_to_run(run, "object3d", 0)
     obj2.bind_to_run(run, "object3d", 1)
     obj3.bind_to_run(run, "object3d", 2)
@@ -1216,9 +1216,9 @@ def test_object3d_from_numpy(
     point_cloud_3,
 ):
     run = mock_run()
-    obj1 = wandb.Object3D.from_numpy(point_cloud_1)
-    obj2 = wandb.Object3D.from_numpy(point_cloud_2)
-    obj3 = wandb.Object3D.from_numpy(point_cloud_3)
+    obj1 = tracklab.Object3D.from_numpy(point_cloud_1)
+    obj2 = tracklab.Object3D.from_numpy(point_cloud_2)
+    obj3 = tracklab.Object3D.from_numpy(point_cloud_3)
     obj1.bind_to_run(run, "object3d", 0)
     obj2.bind_to_run(run, "object3d", 1)
     obj3.bind_to_run(run, "object3d", 2)
@@ -1232,7 +1232,7 @@ def test_object3d_from_numpy(
 
 def test_object3d_dict(mock_run):
     run = mock_run()
-    obj = wandb.Object3D(
+    obj = tracklab.Object3D(
         {
             "type": "lidar/beta",
         }
@@ -1244,7 +1244,7 @@ def test_object3d_dict(mock_run):
 
 def test_object3d_from_point_cloud(mock_run):
     run = mock_run()
-    obj = wandb.Object3D.from_point_cloud([], [], [], "lidar/beta")
+    obj = tracklab.Object3D.from_point_cloud([], [], [], "lidar/beta")
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(".pts.json")
@@ -1252,7 +1252,7 @@ def test_object3d_from_point_cloud(mock_run):
 
 def test_object3d_from_point_cloud_default_type(mock_run):
     run = mock_run()
-    obj = wandb.Object3D.from_point_cloud([], [], [])
+    obj = tracklab.Object3D.from_point_cloud([], [], [])
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(".pts.json")
@@ -1260,23 +1260,23 @@ def test_object3d_from_point_cloud_default_type(mock_run):
 
 def test_object3d_from_point_cloud_invalid():
     with pytest.raises(ValueError):
-        wandb.Object3D.from_point_cloud([], [], [], "invalid point cloud type!")
+        tracklab.Object3D.from_point_cloud([], [], [], "invalid point cloud type!")
 
 
 def test_object3d_dict_invalid():
     with pytest.raises(ValueError):
-        _ = wandb.Object3D(
+        _ = tracklab.Object3D(
             {
                 "type": "INVALID",
             }
         )
-    wandb.finish()
+    tracklab.finish()
 
 
 def test_object3d_dict_invalid_string():
     with pytest.raises(ValueError):
-        _ = wandb.Object3D("INVALID")
-    wandb.finish()
+        _ = tracklab.Object3D("INVALID")
+    tracklab.finish()
 
 
 @pytest.mark.parametrize(
@@ -1290,7 +1290,7 @@ def test_object3d_dict_invalid_string():
 def test_object3d_obj_open_file(mock_run, assets_path, file_info):
     run = mock_run()
     with open(assets_path(file_info["name"])) as open_file:
-        obj = wandb.Object3D(open_file)
+        obj = tracklab.Object3D(open_file)
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
@@ -1309,7 +1309,7 @@ def test_object3d_from_file_with_path(mock_run, assets_path, file_info):
     full_path = str(assets_path(file_info["name"]))
     # precondition since this is how object_3d detects file path case
     assert isinstance(full_path, str)
-    obj = wandb.Object3D.from_file(full_path)
+    obj = tracklab.Object3D.from_file(full_path)
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
@@ -1332,7 +1332,7 @@ def test_object3d_from_file_with_textio(mock_run, assets_path, file_info):
     with open(assets_path(file_info["name"])) as textio:
         # precondition, since read prop is how object_3d detects textio case
         assert hasattr(textio, "read")
-        obj = wandb.Object3D(textio, file_type=file_info["type"])
+        obj = tracklab.Object3D(textio, file_type=file_info["type"])
         obj.bind_to_run(run, "object3D", 0)
         assert obj.to_json(run)["_type"] == "object3D-file"
         assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
@@ -1341,14 +1341,14 @@ def test_object3d_from_file_with_textio(mock_run, assets_path, file_info):
 def test_object3d_from_file_with_textio_invalid_file_type(assets_path):
     textio = io.StringIO("some text")
     with pytest.raises(ValueError):
-        _ = wandb.Object3D.from_file(textio)
+        _ = tracklab.Object3D.from_file(textio)
 
 
 def test_object3d_from_file_with_textio_missing_file_type(mock_run, assets_path):
     run = mock_run()
     with open(assets_path("point_cloud.pts.json")) as textio:
         assert hasattr(textio, "read")
-        obj = wandb.Object3D.from_file(textio)
+        obj = tracklab.Object3D.from_file(textio)
         obj.bind_to_run(run, "object3D", 0)
         assert obj.to_json(run)["_type"] == "object3D-file"
         assert obj.to_json(run)["path"].endswith(".pts.json")
@@ -1367,7 +1367,7 @@ def test_object3d_from_file_with_open_file(mock_run, assets_path, file_info):
     with open(assets_path(file_info["name"])) as open_file:
         # precondition, since this is how object_3d detects open file case
         assert hasattr(open_file, "name")
-        obj = wandb.Object3D(open_file)
+        obj = tracklab.Object3D(open_file)
         obj.bind_to_run(run, "object3D", 0)
         assert obj.to_json(run)["_type"] == "object3D-file"
         assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
@@ -1378,7 +1378,7 @@ def test_object3d_textio(mock_run, assets_path):
     with open(assets_path("Box.gltf")) as f:
         io_obj = io.StringIO(f.read())
 
-    obj = wandb.Object3D(io_obj, file_type="obj")
+    obj = tracklab.Object3D(io_obj, file_type="obj")
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(".obj")
@@ -1401,31 +1401,31 @@ def test_object3d_textio(mock_run, assets_path):
 )
 def test_object3d_unsupported_numpy(object3d):
     with pytest.raises(ValueError):
-        wandb.Object3D(object3d)
+        tracklab.Object3D(object3d)
     with pytest.raises(ValueError):
-        wandb.Object3D.from_numpy(object3d)
+        tracklab.Object3D.from_numpy(object3d)
 
 
 def test_object3d_unsupported_io(assets_path):
     with open(assets_path("Box.gltf")) as f:
         io_obj = io.StringIO(f.read())
     with pytest.raises(ValueError):
-        wandb.Object3D(io_obj)
+        tracklab.Object3D(io_obj)
 
 
 def test_object3d_seq_to_json(mock_run, point_cloud_1, assets_path):
     run = mock_run()
 
-    objects = [wandb.Object3D(point_cloud_1)]
+    objects = [tracklab.Object3D(point_cloud_1)]
     with open(assets_path("Box.gltf")) as f:
-        objects.append(wandb.Object3D(f))
+        objects.append(tracklab.Object3D(f))
     with open(assets_path("cube.obj")) as f:
-        objects.append(wandb.Object3D(f))
+        objects.append(tracklab.Object3D(f))
 
     for o in objects:
         o.bind_to_run(run, "pc", 1)
 
-    obj = wandb.Object3D.seq_to_json(objects, run, "pc", 1)
+    obj = tracklab.Object3D.seq_to_json(objects, run, "pc", 1)
 
     for i in range(3):
         assert os.path.exists(
@@ -1442,22 +1442,22 @@ def test_object3d_label_is_optional(mock_run):
         "color": [0, 0, 0],
     }
     box_no_label = {"corners": [], "color": [0, 0, 0]}
-    wandb.Object3D.from_point_cloud(points=[], boxes=[box_no_label, box_with_label])
+    tracklab.Object3D.from_point_cloud(points=[], boxes=[box_no_label, box_with_label])
 
 
 def test_object3d_score_is_optional(mock_run):
     box_with_score = {"corners": [], "score": 95, "color": [0, 0, 0]}
     box_no_score = {"corners": [], "color": [0, 0, 0]}
-    wandb.Object3D.from_point_cloud(points=[], boxes=[box_no_score, box_with_score])
+    tracklab.Object3D.from_point_cloud(points=[], boxes=[box_no_score, box_with_score])
 
 
 ################################################################################
-# Test wandb.Graph
+# Test tracklab.Graph
 ################################################################################
 
 
 def test_graph():
-    graph = wandb.Graph()
+    graph = tracklab.Graph()
     node_a = data_types.Node("a", "Node A", size=(4,))
     node_b = data_types.Node("b", "Node B", size=(16,))
     graph.add_node(node_a)
@@ -1482,24 +1482,24 @@ def test_graph():
 
 
 ################################################################################
-# Test wandb.PartitionedTable
+# Test tracklab.PartitionedTable
 ################################################################################
 
 
 def test_partitioned_table():
-    partition_table = wandb.data_types.PartitionedTable(parts_path="parts")
+    partition_table = tracklab.data_types.PartitionedTable(parts_path="parts")
     assert len([(ndx, row) for ndx, row in partition_table.iterrows()]) == 0
-    assert partition_table == wandb.data_types.PartitionedTable(parts_path="parts")
-    assert partition_table != wandb.data_types.PartitionedTable(parts_path="parts2")
+    assert partition_table == tracklab.data_types.PartitionedTable(parts_path="parts")
+    assert partition_table != tracklab.data_types.PartitionedTable(parts_path="parts2")
 
 
 ################################################################################
-# Test wandb.Html
+# Test tracklab.Html
 ################################################################################
 
 
 def test_wandb_html_with_directory(tmp_path):
-    html = wandb.Html(str(tmp_path), inject=False)
+    html = tracklab.Html(str(tmp_path), inject=False)
 
     assert html._is_tmp is True
     assert html._path is not None
@@ -1512,7 +1512,7 @@ def test_wandb_html_with_html_file(tmp_path):
     html_file = tmp_path / "index.html"
     html_file.write_text("Hello, world!")
 
-    html = wandb.Html(str(html_file), inject=False)
+    html = tracklab.Html(str(html_file), inject=False)
 
     assert html._is_tmp is False
     assert html._path is not None
@@ -1526,7 +1526,7 @@ def test_wandb_html_with_html_file_skip_file_check(tmp_path):
     html_file = tmp_path / "index.html"
     html_file.write_text("Hello, world!")
 
-    html = wandb.Html(str(html_file), inject=False, data_is_not_path=True)
+    html = tracklab.Html(str(html_file), inject=False, data_is_not_path=True)
 
     assert html._is_tmp is True
     assert html._path is not None
@@ -1538,7 +1538,7 @@ def test_wandb_html_with_non_html_file(tmp_path):
     file = tmp_path / "index.txt"
     file.write_text("Hello, world!")
 
-    html = wandb.Html(str(file), inject=False)
+    html = tracklab.Html(str(file), inject=False)
 
     assert html._is_tmp is True
     with open(html._path) as f:
@@ -1571,8 +1571,8 @@ def test_log_uint8_image():
         # Reading with torch vision
         image = read_image(temp.name)
 
-        torch_vision = wandb.Image(image)
-        path_im = wandb.Image(temp.name)
+        torch_vision = tracklab.Image(image)
+        path_im = tracklab.Image(temp.name)
 
         path_im, torch_vision = np.array(path_im.image), np.array(torch_vision.image)
         assert np.array_equal(path_im, torch_vision)
@@ -1593,7 +1593,7 @@ def test_log_uint8_image():
     ],
 )
 def test_init_image_jpeg_removes_transparency(data, file_type, mock_wandb_log):
-    wandb_img = wandb.Image(data, file_type=file_type)
+    wandb_img = tracklab.Image(data, file_type=file_type)
 
     assert mock_wandb_log.warned(
         "JPEG format does not support transparency. Ignoring alpha channel.",
@@ -1604,5 +1604,5 @@ def test_init_image_jpeg_removes_transparency(data, file_type, mock_wandb_log):
 @pytest.mark.parametrize("file_type", ["jpeg", "jpg", "png"])
 def test_wandb_image_with_matplotlib_figure(file_type):
     fig = plt.figure()
-    wandb_img = wandb.Image(fig, file_type=file_type)
+    wandb_img = tracklab.Image(fig, file_type=file_type)
     assert wandb_img.format == file_type

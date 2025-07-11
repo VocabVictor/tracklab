@@ -1,6 +1,6 @@
 import pytest
-import wandb
-import wandb.sdk
+import tracklab
+import tracklab.sdk
 
 try:
     import torch
@@ -159,7 +159,7 @@ def conv3x3(in_channels, out_channels, **kwargs):
 def test_all_logging(wandb_backend_spy):
     pytest.importorskip("torch")
     n = 3
-    run = wandb.init()
+    run = tracklab.init()
     net = ConvNet()
     run.watch(
         net,
@@ -188,7 +188,7 @@ def test_all_logging(wandb_backend_spy):
 
 def test_embedding_dict_watch(wandb_backend_spy):
     pytest.importorskip("torch")
-    run = wandb.init()
+    run = tracklab.init()
     model = EmbModelWrapper()
     run.watch(model, log_freq=1, idx=0)
     opt = torch.optim.Adam(params=model.parameters())
@@ -211,12 +211,12 @@ def test_embedding_dict_watch(wandb_backend_spy):
 def test_sequence_net(user):
     """Test logging a sequence model.
 
-    Use intrenal function wandb.sdk._watch to query the graph object.
+    Use intrenal function tracklab.sdk._watch to query the graph object.
     """
     pytest.importorskip("torch")
-    with wandb.init() as run:
+    with tracklab.init() as run:
         net = Sequence()
-        graph = wandb.sdk._watch(run, net, log_graph=True)[0]
+        graph = tracklab.sdk._watch(run, net, log_graph=True)[0]
         output = net.forward(dummy_torch_tensor((97, 100)))
         output.backward(torch.zeros((97, 100)))
         graph = graph._to_graph_json()
@@ -229,10 +229,10 @@ def test_sequence_net(user):
 
 def test_multi_net(user):
     pytest.importorskip("torch")
-    with wandb.init() as run:
+    with tracklab.init() as run:
         net1 = ConvNet()
         net2 = ConvNet()
-        graphs = wandb.sdk._watch(run, (net1, net2), log_graph=True)
+        graphs = tracklab.sdk._watch(run, (net1, net2), log_graph=True)
         output1 = net1.forward(dummy_torch_tensor((64, 1, 28, 28)))
         output2 = net2.forward(dummy_torch_tensor((64, 1, 28, 28)))
         grads = torch.ones(64, 10)

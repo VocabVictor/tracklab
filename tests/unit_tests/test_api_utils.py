@@ -1,12 +1,12 @@
 from textwrap import dedent
 
 import pytest
-from wandb.apis.public.utils import (
+from tracklab.apis.public.utils import (
     fetch_org_from_settings_or_entity,
     gql_compat,
     parse_org_from_registry_path,
 )
-from wandb.sdk.internal.internal_api import _OrgNames
+from tracklab.sdk.internal.internal_api import _OrgNames
 from wandb_gql import gql
 from wandb_graphql import print_ast
 
@@ -53,7 +53,7 @@ def mock_fetch_orgs_and_org_entities_from_entity(monkeypatch):
         return responses.get(entity_name, [])
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api._fetch_orgs_and_org_entities_from_entity",
+        "tracklab.sdk.internal.internal_api.Api._fetch_orgs_and_org_entities_from_entity",
         mock_fetch_orgs,
     )
 

@@ -3,20 +3,20 @@ import platform
 from contextlib import nullcontext
 
 import pytest
-import wandb
-from wandb.sdk.artifacts.exceptions import ArtifactFinalizedError
+import tracklab
+from tracklab.sdk.artifacts.exceptions import ArtifactFinalizedError
 
 
 @pytest.fixture
 def sample_data():
-    with wandb.init(id="first_run", settings={"silent": True}):
-        artifact = wandb.Artifact("mnist", type="dataset")
+    with tracklab.init(id="first_run", settings={"silent": True}):
+        artifact = tracklab.Artifact("mnist", type="dataset")
         with artifact.new_file("digits.h5") as f:
             f.write("v0")
-        wandb.run.log_artifact(artifact, aliases=["my_alias"])
+        tracklab.run.log_artifact(artifact, aliases=["my_alias"])
 
-        artifact = wandb.Artifact("mnist", type="dataset")
-        table = wandb.Table(
+        artifact = tracklab.Artifact("mnist", type="dataset")
+        table = tracklab.Table(
             columns=["c1", "c2"],
             data=[
                 ("r1c1", "r1c2"),
@@ -24,11 +24,11 @@ def sample_data():
             ],
         )
         artifact.add(table, name="t")
-        wandb.run.log_artifact(artifact)
+        tracklab.run.log_artifact(artifact)
 
-    with wandb.init(id="second_run", settings={"silent": True}):
-        wandb.run.use_artifact("mnist:v0")
-        wandb.run.use_artifact("mnist:v1")
+    with tracklab.init(id="second_run", settings={"silent": True}):
+        tracklab.run.use_artifact("mnist:v0")
+        tracklab.run.use_artifact("mnist:v1")
 
 
 def test_artifact_versions(user, api, sample_data):
@@ -102,7 +102,7 @@ def test_artifact_files(user, api, sample_data, wandb_backend_spy):
         ),
     )
 
-    api = wandb.Api()
+    api = tracklab.Api()
     art = api.artifact("mnist:v0", type="dataset")
     files = art.files(per_page=1)
     assert "storagePath" not in files[0]._attrs.keys()
@@ -136,7 +136,7 @@ def test_artifact_collection_exists(user, api, sample_data):
 def test_artifact_delete(user, api, sample_data):
     art = api.artifact("mnist:v0", type="dataset")
     # The artifact has aliases, so fail unless delete_aliases is set.
-    with pytest.raises(wandb.errors.CommError):
+    with pytest.raises(tracklab.errors.CommError):
         art.delete()
     art.delete(delete_aliases=True)
 
@@ -206,10 +206,10 @@ def test_artifact_manual_use(user, api, sample_data):
 
 def test_artifact_bracket_accessor(user, api, sample_data):
     art = api.artifact("mnist:v1", type="dataset")
-    assert art["t"].__class__ == wandb.Table
+    assert art["t"].__class__ == tracklab.Table
     assert art["s"] is None
     with pytest.raises(ArtifactFinalizedError):
-        art["s"] = wandb.Table(data=[], columns=[])
+        art["s"] = tracklab.Table(data=[], columns=[])
 
 
 def test_artifact_manual_link(user, api, sample_data):
@@ -219,14 +219,14 @@ def test_artifact_manual_link(user, api, sample_data):
 
 def test_artifact_manual_error(user, api, sample_data):
     run = api.run("uncategorized/first_run")
-    art = wandb.Artifact("test", type="dataset")
-    with pytest.raises(wandb.CommError):
+    art = tracklab.Artifact("test", type="dataset")
+    with pytest.raises(tracklab.CommError):
         run.log_artifact(art)
-    with pytest.raises(wandb.CommError):
+    with pytest.raises(tracklab.CommError):
         run.use_artifact(art)
-    with pytest.raises(wandb.CommError):
+    with pytest.raises(tracklab.CommError):
         run.use_artifact("mnist:v0")
-    with pytest.raises(wandb.CommError):
+    with pytest.raises(tracklab.CommError):
         run.log_artifact("mnist:v0")
 
 
@@ -238,26 +238,26 @@ def test_artifact_verify(user, api, sample_data):
 
 def test_artifact_save_norun(user, test_settings, assets_path):
     im_path = str(assets_path("2x2.png"))
-    artifact = wandb.Artifact(type="dataset", name="my-arty")
-    wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
+    artifact = tracklab.Artifact(type="dataset", name="my-arty")
+    wb_image = tracklab.Image(im_path, classes=[{"id": 0, "name": "person"}])
     artifact.add(wb_image, "my-image")
     artifact.save(settings=test_settings())
 
 
 def test_artifact_save_run(user, test_settings, assets_path):
     im_path = str(assets_path("2x2.png"))
-    artifact = wandb.Artifact(type="dataset", name="my-arty")
-    wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
+    artifact = tracklab.Artifact(type="dataset", name="my-arty")
+    wb_image = tracklab.Image(im_path, classes=[{"id": 0, "name": "person"}])
     artifact.add(wb_image, "my-image")
-    run = wandb.init(settings=test_settings())
+    run = tracklab.init(settings=test_settings())
     artifact.save()
     run.finish()
 
 
 def test_artifact_save_norun_nosettings(user, assets_path):
     im_path = str(assets_path("2x2.png"))
-    artifact = wandb.Artifact(type="dataset", name="my-arty")
-    wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
+    artifact = tracklab.Artifact(type="dataset", name="my-arty")
+    wb_image = tracklab.Image(im_path, classes=[{"id": 0, "name": "person"}])
     artifact.add(wb_image, "my-image")
     artifact.save()
 
@@ -349,11 +349,11 @@ def test_fetch_registry_artifact(
     expected_artifact_fetched,
 ):
     mocker.patch(
-        "wandb.sdk.artifacts.artifact.Artifact._from_attrs",
+        "tracklab.sdk.artifacts.artifact.Artifact._from_attrs",
     )
 
     mock__resolve_org_entity_name = mocker.patch(
-        "wandb.sdk.internal.internal_api.Api._resolve_org_entity_name",
+        "tracklab.sdk.internal.internal_api.Api._resolve_org_entity_name",
         return_value=resolve_org_entity_name,
     )
 
@@ -387,7 +387,7 @@ def test_fetch_registry_artifact(
     expectation = (
         nullcontext()
         if expected_artifact_fetched
-        else pytest.raises(wandb.errors.CommError)
+        else pytest.raises(tracklab.errors.CommError)
     )
     with expectation:
         api.artifact(artifact_path)

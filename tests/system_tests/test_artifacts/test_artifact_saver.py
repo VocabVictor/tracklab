@@ -1,8 +1,8 @@
 from unittest.mock import Mock
 
 import pytest
-from wandb.sdk.artifacts.artifact_saver import ArtifactSaver
-from wandb.sdk.internal import file_pusher, file_stream, internal_api
+from tracklab.sdk.artifacts.artifact_saver import ArtifactSaver
+from tracklab.sdk.internal import file_pusher, file_stream, internal_api
 
 
 def mock_upload_urls(

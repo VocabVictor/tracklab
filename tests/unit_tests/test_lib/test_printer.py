@@ -1,6 +1,6 @@
 import pytest
-import wandb
-from wandb.sdk.lib import printer as p
+import tracklab
+from tracklab.sdk.lib import printer as p
 
 
 @pytest.mark.parametrize("level", [1.3, {}, []])
@@ -38,7 +38,7 @@ def test_printer_levels(level, prefix, capsys):
 
 
 def test_printer_term_silent(capsys):
-    printer = p._PrinterTerm(settings=wandb.Settings(silent=True))
+    printer = p._PrinterTerm(settings=tracklab.Settings(silent=True))
 
     printer.display("something")
     printer.progress_update("update")

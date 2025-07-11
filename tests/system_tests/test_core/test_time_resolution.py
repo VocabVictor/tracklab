@@ -1,12 +1,12 @@
 import time
 
-import wandb
+import tracklab
 
 
 def test_log(wandb_backend_spy):
     """Make sure log is generating history with subsecond resolution."""
     before = time.time()
-    with wandb.init() as run:
+    with tracklab.init() as run:
         for i in range(10):
             run.log(dict(k=i))
             time.sleep(0.000010)  # 10 us

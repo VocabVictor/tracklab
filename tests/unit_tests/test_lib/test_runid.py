@@ -1,4 +1,4 @@
-from wandb.sdk.lib import runid
+from tracklab.sdk.lib import runid
 
 
 def test_generate_id_is_base36():

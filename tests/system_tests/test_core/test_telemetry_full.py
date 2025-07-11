@@ -1,8 +1,8 @@
 from typing import AbstractSet
 from unittest import mock
 
-import wandb
-from wandb.proto.v3.wandb_telemetry_pb2 import Feature
+import tracklab
+from tracklab.proto.v3.wandb_telemetry_pb2 import Feature
 
 # TODO: implement the telemetry context resolver
 
@@ -16,7 +16,7 @@ def get_features(telemetry) -> AbstractSet[str]:
 
 
 def test_telemetry_finish(wandb_backend_spy):
-    with wandb.init(config={"lol": True}) as run:
+    with tracklab.init(config={"lol": True}) as run:
         pass
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -43,7 +43,7 @@ def test_telemetry_imports(wandb_backend_spy):
     ):
         __import__("jax")
 
-        run = wandb.init()
+        run = tracklab.init()
         __import__("catboost")
         run.finish()
         with mock.patch.dict(
@@ -62,7 +62,7 @@ def test_telemetry_imports(wandb_backend_spy):
 
 
 def test_telemetry_run_organizing_init(wandb_backend_spy):
-    with wandb.init(
+    with tracklab.init(
         name="test_name",
         tags=["my-tag"],
         config={"abc": 123},
@@ -79,7 +79,7 @@ def test_telemetry_run_organizing_init(wandb_backend_spy):
 
 
 def test_telemetry_run_organizing_set(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.name = "test-name"
         run.tags = ["tag1"]
         run.config.update = True

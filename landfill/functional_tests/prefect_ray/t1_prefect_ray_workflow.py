@@ -9,7 +9,7 @@ import prefect
 import prefect.task_runners
 import prefect_ray
 
-import wandb
+import tracklab
 
 DATA_PATH = pathlib.Path(__file__).parent.absolute() / "_junk"
 if not DATA_PATH.exists():
@@ -40,7 +40,7 @@ def generate_random_image(image_num: int) -> str:
     wandb_env_vars = {k: v for k, v in os.environ.items() if k.startswith("WANDB")}
     print(f"wandb_env_vars: {wandb_env_vars}")
 
-    run = wandb.init(project="ray-prefect")
+    run = tracklab.init(project="ray-prefect")
     pixels = np.random.randint(low=0, high=256, size=(100, 100, 3))
 
     means = np.zeros((10, 10, 3))
@@ -61,7 +61,7 @@ def generate_random_image(image_num: int) -> str:
     image = pixels.astype(np.uint8)
     plt.imsave(save_path, image)
 
-    run.log({"image": wandb.Image(image)})
+    run.log({"image": tracklab.Image(image)})
 
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
@@ -91,7 +91,7 @@ def combine_images(image_paths: List[str]) -> str:
 
 @prefect.flow(task_runner=task_runner)
 def image_pipeline():
-    run = wandb.init(project="ray-prefect")
+    run = tracklab.init(project="ray-prefect")
     logger = prefect.get_run_logger()
 
     image_path_futures = generate_random_image.map(range(10))
@@ -103,7 +103,7 @@ def image_pipeline():
     # get brightest pixel
     combined_image_path = combine_images(image_path_futures)
     logger.info(f"combined image path: {combined_image_path}")
-    run.log({"combined_image": wandb.Image(plt.imread(combined_image_path))})
+    run.log({"combined_image": tracklab.Image(plt.imread(combined_image_path))})
     run.finish()
 
 

@@ -2,14 +2,14 @@ import datetime
 
 import numpy as np
 import pytest
-import wandb
-from wandb.sdk.data_types.table import _ForeignKeyType, _PrimaryKeyType
+import tracklab
+from tracklab.sdk.data_types.table import _ForeignKeyType, _PrimaryKeyType
 
 
 def test_basic_ndx():
     # Base Case
-    table_a = wandb.Table(columns=["b"], data=[["a"], ["b"]])
-    table = wandb.Table(columns=["fi", "c"])
+    table_a = tracklab.Table(columns=["b"], data=[["a"], ["b"]])
+    table = tracklab.Table(columns=["fi", "c"])
     for _ndx, _ in table_a.iterrows():
         table.add_data(_ndx, "x")
     assert all([row[0]._table == table_a for row in table.data])
@@ -29,7 +29,7 @@ def test_basic_ndx():
 
 def test_pk_cast(use_helper=False):
     # Base Case
-    table = wandb.Table(columns=["id", "b"], data=[["1", "a"], ["2", "b"]])
+    table = tracklab.Table(columns=["id", "b"], data=[["1", "a"], ["2", "b"]])
 
     # Validate that iterrows works as intended for no pks
     assert [id_ for id_, row in list(table.iterrows())] == [0, 1]
@@ -72,7 +72,7 @@ def test_pk_cast(use_helper=False):
             table.cast("b", _PrimaryKeyType())
 
     # Fails on Numerics for now
-    table = wandb.Table(columns=["id", "b"], data=[[1, "a"], [2, "b"]])
+    table = tracklab.Table(columns=["id", "b"], data=[[1, "a"], [2, "b"]])
     with pytest.raises(TypeError):
         if use_helper:
             table.set_pk("id")
@@ -88,17 +88,17 @@ def test_pk_cast(use_helper=False):
 
     # TODO: Test duplicates (not supported today)
     # Fails on initial duplicates
-    # table = wandb.Table(columns=["id", "b"], data=[["1", "a"], ["1", "b"]])
+    # table = tracklab.Table(columns=["id", "b"], data=[["1", "a"], ["1", "b"]])
     # with pytest.raises(TypeError):
     #     if use_helper:
     #         table.set_pk("id")
     #     else:
-    #         table.cast("id", wandb.data_types._PrimaryKeyType())
+    #         table.cast("id", tracklab.data_types._PrimaryKeyType())
 
     # # Assert that the table was not modified
     # assert all([row[0].__class__ == str for row in table.data])
     # assert not isinstance(
-    #     table._column_types.params["type_map"]["id"],wandb.data_types._ForeignKeyType
+    #     table._column_types.params["type_map"]["id"],tracklab.data_types._ForeignKeyType
     # )
 
 
@@ -108,10 +108,10 @@ def test_pk_helper():
 
 def test_fk_cast(use_helper=False):
     # Base Case
-    table_a = wandb.Table(columns=["id", "col_1"], data=[["1", "a"], ["2", "b"]])
+    table_a = tracklab.Table(columns=["id", "col_1"], data=[["1", "a"], ["2", "b"]])
     table_a.set_pk("id")
 
-    table = wandb.Table(columns=["fk", "col_2"], data=[["1", "c"], ["2", "d"]])
+    table = tracklab.Table(columns=["fk", "col_2"], data=[["1", "c"], ["2", "d"]])
 
     # Cast as a FK
     if use_helper:
@@ -138,7 +138,7 @@ def test_fk_cast(use_helper=False):
     )
 
     # Fails on Numerics for now
-    table = wandb.Table(columns=["fk", "col_2"], data=[[1, "c"], [2, "d"]])
+    table = tracklab.Table(columns=["fk", "col_2"], data=[[1, "c"], [2, "d"]])
     with pytest.raises(TypeError):
         if use_helper:
             table.set_fk("fk", table_a, "id")
@@ -158,10 +158,10 @@ def test_fk_helper():
 
 
 def test_fk_from_pk_local_draft():
-    table_a = wandb.Table(columns=["id", "col_1"], data=[["1", "a"], ["2", "b"]])
+    table_a = tracklab.Table(columns=["id", "col_1"], data=[["1", "a"], ["2", "b"]])
     table_a.set_pk("id")
 
-    table = wandb.Table(
+    table = tracklab.Table(
         columns=["fk", "col_2"], data=[[table_a.data[0][0], "c"], ["2", "d"]]
     )
     table.add_data("3", "c")
@@ -179,7 +179,7 @@ def test_fk_from_pk_local_draft():
         ]
     )
 
-    table = wandb.Table(columns=["fk", "col_2"], data=[["1", "c"], ["2", "d"]])
+    table = tracklab.Table(columns=["fk", "col_2"], data=[["1", "c"], ["2", "d"]])
     table.add_data(table_a.data[0][0], "c")
     with pytest.raises(TypeError):
         table.add_data(None, "c")
@@ -235,13 +235,13 @@ def test_loading_from_json_with_mixed_types():
         "nrows": 3,
     }
 
-    artifact = wandb.Artifact("my_artifact", type="dataset")
-    _ = wandb.Table.from_json(json_obj, artifact)
+    artifact = tracklab.Artifact("my_artifact", type="dataset")
+    _ = tracklab.Table.from_json(json_obj, artifact)
 
 
 def test_datetime_conversion():
-    art = wandb.Artifact("A", "B")
-    t = wandb.Table(
+    art = tracklab.Artifact("A", "B")
+    t = tracklab.Table(
         columns=["dt", "t", "np", "d"],
         data=[
             [
@@ -263,12 +263,12 @@ def test_datetime_conversion():
 def test_table_logging_mode_validation():
     """Test that invalid logging modes raise an error."""
     with pytest.raises(AssertionError):
-        wandb.Table(log_mode="INVALID_MODE")
+        tracklab.Table(log_mode="INVALID_MODE")
 
 
 def test_table_logging_mode_mutable():
     """Test that MUTABLE mode allows re-logging after mutations."""
-    t = wandb.Table(columns=["a", "b"], log_mode="MUTABLE")
+    t = tracklab.Table(columns=["a", "b"], log_mode="MUTABLE")
     t._run = "dummy_run"
     t._artifact_target = "dummy_target"
 
@@ -280,7 +280,7 @@ def test_table_logging_mode_mutable():
 
 def test_table_logging_mode_immutable():
     """Test that IMMUTABLE mode preserves state after mutations."""
-    t = wandb.Table(columns=["a", "b"], log_mode="IMMUTABLE")
+    t = tracklab.Table(columns=["a", "b"], log_mode="IMMUTABLE")
     t._run = "dummy_run"
     t._artifact_target = "dummy_target"
 
@@ -292,7 +292,7 @@ def test_table_logging_mode_immutable():
 
 def test_table_logging_mode_incremental():
     """Test that INCREMENTAL mode handles partial logging correctly."""
-    t = wandb.Table(columns=["a", "b"], log_mode="INCREMENTAL")
+    t = tracklab.Table(columns=["a", "b"], log_mode="INCREMENTAL")
 
     assert hasattr(t, "_increment_num")
     assert t._increment_num is None
@@ -302,7 +302,7 @@ def test_table_logging_mode_incremental():
     assert t._increment_num is None
 
     # simulate logging
-    t._set_artifact_target(wandb.Artifact("dummy_art", "placeholder"), "dummy_art")
+    t._set_artifact_target(tracklab.Artifact("dummy_art", "placeholder"), "dummy_art")
     t._increment_num = 0
 
     t.add_data("Yes", "No")
@@ -313,10 +313,10 @@ def test_table_logging_mode_incremental():
 
 def test_table_logging_mode_incremental_operations(mock_wandb_log):
     """Test that INCREMENTAL mode correctly handles unsupported operations."""
-    t = wandb.Table(columns=["a", "b"], log_mode="INCREMENTAL")
+    t = tracklab.Table(columns=["a", "b"], log_mode="INCREMENTAL")
 
     # Test that add_column is not supported
-    with pytest.raises(wandb.Error) as e:
+    with pytest.raises(tracklab.Error) as e:
         t.add_column("c", [1, 2])
 
     assert (
@@ -328,7 +328,7 @@ def test_table_logging_mode_incremental_operations(mock_wandb_log):
     def compute_fn(ndx, row):
         return {"c": row["a"] + 1}
 
-    with pytest.raises(wandb.Error) as e:
+    with pytest.raises(tracklab.Error) as e:
         t.add_computed_columns(compute_fn)
 
         assert (
@@ -340,11 +340,11 @@ def test_table_logging_mode_incremental_operations(mock_wandb_log):
 def test_table_logging_mode_incremental_warnings(mock_wandb_log):
     """Test that INCREMENTAL mode shows warning when exceeding 100 increments"""
 
-    t = wandb.Table(columns=["a", "b"], log_mode="INCREMENTAL")
+    t = tracklab.Table(columns=["a", "b"], log_mode="INCREMENTAL")
 
     # Test warning for max increments
     t._increment_num = 99
-    t._set_artifact_target(wandb.Artifact("dummy_art", "placeholder"), "dummy_art")
+    t._set_artifact_target(tracklab.Artifact("dummy_art", "placeholder"), "dummy_art")
 
     t.add_data("test", "test")
 

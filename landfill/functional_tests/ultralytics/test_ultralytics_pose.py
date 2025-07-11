@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 
-from wandb.integration.ultralytics import add_wandb_callback
+from tracklab.integration.ultralytics import add_wandb_callback
 
 
 def main():

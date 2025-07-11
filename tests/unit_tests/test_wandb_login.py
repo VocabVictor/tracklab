@@ -10,8 +10,8 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
-import wandb
-from wandb.sdk.lib.credentials import _expires_at_fmt
+import tracklab
+from tracklab.sdk.lib.credentials import _expires_at_fmt
 
 
 @pytest.fixture
@@ -75,10 +75,10 @@ def mock_tty(monkeypatch):
 
 def test_login_timeout(mock_tty):
     mock_tty("junk\nmore\n")
-    ret = wandb.login(timeout=4)
+    ret = tracklab.login(timeout=4)
     assert ret is False
-    assert wandb.api.api_key is None
-    assert wandb.setup().settings.mode == "disabled"
+    assert tracklab.api.api_key is None
+    assert tracklab.setup().settings.mode == "disabled"
 
 
 @pytest.mark.skipif(
@@ -87,87 +87,87 @@ def test_login_timeout(mock_tty):
 )
 def test_login_timeout_choose(mock_tty):
     mock_tty("3\n")
-    ret = wandb.login(timeout=8)
+    ret = tracklab.login(timeout=8)
     assert ret is False
-    assert wandb.api.api_key is None
-    assert wandb.setup().settings.mode == "offline"
+    assert tracklab.api.api_key is None
+    assert tracklab.setup().settings.mode == "offline"
 
 
 def test_login_timeout_env_blank(mock_tty):
     mock_tty("\n\n\n")
     with mock.patch.dict(os.environ, {"WANDB_LOGIN_TIMEOUT": "4"}):
-        ret = wandb.login()
+        ret = tracklab.login()
         assert ret is False
-        assert wandb.api.api_key is None
-        assert wandb.setup().settings.mode == "disabled"
+        assert tracklab.api.api_key is None
+        assert tracklab.setup().settings.mode == "disabled"
 
 
 def test_login_timeout_env_invalid(mock_tty):
     mock_tty("")
     with mock.patch.dict(os.environ, {"WANDB_LOGIN_TIMEOUT": "junk"}):
         with pytest.raises(ValueError):
-            wandb.login()
+            tracklab.login()
 
 
 def test_relogin_timeout(dummy_api_key):
-    logged_in = wandb.login(relogin=True, key=dummy_api_key)
+    logged_in = tracklab.login(relogin=True, key=dummy_api_key)
     assert logged_in is True
-    logged_in = wandb.login()
+    logged_in = tracklab.login()
     assert logged_in is True
 
 
 def test_login_key(capsys):
-    wandb.login(key="A" * 40)
+    tracklab.login(key="A" * 40)
     # TODO: this was a bug when tests were leaking out to the global config
-    # wandb.api.set_setting("base_url", "http://localhost:8080")
+    # tracklab.api.set_setting("base_url", "http://localhost:8080")
     _, err = capsys.readouterr()
     assert "Appending key" in err
     #  WTF is happening?
-    assert wandb.api.api_key == "A" * 40
+    assert tracklab.api.api_key == "A" * 40
 
 
 def test_login(test_settings):
     settings = test_settings(dict(mode="disabled"))
-    wandb.setup(settings=settings)
-    wandb.login()
-    wandb.finish()
+    tracklab.setup(settings=settings)
+    tracklab.login()
+    tracklab.finish()
 
 
 def test_login_anonymous():
     with mock.patch.dict("os.environ", WANDB_API_KEY="ANONYMOOSE" * 4):
-        wandb.login(anonymous="must")
-        assert wandb.api.api_key == "ANONYMOOSE" * 4
-        assert wandb.setup().settings.anonymous == "must"
+        tracklab.login(anonymous="must")
+        assert tracklab.api.api_key == "ANONYMOOSE" * 4
+        assert tracklab.setup().settings.anonymous == "must"
 
 
 def test_login_sets_api_base_url(local_settings):
     with mock.patch.dict("os.environ", WANDB_API_KEY="ANONYMOOSE" * 4):
         base_url = "https://api.test.host.ai"
-        wandb.login(anonymous="must", host=base_url)
-        api = wandb.Api()
+        tracklab.login(anonymous="must", host=base_url)
+        api = tracklab.Api()
         assert api.settings["base_url"] == base_url
-        base_url = "https://api.wandb.ai"
-        wandb.login(anonymous="must", host=base_url)
-        api = wandb.Api()
+        base_url = "https://api.tracklab.ai"
+        tracklab.login(anonymous="must", host=base_url)
+        api = tracklab.Api()
         assert api.settings["base_url"] == base_url
 
 
 def test_login_invalid_key():
     with mock.patch(
-        "wandb.apis.internal.Api.validate_api_key",
+        "tracklab.apis.internal.Api.validate_api_key",
         return_value=False,
     ):
-        wandb.ensure_configured()
-        with pytest.raises(wandb.errors.AuthenticationError):
-            wandb.login(key="X" * 40, verify=True)
+        tracklab.ensure_configured()
+        with pytest.raises(tracklab.errors.AuthenticationError):
+            tracklab.login(key="X" * 40, verify=True)
 
-        assert wandb.api.api_key is None
+        assert tracklab.api.api_key is None
 
 
 def test_login_with_token_file(tmp_path: Path):
     token_file = str(tmp_path / "jwt.txt")
     credentials_file = str(tmp_path / "credentials.json")
-    base_url = "https://api.wandb.ai"
+    base_url = "https://api.tracklab.ai"
 
     with open(token_file, "w") as f:
         f.write("eyaksdcmlasfm")
@@ -189,5 +189,5 @@ def test_login_with_token_file(tmp_path: Path):
         WANDB_IDENTITY_TOKEN_FILE=token_file,
         WANDB_CREDENTIALS_FILE=credentials_file,
     ):
-        wandb.login()
-        assert wandb.api.is_authenticated
+        tracklab.login()
+        assert tracklab.api.is_authenticated

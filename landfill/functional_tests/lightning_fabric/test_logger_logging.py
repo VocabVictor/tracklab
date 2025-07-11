@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-from wandb.integration.lightning.fabric.logger import WandbLogger
+from tracklab.integration.lightning.fabric.logger import WandbLogger
 
 
 def test_wandblogger_functionality():

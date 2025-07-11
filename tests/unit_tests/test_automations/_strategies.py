@@ -28,8 +28,8 @@ from hypothesis.strategies import (
     sampled_from,
     text,
 )
-from wandb.automations import MetricChangeFilter, MetricThresholdFilter
-from wandb.automations._filters.run_metrics import Agg, ChangeDir, ChangeType
+from tracklab.automations import MetricChangeFilter, MetricThresholdFilter
+from tracklab.automations._filters.run_metrics import Agg, ChangeDir, ChangeType
 
 
 @composite

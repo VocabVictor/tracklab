@@ -1,8 +1,8 @@
 from unittest import mock
 
-import wandb
+import tracklab
 from pytest import fixture
-from wandb.apis.public.files import File
+from tracklab.apis.public.files import File
 
 
 @fixture

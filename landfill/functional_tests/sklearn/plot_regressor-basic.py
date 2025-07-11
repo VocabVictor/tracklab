@@ -31,9 +31,9 @@ from sklearn import datasets
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import train_test_split
 
-import wandb
+import tracklab
 
-wandb.init("my-scikit-integration")
+tracklab.init("my-scikit-integration")
 
 housing = datasets.fetch_california_housing()
 X, y = pd.DataFrame(housing.data, columns=housing.feature_names), housing.target
@@ -44,6 +44,6 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 model = Ridge()
 model.fit(X_train, y_train)
 
-wandb.sklearn.plot_regressor(
+tracklab.sklearn.plot_regressor(
     model, X_train, X_test, y_train, y_test, model_name="Ridge"
 )

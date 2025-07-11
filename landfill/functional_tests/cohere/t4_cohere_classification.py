@@ -1,7 +1,7 @@
 import cohere
 from cohere.responses.classify import Example
 
-from wandb.integration.cohere import autolog as cohere_autolog
+from tracklab.integration.cohere import autolog as cohere_autolog
 
 cohere_autolog()
 

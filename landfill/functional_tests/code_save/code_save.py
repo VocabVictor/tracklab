@@ -4,7 +4,7 @@
 The main script will be saved if enabled in the users profile settings.
 """
 
-import wandb
+import tracklab
 
-run = wandb.init()
+run = tracklab.init()
 run.finish()

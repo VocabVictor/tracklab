@@ -19,12 +19,12 @@ import multiprocessing as mp
 import shutil
 from typing import List
 
-import wandb
+import tracklab
 
 
 def process_child(n: int, main_q: mp.Queue, proc_q: mp.Queue):
     print(f"init:{n}")
-    run = wandb.init(config=dict(id=n))
+    run = tracklab.init(config=dict(id=n))
 
     # let main know we have called init
     main_q.put(n)
@@ -57,7 +57,7 @@ def main_sync(workers: List):
 
 
 def main():
-    wandb.setup()
+    tracklab.setup()
 
     workers = []
     for n in range(4):

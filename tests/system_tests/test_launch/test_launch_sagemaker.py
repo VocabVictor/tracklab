@@ -1,11 +1,11 @@
 from unittest.mock import MagicMock
 
 import pytest
-import wandb
-from wandb.apis.internal import Api
-from wandb.sdk.launch import loader
-from wandb.sdk.launch._project_spec import EntryPoint, LaunchProject
-from wandb.sdk.launch.environment.aws_environment import AwsEnvironment
+import tracklab
+from tracklab.apis.internal import Api
+from tracklab.sdk.launch import loader
+from tracklab.sdk.launch._project_spec import EntryPoint, LaunchProject
+from tracklab.sdk.launch.environment.aws_environment import AwsEnvironment
 
 
 @pytest.fixture
@@ -34,36 +34,36 @@ async def test_sagemaker_resolved_submitted_job(
     session = MagicMock()
     mock_env.get_session.return_value = session
     monkeypatch.setattr(
-        wandb.sdk.launch.loader,
+        tracklab.sdk.launch.loader,
         "environment_from_config",
         lambda *args: mock_env,
     )
     monkeypatch.setattr(
-        wandb.sdk.launch.loader,
+        tracklab.sdk.launch.loader,
         "builder_from_config",
         lambda *args: MagicMock(),
     )
     monkeypatch.setattr(
-        wandb.sdk.launch.loader,
+        tracklab.sdk.launch.loader,
         "registry_from_config",
         lambda *args: None,
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.sagemaker_runner.launch_sagemaker_job",
+        "tracklab.sdk.launch.runner.sagemaker_runner.launch_sagemaker_job",
         mock_launch_sagemaker_job,
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.docker_image_exists",
+        "tracklab.sdk.launch.runner.local_container.docker_image_exists",
         lambda x: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.pull_docker_image",
+        "tracklab.sdk.launch.runner.local_container.pull_docker_image",
         lambda x: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.builder.noop.NoOpBuilder.build_image",
+        "tracklab.sdk.launch.builder.noop.NoOpBuilder.build_image",
         lambda *args, **kwargs: "testimage",
     )
 

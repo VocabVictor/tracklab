@@ -3,7 +3,7 @@ import logging
 import pathlib
 from typing import Iterator
 
-from wandb.sdk.lib import wb_logging
+from tracklab.sdk.lib import wb_logging
 
 wb_logging.configure_wandb_logger()
 

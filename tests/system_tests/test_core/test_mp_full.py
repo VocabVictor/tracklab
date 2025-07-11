@@ -5,8 +5,8 @@ import sys
 import time
 
 import pytest
-import wandb
-from wandb.errors import UsageError
+import tracklab
+from tracklab.errors import UsageError
 
 
 def train(run, add_val):
@@ -20,7 +20,7 @@ def train(run, add_val):
 
 
 def test_multiproc_default(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     train(run, 0)
     run.finish()
 
@@ -50,7 +50,7 @@ def test_multiproc_spawn(runner, user):
 
 
 def test_missing_attach_id(user):
-    run = wandb.init()
+    run = tracklab.init()
     with pytest.raises(UsageError):
-        wandb.attach(attach_id=None, run_id=None)
+        tracklab.attach(attach_id=None, run_id=None)
     run.finish()

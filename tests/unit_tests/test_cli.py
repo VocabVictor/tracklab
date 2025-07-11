@@ -8,11 +8,11 @@ import traceback
 from unittest import mock
 
 import pytest
-import wandb
-import wandb.docker
-from wandb.apis.internal import InternalApi
-from wandb.cli import cli
-from wandb.sdk.lib.apikey import get_netrc_file_path
+import tracklab
+import tracklab.docker
+from tracklab.apis.internal import InternalApi
+from tracklab.cli import cli
+from tracklab.sdk.lib.apikey import get_netrc_file_path
 
 DOCKER_SHA = (
     "wandb/deepo@sha256:"
@@ -28,7 +28,7 @@ def docker(request, mocker, monkeypatch):
         wandb_args.update(marker.kwargs)
     docker = mocker.MagicMock()
     api_key = mocker.patch(
-        "wandb.apis.InternalApi.api_key", new_callable=mocker.PropertyMock
+        "tracklab.apis.InternalApi.api_key", new_callable=mocker.PropertyMock
     )
     api_key.return_value = "test"
     monkeypatch.setattr(cli, "_HAS_NVIDIA_DOCKER", True)
@@ -54,7 +54,7 @@ def empty_netrc(monkeypatch):
     class FakeNet:
         @property
         def hosts(self):
-            return {"api.wandb.ai": None}
+            return {"api.tracklab.ai": None}
 
     monkeypatch.setattr(netrc, "netrc", lambda *args: FakeNet())
 
@@ -120,7 +120,7 @@ def test_login_host_trailing_slash_fix_invalid(runner, dummy_api_key, local_sett
 @pytest.mark.parametrize(
     "host, error",
     [
-        ("https://app.wandb.ai", "did you mean https://api.wandb.ai"),
+        ("https://app.tracklab.ai", "did you mean https://api.tracklab.ai"),
         ("ftp://google.com", "URL scheme should be 'http' or 'https'"),
     ],
 )
@@ -159,7 +159,7 @@ def test_login_anonymously(runner, dummy_api_key, monkeypatch, empty_netrc):
         api = InternalApi()
         monkeypatch.setattr(cli, "api", api)
         monkeypatch.setattr(
-            wandb.sdk.internal.internal_api.Api,
+            tracklab.sdk.internal.internal_api.Api,
             "create_anonymous_api_key",
             lambda *args, **kwargs: dummy_api_key,
         )
@@ -186,12 +186,12 @@ def test_sync_gc(runner):
         os.mkdir(run1_dir)
         with open(os.path.join(run1_dir, "run-abcd.wandb"), "w") as f:
             f.write("")
-        with open(os.path.join(run1_dir, "run-abcd.wandb.synced"), "w") as f:
+        with open(os.path.join(run1_dir, "run-abcd.tracklab.synced"), "w") as f:
             f.write("")
         os.mkdir(run2_dir)
         with open(os.path.join(run2_dir, "run-efgh.wandb"), "w") as f:
             f.write("")
-        with open(os.path.join(run2_dir, "run-efgh.wandb.synced"), "w") as f:
+        with open(os.path.join(run2_dir, "run-efgh.tracklab.synced"), "w") as f:
             f.write("")
         assert (
             runner.invoke(
@@ -212,7 +212,7 @@ def test_sync_gc(runner):
 
 def test_cli_login_reprompts_when_no_key_specified(runner, mocker, dummy_api_key):
     with runner.isolated_filesystem():
-        mocker.patch("wandb.wandb_lib.apikey.getpass", input)
+        mocker.patch("tracklab.wandb_lib.apikey.getpass", input)
         # this first gives login an empty API key, which should cause
         # it to re-prompt.  this is what we are testing.  we then give
         # it a valid API key (the dummy API key with a different final
@@ -319,7 +319,7 @@ def test_docker(runner, docker):
                 "WANDB_DOCKER=wandb/deepo@sha256:abc123",
                 "--ipc=host",
                 "-v",
-                wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+                tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
                 "--entrypoint",
                 "/wandb-entrypoint.sh",
                 "-v",
@@ -349,7 +349,7 @@ def test_docker_basic(runner, docker, git_repo):
             "WANDB_DOCKER=wandb/deepo@sha256:abc123",
             "--ipc=host",
             "-v",
-            wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+            tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
             "--entrypoint",
             "/wandb-entrypoint.sh",
             "-v",
@@ -378,7 +378,7 @@ def test_docker_sha(runner, docker):
             "WANDB_DOCKER=test@sha256:abc123",
             "--ipc=host",
             "-v",
-            wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+            tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
             "--entrypoint",
             "/wandb-entrypoint.sh",
             "-v",
@@ -407,7 +407,7 @@ def test_docker_no_dir(runner, docker):
             "WANDB_DOCKER=wandb/deepo@sha256:abc123",
             "--ipc=host",
             "-v",
-            wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+            tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
             "--entrypoint",
             "/wandb-entrypoint.sh",
             "-e",
@@ -436,7 +436,7 @@ def test_docker_no_interactive_custom_command(runner, docker, git_repo):
             "WANDB_DOCKER=wandb/deepo@sha256:abc123",
             "--ipc=host",
             "-v",
-            wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+            tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
             "--entrypoint",
             "/wandb-entrypoint.sh",
             "-v",
@@ -467,7 +467,7 @@ def test_docker_jupyter(runner, docker):
                 "WANDB_DOCKER=wandb/deepo@sha256:abc123",
                 "--ipc=host",
                 "-v",
-                wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+                tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
                 "--entrypoint",
                 "/wandb-entrypoint.sh",
                 "-v",
@@ -505,7 +505,7 @@ def test_docker_args(runner, docker):
                 "WANDB_DOCKER=wandb/deepo@sha256:abc123",
                 "--ipc=host",
                 "-v",
-                wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+                tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
                 "--entrypoint",
                 "/wandb-entrypoint.sh",
                 "-v",

@@ -1,6 +1,6 @@
-import wandb
+import tracklab
 
-run = wandb.init()
+run = tracklab.init()
 
 for x in range(10):
     run.log(dict(a=x))

@@ -4,12 +4,12 @@
 import os
 import sys
 
-import wandb
+import tracklab
 
 
 def main(argv):
     # test to ensure
-    run = wandb.init()
+    run = tracklab.init()
     run_project = run.project
     run_id = run.id
     print(f"Started run {run_project}/{run_id}")
@@ -66,12 +66,12 @@ def main(argv):
     ]
 
     # convert the data to a table
-    pr_table = wandb.Table(data=pr_data, columns=["class", "precision", "recall"])
-    wandb.log({"pr_table": pr_table})
-    wandb.finish()
+    pr_table = tracklab.Table(data=pr_data, columns=["class", "precision", "recall"])
+    tracklab.log({"pr_table": pr_table})
+    tracklab.finish()
 
     # Check results
-    api = wandb.Api()
+    api = tracklab.Api()
     last_run = api.run(f"{run_project}/{run_id}")
     media_path = last_run.summary_metrics["pr_table"]["path"]
     media_file = last_run.file(media_path)

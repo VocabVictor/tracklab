@@ -16,7 +16,7 @@ from hypothesis.errors import NonInteractiveExampleWarning
 from mlflow.entities import Metric
 from mlflow.tracking import MlflowClient
 from packaging.version import Version
-from wandb.util import batched
+from tracklab.util import batched
 
 SECONDS_FROM_2023_01_01 = 1672549200
 

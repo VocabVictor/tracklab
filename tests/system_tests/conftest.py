@@ -174,7 +174,7 @@ def wandb_backend_spy(
     Usage:
 
         def test_something(wandb_backend_spy):
-            with wandb.init() as run:
+            with tracklab.init() as run:
                 run.log({"x": 1})
 
             with wandb_backend_spy.freeze() as snapshot:

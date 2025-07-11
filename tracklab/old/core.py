@@ -1,27 +1,53 @@
-"""Legacy core functionality."""
+"""Core variables, functions, and classes that we want in the wandb
+module but are also used in modules that import the wandb module.
 
-from typing import Dict, Any, Optional
+The purpose of this module is to break circular imports.
+"""
+
+import os
+import tempfile
+import time
+
+import tracklab
+from tracklab import env
+
+# We use the hidden version if it already exists, otherwise non-hidden.
+if os.path.exists(os.path.join(env.get_dir(os.getcwd()), ".wandb")):
+    __stage_dir__ = ".wandb" + os.sep
+elif os.path.exists(os.path.join(env.get_dir(os.getcwd()), "wandb")):
+    __stage_dir__ = "wandb" + os.sep
+else:
+    __stage_dir__ = None
+
+wandb.START_TIME = time.time()
 
 
-class LegacyRun:
-    """Legacy run implementation for backward compatibility."""
-    
-    def __init__(self, run_id: str):
-        self.id = run_id
-        self.config = {}
-        self.summary = {}
-        self._history = []
-        
-    def log(self, data: Dict[str, Any], step: Optional[int] = None):
-        """Log data in legacy format."""
-        entry = data.copy()
-        if step is not None:
-            entry['_step'] = step
-        self._history.append(entry)
-        
-    def finish(self):
-        """Finish the legacy run."""
-        print(f"Legacy run {self.id} finished with {len(self._history)} entries")
-        
-    def __repr__(self) -> str:
-        return f"LegacyRun(id={self.id})"
+def wandb_dir(root_dir=None):
+    if root_dir is None or root_dir == "":
+        try:
+            cwd = os.getcwd()
+        except OSError:
+            wandb.termwarn("os.getcwd() no longer exists, using system temp directory")
+            cwd = tempfile.gettempdir()
+        root_dir = env.get_dir(cwd)
+    path = os.path.join(root_dir, __stage_dir__ or ("wandb" + os.sep))
+    if not os.access(root_dir, os.W_OK):
+        wandb.termwarn(
+            f"Path {path} wasn't writable, using system temp directory", repeat=False
+        )
+        path = os.path.join(tempfile.gettempdir(), __stage_dir__ or ("wandb" + os.sep))
+    return path
+
+
+def _set_stage_dir(stage_dir):
+    # Used when initing a new project with "wandb init"
+    global __stage_dir__
+    __stage_dir__ = stage_dir
+
+
+__all__ = [
+    "__stage_dir__",
+    "START_TIME",
+    "wandb_dir",
+    "_set_stage_dir",
+]

@@ -16,23 +16,23 @@ from typing import Any, Callable, Generator, Iterable, Iterator
 import pyte
 import pyte.modes
 from pytest_mock import MockerFixture
-from wandb.errors import term
+from tracklab.errors import term
 
-# Don't write to Sentry in wandb.
+# Don't write to Sentry in tracklab.
 os.environ["WANDB_ERROR_REPORTING"] = "false"
 
 import git
 import pytest
-import wandb
-import wandb.old.settings
-import wandb.sdk.lib.apikey
-import wandb.util
+import tracklab
+import tracklab.old.settings
+import tracklab.sdk.lib.apikey
+import tracklab.util
 from click.testing import CliRunner
 from wandb import Api
-from wandb.sdk.interface.interface_queue import InterfaceQueue
-from wandb.sdk.lib import filesystem, module, runid
-from wandb.sdk.lib.gitlib import GitRepo
-from wandb.sdk.lib.paths import StrPath
+from tracklab.sdk.interface.interface_queue import InterfaceQueue
+from tracklab.sdk.lib import filesystem, module, runid
+from tracklab.sdk.lib.gitlib import GitRepo
+from tracklab.sdk.lib.paths import StrPath
 
 # --------------------------------
 # Global pytest configuration
@@ -114,13 +114,13 @@ def wandb_caplog(
 
 @pytest.fixture(autouse=True)
 def reset_logger():
-    """Resets the `wandb.errors.term` module before each test."""
-    wandb.termsetup(wandb.Settings(silent=False), None)
+    """Resets the `tracklab.errors.term` module before each test."""
+    tracklab.termsetup(tracklab.Settings(silent=False), None)
     term._dynamic_blocks = []
 
 
 class MockWandbTerm:
-    """Helper to test wandb.term*() calls.
+    """Helper to test tracklab.term*() calls.
 
     See the `mock_wandb_log` fixture.
     """
@@ -163,7 +163,7 @@ class MockWandbTerm:
 
 @pytest.fixture()
 def mock_wandb_log() -> Generator[MockWandbTerm, None, None]:
-    """Mocks the wandb.term*() methods for a test.
+    """Mocks the tracklab.term*() methods for a test.
 
     This patches the termlog() / termwarn() / termerror() methods and returns
     a `MockWandbTerm` object that can be used to assert on their usage.
@@ -172,8 +172,8 @@ def mock_wandb_log() -> Generator[MockWandbTerm, None, None]:
     them unsuitable for tests. Use this fixture to assert that a message
     was logged.
     """
-    # NOTE: This only stubs out calls like "wandb.termlog()", NOT
-    # "from wandb.errors.term import termlog; termlog()".
+    # NOTE: This only stubs out calls like "tracklab.termlog()", NOT
+    # "from tracklab.errors.term import termlog; termlog()".
     with unittest.mock.patch.multiple(
         "wandb",
         termlog=unittest.mock.DEFAULT,
@@ -225,7 +225,7 @@ class EmulatedTerminal:
 def emulated_terminal(monkeypatch, capsys) -> EmulatedTerminal:
     """Emulates a terminal for the duration of a test.
 
-    This makes functions in the `wandb.errors.term` module act as if
+    This makes functions in the `tracklab.errors.term` module act as if
     stderr is a terminal.
 
     NOTE: This resets pytest's stderr and stdout buffers. You should not
@@ -278,9 +278,9 @@ def local_settings(filesystem_isolate):
     filesystem.mkdir_exists_ok(os.path.join(".config", "wandb"))
 
     # todo: this breaks things in unexpected places
-    # todo: get rid of wandb.old
+    # todo: get rid of tracklab.old
     with unittest.mock.patch.object(
-        wandb.old.settings.Settings,
+        tracklab.old.settings.Settings,
         "_global_path",
         return_value=config_path,
     ):
@@ -305,19 +305,19 @@ def dummy_api_key() -> str:
 
 @pytest.fixture
 def patch_apikey(mocker: MockerFixture, dummy_api_key: str):
-    mocker.patch.object(wandb.sdk.lib.apikey, "isatty", return_value=True)
-    mocker.patch.object(wandb.sdk.lib.apikey, "input", return_value=1)
-    mocker.patch.object(wandb.sdk.lib.apikey, "getpass", return_value=dummy_api_key)
+    mocker.patch.object(tracklab.sdk.lib.apikey, "isatty", return_value=True)
+    mocker.patch.object(tracklab.sdk.lib.apikey, "input", return_value=1)
+    mocker.patch.object(tracklab.sdk.lib.apikey, "getpass", return_value=dummy_api_key)
     yield
 
 
 @pytest.fixture
 def patch_prompt(monkeypatch):
     monkeypatch.setattr(
-        wandb.util, "prompt_choices", lambda x, input_timeout=None, jupyter=False: x[0]
+        tracklab.util, "prompt_choices", lambda x, input_timeout=None, jupyter=False: x[0]
     )
     monkeypatch.setattr(
-        wandb.wandb_lib.apikey,
+        tracklab.wandb_lib.apikey,
         "prompt_choices",
         lambda x, input_timeout=None, jupyter=False: x[0],
     )
@@ -343,7 +343,7 @@ def git_repo(runner):
 
 @pytest.fixture(scope="function", autouse=True)
 def unset_global_objects():
-    from wandb.sdk.lib.module import unset_globals
+    from tracklab.sdk.lib.module import unset_globals
 
     yield
     unset_globals()
@@ -351,9 +351,9 @@ def unset_global_objects():
 
 @pytest.fixture(scope="session", autouse=True)
 def env_teardown():
-    wandb.teardown()
+    tracklab.teardown()
     yield
-    wandb.teardown()
+    tracklab.teardown()
     if not os.environ.get("CI") == "true":
         # TODO: uncomment this for prod? better make controllable with an env var
         # subprocess.run(["wandb", "server", "stop"])
@@ -363,11 +363,11 @@ def env_teardown():
 @pytest.fixture(scope="function", autouse=True)
 def clean_up():
     yield
-    wandb.teardown()
+    tracklab.teardown()
 
 
 @pytest.fixture
-def api() -> wandb.PublicApi:
+def api() -> tracklab.PublicApi:
     return Api()
 
 
@@ -398,18 +398,18 @@ def mocked_backend(mocked_interface: InterfaceQueue) -> Generator[object, None, 
 @pytest.fixture(scope="function")
 def test_settings():
     def update_test_settings(
-        extra_settings: dict | wandb.Settings | None = None,
+        extra_settings: dict | tracklab.Settings | None = None,
     ):
         if not extra_settings:
             extra_settings = dict()
 
-        settings = wandb.Settings(
+        settings = tracklab.Settings(
             console="off",
             save_code=False,
         )
         if isinstance(extra_settings, dict):
             settings.update_from_dict(extra_settings)
-        elif isinstance(extra_settings, wandb.Settings):
+        elif isinstance(extra_settings, tracklab.Settings):
             settings.update_from_settings(extra_settings)
         settings.x_start_time = time.time()
         return settings
@@ -421,7 +421,7 @@ def test_settings():
 def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
     """Create a Run object with a stubbed out 'backend'.
 
-    This is similar to using `wandb.init(mode="offline")`, but much faster
+    This is similar to using `tracklab.init(mode="offline")`, but much faster
     as it does not start up a service process.
 
     This is intended for tests that need to exercise surface-level Python logic
@@ -429,13 +429,13 @@ def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
     own unit-tested module instead.
     """
 
-    def mock_run_fn(use_magic_mock=False, **kwargs: Any) -> wandb.sdk.wandb_run.Run:
+    def mock_run_fn(use_magic_mock=False, **kwargs: Any) -> tracklab.sdk.wandb_run.Run:
         kwargs_settings = kwargs.pop("settings", dict())
         kwargs_settings = {
             "run_id": runid.generate_id(),
             **dict(kwargs_settings),
         }
-        run = wandb.wandb_sdk.wandb_run.Run(
+        run = tracklab.wandb_sdk.wandb_run.Run(
             settings=test_settings(kwargs_settings), **kwargs
         )
         run._set_backend(

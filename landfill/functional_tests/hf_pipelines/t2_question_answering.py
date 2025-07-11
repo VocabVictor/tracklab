@@ -1,6 +1,6 @@
 from transformers import pipeline
 
-from wandb.integration.huggingface import autolog as hf_autolog
+from tracklab.integration.huggingface import autolog as hf_autolog
 
 hf_autolog()
 

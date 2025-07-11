@@ -37,7 +37,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-import wandb
+import tracklab
 
 # yea test will grab this
 # data_url = "https://raw.githubusercontent.com/wandb/examples/master/examples/data/wine.csv"
@@ -64,9 +64,9 @@ indices = np.argsort(importances)[::-1]
 
 print(model.n_features_in_)
 
-run = wandb.init(project="my-scikit-integration")
+run = tracklab.init(project="my-scikit-integration")
 
-wandb.sklearn.plot_calibration_curve(model, X_train, y_train, "RandomForestClassifier")
+tracklab.sklearn.plot_calibration_curve(model, X_train, y_train, "RandomForestClassifier")
 
 print(model.n_features_in_)
 

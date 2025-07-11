@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-import wandb
+import tracklab
 
 LINE_PREFIX = "wandb: "
 RUN_SUMMARY = "Run summary:"
@@ -58,7 +58,7 @@ def check_output_fn(capsys):
 
 
 def test_footer_private(user, check_output_fn):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(dict(_d=2))
         run.log(dict(_b=2, _d=8))
         run.log(dict(_a=1, _b=2))
@@ -67,7 +67,7 @@ def test_footer_private(user, check_output_fn):
 
 
 def test_footer_normal(user, check_output_fn):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(dict(d=2))
         run.log(dict(b="b", d=8))
         run.log(dict(a=1, b="b"))
@@ -76,7 +76,7 @@ def test_footer_normal(user, check_output_fn):
 
 
 def test_footer_summary(user, check_output_fn):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(dict(d="d"))
         run.log(dict(b="b", d="d"))
         run.log(dict(a="a", b="b"))
@@ -85,7 +85,7 @@ def test_footer_summary(user, check_output_fn):
 
 
 def test_footer_summary_array(user, check_output_fn):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(dict(d="d"))
         run.log(dict(b="b", d="d"))
         run.log(dict(a="a", b="b", skipthisbecausearray=[1, 2, 3]))
@@ -96,17 +96,17 @@ def test_footer_summary_array(user, check_output_fn):
 def test_footer_summary_image(user, check_output_fn):
     pytest.importorskip("pillow")
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(dict(d="d"))
         run.log(dict(b="b", d="d"))
         run.log(dict(a="a", b="b"))
         run.log(dict(a="a"))
-        run.summary["this-is-ignored"] = wandb.Image(np.random.rand(10, 10))
+        run.summary["this-is-ignored"] = tracklab.Image(np.random.rand(10, 10))
     check_output_fn(exp_summary=["a", "b", "d", "🚀", "⭐️"], exp_history=[])
 
 
 def test_footer_history(user, check_output_fn):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("*", summary="none")
         run.log(dict(d=2))
         run.log(dict(b="b", d=8))

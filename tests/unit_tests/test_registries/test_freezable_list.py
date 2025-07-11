@@ -1,5 +1,5 @@
 import pytest
-from wandb.apis.public.registries._freezable_list import FreezableList
+from tracklab.apis.public.registries._freezable_list import FreezableList
 
 
 @pytest.fixture

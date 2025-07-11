@@ -60,8 +60,8 @@ from zipfile import ZipFile
 
 from prodigy_connect import Connect
 
-import wandb
-from wandb.integration.prodigy import upload_dataset
+import tracklab
+from tracklab.integration.prodigy import upload_dataset
 
 sys.modules["prodigy"] = Mock()
 sys.modules["prodigy.components"] = Mock()
@@ -72,9 +72,9 @@ with ZipFile("prodigy_test_resources.zip", "r") as zip_obj:
     zip_obj.extractall()
 
 # Test upload each dataset
-run = wandb.init(project="prodigy")
+run = tracklab.init(project="prodigy")
 all_files = os.listdir("prodigy_test_resources")
 for dataset in all_files:
     dataset_name = dataset.split(".")[0]  # remove .json
     upload_dataset(dataset_name)
-wandb.finish()
+tracklab.finish()

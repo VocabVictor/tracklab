@@ -2,9 +2,9 @@ import random
 from typing import List
 
 import pytest
-from wandb.docker import DockerError
-from wandb.sdk.launch.errors import LaunchError
-from wandb.sdk.launch.utils import (
+from tracklab.docker import DockerError
+from tracklab.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.utils import (
     diff_pip_requirements,
     load_wandb_config,
     macro_sub,
@@ -168,7 +168,7 @@ def test_parse_wandb_uri_invalid_uri():
 
 def test_fail_pull_docker_image(mocker):
     mocker.patch(
-        "wandb.sdk.launch.utils.docker.run",
+        "tracklab.sdk.launch.utils.docker.run",
         side_effect=DockerError("error", 1, b"", b""),
     )
     try:

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from wandb.sdk.artifacts.artifact_file_cache import ArtifactFileCache
+from tracklab.sdk.artifacts.artifact_file_cache import ArtifactFileCache
 
 
 @pytest.fixture

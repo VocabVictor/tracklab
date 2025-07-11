@@ -4,19 +4,19 @@ from unittest.mock import MagicMock
 import boto3
 import kubernetes_asyncio
 import pytest
-import wandb
+import tracklab
 from google.cloud import storage
-from wandb.sdk.launch._project_spec import EntryPoint, LaunchProject
-from wandb.sdk.launch.builder.kaniko_builder import (
+from tracklab.sdk.launch._project_spec import EntryPoint, LaunchProject
+from tracklab.sdk.launch.builder.kaniko_builder import (
     KanikoBuilder,
     _wait_for_completion,
     get_pod_name_safe,
 )
-from wandb.sdk.launch.environment.aws_environment import AwsEnvironment
-from wandb.sdk.launch.environment.azure_environment import AzureEnvironment
-from wandb.sdk.launch.registry.anon import AnonynmousRegistry
-from wandb.sdk.launch.registry.azure_container_registry import AzureContainerRegistry
-from wandb.sdk.launch.registry.elastic_container_registry import (
+from tracklab.sdk.launch.environment.aws_environment import AwsEnvironment
+from tracklab.sdk.launch.environment.azure_environment import AzureEnvironment
+from tracklab.sdk.launch.registry.anon import AnonynmousRegistry
+from tracklab.sdk.launch.registry.azure_container_registry import AzureContainerRegistry
+from tracklab.sdk.launch.registry.elastic_container_registry import (
     ElasticContainerRegistry,
 )
 
@@ -32,7 +32,7 @@ class AsyncMock(MagicMock):
 def azure_environment(mocker):
     """Fixture for AzureEnvironment class."""
     mocker.patch(
-        "wandb.sdk.launch.environment.azure_environment.DefaultAzureCredential",
+        "tracklab.sdk.launch.environment.azure_environment.DefaultAzureCredential",
         MagicMock(),
     )
     config = {
@@ -46,7 +46,7 @@ def azure_environment(mocker):
 @pytest.fixture
 def aws_environment(mocker):
     """Fixture for AwsEnvironment class."""
-    mocker.patch("wandb.sdk.launch.environment.aws_environment.boto3", MagicMock())
+    mocker.patch("tracklab.sdk.launch.environment.aws_environment.boto3", MagicMock())
     config = {
         "type": "aws",
         "region": "us-east-1",
@@ -58,7 +58,7 @@ def aws_environment(mocker):
 def azure_container_registry(mocker, azure_environment):
     """Fixture for AzureContainerRegistry class."""
     mocker.patch(
-        "wandb.sdk.launch.environment.azure_environment.DefaultAzureCredential",
+        "tracklab.sdk.launch.environment.azure_environment.DefaultAzureCredential",
         MagicMock(),
     )
     config = {
@@ -364,12 +364,12 @@ async def test_create_kaniko_job_pvc_dockerconfig(
     mock_kubernetes_clients, runner, mocker
 ):
     """Test that the kaniko builder mounts pvc and dockerconfig correctly."""
-    mocker.patch("wandb.sdk.launch.builder.kaniko_builder.PVC_NAME", "test-pvc")
+    mocker.patch("tracklab.sdk.launch.builder.kaniko_builder.PVC_NAME", "test-pvc")
     mocker.patch(
-        "wandb.sdk.launch.builder.kaniko_builder.PVC_MOUNT_PATH", "/mnt/test-pvc"
+        "tracklab.sdk.launch.builder.kaniko_builder.PVC_MOUNT_PATH", "/mnt/test-pvc"
     )
     mocker.patch(
-        "wandb.sdk.launch.builder.kaniko_builder.DOCKER_CONFIG_SECRET", "test-secret"
+        "tracklab.sdk.launch.builder.kaniko_builder.DOCKER_CONFIG_SECRET", "test-secret"
     )
 
     with runner.isolated_filesystem():
@@ -441,11 +441,11 @@ async def test_build_image_success(
     capsys,
     tmp_path,
 ):
-    api = wandb.sdk.internal.internal_api.Api(
+    api = tracklab.sdk.internal.internal_api.Api(
         default_settings=test_settings(), load_settings=False
     )
     monkeypatch.setattr(
-        wandb.sdk.launch._project_spec.LaunchProject, "build_required", lambda x: True
+        tracklab.sdk.launch._project_spec.LaunchProject, "build_required", lambda x: True
     )
     with runner.isolated_filesystem():
         os.makedirs("./test/context/path/", exist_ok=True)

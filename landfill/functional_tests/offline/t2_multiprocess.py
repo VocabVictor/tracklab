@@ -18,7 +18,7 @@ assert:
 
 import multiprocessing
 
-import wandb
+import tracklab
 
 
 def log_metric(run):
@@ -26,7 +26,7 @@ def log_metric(run):
 
 
 if __name__ == "__main__":
-    run = wandb.init(mode="offline")
+    run = tracklab.init(mode="offline")
 
     ctx = multiprocessing.get_context("spawn")
     pool = ctx.Pool(processes=2)

@@ -1,27 +1,37 @@
-"""
-TrackLab SDK
+"""W&B SDK module."""
 
-Core SDK functionality including run management, configuration, and initialization
-"""
-
-from .tracklab_init import init
-from .tracklab_run import Run, finish
-from .tracklab_config import Config
-from .tracklab_summary import Summary
-from .tracklab_settings import Settings
-from .tracklab_login import login
-from .tracklab_sweep import sweep, agent
-from .tracklab_watch import watch
-
-__all__ = [
-    "init",
-    "Run",
-    "finish",
+__all__ = (
     "Config",
-    "Summary", 
     "Settings",
+    "Summary",
+    "Artifact",
+    "AlertLevel",
+    "init",
+    "setup",
+    "_attach",
+    "_sync",
     "login",
+    "require",
+    "finish",
+    "teardown",
+    "_watch",
+    "_unwatch",
     "sweep",
-    "agent",
-    "watch",
-]
+    "controller",
+    "helper",
+)
+
+from . import wandb_helper as helper
+from .artifacts.artifact import Artifact
+from .wandb_alerts import AlertLevel
+from .wandb_config import Config
+from .wandb_init import _attach, init
+from .wandb_login import login
+from .wandb_require import require
+from .wandb_run import finish
+from .wandb_settings import Settings
+from .wandb_setup import setup, teardown
+from .wandb_summary import Summary
+from .wandb_sweep import controller, sweep
+from .wandb_sync import _sync
+from .wandb_watch import _unwatch, _watch

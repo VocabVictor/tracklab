@@ -1,195 +1,179 @@
-"""File preparation step for upload pipeline."""
+"""Batching file prepare requests to our API."""
 
-import os
-import tempfile
-from typing import List, Dict, Any, Optional, Set
-from pathlib import Path
+import queue
+import threading
+import time
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
-from .stats import FileStats
+if TYPE_CHECKING:
+    from tracklab.sdk.internal.internal_api import (
+        Api,
+        CreateArtifactFileSpecInput,
+        CreateArtifactFilesResponseFile,
+    )
+
+
+# Request for a file to be prepared.
+class RequestPrepare(NamedTuple):
+    file_spec: "CreateArtifactFileSpecInput"
+    response_channel: "queue.Queue[ResponsePrepare]"
+
+
+class RequestFinish(NamedTuple):
+    pass
+
+
+class ResponsePrepare(NamedTuple):
+    birth_artifact_id: str
+    upload_url: Optional[str]
+    upload_headers: Sequence[str]
+    upload_id: Optional[str]
+    storage_path: Optional[str]
+    multipart_upload_urls: Optional[Dict[int, str]]
+
+
+Request = Union[RequestPrepare, RequestFinish]
+
+
+def _clamp(x: float, low: float, high: float) -> float:
+    return max(low, min(x, high))
+
+
+def gather_batch(
+    request_queue: "queue.Queue[Request]",
+    batch_time: float,
+    inter_event_time: float,
+    max_batch_size: int,
+    clock: Callable[[], float] = time.monotonic,
+) -> Tuple[bool, Sequence[RequestPrepare]]:
+    batch_start_time = clock()
+    remaining_time = batch_time
+
+    first_request = request_queue.get()
+    if isinstance(first_request, RequestFinish):
+        return True, []
+
+    batch: List[RequestPrepare] = [first_request]
+
+    while remaining_time > 0 and len(batch) < max_batch_size:
+        try:
+            request = request_queue.get(
+                timeout=_clamp(
+                    x=inter_event_time,
+                    low=1e-12,  # 0 = "block forever", so just use something tiny
+                    high=remaining_time,
+                ),
+            )
+            if isinstance(request, RequestFinish):
+                return True, batch
+
+            batch.append(request)
+            remaining_time = batch_time - (clock() - batch_start_time)
+
+        except queue.Empty:
+            break
+
+    return False, batch
+
+
+def prepare_response(response: "CreateArtifactFilesResponseFile") -> ResponsePrepare:
+    multipart_resp = response.get("uploadMultipartUrls")
+    part_list = multipart_resp["uploadUrlParts"] if multipart_resp else []
+    multipart_parts = {u["partNumber"]: u["uploadUrl"] for u in part_list} or None
+
+    return ResponsePrepare(
+        birth_artifact_id=response["artifact"]["id"],
+        upload_url=response["uploadUrl"],
+        upload_headers=response["uploadHeaders"],
+        upload_id=multipart_resp and multipart_resp.get("uploadID"),
+        storage_path=response.get("storagePath"),
+        multipart_upload_urls=multipart_parts,
+    )
 
 
 class StepPrepare:
-    """Prepares files for upload by analyzing, filtering, and organizing them."""
-    
-    def __init__(self, run_dir: str, ignore_patterns: Optional[List[str]] = None):
-        self.run_dir = Path(run_dir)
-        self.ignore_patterns = ignore_patterns or self._default_ignore_patterns()
-        self.prepared_files: List[Dict[str, Any]] = []
-        
-    def _default_ignore_patterns(self) -> List[str]:
-        """Default patterns for files to ignore."""
-        return [
-            '__pycache__',
-            '*.pyc',
-            '*.pyo',
-            '.git',
-            '.gitignore',
-            '.DS_Store',
-            'Thumbs.db',
-            '*.tmp',
-            '*.temp',
-            '*.log',
-            '.env',
-            'node_modules',
-            '.vscode',
-            '.idea'
-        ]
-        
-    def prepare_files(self, file_paths: Optional[List[str]] = None) -> List[Dict[str, Any]]:
-        """Prepare files for upload.
-        
+    """A thread that batches requests to our file prepare API.
+
+    Any number of threads may call prepare() in parallel. The PrepareBatcher thread
+    will batch requests up and send them all to the backend at once.
+    """
+
+    def __init__(
+        self,
+        api: "Api",
+        batch_time: float,
+        inter_event_time: float,
+        max_batch_size: int,
+        request_queue: Optional["queue.Queue[Request]"] = None,
+    ) -> None:
+        self._api = api
+        self._inter_event_time = inter_event_time
+        self._batch_time = batch_time
+        self._max_batch_size = max_batch_size
+        self._request_queue: queue.Queue[Request] = request_queue or queue.Queue()
+        self._thread = threading.Thread(target=self._thread_body)
+        self._thread.daemon = True
+
+    def _thread_body(self) -> None:
+        while True:
+            finish, batch = gather_batch(
+                request_queue=self._request_queue,
+                batch_time=self._batch_time,
+                inter_event_time=self._inter_event_time,
+                max_batch_size=self._max_batch_size,
+            )
+            if batch:
+                batch_response = self._prepare_batch(batch)
+                # send responses
+                for prepare_request in batch:
+                    name = prepare_request.file_spec["name"]
+                    response_file = batch_response[name]
+                    response = prepare_response(response_file)
+                    prepare_request.response_channel.put(response)
+            if finish:
+                break
+
+    def _prepare_batch(
+        self, batch: Sequence[RequestPrepare]
+    ) -> Mapping[str, "CreateArtifactFilesResponseFile"]:
+        """Execute the prepareFiles API call.
+
         Args:
-            file_paths: Specific files to prepare. If None, scans run directory.
-            
+            batch: List of RequestPrepare objects
         Returns:
-            List of prepared file metadata dictionaries.
+            dict of (save_name: ResponseFile) pairs where ResponseFile is a dict with
+                an uploadUrl key. The value of the uploadUrl key is None if the file
+                already exists, or a url string if the file should be uploaded.
         """
-        if file_paths is None:
-            file_paths = self._scan_directory()
-        else:
-            file_paths = [str(Path(p).resolve()) for p in file_paths]
-            
-        self.prepared_files = []
-        
-        for file_path in file_paths:
-            if self._should_include_file(file_path):
-                file_info = self._prepare_file(file_path)
-                if file_info:
-                    self.prepared_files.append(file_info)
-                    
-        return self.prepared_files
-        
-    def _scan_directory(self) -> List[str]:
-        """Scan run directory for files."""
-        files = []
-        
-        if not self.run_dir.exists():
-            return files
-            
-        for file_path in self.run_dir.rglob('*'):
-            if file_path.is_file():
-                files.append(str(file_path))
-                
-        return files
-        
-    def _should_include_file(self, file_path: str) -> bool:
-        """Check if file should be included based on ignore patterns."""
-        file_path = Path(file_path)
-        
-        # Check against ignore patterns
-        for pattern in self.ignore_patterns:
-            if self._matches_pattern(str(file_path), pattern):
-                return False
-                
-        # Check file size (skip very large files > 1GB)
-        try:
-            if file_path.stat().st_size > 1024 * 1024 * 1024:
-                return False
-        except OSError:
-            return False
-            
-        return True
-        
-    def _matches_pattern(self, file_path: str, pattern: str) -> bool:
-        """Check if file matches ignore pattern."""
-        file_path = file_path.lower()
-        pattern = pattern.lower()
-        
-        # Simple wildcard matching
-        if '*' in pattern:
-            parts = pattern.split('*')
-            if len(parts) == 2:
-                prefix, suffix = parts
-                file_name = os.path.basename(file_path)
-                return file_name.startswith(prefix) and file_name.endswith(suffix)
-                
-        # Direct name or path matching
-        return pattern in file_path or pattern in os.path.basename(file_path)
-        
-    def _prepare_file(self, file_path: str) -> Optional[Dict[str, Any]]:
-        """Prepare a single file for upload."""
-        try:
-            file_stats = FileStats(file_path)
-            stats = file_stats.collect()
-            
-            # Calculate relative path from run directory
-            file_path_obj = Path(file_path)
-            try:
-                relative_path = str(file_path_obj.relative_to(self.run_dir))
-            except ValueError:
-                # File is outside run directory, use just the filename
-                relative_path = file_path_obj.name
-                
-            return {
-                'source_path': file_path,
-                'relative_path': relative_path,
-                'size': stats['size'],
-                'mtime': stats['mtime'],
-                'mime_type': stats.get('mime_type'),
-                'md5': stats.get('md5'),
-                'is_text': file_stats.is_text_file(),
-                'is_image': file_stats.is_image_file(),
-                'is_model': file_stats.is_model_file(),
-                'human_size': file_stats.get_human_readable_size()
-            }
-            
-        except Exception as e:
-            print(f"Warning: Failed to prepare file {file_path}: {e}")
-            return None
-            
-    def get_summary(self) -> Dict[str, Any]:
-        """Get summary of prepared files."""
-        if not self.prepared_files:
-            return {
-                'total_files': 0,
-                'total_size': 0,
-                'file_types': {},
-                'categories': {}
-            }
-            
-        total_size = sum(f['size'] for f in self.prepared_files)
-        
-        # Count file types
-        file_types = {}
-        for file_info in self.prepared_files:
-            ext = Path(file_info['source_path']).suffix.lower()
-            file_types[ext] = file_types.get(ext, 0) + 1
-            
-        # Categorize files
-        categories = {
-            'text': sum(1 for f in self.prepared_files if f['is_text']),
-            'images': sum(1 for f in self.prepared_files if f['is_image']),
-            'models': sum(1 for f in self.prepared_files if f['is_model']),
-            'other': 0
-        }
-        categories['other'] = len(self.prepared_files) - sum(categories.values())
-        
-        return {
-            'total_files': len(self.prepared_files),
-            'total_size': total_size,
-            'human_size': self._format_size(total_size),
-            'file_types': file_types,
-            'categories': categories
-        }
-        
-    def _format_size(self, size: int) -> str:
-        """Format size in human-readable format."""
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-            if size < 1024.0:
-                return f"{size:.1f} {unit}"
-            size /= 1024.0
-        return f"{size:.1f} PB"
-        
-    def add_ignore_pattern(self, pattern: str):
-        """Add a new ignore pattern."""
-        if pattern not in self.ignore_patterns:
-            self.ignore_patterns.append(pattern)
-            
-    def remove_ignore_pattern(self, pattern: str):
-        """Remove an ignore pattern."""
-        if pattern in self.ignore_patterns:
-            self.ignore_patterns.remove(pattern)
-            
-    def get_prepared_files(self) -> List[Dict[str, Any]]:
-        """Get list of prepared files."""
-        return self.prepared_files.copy()
+        return self._api.create_artifact_files([req.file_spec for req in batch])
+
+    def prepare(
+        self, file_spec: "CreateArtifactFileSpecInput"
+    ) -> "queue.Queue[ResponsePrepare]":
+        response_queue: queue.Queue[ResponsePrepare] = queue.Queue()
+        self._request_queue.put(RequestPrepare(file_spec, response_queue))
+        return response_queue
+
+    def start(self) -> None:
+        self._thread.start()
+
+    def finish(self) -> None:
+        self._request_queue.put(RequestFinish())
+
+    def is_alive(self) -> bool:
+        return self._thread.is_alive()
+
+    def shutdown(self) -> None:
+        self.finish()
+        self._thread.join()

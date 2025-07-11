@@ -1,7 +1,7 @@
 import torch
 from diffusers import AudioLDM2Pipeline
 
-from wandb.integration.diffusers import autolog
+from tracklab.integration.diffusers import autolog
 
 autolog()
 

@@ -22,7 +22,7 @@ from typing import Any, List, Optional
 
 from pydantic import ConfigDict, Field, Json, ValidationError
 from pytest import raises
-from wandb._pydantic import (
+from tracklab._pydantic import (
     IS_PYDANTIC_V2,
     AliasChoices,
     CompatBaseModel,
@@ -30,7 +30,7 @@ from wandb._pydantic import (
     field_validator,
     model_validator,
 )
-from wandb.sdk.artifacts._generated import ArtifactVersionFiles
+from tracklab.sdk.artifacts._generated import ArtifactVersionFiles
 
 
 def test_field_validator_before():
@@ -273,7 +273,7 @@ def test_generated_pydantic_fragment_validates_response_data():
                                 "node": {
                                     "id": "QXJ0aWZhY3RGaWxlOjE2OTgzNjI1MDc6cmFuZG9tX2ltYWdlLnBuZw==",
                                     "name": "random_image.png",
-                                    "url": "https://api.wandb.fake/artifactsV2/gcp-us/wandb/abcdef",
+                                    "url": "https://api.tracklab.fake/artifactsV2/gcp-us/wandb/abcdef",
                                     "sizeBytes": 30168,
                                     "storagePath": "wandb_artifacts/626357751/1698362507/7e8ff39b55a1a62101758a6dc7a69f70",
                                     "mimetype": None,

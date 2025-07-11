@@ -1,7 +1,7 @@
 import openai
 
-import wandb
-from wandb.integration.openai import autolog
+import tracklab
+from tracklab.integration.openai import autolog
 
 
 def main():
@@ -14,13 +14,13 @@ def main():
 
     assert autolog._run is not None
     assert autolog._AutologOpenAI__run_created_by_autolog
-    assert wandb.run.settings.project == "skunkworks"
+    assert tracklab.run.settings.project == "skunkworks"
 
     autolog.enable(init={"project": "groundsquirrelworks"})
 
     assert autolog._run is not None
     assert autolog._AutologOpenAI__run_created_by_autolog
-    assert wandb.run.settings.project == "groundsquirrelworks"
+    assert tracklab.run.settings.project == "groundsquirrelworks"
 
     request_kwargs = dict(
         model="text-davinci-edit-001",
@@ -33,7 +33,7 @@ def main():
     autolog.disable()
     assert autolog._run is None
     assert autolog._AutologOpenAI__run_created_by_autolog is False
-    assert wandb.run is None
+    assert tracklab.run is None
 
 
 if __name__ == "__main__":

@@ -1,8 +1,3 @@
-"""Synchronization utilities for TrackLab.
+"""module sync."""
 
-Handles synchronization of experiment data and state across different components.
-"""
-
-from .sync import LocalSync
-
-__all__ = ["LocalSync"]
+from .sync import SyncManager, get_run_from_path, get_runs

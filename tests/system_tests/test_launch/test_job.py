@@ -4,12 +4,12 @@ import tempfile
 from unittest import mock
 
 import pytest
-import wandb
-from wandb.apis.internal import Api as InternalApi
-from wandb.apis.public import Api as PublicApi
-from wandb.sdk.artifacts.artifact import Artifact
-from wandb.sdk.launch.create_job import _create_job
-from wandb.sdk.launch.git_reference import GitReference
+import tracklab
+from tracklab.apis.internal import Api as InternalApi
+from tracklab.apis.public import Api as PublicApi
+from tracklab.sdk.artifacts.artifact import Artifact
+from tracklab.sdk.launch.create_job import _create_job
+from tracklab.sdk.launch.git_reference import GitReference
 
 
 def test_job_call(user):
@@ -18,7 +18,7 @@ def test_job_call(user):
     public_api = PublicApi()
     internal_api = InternalApi()
 
-    run = wandb.init(settings=wandb.Settings(project=proj))
+    run = tracklab.init(settings=tracklab.Settings(project=proj))
 
     docker_image = "TEST_IMAGE"
     job_artifact = run._log_job_artifact_with_image(docker_image)
@@ -45,7 +45,7 @@ def test_job_call(user):
 def test_create_job_artifact(runner, user):
     """Test that non-core job creation produces a partial job as expected."""
     proj = "test-p"
-    settings = wandb.Settings(project=proj)
+    settings = tracklab.Settings(project=proj)
 
     internal_api = InternalApi()
     public_api = PublicApi()
@@ -102,7 +102,7 @@ def test_create_job_artifact(runner, user):
         settings.launch = True
         settings.disable_job_creation = False
 
-        run2 = wandb.init(settings=settings, config={"input1": 1})
+        run2 = tracklab.init(settings=settings, config={"input1": 1})
         run2.log({"x": 2})
         run2.finish()
 
@@ -122,7 +122,7 @@ def test_create_git_job(runner, user, monkeypatch):
     with the artifact saver that is only happening when running in CI.
     """
     proj = "test-p99999"
-    settings = wandb.Settings(project=proj)
+    settings = tracklab.Settings(project=proj)
 
     internal_api = InternalApi()
     public_api = PublicApi()
@@ -182,7 +182,7 @@ def test_create_git_job(runner, user, monkeypatch):
         settings.launch = True
         settings.disable_job_creation = False
 
-        run2 = wandb.init(settings=settings, config={"input1": 1})
+        run2 = tracklab.init(settings=settings, config={"input1": 1})
         run2.log({"x": 2})
         run2.finish()
 

@@ -2,10 +2,10 @@ import os
 
 import numpy as np
 
-import wandb
+import tracklab
 
 os.environ.setdefault("WANDB_PROJECT", "lidar-scene-test")
-wandb.init()
+tracklab.init()
 
 
 N_POINT = 1000
@@ -13,7 +13,7 @@ points = np.random.rand(N_POINT, 3) * 5 - 2.5
 
 
 def make_scene(vecs):
-    return wandb.Object3D(
+    return tracklab.Object3D(
         {
             "type": "lidar/beta",
             "vectors": np.array(vecs),
@@ -73,7 +73,7 @@ def main():
 
     vectors_all = vectors + vectors_2
 
-    wandb.log(
+    tracklab.log(
         {
             "separate_vectors": [make_scene([v]) for v in vectors],
             "color_vectors": make_scene(vectors_2),

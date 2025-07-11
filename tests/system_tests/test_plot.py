@@ -4,15 +4,15 @@ import json
 from typing import TYPE_CHECKING
 
 import pytest
-import wandb
+import tracklab
 
 if TYPE_CHECKING:
-    from wandb.plot.custom_chart import CustomChart
+    from tracklab.plot.custom_chart import CustomChart
 
 
 @pytest.fixture
 def roc_curve() -> CustomChart:
-    return wandb.plot.roc_curve(
+    return tracklab.plot.roc_curve(
         y_true=[0, 1],
         y_probas=[
             (0.4, 0.6),
@@ -24,7 +24,7 @@ def roc_curve() -> CustomChart:
 
 @pytest.fixture
 def line_series() -> CustomChart:
-    return wandb.plot.line_series(
+    return tracklab.plot.line_series(
         xs=[0, 1, 2, 3, 4],
         ys=[[123, 333, 111, 42, 533]],
         keys=["metric_A"],
@@ -33,7 +33,7 @@ def line_series() -> CustomChart:
 
 @pytest.fixture
 def confusion_matrix() -> CustomChart:
-    return wandb.plot.confusion_matrix(
+    return tracklab.plot.confusion_matrix(
         y_true=[0, 1],
         probs=[
             (0.4, 0.6),
@@ -44,8 +44,8 @@ def confusion_matrix() -> CustomChart:
 
 @pytest.fixture
 def bar_chart() -> CustomChart:
-    return wandb.plot.bar(
-        table=wandb.Table(columns=["a"], data=[[1]]),
+    return tracklab.plot.bar(
+        table=tracklab.Table(columns=["a"], data=[[1]]),
         label="a",
         value="a",
     )
@@ -53,13 +53,13 @@ def bar_chart() -> CustomChart:
 
 @pytest.fixture
 def histogram() -> CustomChart:
-    return wandb.plot.histogram(table=wandb.Table(columns=["a"], data=[[1]]), value="a")
+    return tracklab.plot.histogram(table=tracklab.Table(columns=["a"], data=[[1]]), value="a")
 
 
 @pytest.fixture
 def line_chart() -> CustomChart:
-    return wandb.plot.line(
-        table=wandb.Table(columns=["a"], data=[[1]]),
+    return tracklab.plot.line(
+        table=tracklab.Table(columns=["a"], data=[[1]]),
         x=[0, 1, 2, 3, 4],
         y=[[1, 2, 3, 4, 5]],
     )
@@ -67,7 +67,7 @@ def line_chart() -> CustomChart:
 
 @pytest.fixture
 def pr_curve() -> CustomChart:
-    return wandb.plot.pr_curve(
+    return tracklab.plot.pr_curve(
         y_true=[0, 1],
         y_probas=[
             (0.4, 0.6),
@@ -78,21 +78,21 @@ def pr_curve() -> CustomChart:
 
 @pytest.fixture
 def scatter_plot() -> CustomChart:
-    return wandb.plot.scatter(
-        table=wandb.Table(columns=["a"], data=[[1]]),
+    return tracklab.plot.scatter(
+        table=tracklab.Table(columns=["a"], data=[[1]]),
         x=[1, 2, 3],
         y=[4, 5, 6],
     )
 
 
-def get_table_from_summary(run, summary: dict, key_path: list[str]) -> wandb.Table:
+def get_table_from_summary(run, summary: dict, key_path: list[str]) -> tracklab.Table:
     table_path = summary
     for key in key_path:
         table_path = table_path[key]
     table_path = table_path["path"]
     table_path = f"{run.dir}/{table_path}"
     table_json = json.load(open(table_path))
-    return wandb.Table(data=table_json["data"], columns=table_json["columns"])
+    return tracklab.Table(data=table_json["data"], columns=table_json["columns"])
 
 
 @pytest.mark.parametrize(
@@ -110,7 +110,7 @@ def get_table_from_summary(run, summary: dict, key_path: list[str]) -> wandb.Tab
 )
 def test_log_nested_plot(user, request, wandb_backend_spy, plot_object):
     plot = request.getfixturevalue(plot_object)
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(
             {
                 "layer1": {
@@ -130,13 +130,13 @@ def test_log_nested_plot(user, request, wandb_backend_spy, plot_object):
 
 
 def test_log_multiple_nested_plots(user, wandb_backend_spy):
-    with wandb.init() as run:
-        plot1 = wandb.plot.line_series(
+    with tracklab.init() as run:
+        plot1 = tracklab.plot.line_series(
             xs=[0, 1, 2, 3, 4],
             ys=[[123, 333, 111, 42, 533]],
             keys=["metric_A"],
         )
-        plot2 = wandb.plot.roc_curve(
+        plot2 = tracklab.plot.roc_curve(
             y_true=[0, 1],
             y_probas=[
                 (0.4, 0.6),
@@ -174,9 +174,9 @@ def test_log_multiple_nested_plots(user, wandb_backend_spy):
 
 
 def test_log_nested_table(user, wandb_backend_spy):
-    with wandb.init() as run:
-        table1 = wandb.Table(columns=["a"], data=[[1]])
-        table2 = wandb.Table(columns=["b"], data=[[2]])
+    with tracklab.init() as run:
+        table1 = tracklab.Table(columns=["a"], data=[[1]])
+        table2 = tracklab.Table(columns=["b"], data=[[2]])
         run.log(
             {
                 "layer1": {
@@ -201,15 +201,15 @@ def test_log_nested_table(user, wandb_backend_spy):
 
 
 def test_log_nested_visualize(user, wandb_backend_spy):
-    with wandb.init() as run:
-        table1 = wandb.Table(columns=["a"], data=[[1]])
-        table2 = wandb.Table(columns=["b"], data=[[2]])
+    with tracklab.init() as run:
+        table1 = tracklab.Table(columns=["a"], data=[[1]])
+        table2 = tracklab.Table(columns=["b"], data=[[2]])
 
-        visualize1 = wandb.visualize(
+        visualize1 = tracklab.visualize(
             "wandb/confusion_matrix/v1",
             table1,
         )
-        visualize2 = wandb.visualize(
+        visualize2 = tracklab.visualize(
             "wandb/confusion_matrix/v1",
             table2,
         )

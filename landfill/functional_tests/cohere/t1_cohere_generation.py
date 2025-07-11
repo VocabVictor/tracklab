@@ -1,6 +1,6 @@
 import cohere
 
-from wandb.integration.cohere import autolog as cohere_autolog
+from tracklab.integration.cohere import autolog as cohere_autolog
 
 cohere_autolog()
 

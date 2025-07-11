@@ -1,83 +1,54 @@
-"""TensorFlow estimator hook for TrackLab integration."""
+import tensorflow as tf
 
-try:
-    import tensorflow as tf
-    _tensorflow_available = True
-except ImportError:
-    _tensorflow_available = False
-    tf = None
+import tracklab
+from tracklab.sdk.lib import telemetry
 
-from typing import Dict, Any, Optional
+if hasattr(tf.estimator, "SessionRunHook"):
+    # In tf 1.14 and beyond, SessionRunHook is in the estimator package.
+    SessionRunHook = tf.estimator.SessionRunHook
+    SessionRunArgs = tf.estimator.SessionRunArgs
+else:
+    # In older versions it's in train.
+    SessionRunHook = tf.train.SessionRunHook
+    SessionRunArgs = tf.train.SessionRunArgs
+
+if hasattr(tf.train, "get_global_step"):
+    get_global_step = tf.train.get_global_step
+else:
+    get_global_step = tf.compat.v1.train.get_global_step
+
+if hasattr(tf.summary, "merge_all"):
+    merge_all_summaries = tf.summary.merge_all
+else:
+    merge_all_summaries = tf.compat.v1.summary.merge_all
 
 
-class TrackLabHook:
-    """TensorFlow SessionRunHook for automatic logging to TrackLab."""
-    
-    def __init__(self, 
-                 log_frequency: int = 100,
-                 include_params: bool = True):
-        if not _tensorflow_available:
-            raise ImportError("TensorFlow is not installed. Please install tensorflow to use this integration.")
-            
-        self.log_frequency = log_frequency
-        self.include_params = include_params
-        self._step_count = 0
-        self._current_run = None
-        
+class WandbHook(SessionRunHook):
+    def __init__(self, summary_op=None, steps_per_log=1000, history=None):
+        self._summary_op = summary_op
+        self._steps_per_log = steps_per_log
+        self._history = history
+
+        with telemetry.context() as tel:
+            tel.feature.estimator_hook = True
+
     def begin(self):
-        """Called once before using the session."""
-        # Get current tracklab run
-        try:
-            import tracklab
-            self._current_run = tracklab.run
-        except (ImportError, AttributeError):
-            self._current_run = None
-            
+        if wandb.run is None:
+            raise wandb.Error("You must call `wandb.init()` before calling `WandbHook`")
+        if self._summary_op is None:
+            self._summary_op = merge_all_summaries()
+        self._step = -1
+
     def before_run(self, run_context):
-        """Called before each call to run()."""
-        # Could request specific tensors to log
-        return None
-        
+        return SessionRunArgs(
+            {"summary": self._summary_op, "global_step": get_global_step()}
+        )
+
     def after_run(self, run_context, run_values):
-        """Called after each call to run()."""
-        self._step_count += 1
-        
-        if self._current_run and self._step_count % self.log_frequency == 0:
-            # Log basic step information
-            self._current_run.log({
-                "tensorflow/step": self._step_count,
-                "tensorflow/global_step": self._step_count
-            })
-            
-    def end(self, session):
-        """Called at the end of session."""
-        if self._current_run:
-            self._current_run.log({
-                "tensorflow/total_steps": self._step_count
-            })
-
-
-def log_model_info(model, name: str = "tensorflow_model"):
-    """Log TensorFlow model information."""
-    if not _tensorflow_available:
-        return
-        
-    try:
-        import tracklab
-        if tracklab.run is None:
-            return
-            
-        # Log model summary if available
-        if hasattr(model, 'summary'):
-            # For Keras models
-            try:
-                model_config = model.get_config()
-                tracklab.run.log({
-                    f"{name}/layers": len(model_config.get('layers', [])),
-                    f"{name}/trainable_params": model.count_params() if hasattr(model, 'count_params') else 0
-                })
-            except Exception:
-                pass
-                
-    except ImportError:
-        pass
+        step = run_values.results["global_step"]
+        if step % self._steps_per_log == 0:
+            wandb.tensorboard._log(
+                run_values.results["summary"],
+                history=self._history,
+                step=step,
+            )

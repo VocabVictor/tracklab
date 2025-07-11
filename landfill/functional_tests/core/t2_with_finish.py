@@ -17,9 +17,9 @@ assert:
     - 2  # finish
 """
 
-import wandb
+import tracklab
 
-wandb.init()
-wandb.log(dict(m1=1))
-wandb.log(dict(m2=2))
-wandb.finish()
+tracklab.init()
+tracklab.log(dict(m1=1))
+tracklab.log(dict(m2=2))
+tracklab.finish()

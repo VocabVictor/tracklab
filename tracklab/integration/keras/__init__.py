@@ -1,5 +1,11 @@
-"""Keras integration for TrackLab."""
+"""Tools for integrating `wandb` with [`Keras`](https://keras.io/)."""
 
-from .keras import TrackLabCallback
+__all__ = (
+    "WandbCallback",
+    "WandbMetricsLogger",
+    "WandbModelCheckpoint",
+    "WandbEvalCallback",
+)
 
-__all__ = ["TrackLabCallback"]
+from .callbacks import WandbEvalCallback, WandbMetricsLogger, WandbModelCheckpoint
+from .keras import WandbCallback  # TODO: legacy callback to be deprecated

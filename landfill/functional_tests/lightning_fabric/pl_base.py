@@ -4,7 +4,7 @@ import torch
 from lightning import LightningModule
 from torch.utils.data import Dataset
 
-import wandb
+import tracklab
 
 
 class RandomDataset(Dataset):
@@ -75,16 +75,16 @@ class BoringModel(LightningModule):
 class TableLoggingCallback:
     def __init__(self, wandb_logger):
         self.wandb_logger = wandb_logger
-        self.table = wandb.Table(columns=["image", "prediction", "ground_truth"])
+        self.table = tracklab.Table(columns=["image", "prediction", "ground_truth"])
 
     def on_test_batch_end(self, images, predictions, ground_truths):
         for image, prediction, ground_truth in zip(images, predictions, ground_truths):
-            self.table.add_data(wandb.Image(image), prediction, ground_truth)
+            self.table.add_data(tracklab.Image(image), prediction, ground_truth)
 
     def on_model_epoch_end(self):
         prediction_table = self.table
         self.wandb_logger.experiment.log({"prediction_table": prediction_table})
-        self.table = wandb.Table(columns=["image", "prediction", "ground_truth"])
+        self.table = tracklab.Table(columns=["image", "prediction", "ground_truth"])
 
 
 class SimpleNet(torch.nn.Module):

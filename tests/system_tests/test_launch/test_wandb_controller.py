@@ -1,5 +1,5 @@
 import sweeps
-import wandb
+import tracklab
 
 SWEEP_CONFIGURATION = {
     "method": "random",
@@ -34,9 +34,9 @@ def test_run_from_dict():
 
 def test_print_status(user, capsys):
     project = "my-first-sweep"
-    sweep_id = wandb.sweep(sweep=SWEEP_CONFIGURATION, project=project)
+    sweep_id = tracklab.sweep(sweep=SWEEP_CONFIGURATION, project=project)
 
-    c = wandb.controller(sweep_id, entity=user, project=project)
+    c = tracklab.controller(sweep_id, entity=user, project=project)
     c.print_status()
     stdout, stderr = capsys.readouterr()
     assert "Runs: 0" in stdout
@@ -49,16 +49,16 @@ def test_print_status(user, capsys):
 
 def test_controller_existing(user):
     project = "my-first-sweep"
-    sweep_id = wandb.sweep(sweep=SWEEP_CONFIGURATION, project=project)
+    sweep_id = tracklab.sweep(sweep=SWEEP_CONFIGURATION, project=project)
 
-    c = wandb.controller(sweep_id, entity=user, project=project)
+    c = tracklab.controller(sweep_id, entity=user, project=project)
 
     assert c.sweep_id == sweep_id
     assert c.sweep_config == SWEEP_CONFIGURATION
 
 
 def test_controller_new(user):
-    tuner = wandb.controller(
+    tuner = tracklab.controller(
         {
             "method": "random",
             "program": "train-dummy.py",

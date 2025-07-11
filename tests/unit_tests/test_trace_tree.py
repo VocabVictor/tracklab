@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from wandb.sdk.data_types.trace_tree import Span, SpanKind, StatusCode, Trace
+from tracklab.sdk.data_types.trace_tree import Span, SpanKind, StatusCode, Trace
 
 
 def test_trace_creation():
@@ -223,7 +223,7 @@ def test_overwrite_outputs():
 def test_trace_log(mocker):
     t = Trace(name="test")
     mock_run = mocker.MagicMock()
-    mocker.patch("wandb.run", mock_run)
+    mocker.patch("tracklab.run", mock_run)
     mock_log = mocker.patch.object(mock_run, "log")
 
     t.log("trace")
@@ -263,7 +263,7 @@ def test_trace_log_without_name(mocker):
     t = Trace(name="test")
 
     mock_run = mocker.MagicMock()
-    mocker.patch("wandb.run", mock_run)
+    mocker.patch("tracklab.run", mock_run)
     mock_log = mocker.patch.object(mock_run, "log")
 
     with pytest.raises(AssertionError):
@@ -277,7 +277,7 @@ def test_trace_model_dict(mocker):
     t = Trace(name="test", model_dict=model_dict)
 
     mock_run = mocker.MagicMock()
-    mocker.patch("wandb.run", mock_run)
+    mocker.patch("tracklab.run", mock_run)
     mock_log = mocker.patch.object(mock_run, "log")
 
     t.log("trace")
@@ -296,7 +296,7 @@ def test_trace_child_model_dict(mocker):
     parent.add_child(child)
 
     mock_run = mocker.MagicMock()
-    mocker.patch("wandb.run", mock_run)
+    mocker.patch("tracklab.run", mock_run)
     mock_log = mocker.patch.object(mock_run, "log")
 
     parent.log("trace")

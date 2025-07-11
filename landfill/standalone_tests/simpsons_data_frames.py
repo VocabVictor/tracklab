@@ -19,11 +19,11 @@ from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator
 
-import wandb
+import tracklab
 
 
 def main():
-    run = wandb.init()
+    run = tracklab.init()
     config = run.config
     config.img_size = 50
     config.batch_size = 32
@@ -128,7 +128,7 @@ def main():
     {pred_classes[i]} ({pred_probs[i]:.2%})
     Actual:
     {true_classes[i]} ({true_probs[i]:.2%})
-    ![](https://api.wandb.ai/adrianbg/simpsons/tgw7wnqj/simpsons/{i}.jpg)
+    ![](https://api.tracklab.ai/adrianbg/simpsons/tgw7wnqj/simpsons/{i}.jpg)
     ```"""
                 )
 
@@ -144,7 +144,7 @@ def main():
         frame_dict = {
             "wandb_example_id": [str(s) for s in gen.filenames[: len(cards)]],
             "image": [
-                wandb.Image(os.path.join(config.test_path, f))
+                tracklab.Image(os.path.join(config.test_path, f))
                 for f in gen.filenames[: len(cards)]
             ],
             "card": cards,

@@ -1,25 +1,30 @@
-"""Plotting and visualization utilities for TrackLab.
+"""Chart Visualization Utilities
 
-Provides plotting functions compatible with wandb.plot API for creating
-charts and visualizations in experiment tracking.
+This module offers a collection of predefined chart types, along with functionality
+for creating custom charts, enabling flexible visualization of your data beyond the
+built-in options.
 """
-
-from .line import line
-from .bar import bar  
-from .scatter import scatter
-from .histogram import histogram
-from .confusion_matrix import confusion_matrix
-from .pr_curve import pr_curve
-from .roc_curve import roc_curve
-from .custom_chart import custom_chart
 
 __all__ = [
     "line",
-    "bar", 
-    "scatter",
     "histogram",
-    "confusion_matrix",
-    "pr_curve",
+    "scatter",
+    "bar",
     "roc_curve",
-    "custom_chart"
+    "pr_curve",
+    "confusion_matrix",
+    "line_series",
+    "plot_table",
+    "visualize",  # doc:exclude
 ]
+
+from tracklab.plot.bar import bar
+from tracklab.plot.confusion_matrix import confusion_matrix
+from tracklab.plot.custom_chart import CustomChart, plot_table
+from tracklab.plot.histogram import histogram
+from tracklab.plot.line import line
+from tracklab.plot.line_series import line_series
+from tracklab.plot.pr_curve import pr_curve
+from tracklab.plot.roc_curve import roc_curve
+from tracklab.plot.scatter import scatter
+from tracklab.plot.viz import Visualize, visualize

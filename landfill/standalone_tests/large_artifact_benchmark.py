@@ -54,7 +54,7 @@ from typing import Optional
 
 import click
 
-import wandb
+import tracklab
 
 
 def duration(end: float, start: float = 0) -> str:
@@ -91,7 +91,7 @@ def cli(
 ) -> None:
     ctx.ensure_object(dict)
 
-    version = wandb.__version__
+    version = tracklab.__version__
     git_sha = None
     with contextlib.suppress(CalledProcessError):
         git_sha = check_output(["git", "rev-parse", "HEAD"]).decode("utf-8")[:8]
@@ -99,7 +99,7 @@ def cli(
     print(f"wandb version: {version}{f'@{git_sha}' if git_sha else ''}")
 
     if core:
-        wandb.require("core")
+        tracklab.require("core")
         print("using Go core")
     else:
         print("using Python core")
@@ -159,11 +159,11 @@ def upload(ctx) -> None:
         print(f"\tcreated {o['count']} test files under {root}")
 
         start = perf_counter()
-        with wandb.init(
+        with tracklab.init(
             project=o["project"], entity=o["entity"], settings={"console": "off"}
         ) as run:
             begin = perf_counter()
-            artifact = wandb.Artifact(name=o["name"], type="test")
+            artifact = tracklab.Artifact(name=o["name"], type="test")
             artifact.add_dir(root, skip_cache=o["skip_cache"], policy=o["policy"])
             add_done = perf_counter()
             print(f"\tadd files: {duration(add_done, begin)}")
@@ -200,7 +200,7 @@ def incremental(
         qualified_name = ctx.obj["qualified_name"]
     o = ctx.obj
     start = perf_counter()
-    with TemporaryDirectory() as tmpdir, wandb.init(
+    with TemporaryDirectory() as tmpdir, tracklab.init(
         project=o["project"], entity=o["entity"], settings={"console": "off"}
     ) as run:
         root = Path(tmpdir)
@@ -214,7 +214,7 @@ def incremental(
         print(f"Incremental: {', '.join(operations)} from {o['qualified_name']}")
 
         begin = perf_counter()
-        artifact = wandb.Api().artifact(o["qualified_name"]).new_draft()
+        artifact = tracklab.Api().artifact(o["qualified_name"]).new_draft()
         done_create_draft = perf_counter()
         print(f"\tcreate draft: {duration(done_create_draft, begin)}")
 
@@ -266,7 +266,7 @@ def download(ctx: click.Context, qualified_name: Optional[str]) -> None:
     print(f"Downloading {qualified_name}")
     with TemporaryDirectory() as tmpdir:
         begin = perf_counter()
-        artifact = wandb.Api().artifact(qualified_name)
+        artifact = tracklab.Api().artifact(qualified_name)
         _ = artifact.manifest
         done_retrieve_manifest = perf_counter()
         print("\tretrieve manifest: ", duration(done_retrieve_manifest, begin))

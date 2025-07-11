@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import wandb
+import tracklab
 from pytest import fixture, skip
 from wandb import Api, Artifact
-from wandb.apis.public.registries._utils import fetch_org_entity_from_organization
-from wandb.apis.public.registries.registry import Registry
-from wandb.proto.wandb_internal_pb2 import ServerFeature
-from wandb.sdk.internal.internal_api import Api as InternalApi
-from wandb.util import random_string
+from tracklab.apis.public.registries._utils import fetch_org_entity_from_organization
+from tracklab.apis.public.registries.registry import Registry
+from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.sdk.internal.internal_api import Api as InternalApi
+from tracklab.util import random_string
 
 if TYPE_CHECKING:
     from ..backend_fixtures import BackendFixtureFactory, TeamAndOrgNames
@@ -58,7 +58,7 @@ def registry(org: str, api: Api, worker_id: str) -> Registry:
 def source_artifact(team: str, worker_id: str) -> Artifact:
     # In order to link to an org registry, the source artifact must be logged
     # within a TEAM entity, NOT the user's personal entity.
-    with wandb.init(entity=team) as run:
+    with tracklab.init(entity=team) as run:
         artifact = Artifact(name="test-artifact", type="dataset")
         return run.log_artifact(artifact)
 

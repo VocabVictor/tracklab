@@ -6,7 +6,7 @@ On error, prints additional text to stderr.
 
 import sys
 
-from wandb.sdk.lib import console_capture
+from tracklab.sdk.lib import console_capture
 
 _got_stdout = False
 _got_stderr = False

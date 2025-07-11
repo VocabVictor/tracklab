@@ -1,15 +1,15 @@
 import json
 import os
 
-import wandb
-from wandb.cli import cli
+import tracklab
+from tracklab.cli import cli
 
 
 def test_agent_queues_config(runner, monkeypatch, user):
-    run = wandb.init(project="model-registry")
+    run = tracklab.init(project="model-registry")
     run.finish()
     monkeypatch.setattr(
-        wandb.sdk.launch._launch,
+        tracklab.sdk.launch._launch,
         "LAUNCH_CONFIG_FILE",
         os.path.join("./config/wandb/launch-config.yaml"),
     )

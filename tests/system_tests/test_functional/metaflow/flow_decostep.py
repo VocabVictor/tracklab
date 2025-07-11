@@ -8,7 +8,7 @@ from metaflow import FlowSpec, Parameter, step
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from wandb.integration.metaflow import wandb_log
+from tracklab.integration.metaflow import tracklab_log
 
 os.environ["METAFLOW_USER"] = "test_user"
 os.environ["USER"] = os.environ["METAFLOW_USER"]

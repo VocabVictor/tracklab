@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.nn.parallel import DistributedDataParallel
 
-import wandb
+import tracklab
 
 
 def setup(rank, world_size):
@@ -49,7 +49,7 @@ def demo_basic(rank, world_size):
     model = ToyModel().to(device)
     ddp_model = DistributedDataParallel(model, device_ids=device_ids)
 
-    with wandb.init(group="ddp-basic") as run:
+    with tracklab.init(group="ddp-basic") as run:
         run.watch(models=ddp_model, log_freq=1, log_graph=True)
 
         loss_fn = nn.MSELoss()

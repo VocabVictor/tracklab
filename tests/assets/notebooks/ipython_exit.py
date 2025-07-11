@@ -1,3 +1,3 @@
-import wandb
+import tracklab
 
-wandb.init()
+tracklab.init()

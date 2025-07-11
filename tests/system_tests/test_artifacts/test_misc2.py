@@ -2,8 +2,8 @@ from typing import Callable
 
 import numpy as np
 import pytest
-import wandb
-from wandb.sdk.artifacts.exceptions import ArtifactNotLoggedError
+import tracklab
+from tracklab.sdk.artifacts.exceptions import ArtifactNotLoggedError
 
 
 def test_artifact_log_with_network_error(wandb_backend_spy):
@@ -15,28 +15,28 @@ def test_artifact_log_with_network_error(wandb_backend_spy):
             status=500,
         ),
     )
-    with wandb.init() as run:
-        artifact = wandb.Artifact("table-example", "dataset")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("table-example", "dataset")
         run.log_artifact(artifact)
 
 
 def test_artifact_references_internal(user):
-    t1 = wandb.Table(columns=[], data=[])
+    t1 = tracklab.Table(columns=[], data=[])
 
-    art = wandb.Artifact("A", "dataset")
+    art = tracklab.Artifact("A", "dataset")
     art.add(t1, "t1")
     art.save()
 
-    art = wandb.Artifact("B", "dataset")
+    art = tracklab.Artifact("B", "dataset")
     art.add(t1, "t1")  # creates a reference to A
     art.save()
 
 
 def test_lazy_artifact_passthrough(user):
-    with wandb.init() as run:
-        art = wandb.Artifact("test_lazy_artifact_passthrough", "dataset")
+    with tracklab.init() as run:
+        art = tracklab.Artifact("test_lazy_artifact_passthrough", "dataset")
 
-        t1 = wandb.Table(columns=[], data=[])
+        t1 = tracklab.Table(columns=[], data=[])
         e = art.add(t1, "t1")
         with pytest.raises(ValueError):
             e.ref_target()
@@ -163,15 +163,15 @@ def test_lazy_artifact_passthrough(user):
 
 def test_reference_download(user):
     open("file1.txt", "w").write("hello")
-    with wandb.init() as run:
-        artifact = wandb.Artifact("test_reference_download", "dataset")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("test_reference_download", "dataset")
         artifact.add_file("file1.txt")
         artifact.add_reference(
             "https://wandb-artifacts-refs-public-test.s3-us-west-2.amazonaws.com/StarWars3.wav"
         )
         run.log_artifact(artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = run.use_artifact("test_reference_download:latest")
         entry = artifact.get_entry("StarWars3.wav")
         entry.download()
@@ -187,7 +187,7 @@ def test_reference_download(user):
 
 
 def _create_artifact_and_set_metadata(metadata):
-    artifact = wandb.Artifact("foo", "dataset")
+    artifact = tracklab.Artifact("foo", "dataset")
     artifact.metadata = metadata
     return artifact
 
@@ -199,13 +199,13 @@ def _create_artifact_and_set_metadata(metadata):
 @pytest.mark.parametrize(
     "create_artifact",
     [
-        lambda metadata: wandb.Artifact("foo", "dataset", metadata=metadata),
+        lambda metadata: tracklab.Artifact("foo", "dataset", metadata=metadata),
         _create_artifact_and_set_metadata,
     ],
 )
 class TestArtifactChecksMetadata:
     def test_validates_metadata_ok(
-        self, create_artifact: Callable[..., wandb.Artifact]
+        self, create_artifact: Callable[..., tracklab.Artifact]
     ):
         assert create_artifact(metadata=None).metadata == {}
         assert create_artifact(metadata={"foo": "bar"}).metadata == {"foo": "bar"}
@@ -220,7 +220,7 @@ class TestArtifactChecksMetadata:
         }
 
     def test_validates_metadata_err(
-        self, create_artifact: Callable[..., wandb.Artifact]
+        self, create_artifact: Callable[..., tracklab.Artifact]
     ):
         with pytest.raises(TypeError):
             create_artifact(metadata=123)
@@ -231,7 +231,7 @@ class TestArtifactChecksMetadata:
         with pytest.raises(TypeError):
             create_artifact(metadata={"unserializable": object()})
 
-    def test_deepcopies_metadata(self, create_artifact: Callable[..., wandb.Artifact]):
+    def test_deepcopies_metadata(self, create_artifact: Callable[..., tracklab.Artifact]):
         orig_metadata = {"foo": ["original"]}
         artifact = create_artifact(metadata=orig_metadata)
 

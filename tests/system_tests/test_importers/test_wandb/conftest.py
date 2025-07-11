@@ -10,8 +10,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.io as pio
 import pytest
-import wandb
-import wandb.apis.reports as wr
+import tracklab
+import tracklab.apis.reports as wr
 from PIL import Image
 from rdkit import Chem
 
@@ -30,7 +30,7 @@ def server_src(user):
     project_name = "test"
 
     for _ in range(n_experiments):
-        run = wandb.init(entity=user, project=project_name)
+        run = tracklab.init(entity=user, project=project_name)
 
         # log metrics
         data = generate_random_data(n_steps, n_metrics)
@@ -70,7 +70,7 @@ def server_src(user):
         # In manual tests it does work, but it seems to misbehave in the testcontainer, so commenting
         # this out for now.
         # delete the middle artifact in sequence to test gap handling
-        # api = wandb.Api()
+        # api = tracklab.Api()
         # art_type = api.artifact_type("logged_art", project_name)
         # for collection in art_type.collections():
         #     for art in collection.artifacts():
@@ -162,14 +162,14 @@ def create_random_image(size=(100, 100)):
 
     array = rng.randint(0, 256, size + (3,), dtype=np.uint8)
     img = Image.fromarray(array)
-    return wandb.Image(img)
+    return tracklab.Image(img)
 
 
 def create_random_video():
     rng = np.random.RandomState(seed=1337)
 
     frames = rng.randint(low=0, high=256, size=(10, 3, 100, 100), dtype=np.uint8)
-    return wandb.Video(frames, fps=4)
+    return tracklab.Video(frames, fps=4)
 
 
 def create_random_audio():
@@ -179,7 +179,7 @@ def create_random_audio():
     sampling_rate = 44100  # Typical audio sampling rate
     duration = 1.0  # duration in seconds
     audio_data = rng.uniform(low=-1.0, high=1.0, size=int(sampling_rate * duration))
-    return wandb.Audio(audio_data, sample_rate=sampling_rate, caption="its audio yo")
+    return tracklab.Audio(audio_data, sample_rate=sampling_rate, caption="its audio yo")
 
 
 def create_random_plotly():
@@ -195,19 +195,19 @@ def create_random_plotly():
 def create_random_html():
     fig = create_random_plotly()
     string = pio.to_html(fig)
-    return wandb.Html(string)
+    return tracklab.Html(string)
 
 
 def create_random_point_cloud():
     rng = np.random.RandomState(seed=1337)
 
     point_cloud = rng.rand(100, 3)
-    return wandb.Object3D(point_cloud)
+    return tracklab.Object3D(point_cloud)
 
 
 def create_random_molecule():
     m = Chem.MolFromSmiles("Cc1ccccc1")
-    return wandb.Molecule.from_rdkit(m)
+    return tracklab.Molecule.from_rdkit(m)
 
 
 def make_artifact(name):
@@ -219,7 +219,7 @@ def make_artifact(name):
                 random_text = generate_random_text(50)
                 f.write(random_text + "\n")
 
-        artifact = wandb.Artifact(name, name)
+        artifact = tracklab.Artifact(name, name)
         artifact.add_file(filename)
 
     return artifact

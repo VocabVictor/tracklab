@@ -2,9 +2,9 @@ from unittest.mock import patch
 
 import pytest
 from wandb import Api
-from wandb.proto.wandb_internal_pb2 import ServerFeature
-from wandb.sdk.artifacts._validators import REGISTRY_PREFIX
-from wandb.sdk.internal.internal_api import Api as InternalApi
+from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.sdk.artifacts._validators import REGISTRY_PREFIX
+from tracklab.sdk.internal.internal_api import Api as InternalApi
 
 
 @pytest.fixture
@@ -306,7 +306,7 @@ def test_create_registry_invalid_registry_name(default_organization):
 
 
 @pytest.mark.usefixtures(skip_if_server_does_not_support_create_registry.__name__)
-@patch("wandb.apis.public.registries.registry.wandb.termlog")
+@patch("tracklab.apis.public.registries.registry.tracklab.termlog")
 def test_edit_registry_name(mock_termlog, default_organization):
     api = Api()
     registry_name = "test"

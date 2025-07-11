@@ -3,11 +3,11 @@ import sys
 
 import pytest
 import tqdm
-import wandb
+import tracklab
 
 
 def test_tqdm(wandb_backend_spy):
-    with wandb.init(settings={"console": "auto"}) as run:
+    with tracklab.init(settings={"console": "auto"}) as run:
         print("before progress")
         for i in tqdm.tqdm(range(10), ascii=" 123456789#"):
             print(f"progress {i}")
@@ -26,7 +26,7 @@ def test_tqdm(wandb_backend_spy):
 
 
 def test_emoji(wandb_backend_spy):
-    with wandb.init(settings={"console": "auto"}) as run:
+    with tracklab.init(settings={"console": "auto"}) as run:
         print("before emoji")
         for i in range(10):
             print(f"line-{i}-\N{GRINNING FACE}")
@@ -42,7 +42,7 @@ def test_emoji(wandb_backend_spy):
 
 @pytest.mark.skip(reason="order seems to be wrong")
 def test_tqdm_nested(wandb_backend_spy):
-    with wandb.init(settings={"console": "auto"}) as run:
+    with tracklab.init(settings={"console": "auto"}) as run:
         print("before progress")
         for outer in tqdm.tqdm([10, 20, 30, 40, 50], desc=" outer", position=0):
             for inner in tqdm.tqdm(
@@ -67,7 +67,7 @@ def test_tqdm_nested(wandb_backend_spy):
 
 @pytest.mark.skip(reason="capture seems wrong")
 def test_tqdm_post_finish(wandb_backend_spy):
-    with wandb.init(settings={"console": "auto"}) as run:
+    with tracklab.init(settings={"console": "auto"}) as run:
         progress_bar = tqdm.tqdm(range(5))
         progress_bar.update(2)
         run.finish()

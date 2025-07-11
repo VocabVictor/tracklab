@@ -1,259 +1,287 @@
-"""Upload step for file synchronization pipeline."""
+"""Batching file prepare requests to our API."""
 
-import os
-import shutil
+import concurrent.futures
+import logging
+import queue
+import sys
 import threading
-from typing import List, Dict, Any, Optional, Callable
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    NamedTuple,
+    Optional,
+    Union,
+)
 
-from .upload_job import UploadJob, UploadStatus
-from .stats import FileStats
+from tracklab.errors.term import termerror
+from tracklab.filesync import upload_job
+from tracklab.sdk.lib.paths import LogicalPath
+
+if TYPE_CHECKING:
+    from typing import TypedDict
+
+    from tracklab.filesync import stats
+    from tracklab.sdk.internal import file_stream, internal_api, progress
+    from tracklab.sdk.internal.settings_static import SettingsStatic
+
+    class ArtifactStatus(TypedDict):
+        finalize: bool
+        pending_count: int
+        commit_requested: bool
+        pre_commit_callbacks: MutableSet["PreCommitFn"]
+        result_futures: MutableSet["concurrent.futures.Future[None]"]
+
+
+PreCommitFn = Callable[[], None]
+OnRequestFinishFn = Callable[[], None]
+SaveFn = Callable[["progress.ProgressFn"], bool]
+
+logger = logging.getLogger(__name__)
+
+
+class RequestUpload(NamedTuple):
+    path: str
+    save_name: LogicalPath
+    artifact_id: Optional[str]
+    md5: Optional[str]
+    copied: bool
+    save_fn: Optional[SaveFn]
+    digest: Optional[str]
+
+
+class RequestCommitArtifact(NamedTuple):
+    artifact_id: str
+    finalize: bool
+    before_commit: PreCommitFn
+    result_future: "concurrent.futures.Future[None]"
+
+
+class RequestFinish(NamedTuple):
+    callback: Optional[OnRequestFinishFn]
+
+
+class EventJobDone(NamedTuple):
+    job: RequestUpload
+    exc: Optional[BaseException]
+
+
+Event = Union[RequestUpload, RequestCommitArtifact, RequestFinish, EventJobDone]
 
 
 class StepUpload:
-    """Handles the upload step of file synchronization.
-    
-    In TrackLab's local-first approach, this manages copying files
-    to the experiment's managed storage location.
-    """
-    
-    def __init__(self, 
-                 run_id: str,
-                 target_dir: str,
-                 max_workers: int = 4,
-                 progress_callback: Optional[Callable] = None):
-        self.run_id = run_id
-        self.target_dir = Path(target_dir)
-        self.max_workers = max_workers
-        self.progress_callback = progress_callback
-        self.active_jobs: List[UploadJob] = []
-        self._lock = threading.Lock()
-        
-    def upload_files(self, 
-                    file_list: List[Dict[str, Any]], 
-                    source_dir: Optional[str] = None) -> UploadJob:
-        """Upload a list of prepared files.
-        
-        Args:
-            file_list: List of file metadata from StepPrepare
-            source_dir: Base source directory for relative paths
-            
-        Returns:
-            UploadJob instance for tracking progress
-        """
-        job = UploadJob(
-            run_id=self.run_id,
-            source_dir=source_dir or "/",
-            target_dir=str(self.target_dir)
+    def __init__(
+        self,
+        api: "internal_api.Api",
+        stats: "stats.Stats",
+        event_queue: "queue.Queue[Event]",
+        max_threads: int,
+        file_stream: "file_stream.FileStreamApi",
+        settings: Optional["SettingsStatic"] = None,
+    ) -> None:
+        self._api = api
+        self._stats = stats
+        self._event_queue = event_queue
+        self._file_stream = file_stream
+
+        self._thread = threading.Thread(target=self._thread_body)
+        self._thread.daemon = True
+
+        self._pool = concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix="wandb-upload",
+            max_workers=max_threads,
         )
-        
-        # Add files to job
-        for file_info in file_list:
-            job.add_file(
-                file_path=file_info['source_path'],
-                relative_path=file_info['relative_path']
+
+        # Indexed by files' `save_name`'s, which are their ID's in the Run.
+        self._running_jobs: MutableMapping[LogicalPath, RequestUpload] = {}
+        self._pending_jobs: MutableSequence[RequestUpload] = []
+
+        self._artifacts: MutableMapping[str, ArtifactStatus] = {}
+
+        self.silent = bool(settings.silent) if settings else False
+
+    def _thread_body(self) -> None:
+        event: Optional[Event]
+        # Wait for event in the queue, and process one by one until a
+        # finish event is received
+        finish_callback = None
+        while True:
+            event = self._event_queue.get()
+            if isinstance(event, RequestFinish):
+                finish_callback = event.callback
+                break
+            self._handle_event(event)
+
+        # We've received a finish event. At this point, further Upload requests
+        # are invalid.
+
+        # After a finish event is received, iterate through the event queue
+        # one by one and process all remaining events.
+        while True:
+            try:
+                event = self._event_queue.get(True, 0.2)
+            except queue.Empty:
+                event = None
+            if event:
+                self._handle_event(event)
+            elif not self._running_jobs:
+                # Queue was empty and no jobs left.
+                self._pool.shutdown(wait=False)
+                if finish_callback:
+                    finish_callback()
+                break
+
+    def _handle_event(self, event: Event) -> None:
+        if isinstance(event, EventJobDone):
+            job = event.job
+
+            if event.exc is not None:
+                logger.exception(
+                    "Failed to upload file: %s", job.path, exc_info=event.exc
+                )
+
+            if job.artifact_id:
+                if event.exc is None:
+                    self._artifacts[job.artifact_id]["pending_count"] -= 1
+                    self._maybe_commit_artifact(job.artifact_id)
+                else:
+                    if not self.silent:
+                        termerror(
+                            "Uploading artifact file failed. Artifact won't be committed."
+                        )
+                    self._fail_artifact_futures(job.artifact_id, event.exc)
+            self._running_jobs.pop(job.save_name)
+            # If we have any pending jobs, start one now
+            if self._pending_jobs:
+                event = self._pending_jobs.pop(0)
+                self._start_upload_job(event)
+        elif isinstance(event, RequestCommitArtifact):
+            if event.artifact_id not in self._artifacts:
+                self._init_artifact(event.artifact_id)
+            self._artifacts[event.artifact_id]["commit_requested"] = True
+            self._artifacts[event.artifact_id]["finalize"] = event.finalize
+            self._artifacts[event.artifact_id]["pre_commit_callbacks"].add(
+                event.before_commit
             )
-            
-        job.progress_callback = self.progress_callback
-        
-        with self._lock:
-            self.active_jobs.append(job)
-            
-        return job
-        
-    def upload_files_parallel(self, 
-                              file_list: List[Dict[str, Any]], 
-                              source_dir: Optional[str] = None) -> UploadJob:
-        """Upload files in parallel for better performance."""
-        job = self.upload_files(file_list, source_dir)
-        
-        # Start upload in background thread
-        thread = threading.Thread(target=self._parallel_upload, args=(job,))
-        thread.daemon = True
-        thread.start()
-        
-        return job
-        
-    def _parallel_upload(self, job: UploadJob):
-        """Execute parallel upload for a job."""
-        try:
-            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-                # Submit all upload tasks
-                future_to_item = {}
-                for item in job.items:
-                    if item.status == UploadStatus.PENDING:
-                        future = executor.submit(self._upload_single_file, item, job.target_dir)
-                        future_to_item[future] = item
-                        
-                # Process completed uploads
-                completed = 0
-                total = len(future_to_item)
-                
-                for future in as_completed(future_to_item):
-                    item = future_to_item[future]
-                    try:
-                        future.result()  # This will raise if upload failed
-                        item.status = UploadStatus.COMPLETED
-                        item.uploaded_at = datetime.now()
-                    except Exception as e:
-                        item.status = UploadStatus.FAILED
-                        item.error_message = str(e)
-                        
-                    completed += 1
-                    
-                    if self.progress_callback:
-                        progress = completed / total
-                        self.progress_callback(progress, item)
-                        
-            # Update job status
-            failed_items = [item for item in job.items if item.status == UploadStatus.FAILED]
-            if failed_items:
-                job.status = UploadStatus.FAILED
-            else:
-                job.status = UploadStatus.COMPLETED
-                
-            job.completed_at = datetime.now()
-            
-        except Exception as e:
-            job.status = UploadStatus.FAILED
-            job.completed_at = datetime.now()
-            print(f"Upload job failed: {e}")
-            
-    def _upload_single_file(self, item, target_base_dir: Path):
-        """Upload a single file."""
-        source_path = Path(item.source_path)
-        target_path = target_base_dir / item.relative_path
-        
-        # Ensure target directory exists
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Copy file with metadata preservation
-        shutil.copy2(source_path, target_path)
-        
-        # Verify copy
-        if not target_path.exists():
-            raise IOError(f"Failed to copy file to {target_path}")
-            
-        source_size = source_path.stat().st_size
-        target_size = target_path.stat().st_size
-        
-        if source_size != target_size:
-            raise IOError(f"File size mismatch: expected {source_size}, got {target_size}")
-            
-    def upload_single_file(self, 
-                          source_path: str, 
-                          relative_path: Optional[str] = None) -> Dict[str, Any]:
-        """Upload a single file immediately.
-        
-        Args:
-            source_path: Path to source file
-            relative_path: Relative path in target directory
-            
-        Returns:
-            Upload result metadata
+            self._artifacts[event.artifact_id]["result_futures"].add(
+                event.result_future
+            )
+            self._maybe_commit_artifact(event.artifact_id)
+        elif isinstance(event, RequestUpload):
+            if event.artifact_id is not None:
+                if event.artifact_id not in self._artifacts:
+                    self._init_artifact(event.artifact_id)
+                self._artifacts[event.artifact_id]["pending_count"] += 1
+            self._start_upload_job(event)
+        else:
+            raise TypeError(f"Event has unexpected type: {event!s}")
+
+    def _start_upload_job(self, event: RequestUpload) -> None:
+        # Operations on a single backend file must be serialized. if
+        # we're already uploading this file, put the event on the
+        # end of the queue
+        if event.save_name in self._running_jobs:
+            self._pending_jobs.append(event)
+            return
+
+        self._spawn_upload(event)
+
+    def _spawn_upload(self, event: RequestUpload) -> None:
+        """Spawn an upload job, and handles the bookkeeping of `self._running_jobs`.
+
+        Context: it's important that, whenever we add an entry to `self._running_jobs`,
+        we ensure that a corresponding `EventJobDone` message will eventually get handled;
+        otherwise, the `_running_jobs` entry will never get removed, and the StepUpload
+        will never shut down.
+
+        The sole purpose of this function is to make sure that the code that adds an entry
+        to `self._running_jobs` is textually right next to the code that eventually enqueues
+        the `EventJobDone` message. This should help keep them in sync.
         """
-        source_path = Path(source_path)
-        
-        if not source_path.exists():
-            raise FileNotFoundError(f"Source file not found: {source_path}")
-            
-        if relative_path is None:
-            relative_path = source_path.name
-            
-        target_path = self.target_dir / relative_path
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        start_time = datetime.now()
-        
-        try:
-            # Copy file
-            shutil.copy2(source_path, target_path)
-            
-            # Verify
-            if not target_path.exists():
-                raise IOError(f"Failed to copy file to {target_path}")
-                
-            source_stats = source_path.stat()
-            target_stats = target_path.stat()
-            
-            if source_stats.st_size != target_stats.st_size:
-                raise IOError(f"File size mismatch after copy")
-                
-            end_time = datetime.now()
-            duration = (end_time - start_time).total_seconds()
-            
-            return {
-                'source_path': str(source_path),
-                'target_path': str(target_path),
-                'relative_path': relative_path,
-                'size': source_stats.st_size,
-                'duration': duration,
-                'success': True,
-                'uploaded_at': end_time.isoformat()
-            }
-            
-        except Exception as e:
-            end_time = datetime.now()
-            duration = (end_time - start_time).total_seconds()
-            
-            return {
-                'source_path': str(source_path),
-                'target_path': str(target_path) if 'target_path' in locals() else None,
-                'relative_path': relative_path,
-                'size': source_path.stat().st_size if source_path.exists() else 0,
-                'duration': duration,
-                'success': False,
-                'error': str(e),
-                'uploaded_at': end_time.isoformat()
-            }
-            
-    def get_active_jobs(self) -> List[UploadJob]:
-        """Get list of active upload jobs."""
-        with self._lock:
-            return self.active_jobs.copy()
-            
-    def get_job_status(self, run_id: str) -> Optional[Dict[str, Any]]:
-        """Get status of upload job for a specific run."""
-        with self._lock:
-            for job in self.active_jobs:
-                if job.run_id == run_id:
-                    return job.get_progress()
-        return None
-        
-    def cancel_job(self, run_id: str) -> bool:
-        """Cancel an active upload job."""
-        with self._lock:
-            for job in self.active_jobs:
-                if job.run_id == run_id:
-                    job.cancel()
-                    return True
-        return False
-        
-    def cleanup_completed_jobs(self):
-        """Remove completed jobs from active list."""
-        with self._lock:
-            self.active_jobs = [job for job in self.active_jobs if not job.is_completed]
-            
-    def get_upload_summary(self) -> Dict[str, Any]:
-        """Get summary of all upload activities."""
-        with self._lock:
-            total_jobs = len(self.active_jobs)
-            completed_jobs = sum(1 for job in self.active_jobs if job.status == UploadStatus.COMPLETED)
-            failed_jobs = sum(1 for job in self.active_jobs if job.status == UploadStatus.FAILED)
-            in_progress_jobs = sum(1 for job in self.active_jobs if job.status == UploadStatus.IN_PROGRESS)
-            
-            total_files = sum(len(job.items) for job in self.active_jobs)
-            uploaded_files = sum(len([item for item in job.items if item.status == UploadStatus.COMPLETED]) 
-                               for job in self.active_jobs)
-            
-            return {
-                'total_jobs': total_jobs,
-                'completed_jobs': completed_jobs,
-                'failed_jobs': failed_jobs,
-                'in_progress_jobs': in_progress_jobs,
-                'total_files': total_files,
-                'uploaded_files': uploaded_files,
-                'target_directory': str(self.target_dir)
-            }
+        # Adding the entry to `self._running_jobs` MUST happen in the main thread,
+        # NOT in the job that gets submitted to the thread-pool, to guard against
+        # this sequence of events:
+        # - StepUpload receives a RequestUpload
+        #     ...and therefore spawns a thread to do the upload
+        # - StepUpload receives a RequestFinish
+        #     ...and checks `self._running_jobs` to see if there are any tasks to wait for...
+        #     ...and there are none, because the addition to `self._running_jobs` happens in
+        #        the background thread, which the scheduler hasn't yet run...
+        #     ...so the StepUpload shuts down. Even though we haven't uploaded the file!
+        #
+        # This would be very bad!
+        # So, this line has to happen _outside_ the `pool.submit()`.
+        self._running_jobs[event.save_name] = event
+
+        def run_and_notify() -> None:
+            try:
+                self._do_upload(event)
+            finally:
+                self._event_queue.put(EventJobDone(event, exc=sys.exc_info()[1]))
+
+        self._pool.submit(run_and_notify)
+
+    def _do_upload(self, event: RequestUpload) -> None:
+        job = upload_job.UploadJob(
+            self._stats,
+            self._api,
+            self._file_stream,
+            self.silent,
+            event.save_name,
+            event.path,
+            event.artifact_id,
+            event.md5,
+            event.copied,
+            event.save_fn,
+            event.digest,
+        )
+        job.run()
+
+    def _init_artifact(self, artifact_id: str) -> None:
+        self._artifacts[artifact_id] = {
+            "finalize": False,
+            "pending_count": 0,
+            "commit_requested": False,
+            "pre_commit_callbacks": set(),
+            "result_futures": set(),
+        }
+
+    def _maybe_commit_artifact(self, artifact_id: str) -> None:
+        artifact_status = self._artifacts[artifact_id]
+        if (
+            artifact_status["pending_count"] == 0
+            and artifact_status["commit_requested"]
+        ):
+            try:
+                for pre_callback in artifact_status["pre_commit_callbacks"]:
+                    pre_callback()
+                if artifact_status["finalize"]:
+                    self._api.commit_artifact(artifact_id)
+            except Exception as exc:
+                termerror(
+                    f"Committing artifact failed. Artifact {artifact_id} won't be finalized."
+                )
+                termerror(str(exc))
+                self._fail_artifact_futures(artifact_id, exc)
+            else:
+                self._resolve_artifact_futures(artifact_id)
+
+    def _fail_artifact_futures(self, artifact_id: str, exc: BaseException) -> None:
+        futures = self._artifacts[artifact_id]["result_futures"]
+        for result_future in futures:
+            result_future.set_exception(exc)
+        futures.clear()
+
+    def _resolve_artifact_futures(self, artifact_id: str) -> None:
+        futures = self._artifacts[artifact_id]["result_futures"]
+        for result_future in futures:
+            result_future.set_result(None)
+        futures.clear()
+
+    def start(self) -> None:
+        self._thread.start()
+
+    def is_alive(self) -> bool:
+        return self._thread.is_alive()

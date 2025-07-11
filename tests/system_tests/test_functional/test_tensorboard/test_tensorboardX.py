@@ -1,12 +1,12 @@
 """Tests for tensorboardX integration."""
 
 import torch
-import wandb
+import tracklab
 from tensorboardX import SummaryWriter
 
 
 def test_add_scalar(wandb_backend_spy):
-    with wandb.init(sync_tensorboard=True) as run:
+    with tracklab.init(sync_tensorboard=True) as run:
         with SummaryWriter() as writer:
             for i in range(10):
                 writer.add_scalar("loss", torch.tensor(i / 64), i + 1)
@@ -18,11 +18,11 @@ def test_add_scalar(wandb_backend_spy):
         assert summary["global_step"] == 10
         assert summary["loss"] == 9 / 64
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_image(wandb_backend_spy):
-    with wandb.init(sync_tensorboard=True) as run:
+    with tracklab.init(sync_tensorboard=True) as run:
         with SummaryWriter() as writer:
             for i in range(10):
                 writer.add_image(
@@ -41,11 +41,11 @@ def test_add_image(wandb_backend_spy):
         assert summary["example"]["height"] == 28
         assert summary["example"]["format"] == "png"
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_gif(wandb_backend_spy):
-    with wandb.init(sync_tensorboard=True) as run:
+    with tracklab.init(sync_tensorboard=True) as run:
         with SummaryWriter() as writer:
             for i in range(10):
                 writer.add_video(
@@ -66,4 +66,4 @@ def test_add_gif(wandb_backend_spy):
         assert summary["example"]["height"] == 1
         assert summary["example"]["format"] == "gif"
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()

@@ -7,8 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 from pydantic import BaseModel, Field
-from wandb.sdk.launch.errors import LaunchError
-from wandb.sdk.launch.inputs.internal import (
+from tracklab.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.inputs.internal import (
     ConfigTmpDir,
     JobInputArguments,
     StagedLaunchInputs,
@@ -182,13 +182,13 @@ def test_replace_refs_and_allofs(test_json_schema, expected_json_schema):
 
 def test_handle_config_file_input(mocker):
     """Test handle_config_file_input function."""
-    mocker.patch("wandb.sdk.launch.inputs.internal.override_file")
-    mocker.patch("wandb.sdk.launch.inputs.internal.config_path_is_valid")
-    mocker.patch("wandb.sdk.launch.inputs.internal.ConfigTmpDir")
-    mocker.patch("wandb.sdk.launch.inputs.internal.shutil.copy")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.override_file")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.config_path_is_valid")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.ConfigTmpDir")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.shutil.copy")
 
     wandb_run = MagicMock()
-    mocker.patch("wandb.sdk.launch.inputs.internal.wandb.run", wandb_run)
+    mocker.patch("tracklab.sdk.launch.inputs.internal.tracklab.run", wandb_run)
     handle_config_file_input("path", include=["include"], exclude=["exclude"])
     wandb_run._backend.interface.publish_job_input.assert_called_once_with(
         include_paths=[["include"]],
@@ -212,13 +212,13 @@ def test_handle_config_file_input_pydantic(
     expected_json_schema,
 ):
     """Test handle_config_file_input function with a Pydantic model schema."""
-    mocker.patch("wandb.sdk.launch.inputs.internal.override_file")
-    mocker.patch("wandb.sdk.launch.inputs.internal.config_path_is_valid")
-    mocker.patch("wandb.sdk.launch.inputs.internal.ConfigTmpDir")
-    mocker.patch("wandb.sdk.launch.inputs.internal.shutil.copy")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.override_file")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.config_path_is_valid")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.ConfigTmpDir")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.shutil.copy")
 
     wandb_run = MagicMock()
-    mocker.patch("wandb.sdk.launch.inputs.internal.wandb.run", wandb_run)
+    mocker.patch("tracklab.sdk.launch.inputs.internal.tracklab.run", wandb_run)
     handle_config_file_input(
         "path", include=["include"], exclude=["exclude"], schema=ExampleSchema
     )
@@ -235,7 +235,7 @@ def test_handle_run_config_input(mocker):
     """Test handle_run_config_input function."""
     wandb_run = mocker.MagicMock()
     wandb_run._backend.interface = mocker.MagicMock()
-    mocker.patch("wandb.sdk.launch.inputs.internal.wandb.run", wandb_run)
+    mocker.patch("tracklab.sdk.launch.inputs.internal.tracklab.run", wandb_run)
     handle_run_config_input(include=["include"], exclude=["exclude"])
     wandb_run._backend.interface.publish_job_input.assert_called_once_with(
         include_paths=[["include"]],
@@ -248,11 +248,11 @@ def test_handle_run_config_input(mocker):
 
 def test_handle_config_file_input_staged(mocker, reset_staged_inputs):
     """Test that config file input is staged when run is not available."""
-    mocker.patch("wandb.sdk.launch.inputs.internal.wandb.run", None)
-    mocker.patch("wandb.sdk.launch.inputs.internal.override_file")
-    mocker.patch("wandb.sdk.launch.inputs.internal.config_path_is_valid")
-    mocker.patch("wandb.sdk.launch.inputs.internal.ConfigTmpDir")
-    mocker.patch("wandb.sdk.launch.inputs.internal.shutil.copy")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.tracklab.run", None)
+    mocker.patch("tracklab.sdk.launch.inputs.internal.override_file")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.config_path_is_valid")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.ConfigTmpDir")
+    mocker.patch("tracklab.sdk.launch.inputs.internal.shutil.copy")
 
     handle_config_file_input("path", include=["include"], exclude=["exclude"])
     staged_inputs = StagedLaunchInputs()._staged_inputs
@@ -266,7 +266,7 @@ def test_handle_config_file_input_staged(mocker, reset_staged_inputs):
 
 def test_handle_run_config_input_staged(mocker, reset_staged_inputs):
     """Test that run config input is staged when run is not available."""
-    mocker.patch("wandb.sdk.launch.inputs.internal.wandb.run", None)
+    mocker.patch("tracklab.sdk.launch.inputs.internal.tracklab.run", None)
     handle_run_config_input(include=["include"], exclude=["exclude"])
     staged_inputs = StagedLaunchInputs()._staged_inputs
     assert len(staged_inputs) == 1

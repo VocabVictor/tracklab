@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-"""Tests for the `wandb.GitRepo` module."""
+"""Tests for the `tracklab.GitRepo` module."""
 
 from typing import Generator, Optional
 
 import git
 import pytest
-from wandb.sdk.lib.gitlib import GitRepo
+from tracklab.sdk.lib.gitlib import GitRepo
 
 
 @pytest.fixture

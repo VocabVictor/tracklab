@@ -7,7 +7,7 @@ import subprocess
 import time
 
 import tqdm
-import wandb
+import tracklab
 
 
 def main(
@@ -16,9 +16,9 @@ def main(
     num_steps: int = 10,
     eval_rate: int = 4,
 ):
-    run = wandb.init(
+    run = tracklab.init(
         project=project,
-        settings=wandb.Settings(
+        settings=tracklab.Settings(
             init_timeout=60,
             mode="shared",
             _stats_sample_rate_seconds=1,

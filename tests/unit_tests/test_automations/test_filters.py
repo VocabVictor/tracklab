@@ -5,7 +5,7 @@ from typing import Any
 
 from hypothesis import given
 from hypothesis.strategies import booleans, builds, lists, sampled_from
-from wandb.automations._filters import (
+from tracklab.automations._filters import (
     And,
     Contains,
     Eq,

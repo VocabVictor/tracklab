@@ -1,7 +1,7 @@
 import pytest
-import wandb
-from wandb.apis.importers.internals.util import Namespace
-from wandb.apis.importers.mlflow import MlflowImporter
+import tracklab
+from tracklab.apis.importers.internals.util import Namespace
+from tracklab.apis.importers.mlflow import MlflowImporter
 
 
 @pytest.mark.timeout(60)
@@ -24,7 +24,7 @@ def test_mlflow(
     runs = importer.collect_runs()
     importer.import_runs(runs, namespace=Namespace(user, project))
 
-    api = wandb.Api()
+    api = tracklab.Api()
     runs = list(api.runs(f"{user}/{project}"))
     assert len(runs) == mlflow_logging_config.total_runs
     for run in runs:
@@ -38,6 +38,6 @@ def test_mlflow(
         assert len(run.config) == 10  # 9 keys + `imported_mlflow_tags`
 
         # Check artifacts (note: all mlflow artifacts are lumped
-        # into a single wandb.Artifact, so len(art) == 1 always)
+        # into a single tracklab.Artifact, so len(art) == 1 always)
         art = list(run.logged_artifacts())[0]
         assert len(art.files()) == mlflow_logging_config.total_files

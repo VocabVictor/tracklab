@@ -2,7 +2,7 @@ import platform
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch.runner.local_container import LocalContainerRunner
+from tracklab.sdk.launch.runner.local_container import LocalContainerRunner
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def mock_launch_project(tmpdir):
 def mock_pull_docker_image(mocker):
     """Patches the docker image pull method with a dummy."""
     mocker.patch(
-        "wandb.sdk.launch.runner.local_container.pull_docker_image", return_value=None
+        "tracklab.sdk.launch.runner.local_container.pull_docker_image", return_value=None
     )
 
 

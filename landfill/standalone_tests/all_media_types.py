@@ -11,7 +11,7 @@ import plotly.graph_objs as go
 import tensorflow
 import torch
 
-import wandb
+import tracklab
 
 
 def dummy_torch_tensor(size, requires_grad=True):
@@ -24,10 +24,10 @@ def dummy_torch_tensor(size, requires_grad=True):
 
 
 def main():
-    wandb.init()
+    tracklab.init()
 
-    histogram_small_literal = wandb.Histogram(np_histogram=([1, 2, 4], [3, 10, 20, 0]))
-    histogram_large_random = wandb.Histogram(numpy.random.randint(255, size=(1000)))
+    histogram_small_literal = tracklab.Histogram(np_histogram=([1, 2, 4], [3, 10, 20, 0]))
+    histogram_large_random = tracklab.Histogram(numpy.random.randint(255, size=(1000)))
     numpy_array = numpy.random.rand(1000)
     torch_tensor = torch.rand(1000, 1000)
     data_frame = pandas.DataFrame(  # noqa: F841
@@ -41,13 +41,13 @@ def main():
     )
 
     image_data = numpy.zeros((28, 28))
-    image_cool = wandb.Image(image_data, caption="Cool zeros")
-    image_nice = wandb.Image(image_data, caption="Nice zeros")
-    image_random = wandb.Image(numpy.random.randint(255, size=(28, 28, 3)))
-    image_pil = wandb.Image(PIL.Image.new("L", (28, 28)))
+    image_cool = tracklab.Image(image_data, caption="Cool zeros")
+    image_nice = tracklab.Image(image_data, caption="Nice zeros")
+    image_random = tracklab.Image(numpy.random.randint(255, size=(28, 28, 3)))
+    image_pil = tracklab.Image(PIL.Image.new("L", (28, 28)))
     plt.plot([1, 2, 3, 4])
     plt.ylabel("some interesting numbers")
-    image_matplotlib_plot = wandb.Image(plt)
+    image_matplotlib_plot = tracklab.Image(plt)
     # matplotlib_plot = plt
 
     audio_data = numpy.random.uniform(-1, 1, 44100)
@@ -55,21 +55,21 @@ def main():
     caption1 = "This is what a dog sounds like"
     caption2 = "This is what a chicken sounds like"
     # test with all captions
-    audio1 = wandb.Audio(audio_data, sample_rate=sample_rate, caption=caption1)
-    audio2 = wandb.Audio(audio_data, sample_rate=sample_rate, caption=caption2)
+    audio1 = tracklab.Audio(audio_data, sample_rate=sample_rate, caption=caption1)
+    audio2 = tracklab.Audio(audio_data, sample_rate=sample_rate, caption=caption2)
     # test with no captions
-    audio3 = wandb.Audio(audio_data, sample_rate=sample_rate)
-    audio4 = wandb.Audio(audio_data, sample_rate=sample_rate)
+    audio3 = tracklab.Audio(audio_data, sample_rate=sample_rate)
+    audio4 = tracklab.Audio(audio_data, sample_rate=sample_rate)
     # test with some captions
-    audio5 = wandb.Audio(audio_data, sample_rate=sample_rate)
-    audio6 = wandb.Audio(audio_data, sample_rate=sample_rate, caption=caption2)
+    audio5 = tracklab.Audio(audio_data, sample_rate=sample_rate)
+    audio6 = tracklab.Audio(audio_data, sample_rate=sample_rate, caption=caption2)
 
-    html = wandb.Html("<html><body><h1>Hello</h1></body></html>")
+    html = tracklab.Html("<html><body><h1>Hello</h1></body></html>")
 
-    table_default_columns = wandb.Table()
+    table_default_columns = tracklab.Table()
     table_default_columns.add_data("Some awesome text", "Positive", "Negative")
 
-    table_custom_columns = wandb.Table(["Foo", "Bar"])
+    table_custom_columns = tracklab.Table(["Foo", "Bar"])
     table_custom_columns.add_data("So", "Cool")
     table_custom_columns.add_data("&", "Rad")
 
@@ -81,13 +81,13 @@ def main():
 
     # pytorch model graph
     # alex = models.AlexNet()
-    # graph = wandb.wandb_torch.TorchGraph.hook_torch(alex)
+    # graph = tracklab.wandb_torch.TorchGraph.hook_torch(alex)
     # alex.forward(dummy_torch_tensor((2, 3, 224, 224)))
 
     with tensorflow.Session().as_default() as sess:
         sess.run(tensorflow.global_variables_initializer())
 
-        wandb.run.summary.update(
+        tracklab.run.summary.update(
             {
                 "histogram-small-literal-summary": histogram_small_literal,
                 "histogram-large-random-summary": histogram_large_random,
@@ -124,7 +124,7 @@ def main():
         )
 
         for _ in range(10):
-            wandb.run.log(
+            tracklab.run.log(
                 {
                     "string": "string",
                     "histogram-small-literal": histogram_small_literal,
@@ -157,7 +157,7 @@ def main():
                 }
             )
 
-        wandb.run.summary.update(
+        tracklab.run.summary.update(
             {
                 "histogram-small-literal-summary": histogram_small_literal,
                 "histogram-large-random-summary": histogram_large_random,

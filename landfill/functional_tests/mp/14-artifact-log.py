@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
-import wandb
+import tracklab
 
 
 def main():
-    run = wandb.init()
+    run = tracklab.init()
     run.log(dict(m1=1))
     run.log(dict(m2=2))
 
     with open("my-dataset.txt", "w") as fp:
         fp.write("this-is-data")
-    artifact = wandb.Artifact("my-dataset", type="dataset")
-    table = wandb.Table(columns=["a", "b", "c"], data=[[1, 2, 3]])
+    artifact = tracklab.Artifact("my-dataset", type="dataset")
+    table = tracklab.Table(columns=["a", "b", "c"], data=[[1, 2, 3]])
     artifact.add(table, "my_table")
     artifact.add_file("my-dataset.txt")
     art = run.log_artifact(artifact)

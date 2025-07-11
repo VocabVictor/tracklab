@@ -11,7 +11,7 @@ pytest.importorskip("metaflow")
 import pandas as pd
 from metaflow import FlowSpec, step
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from wandb.integration.metaflow import wandb_log, wandb_track, wandb_use
+from tracklab.integration.metaflow import tracklab_log, wandb_track, wandb_use
 
 try:
     import torch

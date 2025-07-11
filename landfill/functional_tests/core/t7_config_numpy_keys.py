@@ -15,9 +15,9 @@ assert:
 
 import numpy as np
 
-import wandb
+import tracklab
 
-wandb.init(
+tracklab.init(
     config={
         "this": 2,
         "ok": {3: 4},

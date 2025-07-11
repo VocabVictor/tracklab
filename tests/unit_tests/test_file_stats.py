@@ -1,5 +1,5 @@
 import pytest
-from wandb.filesync import stats
+from tracklab.filesync import stats
 
 
 @pytest.mark.parametrize(

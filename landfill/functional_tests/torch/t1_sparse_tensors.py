@@ -4,14 +4,14 @@ import torch.nn as nn
 import torch.nn.functional as tnnf
 import torch.optim as optim
 
-import wandb
+import tracklab
 
 CONTEXT_SIZE = 2
 EMBEDDING_DIM = 10
 
 
 def main():
-    run = wandb.init()
+    run = tracklab.init()
 
     # We will use Shakespeare Sonnet 2
     test_sentence = """When forty winters shall besiege thy brow,
@@ -60,7 +60,7 @@ def main():
     model = model.cuda() if has_cuda else model
     optimizer = optim.SGD(model.parameters(), lr=0.001)
 
-    wandb.watch(model, log="all", log_freq=100)
+    tracklab.watch(model, log="all", log_freq=100)
 
     for _epoch in range(100):
         total_loss = 0
@@ -93,7 +93,7 @@ def main():
 
             # Get the Python number from a 1-element Tensor by calling tensor.item()
             total_loss += loss.item()
-            wandb.log({"batch_loss": loss.item()})
+            tracklab.log({"batch_loss": loss.item()})
         losses.append(total_loss)
     print(losses)  # The loss decreased every iteration over the training data!
 

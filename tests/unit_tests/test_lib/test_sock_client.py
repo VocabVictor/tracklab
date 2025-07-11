@@ -1,5 +1,5 @@
 import pytest
-from wandb.sdk.lib import sock_client
+from tracklab.sdk.lib import sock_client
 
 
 def test_append():

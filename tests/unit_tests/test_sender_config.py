@@ -1,6 +1,6 @@
-from wandb.proto import wandb_internal_pb2
-from wandb.sdk.internal import sender_config
-from wandb.sdk.lib import telemetry
+from tracklab.proto import tracklab_internal_pb2
+from tracklab.sdk.internal import sender_config
+from tracklab.sdk.lib import telemetry
 
 
 def test_config_record_update():

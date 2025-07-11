@@ -4,10 +4,10 @@ import sys
 from typing import List
 
 import pytest
-import wandb
-from wandb.apis.internal import InternalApi
-from wandb.apis.public import Api
-from wandb.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT
+import tracklab
+from tracklab.apis.internal import InternalApi
+from tracklab.apis.public import Api
+from tracklab.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT
 
 
 def _run_cmd_check_msg(cmd: List[str], assert_str: str) -> None:
@@ -19,7 +19,7 @@ def _run_cmd_check_msg(cmd: List[str], assert_str: str) -> None:
 def test_launch_sweep_param_validation(user):
     # make a job artifact for testing
     _project = "test-project7"
-    run = wandb.init(settings=wandb.Settings(project=_project))
+    run = tracklab.init(settings=tracklab.Settings(project=_project))
     job_artifact = run._log_job_artifact_with_image("ljadnfakehbbr:latest", args=[])
     job_name = f"{user}/{_project}/{job_artifact.wait().name}"
     run.finish()
@@ -98,8 +98,8 @@ def test_launch_sweep_param_validation(user):
 )
 def test_launch_sweep_scheduler_resources(user, scheduler_args, msg):
     # make proj and job
-    settings = wandb.Settings(project="model-registry")
-    run = wandb.init(settings=settings)
+    settings = tracklab.Settings(project="model-registry")
+    run = tracklab.init(settings=settings)
     job_artifact = run._log_job_artifact_with_image("test:latest", args=[])
     job_name = f"{user}/model-registry/{job_artifact.wait().name}"
     run.finish()
@@ -224,7 +224,7 @@ def test_launch_sweep_launch_resume(user):
     }
 
     # Entity, project, and sweep
-    sweep_id = wandb.sweep(sweep_config, entity=user, project=LAUNCH_DEFAULT_PROJECT)
+    sweep_id = tracklab.sweep(sweep_config, entity=user, project=LAUNCH_DEFAULT_PROJECT)
     subprocess.check_output(
         [
             "wandb",
@@ -242,7 +242,7 @@ def test_launch_sweep_launch_resume(user):
     )
 
     # Resume the same sweep, NO queue, should pick up from previous
-    sweep_id = wandb.sweep(sweep_config, entity=user, project=LAUNCH_DEFAULT_PROJECT)
+    sweep_id = tracklab.sweep(sweep_config, entity=user, project=LAUNCH_DEFAULT_PROJECT)
     subprocess.check_output(
         [
             "wandb",

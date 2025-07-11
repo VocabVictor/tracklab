@@ -3,10 +3,10 @@
 import sys
 import time
 
-import wandb
+import tracklab
 
 if __name__ == "__main__":
-    with wandb.init():
+    with tracklab.init():
         try:
             start_time = time.monotonic()
             time.sleep(30)

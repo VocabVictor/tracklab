@@ -6,14 +6,14 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-import wandb
-import wandb.sdk.launch.runner.kubernetes_runner
+import tracklab
+import tracklab.sdk.launch.runner.kubernetes_runner
 from kubernetes_asyncio import client
 from kubernetes_asyncio.client import ApiException
-from wandb.sdk.launch._project_spec import LaunchProject
-from wandb.sdk.launch.agent.agent import LaunchAgent
-from wandb.sdk.launch.errors import LaunchError
-from wandb.sdk.launch.runner.kubernetes_monitor import (
+from tracklab.sdk.launch._project_spec import LaunchProject
+from tracklab.sdk.launch.agent.agent import LaunchAgent
+from tracklab.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.runner.kubernetes_monitor import (
     CustomResource,
     LaunchKubernetesMonitor,
     _is_container_creating,
@@ -21,7 +21,7 @@ from wandb.sdk.launch.runner.kubernetes_monitor import (
     _state_from_conditions,
     _state_from_replicated_status,
 )
-from wandb.sdk.launch.runner.kubernetes_runner import (
+from tracklab.sdk.launch.runner.kubernetes_runner import (
     KubernetesRunner,
     KubernetesSubmittedRun,
     add_entrypoint_args_overrides,
@@ -323,7 +323,7 @@ def mock_event_streams(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_monitor.SafeWatch.stream",
+        "tracklab.sdk.launch.runner.kubernetes_monitor.SafeWatch.stream",
         _select_stream,
     )
     return job_stream, pod_stream
@@ -334,7 +334,7 @@ def mock_batch_api(monkeypatch):
     """Patches the kubernetes batch api with a mock and returns it."""
     batch_api = MockBatchApi()
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.client.BatchV1Api",
+        "tracklab.sdk.launch.runner.kubernetes_runner.client.BatchV1Api",
         lambda *args, **kwargs: batch_api,
     )
     return batch_api
@@ -345,7 +345,7 @@ def mock_core_api(monkeypatch):
     """Patches the kubernetes core api with a mock and returns it."""
     core_api = MockCoreV1Api()
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.client.CoreV1Api",
+        "tracklab.sdk.launch.runner.kubernetes_runner.client.CoreV1Api",
         lambda *args, **kwargs: core_api,
     )
     return core_api
@@ -356,7 +356,7 @@ def mock_custom_api(monkeypatch):
     """Patches the kubernetes custom api with a mock and returns it."""
     custom_api = MockCustomObjectsApi()
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.client.CustomObjectsApi",
+        "tracklab.sdk.launch.runner.kubernetes_runner.client.CustomObjectsApi",
         lambda *args, **kwargs: custom_api,
     )
     return custom_api
@@ -370,11 +370,11 @@ def mock_kube_context_and_api_client(monkeypatch):
         return (None, None)
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.get_kube_context_and_api_client",
+        "tracklab.sdk.launch.runner.kubernetes_runner.get_kube_context_and_api_client",
         _mock_get_kube_context_and_api_client,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_monitor.get_kube_context_and_api_client",
+        "tracklab.sdk.launch.runner.kubernetes_monitor.get_kube_context_and_api_client",
         _mock_get_kube_context_and_api_client,
     )
 
@@ -387,7 +387,7 @@ def mock_maybe_create_image_pullsecret(monkeypatch):
         return None
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.maybe_create_imagepull_secret",
+        "tracklab.sdk.launch.runner.kubernetes_runner.maybe_create_imagepull_secret",
         _mock_maybe_create_image_pullsecret,
     )
 
@@ -438,7 +438,7 @@ async def test_launch_kube_works(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
     )
@@ -550,7 +550,7 @@ async def test_launch_crd_works(
 ):
     """Test that we can launch a kubernetes job."""
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.maybe_create_imagepull_secret",
+        "tracklab.sdk.launch.runner.kubernetes_runner.maybe_create_imagepull_secret",
         lambda *args, **kwargs: None,
     )
     mock_batch_api.jobs = {"test-job": MockDict(volcano_spec)}
@@ -568,7 +568,7 @@ async def test_launch_crd_works(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
     )
@@ -670,7 +670,7 @@ async def test_launch_crd_pod_schedule_warning(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
     )
@@ -729,12 +729,12 @@ async def test_launch_kube_base_image_works(
 ):
     """Test that runner works as expected with base image jobs."""
     monkeypatch.setattr(
-        wandb.sdk.launch.runner.kubernetes_runner,
+        tracklab.sdk.launch.runner.kubernetes_runner,
         "SOURCE_CODE_PVC_MOUNT_PATH",
         tmpdir,
     )
     monkeypatch.setattr(
-        wandb.sdk.launch.runner.kubernetes_runner,
+        tracklab.sdk.launch.runner.kubernetes_runner,
         "SOURCE_CODE_PVC_NAME",
         "wandb-source-code-pvc",
     )
@@ -752,7 +752,7 @@ async def test_launch_kube_base_image_works(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
         docker_config={},
@@ -802,12 +802,12 @@ async def test_launch_crd_base_image_works(
 ):
     """Test that runner works as expected with base image jobs."""
     monkeypatch.setattr(
-        wandb.sdk.launch.runner.kubernetes_runner,
+        tracklab.sdk.launch.runner.kubernetes_runner,
         "SOURCE_CODE_PVC_MOUNT_PATH",
         tmpdir,
     )
     monkeypatch.setattr(
-        wandb.sdk.launch.runner.kubernetes_runner,
+        tracklab.sdk.launch.runner.kubernetes_runner,
         "SOURCE_CODE_PVC_NAME",
         "wandb-source-code-pvc",
     )
@@ -826,7 +826,7 @@ async def test_launch_crd_base_image_works(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
     )
@@ -885,7 +885,7 @@ async def test_launch_kube_failed(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
     )
@@ -927,13 +927,13 @@ async def test_launch_kube_api_secret_failed(
         return None
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.maybe_create_imagepull_secret",
+        "tracklab.sdk.launch.runner.kubernetes_runner.maybe_create_imagepull_secret",
         mock_maybe_create_imagepull_secret,
     )
     mock_la = MagicMock()
     mock_la.initialized = MagicMock(return_value=True)
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.LaunchAgent", mock_la
+        "tracklab.sdk.launch.runner.kubernetes_runner.LaunchAgent", mock_la
     )
 
     async def mock_create_namespaced_secret(*args, **kwargs):
@@ -942,10 +942,10 @@ async def test_launch_kube_api_secret_failed(
     mock_core_api = MagicMock()
     mock_core_api.create_namespaced_secret = mock_create_namespaced_secret
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.kubernetes_asyncio.client.CoreV1Api",
+        "tracklab.sdk.launch.runner.kubernetes_runner.kubernetes_asyncio.client.CoreV1Api",
         mock_core_api,
     )
-    monkeypatch.setattr("wandb.termwarn", MagicMock())
+    monkeypatch.setattr("tracklab.termwarn", MagicMock())
     mock_batch_api.jobs = {"test-job": MockDict(manifest)}
     project = LaunchProject(
         docker_config={"docker_image": "test_image"},
@@ -961,7 +961,7 @@ async def test_launch_kube_api_secret_failed(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
     )
@@ -971,8 +971,8 @@ async def test_launch_kube_api_secret_failed(
     with pytest.raises(LaunchError):
         await runner.run(project, MagicMock())
 
-    assert wandb.termwarn.call_count == 6
-    assert wandb.termwarn.call_args_list[0][0][0].startswith(
+    assert tracklab.termwarn.call_count == 6
+    assert tracklab.termwarn.call_args_list[0][0][0].startswith(
         "Exception when ensuring Kubernetes API key secret"
     )
 
@@ -1007,7 +1007,7 @@ async def test_launch_kube_pod_schedule_warning(
         api=test_api,
         git_info={},
         job="",
-        uri="https://wandb.ai/test_entity/test_project/runs/test_run",
+        uri="https://tracklab.ai/test_entity/test_project/runs/test_run",
         run_id="test_run_id",
         name="test_run",
     )
@@ -1092,7 +1092,7 @@ async def test_create_api_key_secret_exists():
 
     # Create secret with same name but different data, assert it gets overwritten
     secret_data = "bad data"
-    labels = {"wandb.ai/created-by": "launch-agent"}
+    labels = {"tracklab.ai/created-by": "launch-agent"}
     secret = client.V1Secret(
         data=secret_data,
         metadata=client.V1ObjectMeta(
@@ -1376,7 +1376,7 @@ def test_custom_resource_helper():
 @pytest.mark.asyncio
 async def test_log_error_callback(monkeypatch):
     """Test that our callback logs exceptions for crashed tasks."""
-    monkeypatch.setattr("wandb.termerror", MagicMock())
+    monkeypatch.setattr("tracklab.termerror", MagicMock())
 
     async def _error_raiser():
         raise LaunchError("test error")
@@ -1385,8 +1385,8 @@ async def test_log_error_callback(monkeypatch):
     task.add_done_callback(_log_err_task_callback)
     with pytest.raises(LaunchError):
         await task
-    assert wandb.termerror.call_count == 2
-    assert wandb.termerror.call_args_list[0][0][0].startswith("Exception in task")
+    assert tracklab.termerror.call_count == 2
+    assert tracklab.termerror.call_args_list[0][0][0].startswith("Exception in task")
 
 
 # Tests for KubernetesSubmittedRun

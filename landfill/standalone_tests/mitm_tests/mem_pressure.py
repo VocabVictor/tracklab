@@ -3,11 +3,11 @@ import time
 
 import yea
 
-import wandb
+import tracklab
 
 
 def main():
-    run = wandb.init()
+    run = tracklab.init()
     history = 20
     for i in range(history):
         if i % 10 == 0:

@@ -2,11 +2,11 @@ import hashlib
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch._project_spec import EntryPoint, LaunchProject
-from wandb.sdk.launch.builder import build
-from wandb.sdk.launch.builder.abstract import registry_from_uri
-from wandb.sdk.launch.builder.context_manager import get_requirements_section
-from wandb.sdk.launch.builder.templates.dockerfile import PIP_TEMPLATE
+from tracklab.sdk.launch._project_spec import EntryPoint, LaunchProject
+from tracklab.sdk.launch.builder import build
+from tracklab.sdk.launch.builder.abstract import registry_from_uri
+from tracklab.sdk.launch.builder.context_manager import get_requirements_section
+from tracklab.sdk.launch.builder.templates.dockerfile import PIP_TEMPLATE
 
 
 @pytest.mark.parametrize(
@@ -26,19 +26,19 @@ from wandb.sdk.launch.builder.templates.dockerfile import PIP_TEMPLATE
 )
 def test_registry_from_uri(url, expected, mocker):
     mocker.patch(
-        "wandb.sdk.launch.registry.azure_container_registry.AzureContainerRegistry",
+        "tracklab.sdk.launch.registry.azure_container_registry.AzureContainerRegistry",
         MagicMock(return_value="azure_container_registry"),
     )
     mocker.patch(
-        "wandb.sdk.launch.registry.google_artifact_registry.GoogleArtifactRegistry",
+        "tracklab.sdk.launch.registry.google_artifact_registry.GoogleArtifactRegistry",
         MagicMock(return_value="google_artifact_registry"),
     )
     mocker.patch(
-        "wandb.sdk.launch.registry.elastic_container_registry.ElasticContainerRegistry",
+        "tracklab.sdk.launch.registry.elastic_container_registry.ElasticContainerRegistry",
         MagicMock(return_value="elastic_container_registry"),
     )
     mocker.patch(
-        "wandb.sdk.launch.builder.abstract.AnonynmousRegistry",
+        "tracklab.sdk.launch.builder.abstract.AnonynmousRegistry",
         MagicMock(return_value="anon"),
     )
     assert registry_from_uri(url) == expected
@@ -109,9 +109,9 @@ def _setup(mocker):
 
 @pytest.fixture
 def no_buildx(mocker):
-    """Patches wandb.docker.is_buildx_installed to always return False."""
+    """Patches tracklab.docker.is_buildx_installed to always return False."""
     mocker.patch(
-        "wandb.sdk.launch.builder.build.docker.is_buildx_installed",
+        "tracklab.sdk.launch.builder.build.docker.is_buildx_installed",
         lambda: False,
     )
 
@@ -121,7 +121,7 @@ def test_get_requirements_section_user_provided_requirements(
 ):
     """Test that we use the user provided requirements.txt."""
     mocker.termwarn = MagicMock()
-    mocker.patch("wandb.termwarn", mocker.termwarn)
+    mocker.patch("tracklab.termwarn", mocker.termwarn)
     mock_launch_project.project_dir = tmp_path
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "requirements.txt").write_text("")
@@ -152,7 +152,7 @@ def test_get_requirements_section_frozen_requirements(
 ):
     """Test that we use frozen requirements.txt if nothing else is provided."""
     mocker.termwarn = MagicMock()
-    mocker.patch("wandb.termwarn", mocker.termwarn)
+    mocker.patch("tracklab.termwarn", mocker.termwarn)
     mock_launch_project.project_dir = tmp_path
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "requirements.frozen.txt").write_text("")
@@ -187,7 +187,7 @@ def test_get_requirements_section_pyproject(
     This should only happen if there is no requirements.txt in the directory.
     """
     mocker.termwarn = MagicMock()
-    mocker.patch("wandb.termwarn", mocker.termwarn)
+    mocker.patch("tracklab.termwarn", mocker.termwarn)
     mock_launch_project.project_dir = tmp_path
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "pyproject.toml").write_text(

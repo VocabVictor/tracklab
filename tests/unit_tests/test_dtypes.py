@@ -2,9 +2,9 @@ import datetime
 
 import numpy as np
 import pytest
-import wandb
+import tracklab
 from wandb import data_types
-from wandb.sdk.data_types._dtypes import (
+from tracklab.sdk.data_types._dtypes import (
     AnyType,
     BooleanType,
     ConstType,
@@ -20,8 +20,8 @@ from wandb.sdk.data_types._dtypes import (
     UnionType,
     UnknownType,
 )
-from wandb.sdk.data_types.image import _ImageFileType
-from wandb.sdk.data_types.table import _TableType
+from tracklab.sdk.data_types.image import _ImageFileType
+from tracklab.sdk.data_types.table import _TableType
 
 
 def test_none_type():
@@ -371,10 +371,10 @@ def test_image_file_type(assets_path):
     # to make sure that meta data is preserved when we assign to a new image
     im_path = assets_path("test.png")
     formats = ["png", "jpg", "jpeg", "bmp"]
-    jpg_img = wandb.Image(np.random.rand(10, 10), file_type=formats[0])
-    png_img = wandb.Image(np.random.rand(10, 10), file_type=formats[1])
-    gif_img = wandb.Image(np.random.rand(10, 10), file_type=formats[2])
-    bmp_img = wandb.Image(np.random.rand(10, 10), file_type=formats[3])
+    jpg_img = tracklab.Image(np.random.rand(10, 10), file_type=formats[0])
+    png_img = tracklab.Image(np.random.rand(10, 10), file_type=formats[1])
+    gif_img = tracklab.Image(np.random.rand(10, 10), file_type=formats[2])
+    bmp_img = tracklab.Image(np.random.rand(10, 10), file_type=formats[3])
     images = [jpg_img, png_img, gif_img, bmp_img]
     images_back_types = [im.format for im in images]
     assert images_back_types == formats
@@ -421,7 +421,7 @@ def test_image_file_type(assets_path):
         "mask_ground_truth": {"path": im_path, "class_labels": class_labels},
     }
     for filetype in formats:
-        img = wandb.Image(
+        img = tracklab.Image(
             np.random.rand(10, 10),
             boxes=box_annotation,
             masks=mask_annotation,
@@ -441,7 +441,7 @@ def test_classes_type():
     )
 
     wb_class_type = (
-        wandb.wandb_sdk.data_types.helper_types.classes._ClassesIdType.from_obj(
+        tracklab.wandb_sdk.data_types.helper_types.classes._ClassesIdType.from_obj(
             wb_classes
         )
     )
@@ -450,22 +450,22 @@ def test_classes_type():
 
 
 def test_table_type():
-    table_1 = wandb.Table(columns=["col"], data=[[1]])
+    table_1 = tracklab.Table(columns=["col"], data=[[1]])
     t1 = _TableType.from_obj(table_1)
-    table_2 = wandb.Table(columns=["col"], data=[[1.3]])
-    table_3 = wandb.Table(columns=["col"], data=[["a"]])
+    table_2 = tracklab.Table(columns=["col"], data=[[1.3]])
+    table_3 = tracklab.Table(columns=["col"], data=[["a"]])
     assert t1.assign(table_2) == t1
     assert t1.assign(table_3) == InvalidType()
 
 
 def test_table_implicit_types():
-    table = wandb.Table(columns=["col"])
+    table = tracklab.Table(columns=["col"])
     table.add_data(None)
     table.add_data(1)
     with pytest.raises(TypeError):
         table.add_data("a")
 
-    table = wandb.Table(columns=["col"], optional=False)
+    table = tracklab.Table(columns=["col"], optional=False)
     with pytest.raises(TypeError):
         table.add_data(None)
     table.add_data(1)
@@ -474,12 +474,12 @@ def test_table_implicit_types():
 
 
 def test_table_allow_mixed_types():
-    table = wandb.Table(columns=["col"], allow_mixed_types=True)
+    table = tracklab.Table(columns=["col"], allow_mixed_types=True)
     table.add_data(None)
     table.add_data(1)
     table.add_data("a")  # No error with allow_mixed_types
 
-    table = wandb.Table(columns=["col"], optional=False, allow_mixed_types=True)
+    table = tracklab.Table(columns=["col"], optional=False, allow_mixed_types=True)
     with pytest.raises(TypeError):
         table.add_data(None)  # Still errors since optional is false
     table.add_data(1)
@@ -498,7 +498,7 @@ def test_tables_with_dicts():
                             [
                                 {
                                     "d": 1,
-                                    "e": wandb.Image(
+                                    "e": tracklab.Image(
                                         np.random.randint(255, size=(10, 10))
                                     ),
                                 }
@@ -517,7 +517,7 @@ def test_tables_with_dicts():
                             [
                                 {
                                     "d": 1,
-                                    "e": wandb.Image(
+                                    "e": tracklab.Image(
                                         np.random.randint(255, size=(10, 10))
                                     ),
                                 }
@@ -539,7 +539,7 @@ def test_tables_with_dicts():
                             [
                                 {
                                     "d": 1,
-                                    "e": wandb.Image(
+                                    "e": tracklab.Image(
                                         np.random.randint(255, size=(10, 10))
                                     ),
                                 }
@@ -567,28 +567,28 @@ def test_tables_with_dicts():
         ],
     ]
 
-    _ = wandb.Table(columns=["A"], data=good_data, allow_mixed_types=True)
-    _ = wandb.Table(columns=["A"], data=bad_data, allow_mixed_types=True)
-    _ = wandb.Table(columns=["A"], data=good_data)
+    _ = tracklab.Table(columns=["A"], data=good_data, allow_mixed_types=True)
+    _ = tracklab.Table(columns=["A"], data=bad_data, allow_mixed_types=True)
+    _ = tracklab.Table(columns=["A"], data=good_data)
     with pytest.raises(TypeError):
-        _ = wandb.Table(columns=["A"], data=bad_data)
+        _ = tracklab.Table(columns=["A"], data=bad_data)
 
 
 def test_table_explicit_types():
-    table = wandb.Table(columns=["a", "b"], dtype=int)
+    table = tracklab.Table(columns=["a", "b"], dtype=int)
     table.add_data(None, None)
     table.add_data(1, 2)
     with pytest.raises(TypeError):
         table.add_data(1, "a")
 
-    table = wandb.Table(columns=["a", "b"], optional=False, dtype=[int, str])
+    table = tracklab.Table(columns=["a", "b"], optional=False, dtype=[int, str])
     with pytest.raises(TypeError):
         table.add_data(None, None)
     table.add_data(1, "a")
     with pytest.raises(TypeError):
         table.add_data("a", "a")
 
-    table = wandb.Table(columns=["a", "b"], optional=[False, True], dtype=[int, str])
+    table = tracklab.Table(columns=["a", "b"], optional=[False, True], dtype=[int, str])
     with pytest.raises(TypeError):
         table.add_data(None, None)
     with pytest.raises(TypeError):
@@ -600,7 +600,7 @@ def test_table_explicit_types():
 
 
 def test_table_type_cast():
-    table = wandb.Table(columns=["type_col"])
+    table = tracklab.Table(columns=["type_col"])
     table.add_data(1)
 
     wb_classes = data_types.Classes(
@@ -659,7 +659,7 @@ def test_table_specials(assets_path):
         "mask_ground_truth": {"path": im_path, "class_labels": class_labels},
     }
 
-    table = wandb.Table(
+    table = tracklab.Table(
         columns=["image", "table"],
         optional=False,
         dtype=[data_types.Image, data_types.Table],
@@ -719,14 +719,14 @@ def test_table_specials(assets_path):
 def test_nan_non_float():
     import pandas as pd
 
-    wandb.Table(dataframe=pd.DataFrame(data=[["A"], [np.nan]], columns=["a"]))
+    tracklab.Table(dataframe=pd.DataFrame(data=[["A"], [np.nan]], columns=["a"]))
 
 
 def test_table_typing_numpy():
     # Pulled from https://numpy.org/devdocs/user/basics.types.html
 
     # Numerics
-    table = wandb.Table(columns=["A"], dtype=[NumberType])
+    table = tracklab.Table(columns=["A"], dtype=[NumberType])
     table.add_data(None)
     table.add_data(42)
     table.add_data(np.byte(1))
@@ -762,14 +762,14 @@ def test_table_typing_numpy():
     table.add_data(np.complex128(42))
 
     # Booleans
-    table = wandb.Table(columns=["A"], dtype=[BooleanType])
+    table = tracklab.Table(columns=["A"], dtype=[BooleanType])
     table.add_data(None)
     table.add_data(True)
     table.add_data(False)
     table.add_data(np.bool_(True))
 
     # Array of Numerics
-    table = wandb.Table(columns=["A"], dtype=[[NumberType]])
+    table = tracklab.Table(columns=["A"], dtype=[[NumberType]])
     table.add_data(None)
     table.add_data([42])
     table.add_data(np.array([1, 0], dtype=np.byte))
@@ -805,14 +805,14 @@ def test_table_typing_numpy():
     table.add_data(np.array([42, 42], dtype=np.complex128))
 
     # Array of Booleans
-    table = wandb.Table(columns=["A"], dtype=[[BooleanType]])
+    table = tracklab.Table(columns=["A"], dtype=[[BooleanType]])
     table.add_data(None)
     table.add_data([True])
     table.add_data([False])
     table.add_data(np.array([True, False], dtype=np.bool_))
 
     # Nested arrays
-    table = wandb.Table(columns=["A"])
+    table = tracklab.Table(columns=["A"])
     table.add_data([[[[1, 2, 3]]]])
     table.add_data(np.array([[[[1, 2, 3]]]]))
 
@@ -822,99 +822,99 @@ def test_table_typing_pandas():
 
     # TODO: Pandas https://pandas.pydata.org/pandas-docs/stable/user_guide/basics.html#basics-dtypes
     # Numerics
-    table = wandb.Table(dataframe=pd.DataFrame([[1], [0]]).astype(np.byte))
+    table = tracklab.Table(dataframe=pd.DataFrame([[1], [0]]).astype(np.byte))
     table.add_data(1)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.short))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.short))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.ushort))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.ushort))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.intc))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.intc))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uintc))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uintc))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int_))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int_))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.longlong))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.longlong))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.ulonglong))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.ulonglong))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.half))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.half))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.float16))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.float16))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.single))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.single))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.double))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.double))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.longdouble))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.longdouble))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.csingle))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.csingle))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.cdouble))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.cdouble))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.clongdouble))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.clongdouble))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int8))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int8))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int16))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int16))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int32))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int32))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int64))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.int64))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint8))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint8))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint16))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint16))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint32))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint32))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint64))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uint64))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.intp))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.intp))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uintp))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.uintp))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.float32))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.float32))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.float64))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.float64))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.complex64))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.complex64))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.complex128))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype(np.complex128))
     table.add_data(42)
 
     # Boolean
-    table = wandb.Table(dataframe=pd.DataFrame([[True], [False]]).astype(np.bool_))
+    table = tracklab.Table(dataframe=pd.DataFrame([[True], [False]]).astype(np.bool_))
     table.add_data(True)
 
     # String aliased
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int8"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int8"))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int16"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int16"))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int32"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int32"))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int64"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("Int64"))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt8"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt8"))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt16"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt16"))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt32"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt32"))
     table.add_data(42)
-    table = wandb.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt64"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[42], [42]]).astype("UInt64"))
     table.add_data(42)
 
-    table = wandb.Table(dataframe=pd.DataFrame([["42"], ["42"]]).astype("string"))
+    table = tracklab.Table(dataframe=pd.DataFrame([["42"], ["42"]]).astype("string"))
     table.add_data("42")
-    table = wandb.Table(dataframe=pd.DataFrame([[True], [False]]).astype("boolean"))
+    table = tracklab.Table(dataframe=pd.DataFrame([[True], [False]]).astype("boolean"))
     table.add_data(True)
 
 
 def test_artifact_type():
-    artifact = wandb.Artifact("name", type="dataset")
+    artifact = tracklab.Artifact("name", type="dataset")
     target_type = TypeRegistry.types_by_name().get("artifactVersion")()
     type_of_artifact = TypeRegistry.type_of(artifact)
 

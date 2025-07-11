@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import responses
 from wandb import errors
-from wandb.sdk.lib.credentials import _expires_at_fmt, access_token
+from tracklab.sdk.lib.credentials import _expires_at_fmt, access_token
 
 
 def write_credentials(data: dict, credentials_file: Path):
@@ -92,7 +92,7 @@ def test_refresh_credentials(tmp_path: Path):
 
 def test_write_credentials_other_base_url(tmp_path: Path):
     base_url = "http://localhost"
-    other_base_url = "https://api.wandb.ai"
+    other_base_url = "https://api.tracklab.ai"
     token_file = tmp_path / "jwt.txt"
     write_token(token_file)
     credentials_file = tmp_path / "credentials.json"

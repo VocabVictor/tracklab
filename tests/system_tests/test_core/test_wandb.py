@@ -16,8 +16,8 @@ from unittest import mock
 import numpy as np
 import pytest
 import requests
-import wandb
-from wandb.sdk.lib import filesystem
+import tracklab
+from tracklab.sdk.lib import filesystem
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def mock_sagemaker():
             "CURRENT_HOST": "maker",
         },
     ), unittest.mock.patch(
-        "wandb.util.os.path.exists",
+        "tracklab.util.os.path.exists",
         exists,
     ), unittest.mock.patch(
         "builtins.open",
@@ -67,11 +67,11 @@ def mock_sagemaker():
 def test_sagemaker_key():
     with open("secrets.env", "w") as f:
         f.write("WANDB_API_KEY={}".format("S" * 40))
-    assert wandb.api.api_key == "S" * 40
+    assert tracklab.api.api_key == "S" * 40
 
 
 def test_sagemaker(user, git_repo, mock_sagemaker):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
     assert run.config.foo == "bar"
     assert run.id.startswith("sage-")
@@ -89,10 +89,10 @@ def test_sagemaker(user, git_repo, mock_sagemaker):
     }
 )
 @pytest.mark.skip(
-    reason="TF_CONFIG parsing not yet implemented, see wandb.util.parse_tfjob_config"
+    reason="TF_CONFIG parsing not yet implemented, see tracklab.util.parse_tfjob_config"
 )
 def test_simple_tfjob(user):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
     assert run.group is None
     assert run.job_type == "master"
@@ -110,10 +110,10 @@ def test_simple_tfjob(user):
     }
 )
 @pytest.mark.skip(
-    reason="TF_CONFIG parsing not yet implemented, see wandb.util.parse_tfjob_config"
+    reason="TF_CONFIG parsing not yet implemented, see tracklab.util.parse_tfjob_config"
 )
 def test_distributed_tfjob(user):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
     assert run.group == "trainer-sj2hp"
     assert run.job_type == "worker"
@@ -121,27 +121,27 @@ def test_distributed_tfjob(user):
 
 @pytest.mark.wandb_args(tf_config={"cluster": {"corrupt": ["bad"]}})
 @pytest.mark.skip(
-    reason="TF_CONFIG parsing not yet implemented, see wandb.util.parse_tfjob_config"
+    reason="TF_CONFIG parsing not yet implemented, see tracklab.util.parse_tfjob_config"
 )
 def test_corrupt_tfjob(user):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
     assert run.group is None
 
 
 @pytest.mark.wandb_args(env={"TF_CONFIG": "garbage"})
 @pytest.mark.skip(
-    reason="TF_CONFIG parsing not yet implemented, see wandb.util.parse_tfjob_config"
+    reason="TF_CONFIG parsing not yet implemented, see tracklab.util.parse_tfjob_config"
 )
 def test_bad_json_tfjob(user):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
     assert run.group is None
 
 
 def test_custom_dir(user):
     with tempfile.TemporaryDirectory() as tmpdir:
-        run = wandb.init(dir=tmpdir, mode="offline")
+        run = tracklab.init(dir=tmpdir, mode="offline")
         run.finish()
 
         assert len(glob.glob(os.path.join(tmpdir, "wandb", "offline-*"))) > 0
@@ -149,7 +149,7 @@ def test_custom_dir(user):
 
 def test_custom_dir_env(user):
     with mock.patch.dict("os.environ", {"WANDB_DIR": tempfile.gettempdir()}):
-        run = wandb.init(mode="offline")
+        run = tracklab.init(mode="offline")
         run.finish()
         assert (
             len(glob.glob(os.path.join(tempfile.gettempdir(), "wandb", "offline-*")))
@@ -164,7 +164,7 @@ def test_anonymous_mode(user, capsys, local_settings):
     copied_env.pop("WANDB_USERNAME")
     copied_env.pop("WANDB_ENTITY")
     with mock.patch.dict("os.environ", copied_env, clear=True):
-        with wandb.init(anonymous="must") as run:
+        with tracklab.init(anonymous="must") as run:
             run.log({"something": 1})
 
     _, err = capsys.readouterr()
@@ -176,66 +176,66 @@ def test_anonymous_mode(user, capsys, local_settings):
 
 def test_run_id(user):
     with mock.patch.dict("os.environ", {"WANDB_RUN_ID": "123456"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert run.id == "123456"
 
 
 def test_run_name(user):
     with mock.patch.dict("os.environ", {"WANDB_NAME": "coolio"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert run.name == "coolio"
 
 
 def test_run_setname(user):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.name = "name1"
     assert run.name == "name1"
 
 
 def test_run_notes(user):
     with mock.patch.dict("os.environ", {"WANDB_NOTES": "these are my notes"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert run.notes == "these are my notes"
 
 
 def test_run_setnotes(user):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.notes = "notes1"
     assert run.notes == "notes1"
 
 
 def test_run_tags(user):
     with mock.patch.dict("os.environ", {"WANDB_TAGS": "tag1,tag2"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert run.tags == ("tag1", "tag2")
 
 
 def test_run_settags(user):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.tags = ("tag1", "tag2")
     assert run.tags == ("tag1", "tag2")
 
 
 def test_run_offline(user):
-    run = wandb.init(mode="offline")
+    run = tracklab.init(mode="offline")
     run.finish()
     assert run.offline is True
 
 
 def test_run_entity(user):
     with mock.patch.dict("os.environ", {"WANDB_ENTITY": "ent1"}):
-        run = wandb.init(mode="offline")
+        run = tracklab.init(mode="offline")
         run.finish()
         assert run.entity == "ent1"
 
 
 def test_run_project(user):
     with mock.patch.dict("os.environ", {"WANDB_PROJECT": "proj1"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert run.project == "proj1"
         assert run.project_name() == "proj1"
@@ -243,41 +243,41 @@ def test_run_project(user):
 
 def test_run_group(user):
     with mock.patch.dict("os.environ", {"WANDB_RUN_GROUP": "group1"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert run.group == "group1"
 
 
 def test_run_jobtype(user):
     with mock.patch.dict("os.environ", {"WANDB_JOB_TYPE": "job1"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert run.job_type == "job1"
 
 
 def test_run_not_resumed(user):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
     assert run.resumed is False
 
 
 def test_run_resumed(user):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.config.update({"fruit": "banana"})
 
-    with wandb.init(id=run.id, resume="must") as run:
+    with tracklab.init(id=run.id, resume="must") as run:
         assert run.resumed is True
         assert run.config.fruit == "banana"
 
 
 def test_run_sweepid(user):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
     assert run.sweep_id is None
 
 
 def test_run_configstatic(user):
-    run = wandb.init()
+    run = tracklab.init()
     run.config.update(dict(this=2, that=3))
     assert dict(run.config_static) == dict(this=2, that=3)
     run.finish()
@@ -288,7 +288,7 @@ def test_run_path(user):
         "os.environ",
         {"WANDB_ENTITY": "ent1", "WANDB_PROJECT": "proj1", "WANDB_RUN_ID": "run1"},
     ):
-        run = wandb.init(mode="offline")
+        run = tracklab.init(mode="offline")
         run.finish()
         assert run.path == "ent1/proj1/run1"
 
@@ -296,7 +296,7 @@ def test_run_path(user):
 def test_run_create_root_dir(user, tmp_path):
     root_dir = tmp_path / "create_dir_test"
 
-    with wandb.init(dir=root_dir) as run:
+    with tracklab.init(dir=root_dir) as run:
         run.log({"test": 1})
 
     assert os.path.exists(root_dir)
@@ -318,8 +318,8 @@ def test_run_create_root_dir_without_permissions_defaults_to_temp_dir(
     root_dir = tmp_path / "no_permissions_test"
     root_dir.mkdir(parents=True, mode=0o444, exist_ok=True)
 
-    with wandb.init(
-        settings=wandb.Settings(root_dir=os.path.join(root_dir, "missing"))
+    with tracklab.init(
+        settings=tracklab.Settings(root_dir=os.path.join(root_dir, "missing"))
     ) as run:
         run.log({"test": 1})
 
@@ -328,21 +328,21 @@ def test_run_create_root_dir_without_permissions_defaults_to_temp_dir(
 
 
 def test_run_projecturl(user):
-    run = wandb.init(settings={"mode": "offline"})
+    run = tracklab.init(settings={"mode": "offline"})
     run.finish()
     # URL is not available offline
     assert run.get_project_url() is None
 
 
 def test_run_sweepurl(user):
-    run = wandb.init(settings={"mode": "offline"})
+    run = tracklab.init(settings={"mode": "offline"})
     run.finish()
     # URL is not available offline
     assert run.get_sweep_url() is None
 
 
 def test_run_url(user):
-    run = wandb.init(settings={"mode": "offline"})
+    run = tracklab.init(settings={"mode": "offline"})
     run.finish()
     # URL is not available offline
     assert run.get_url() is None
@@ -350,12 +350,12 @@ def test_run_url(user):
 
 
 # ----------------------------------
-# wandb.log
+# tracklab.log
 # ----------------------------------
 
 
 def test_log_step(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     run.log({"acc": 1}, step=5, commit=True)
     run.finish()
 
@@ -366,9 +366,9 @@ def test_log_step(wandb_backend_spy):
 
 
 def test_log_custom_chart(wandb_backend_spy):
-    run = wandb.init()
-    my_custom_chart = wandb.plot_table(
-        "test_spec", wandb.Table(data=[[1, 2], [3, 4]], columns=["A", "B"]), {}, {}
+    run = tracklab.init()
+    my_custom_chart = tracklab.plot_table(
+        "test_spec", tracklab.Table(data=[[1, 2], [3, 4]], columns=["A", "B"]), {}, {}
     )
     run.log({"my_custom_chart": my_custom_chart})
     run.finish()
@@ -381,7 +381,7 @@ def test_log_custom_chart(wandb_backend_spy):
 
 def test_log_silent(user, capsys):
     with mock.patch.dict("os.environ", {"WANDB_SILENT": "true"}):
-        run = wandb.init()
+        run = tracklab.init()
         run.log({"acc": 1})
         run.finish()
     _, err = capsys.readouterr()
@@ -389,7 +389,7 @@ def test_log_silent(user, capsys):
 
 
 def test_log_multiple_cases_example(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     run.log(dict(n=1))
     run.log(dict(n=11), commit=False)
     run.log(dict(n=2), step=100)
@@ -407,7 +407,7 @@ def test_log_multiple_cases_example(wandb_backend_spy):
 
 
 def test_log_step_uncommitted(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     run.log(dict(cool=2), step=2, commit=False)
     run.log(dict(cool=2), step=4)
     run.finish()
@@ -418,7 +418,7 @@ def test_log_step_uncommitted(wandb_backend_spy):
 
 
 def test_log_step_committed(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     run.log(dict(cool=2), step=2)
     run.log(dict(cool=2), step=4, commit=True)
     run.finish()
@@ -429,7 +429,7 @@ def test_log_step_committed(wandb_backend_spy):
 
 
 def test_log_step_committed_same(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     run.log(dict(cool=2), step=1)
     run.log(dict(cool=2), step=4)
     run.log(dict(bad=3), step=4, commit=True)
@@ -446,7 +446,7 @@ def test_log_step_committed_same(wandb_backend_spy):
 
 
 def test_log_step_committed_same_dropped(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     run.log(dict(cool=2), step=1)
     run.log(dict(cool=2), step=4, commit=True)
     run.log(dict(bad=3), step=4, commit=True)
@@ -468,7 +468,7 @@ def test_log_step_committed_same_dropped(wandb_backend_spy):
 
 
 def test_log_empty_string(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     run.log(dict(cool=""))
     run.finish()
 
@@ -487,16 +487,16 @@ def test_log_table_offline_no_network(user, monkeypatch):
         return original_request(self, *args, **kwargs)
 
     monkeypatch.setattr(requests.Session, "request", mock_request)
-    run = wandb.init(mode="offline")
-    run.log({"table": wandb.Table()})
+    run = tracklab.init(mode="offline")
+    run.log({"table": tracklab.Table()})
     run.finish()
     assert num_network_calls_made == 0
     assert run.offline is True
 
 
 def test_log_with_glob_chars(user, wandb_backend_spy):
-    run = wandb.init()
-    run.log({"[glob chars]": wandb.Image(np.random.randint(0, 255, (100, 100, 3)))})
+    run = tracklab.init()
+    run.log({"[glob chars]": tracklab.Image(np.random.randint(0, 255, (100, 100, 3)))})
     run.finish()
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -505,13 +505,13 @@ def test_log_with_glob_chars(user, wandb_backend_spy):
 
 
 # ----------------------------------
-# wandb.save
+# tracklab.save
 # ----------------------------------
 
 
 @pytest.mark.xfail(reason="This test is flaky")
 def test_save_invalid_path(user):
-    run = wandb.init()
+    run = tracklab.init()
     root = tempfile.gettempdir()
     test_path = os.path.join(root, "tmp", "test.txt")
     filesystem.mkdir_exists_ok(os.path.dirname(test_path))
@@ -523,7 +523,7 @@ def test_save_invalid_path(user):
 
 
 # ----------------------------------
-# wandb.restore
+# tracklab.restore
 # ----------------------------------
 
 
@@ -531,7 +531,7 @@ def test_save_invalid_path(user):
 def create_run_with_file(user):
     @contextmanager
     def create_file_for_run_fn(file_name, file_content):
-        run = wandb.init(settings={"save_code": True})
+        run = tracklab.init(settings={"save_code": True})
         try:
             file = Path(run.dir) / file_name
             file.touch(exist_ok=True)
@@ -546,13 +546,13 @@ def create_run_with_file(user):
 
 def test_restore_no_path():
     with pytest.raises(ValueError, match="run_path required"):
-        wandb.restore("weights.h5")
+        tracklab.restore("weights.h5")
 
 
 @pytest.mark.skip(reason="This test seems to be flaky")
 def test_restore_name_not_found(user):
     with pytest.raises(ValueError):
-        run = wandb.init()
+        run = tracklab.init()
         run.restore("no_file.h5")
 
 
@@ -561,7 +561,7 @@ def test_restore_no_init(create_run_with_file):
     with create_run_with_file("weights.h5", "content") as (run, file):
         file_size = os.path.getsize(file)
 
-    res = wandb.restore("weights.h5", run_path=run.path)
+    res = tracklab.restore("weights.h5", run_path=run.path)
     assert os.path.getsize(res.name) == file_size
 
 
@@ -570,20 +570,20 @@ def test_restore(create_run_with_file, test_settings):
     with create_run_with_file("weights.h5", "content") as (run, file):
         file_size = os.path.getsize(file)
 
-    with wandb.init(settings=test_settings()):
-        res = wandb.restore("weights.h5", run_path=run.path)
+    with tracklab.init(settings=test_settings()):
+        res = tracklab.restore("weights.h5", run_path=run.path)
         assert os.path.getsize(res.name) == file_size
 
 
 # ----------------------------------
-# wandb.attach
+# tracklab.attach
 # ----------------------------------
 
 
 def test_attach_usage_errors(user):
-    run = wandb.init()
-    with pytest.raises(wandb.UsageError) as e:
-        wandb._attach()
+    run = tracklab.init()
+    with pytest.raises(tracklab.UsageError) as e:
+        tracklab._attach()
     assert "Either (`attach_id` or `run_id`) or `run` must be specified" in str(e.value)
     run.finish()
 

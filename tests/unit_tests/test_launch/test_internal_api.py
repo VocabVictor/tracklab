@@ -2,9 +2,9 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-import wandb
-from wandb.apis import internal
-from wandb.errors import UnsupportedError
+import tracklab
+from tracklab.apis import internal
+from tracklab.errors import UnsupportedError
 
 
 def test_create_run_queue(monkeypatch):
@@ -14,7 +14,7 @@ def test_create_run_queue(monkeypatch):
     _api.api.gql = MagicMock(return_value={"createRunQueue": "test-result"})
     _api.api.create_run_queue_introspection = MagicMock(return_value=(True, True, True))
     mock_gql = MagicMock(return_value="test-gql-resp")
-    monkeypatch.setattr(wandb.sdk.internal.internal_api, "gql", mock_gql)
+    monkeypatch.setattr(tracklab.sdk.internal.internal_api, "gql", mock_gql)
 
     kwargs = {
         "entity": "test-entity",
@@ -44,7 +44,7 @@ def test_create_run_queue(monkeypatch):
         return_value=(True, True, False)
     )
     mock_gql = MagicMock(return_value="test-gql-resp")
-    monkeypatch.setattr(wandb.sdk.internal.internal_api, "gql", mock_gql)
+    monkeypatch.setattr(tracklab.sdk.internal.internal_api, "gql", mock_gql)
 
     # trying to use prioritization_mode gives error
     with pytest.raises(UnsupportedError):
@@ -72,7 +72,7 @@ def test_push_to_run_queue_by_name(monkeypatch):
     mock_gql_response = {"pushToRunQueueByName": {"runSpec": json.dumps(mock_run_spec)}}
     _api.api.gql = MagicMock(return_value=mock_gql_response)
     _api.api.push_to_run_queue_introspection = MagicMock()
-    monkeypatch.setattr(wandb.sdk.internal.internal_api, "gql", lambda x: x)
+    monkeypatch.setattr(tracklab.sdk.internal.internal_api, "gql", lambda x: x)
 
     _api.api.server_push_to_run_queue_supports_priority = True
     push_kwargs = {
@@ -104,7 +104,7 @@ def test_upsert_sweep(monkeypatch):
     mock_sweep_name = "test-sweep"
     mock_gql_response = {"upsertSweep": {"sweep": {"name": mock_sweep_name}}}
     _api.api.gql = MagicMock(return_value=mock_gql_response)
-    monkeypatch.setattr(wandb.sdk.internal.internal_api, "gql", lambda x: x)
+    monkeypatch.setattr(tracklab.sdk.internal.internal_api, "gql", lambda x: x)
 
     run_ids = ["abc", "def"]
     sweep_config = {

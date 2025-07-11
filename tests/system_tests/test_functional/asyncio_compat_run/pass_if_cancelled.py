@@ -3,7 +3,7 @@ import sys
 import threading
 import time
 
-from wandb.sdk.lib import asyncio_compat
+from tracklab.sdk.lib import asyncio_compat
 
 _got_cancelled_lock = threading.Lock()
 _got_cancelled = False

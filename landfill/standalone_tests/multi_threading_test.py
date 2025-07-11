@@ -1,11 +1,11 @@
 import threading
 
-import wandb
+import tracklab
 
 
 # Checks if wandb has issues during set up in a multithreaded environment
 def thread_test(n):
-    run = wandb.init(project="threadtest")
+    run = tracklab.init(project="threadtest")
     run.log({"thread": n})
 
 

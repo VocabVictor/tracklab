@@ -3,7 +3,7 @@ from itertools import repeat, tee
 from hypothesis import example, given
 from hypothesis.strategies import integers, iterables, sampled_from
 from pytest import raises
-from wandb._iterutils import one
+from tracklab._iterutils import one
 
 
 @given(iterable=iterables(integers(), min_size=1, max_size=1))

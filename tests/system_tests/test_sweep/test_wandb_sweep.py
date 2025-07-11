@@ -5,9 +5,9 @@ import sys
 from typing import Any, Dict, List
 
 import pytest
-import wandb
-import wandb.apis
-from wandb.cli import cli
+import tracklab
+import tracklab.apis
+from tracklab.cli import cli
 
 # Sweep configs used for testing
 SWEEP_CONFIG_GRID: Dict[str, Any] = {
@@ -132,7 +132,7 @@ def upsert_sweep_spy(wandb_backend_spy):
 
 @pytest.mark.parametrize("sweep_config", VALID_SWEEP_CONFIGS_ALL)
 def test_sweep_create(user, upsert_sweep_spy, sweep_config):
-    wandb.sweep(sweep_config, entity=user)
+    tracklab.sweep(sweep_config, entity=user)
 
     assert upsert_sweep_spy.total_calls == 1
 
@@ -142,7 +142,7 @@ def test_sweep_entity_project_callable(user, upsert_sweep_spy, sweep_config):
     def sweep_callable():
         return sweep_config
 
-    wandb.sweep(sweep_callable, project="test", entity=user)
+    tracklab.sweep(sweep_callable, project="test", entity=user)
 
     assert upsert_sweep_spy.total_calls == 1
     assert upsert_sweep_spy.requests[0].variables["projectName"] == "test"
@@ -155,13 +155,13 @@ def test_object_dict_config(user, upsert_sweep_spy, sweep_config):
         def __init__(self, d: dict):
             super().__init__(d)
 
-    wandb.sweep(DictLikeObject(sweep_config), entity=user)
+    tracklab.sweep(DictLikeObject(sweep_config), entity=user)
 
     assert upsert_sweep_spy.total_calls == 1
 
 
 def test_minmax_validation():
-    api = wandb.apis.InternalApi()
+    api = tracklab.apis.InternalApi()
     sweep_config = {
         "name": "My Sweep",
         "method": "random",
@@ -193,8 +193,8 @@ def test_minmax_validation():
 
 
 def test_add_run_to_existing_sweep(wandb_backend_spy, user):
-    sweep_id = wandb.sweep(SWEEP_CONFIG_GRID, entity=user)
-    with wandb.init(entity=user, settings={"sweep_id": sweep_id}) as run:
+    sweep_id = tracklab.sweep(SWEEP_CONFIG_GRID, entity=user)
+    with tracklab.init(entity=user, settings={"sweep_id": sweep_id}) as run:
         run.log({"x": 1})
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -202,7 +202,7 @@ def test_add_run_to_existing_sweep(wandb_backend_spy, user):
 
 
 def test_nones_validation():
-    api = wandb.apis.InternalApi()
+    api = tracklab.apis.InternalApi()
     filled = api.api._validate_config_and_fill_distribution(SWEEP_CONFIG_BAYES_NONES)
     assert filled["parameters"]["param1"]["values"] == [None, 1, 2, 3]
     assert filled["parameters"]["param2"]["value"] is None
@@ -219,12 +219,12 @@ def test_sweep_pause(runner, user, mocker, stop_method, monkeypatch):
             "entity": user,
             "parameters": {"parameter1": {"values": [1, 2, 3]}},
         }
-        sweep_id = wandb.sweep(sweep_config, entity=user, project=stop_method)
+        sweep_id = tracklab.sweep(sweep_config, entity=user, project=stop_method)
 
         def mock_read_from_queue(a, b, c):
             sys.exit(1)
 
-        mocker.patch("wandb.wandb_agent.Agent._process_command", mock_read_from_queue)
+        mocker.patch("tracklab.wandb_agent.Agent._process_command", mock_read_from_queue)
         res_agent = runner.invoke(cli.agent, [sweep_id, "--project", stop_method])
         assert res_agent.exit_code == 1
         assert runner.invoke(cli.sweep, ["--pause", sweep_id]).exit_code == 0
@@ -270,7 +270,7 @@ def test_sweep_scheduler(runner, user):
             "method": "grid",
             "parameters": {"parameter1": {"values": [1, 2, 3]}},
         }
-        sweep_id = wandb.sweep(sweep_config)
+        sweep_id = tracklab.sweep(sweep_config)
         res = runner.invoke(
             cli.launch_sweep,
             ["config.json", "--resume_id", sweep_id],

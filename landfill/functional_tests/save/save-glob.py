@@ -27,7 +27,7 @@ assert:
 import os
 import tempfile
 
-import wandb
+import tracklab
 
 
 def write_file(fname):
@@ -43,19 +43,19 @@ def test_save_glob():
         write_file(os.path.join(tmpdir, "newdir", "newfile1.txt"))
         write_file(os.path.join(tmpdir, "newdir", "newfile2.csv"))
         write_file(os.path.join(tmpdir, "newdir", "newfile3.txt"))
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.config.id = "save_glob"
             run.save(glob, base_path=tmpdir)
 
 
 def test_save_glob_later():
-    """If you add files later, wandb.save() does not pick them up."""
+    """If you add files later, tracklab.save() does not pick them up."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dirname = os.path.join(tmpdir, "newdir")
         glob = os.path.join(dirname, "*.txt")
         os.mkdir(dirname)
         write_file(os.path.join(tmpdir, "newdir", "newfile1.txt"))
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.config.id = "save_glob_later"
             run.save(glob, base_path=tmpdir)
             write_file(os.path.join(tmpdir, "newdir", "newfile2.csv"))

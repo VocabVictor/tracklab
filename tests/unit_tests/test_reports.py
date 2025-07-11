@@ -2,9 +2,9 @@ import json
 from unittest import mock
 
 import pytest
-import wandb
+import tracklab
 from wandb import Api
-from wandb.apis.public.reports import BetaReport
+from tracklab.apis.public.reports import BetaReport
 
 
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
@@ -30,7 +30,7 @@ def test_report_properties_full():
     """Test that BetaReport properties work correctly with a complete set of attributes."""
     # Mock the client with app_url
     mock_client = mock.MagicMock()
-    mock_client.app_url = "https://wandb.ai/"
+    mock_client.app_url = "https://tracklab.ai/"
 
     attrs = {
         "id": "test-id",
@@ -55,7 +55,7 @@ def test_report_properties_full():
     assert report.created_at == "2023-01-01T00:00:00Z"
     assert (
         report.url
-        == "https://wandb.ai/test-entity/test-project/reports/Test-Display-Name--test-id"
+        == "https://tracklab.ai/test-entity/test-project/reports/Test-Display-Name--test-id"
     )
 
 
@@ -110,7 +110,7 @@ def test_report_url_creation():
     """Test that url creation handles display names with symbols."""
     # Mock the client with app_url
     mock_client = mock.MagicMock()
-    mock_client.app_url = "https://wandb.ai/"
+    mock_client.app_url = "https://tracklab.ai/"
     test_entity = "test-entity"
     test_project = "test-project"
     attrs = {
@@ -122,5 +122,5 @@ def test_report_url_creation():
 
     assert (
         report.url
-        == f"https://wandb.ai/{test_entity}/{test_project}/reports/Test-Timestamp-25-05-01-09-28-29--test-id"
+        == f"https://tracklab.ai/{test_entity}/{test_project}/reports/Test-Timestamp-25-05-01-09-28-29--test-id"
     )

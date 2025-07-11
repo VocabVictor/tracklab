@@ -3,7 +3,7 @@
 import argparse
 import multiprocessing as mp
 
-import wandb
+import tracklab
 
 
 def process_child(run):
@@ -20,8 +20,8 @@ def process_child(run):
 
 
 def main():
-    with wandb.init() as run:
-        assert run == wandb.run
+    with tracklab.init() as run:
+        assert run == tracklab.run
 
         run.config.c1 = 11
         run.log({"s1": 11})

@@ -2,9 +2,9 @@ import os
 import unittest.mock
 
 import pytest
-import wandb
-from wandb.cli import cli
-from wandb.sdk.lib.runid import generate_id
+import tracklab
+from tracklab.cli import cli
+from tracklab.sdk.lib.runid import generate_id
 
 
 @pytest.mark.flaky
@@ -28,7 +28,7 @@ def test_beta_sync(user, runner, mark_synced):
     _ = pytest.importorskip("wandb_core")
 
     os.makedirs(".wandb", exist_ok=True)
-    run = wandb.init(settings={"mode": "offline"})
+    run = tracklab.init(settings={"mode": "offline"})
     run.log(dict(a=1))
     run.finish()
 
@@ -49,11 +49,11 @@ def test_beta_sync(user, runner, mark_synced):
 def test_beta_sync_two_runs(user, test_settings, runner):
     _ = pytest.importorskip("wandb_core")
     os.makedirs(".wandb", exist_ok=True)
-    run = wandb.init(settings=test_settings({"mode": "offline"}))
+    run = tracklab.init(settings=test_settings({"mode": "offline"}))
     run.log(dict(a=1))
     run.finish()
 
-    run2 = wandb.init(settings=test_settings({"mode": "offline"}))
+    run2 = tracklab.init(settings=test_settings({"mode": "offline"}))
     run2.log(dict(a=1))
     run2.finish()
 

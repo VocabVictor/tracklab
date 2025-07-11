@@ -1,7 +1,7 @@
 import unittest.mock
 
-import wandb
-import wandb.sdk.verify.verify as wandb_verify
+import tracklab
+import tracklab.sdk.verify.verify as wandb_verify
 
 
 def test_print_results(capsys):
@@ -16,18 +16,18 @@ def test_print_results(capsys):
 
 
 def test_check_host():
-    assert not wandb_verify.check_host("https://api.wandb.ai")
+    assert not wandb_verify.check_host("https://api.tracklab.ai")
     assert wandb_verify.check_host("http://localhost:8000")
 
 
 def test_check_secure_requests(capsys):
     wandb_verify.check_secure_requests(
-        "https://wandb.rules",
+        "https://tracklab.rules",
         "Checking requests to base url",
         "Connections are not made over https. SSL required for secure communications.",
     )
     wandb_verify.check_secure_requests(
-        "http://wandb.rules",
+        "http://tracklab.rules",
         "Checking requests to base url",
         "Connections are not made over https. SSL required for secure communications.",
     )

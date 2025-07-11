@@ -4,24 +4,24 @@ import os
 from unittest import mock
 
 import pytest
-import wandb
+import tracklab
 
 
 def test_disabled_noop(user):
     """Make sure that all objects are dummy objects in noop case."""
-    with wandb.init(mode="disabled") as run:
+    with tracklab.init(mode="disabled") as run:
         run.log(dict(this=2))
 
 
 def test_disabled_dir(user):
     tmp_dir = "/tmp/dir"
     with mock.patch("tempfile.gettempdir", lambda: tmp_dir):
-        run = wandb.init(mode="disabled")
+        run = tracklab.init(mode="disabled")
         assert run.dir == tmp_dir
 
 
 def test_disabled_summary(user):
-    run = wandb.init(mode="disabled")
+    run = tracklab.init(mode="disabled")
     run.summary["cat"] = 2
     run.summary["nested"] = dict(level=3)
     assert "cat" in run.summary
@@ -33,23 +33,23 @@ def test_disabled_summary(user):
 
 
 def test_disabled_globals(user):
-    # Test wandb.* attributes
-    run = wandb.init(config={"foo": {"bar": {"x": "y"}}}, mode="disabled")
-    wandb.log({"x": {"y": "z"}})
-    wandb.log({"foo": {"bar": {"x": "y"}}})
-    assert wandb.run == run
-    assert wandb.config == run.config
-    assert wandb.summary == run.summary
-    assert wandb.config.foo["bar"]["x"] == "y"
-    assert wandb.summary["x"].y == "z"
-    assert wandb.summary["foo"].bar.x == "y"
-    wandb.summary.foo["bar"].update({"a": "b"})
-    assert wandb.summary.foo.bar.a == "b"
+    # Test tracklab.* attributes
+    run = tracklab.init(config={"foo": {"bar": {"x": "y"}}}, mode="disabled")
+    tracklab.log({"x": {"y": "z"}})
+    tracklab.log({"foo": {"bar": {"x": "y"}}})
+    assert tracklab.run == run
+    assert tracklab.config == run.config
+    assert tracklab.summary == run.summary
+    assert tracklab.config.foo["bar"]["x"] == "y"
+    assert tracklab.summary["x"].y == "z"
+    assert tracklab.summary["foo"].bar.x == "y"
+    tracklab.summary.foo["bar"].update({"a": "b"})
+    assert tracklab.summary.foo.bar.a == "b"
     run.finish()
 
 
 def test_bad_url(user):
-    run = wandb.init(
+    run = tracklab.init(
         settings=dict(mode="disabled", base_url="http://my-localhost:9000")
     )
     run.log({"acc": 0.9})
@@ -57,14 +57,14 @@ def test_bad_url(user):
 
 
 def test_no_dirs(user):
-    run = wandb.init(settings={"mode": "disabled"})
+    run = tracklab.init(settings={"mode": "disabled"})
     run.log({"acc": 0.9})
     run.finish()
     assert not os.path.isdir("wandb")
 
 
 def test_access_properties(user):
-    run = wandb.init(mode="disabled")
+    run = tracklab.init(mode="disabled")
     assert run.dir
     assert run.disabled
     assert run.entity
@@ -105,7 +105,7 @@ def test_disabled_no_activity(wandb_backend_spy):
     graphql_spy = gql.Capture()
     wandb_backend_spy.stub_gql(gql.any(), graphql_spy)
 
-    with wandb.init(settings={"mode": "disabled"}) as run:
+    with tracklab.init(settings={"mode": "disabled"}) as run:
         run.alert("alert")
         run.define_metric("metric")
         run.log_code()
@@ -121,8 +121,8 @@ def test_disabled_mode_artifact(wandb_backend_spy):
     gql = wandb_backend_spy.gql
     graphql_spy = gql.Capture()
     wandb_backend_spy.stub_gql(gql.any(), graphql_spy)
-    run = wandb.init(settings={"mode": "disabled"})
-    art = run.log_artifact(wandb.Artifact("dummy", "dummy")).wait()
+    run = tracklab.init(settings={"mode": "disabled"})
+    art = run.log_artifact(tracklab.Artifact("dummy", "dummy")).wait()
     run.link_artifact(art, "dummy")
     run.finish()
     assert graphql_spy.total_calls == 0

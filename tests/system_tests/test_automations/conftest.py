@@ -5,12 +5,12 @@ from functools import lru_cache
 from string import ascii_lowercase, digits
 from typing import Callable, Iterator, Union
 
-import wandb
+import tracklab
 from pytest import FixtureRequest, MonkeyPatch, fixture, skip
 from typing_extensions import TypeAlias
 from wandb import Artifact
-from wandb.apis.public import ArtifactCollection, Project
-from wandb.automations import (
+from tracklab.apis.public import ArtifactCollection, Project
+from tracklab.automations import (
     ActionType,
     ArtifactEvent,
     DoNothing,
@@ -24,13 +24,13 @@ from wandb.automations import (
     SendWebhook,
     WebhookIntegration,
 )
-from wandb.automations._filters import FilterExpr
-from wandb.automations._generated import (
+from tracklab.automations._filters import FilterExpr
+from tracklab.automations._generated import (
     CREATE_GENERIC_WEBHOOK_INTEGRATION_GQL,
     CreateGenericWebhookIntegration,
 )
-from wandb.automations._utils import EXCLUDED_INPUT_ACTIONS, EXCLUDED_INPUT_EVENTS
-from wandb.automations.events import InputEvent
+from tracklab.automations._utils import EXCLUDED_INPUT_ACTIONS, EXCLUDED_INPUT_EVENTS
+from tracklab.automations.events import InputEvent
 from wandb_gql import gql
 
 ScopableWandbType: TypeAlias = Union[ArtifactCollection, Project]
@@ -74,7 +74,7 @@ def user(backend_fixture_factory) -> Iterator[str]:
 
 # Request the `user` fixture to ensure env variables are set
 @fixture(scope="module")
-def api(user: str) -> wandb.Api:
+def api(user: str) -> tracklab.Api:
     """A redefined, module-scoped `Api` fixture for tests in this module.
 
     Note that this overrides the default `api` fixture from the root-level
@@ -82,7 +82,7 @@ def api(user: str) -> wandb.Api:
     since the default `api` fixture is function-scoped, meaning it does not
     play well with other module-scoped fixtures.
     """
-    return wandb.Api()
+    return tracklab.Api()
 
 
 @fixture(scope="module")
@@ -97,7 +97,7 @@ def project(user, api, make_name) -> Project:
 @fixture(scope="module")
 def artifact(user, project, make_name) -> Artifact:
     name = make_name("test-artifact")
-    with wandb.init(entity=user, project=project.name) as run:
+    with tracklab.init(entity=user, project=project.name) as run:
         artifact = Artifact(name, "dataset")
         logged_artifact = run.log_artifact(artifact)
         return logged_artifact.wait()
@@ -111,7 +111,7 @@ def artifact_collection(artifact, api) -> ArtifactCollection:
 
 @fixture(scope="module")
 def make_webhook_integration(
-    api: wandb.Api,
+    api: tracklab.Api,
 ) -> Callable[[str, str, str], WebhookIntegration]:
     """A module-scoped factory for creating WebhookIntegrations."""
 
@@ -178,7 +178,7 @@ def scope_type(request: FixtureRequest) -> ScopeType:
 
 @fixture(params=valid_input_events(), ids=lambda x: f"EVENT[{x.value}]")
 def event_type(
-    request: FixtureRequest, scope_type: ScopeType, api: wandb.Api
+    request: FixtureRequest, scope_type: ScopeType, api: tracklab.Api
 ) -> EventType:
     """A fixture that parametrizes over all valid event types."""
 
@@ -194,7 +194,7 @@ def event_type(
 
 
 @fixture(params=valid_input_actions(), ids=lambda x: f"ACTION[{x.value}]")
-def action_type(request: type[FixtureRequest], api: wandb.Api) -> ActionType:
+def action_type(request: type[FixtureRequest], api: tracklab.Api) -> ActionType:
     """A fixture that parametrizes over all valid action types."""
     action_type = request.param
 

@@ -4,10 +4,10 @@ import threading
 import unittest.mock
 
 import pytest
-from wandb.proto import wandb_internal_pb2 as pb
-from wandb.proto import wandb_server_pb2 as spb
-from wandb.sdk import mailbox as mb
-from wandb.sdk.lib import asyncio_compat
+from tracklab.proto import tracklab_internal_pb2 as pb
+from tracklab.proto import tracklab_server_pb2 as spb
+from tracklab.sdk import mailbox as mb
+from tracklab.sdk.lib import asyncio_compat
 
 
 @pytest.fixture(params=[-9.4, -1, 0, 99.1, None])

@@ -2,10 +2,10 @@ import os
 import platform
 from pathlib import Path
 
-from wandb.cli import cli
-from wandb.sdk.artifacts import artifact_file_cache
-from wandb.sdk.artifacts.staging import get_staging_dir
-from wandb.sdk.lib.filesystem import mkdir_exists_ok
+from tracklab.cli import cli
+from tracklab.sdk.artifacts import artifact_file_cache
+from tracklab.sdk.artifacts.staging import get_staging_dir
+from tracklab.sdk.lib.filesystem import mkdir_exists_ok
 
 
 def test_artifact(runner, user):

@@ -1,8 +1,8 @@
 """telemetry lib tests."""
 
-import wandb
+import tracklab
 
-telem_lib = wandb.wandb_lib.telemetry
+telem_lib = tracklab.wandb_lib.telemetry
 
 
 def test_telemetry_parse():

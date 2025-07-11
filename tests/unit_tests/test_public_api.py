@@ -4,16 +4,16 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
-import wandb
+import tracklab
 from wandb import Api
-from wandb.apis import internal
-from wandb.sdk.artifacts.artifact_download_logger import ArtifactDownloadLogger
-from wandb.sdk.internal.thread_local_settings import _thread_local_api_settings
+from tracklab.apis import internal
+from tracklab.sdk.artifacts.artifact_download_logger import ArtifactDownloadLogger
+from tracklab.sdk.internal.thread_local_settings import _thread_local_api_settings
 
 
 def test_api_auto_login_no_tty():
     with mock.patch.object(sys, "stdin", None):
-        with pytest.raises(wandb.UsageError):
+        with pytest.raises(tracklab.UsageError):
             Api()
 
 
@@ -38,8 +38,8 @@ def test_thread_local_api_key():
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
 def test_base_url_sanitization():
     with mock.patch.object(wandb, "login", mock.MagicMock()):
-        api = Api({"base_url": "https://wandb.corp.net///"})
-        assert api.settings["base_url"] == "https://wandb.corp.net"
+        api = Api({"base_url": "https://tracklab.corp.net///"})
+        assert api.settings["base_url"] == "https://tracklab.corp.net"
 
 
 @pytest.mark.parametrize(
@@ -132,7 +132,7 @@ def test_direct_specification_of_api_key():
 def test_from_path_project_type(path):
     with mock.patch.object(wandb, "login", mock.MagicMock()):
         project = Api().from_path(path)
-        assert isinstance(project, wandb.apis.public.Project)
+        assert isinstance(project, tracklab.apis.public.Project)
 
 
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
@@ -145,9 +145,9 @@ def test_report_to_html():
 
 
 def test_override_base_url_passed_to_login():
-    base_url = "https://wandb.space"
+    base_url = "https://tracklab.space"
     with mock.patch.object(wandb, "login", mock.MagicMock()) as mock_login:
-        api = wandb.Api(api_key=None, overrides={"base_url": base_url})
+        api = tracklab.Api(api_key=None, overrides={"base_url": base_url})
         assert mock_login.call_args[1]["host"] == base_url
         assert api.settings["base_url"] == base_url
 
@@ -192,7 +192,7 @@ def test_create_custom_chart(monkeypatch):
     _api = internal.Api()
     _api.api.gql = MagicMock(return_value={"createCustomChart": {"chart": {"id": "1"}}})
     mock_gql = MagicMock(return_value="test-gql-resp")
-    monkeypatch.setattr(wandb.sdk.internal.internal_api, "gql", mock_gql)
+    monkeypatch.setattr(tracklab.sdk.internal.internal_api, "gql", mock_gql)
 
     # Test with uppercase access (as would be passed from public API)
     kwargs = {

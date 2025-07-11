@@ -3,11 +3,11 @@ import os
 import cloudpickle
 import pytest
 import torch
-import wandb
-from wandb.sdk.artifacts.artifact import Artifact
-from wandb.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
-from wandb.sdk.data_types import saved_model
-from wandb.sdk.lib.filesystem import copy_or_overwrite_changed
+import tracklab
+from tracklab.sdk.artifacts.artifact import Artifact
+from tracklab.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
+from tracklab.sdk.data_types import saved_model
+from tracklab.sdk.lib.filesystem import copy_or_overwrite_changed
 
 from . import saved_model_constructors
 
@@ -199,10 +199,10 @@ def saved_model_test(mocker, model, py_deps=None):
     sm = saved_model._SavedModel.init(model, **kwargs)
 
     mocker.patch(
-        "wandb.sdk.artifacts.artifact.ArtifactManifestEntry",
+        "tracklab.sdk.artifacts.artifact.ArtifactManifestEntry",
         ArtifactManifestEntryPatch,
     )
-    art = wandb.Artifact("name", "type")
+    art = tracklab.Artifact("name", "type")
     art.add(sm, "model")
     assert art.manifest.entries[f"model.{sm._log_type}.json"] is not None
     pub_art = make_local_artifact_public(art)

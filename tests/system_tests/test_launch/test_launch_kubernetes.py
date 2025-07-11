@@ -2,11 +2,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import kubernetes_asyncio
 import pytest
-from wandb.apis.internal import Api
-from wandb.sdk.launch import loader
-from wandb.sdk.launch.agent.agent import LaunchAgent
-from wandb.sdk.launch.runner import kubernetes_monitor, kubernetes_runner
-from wandb.sdk.launch.utils import make_name_dns_safe
+from tracklab.apis.internal import Api
+from tracklab.sdk.launch import loader
+from tracklab.sdk.launch.agent.agent import LaunchAgent
+from tracklab.sdk.launch.runner import kubernetes_monitor, kubernetes_runner
+from tracklab.sdk.launch.utils import make_name_dns_safe
 
 
 async def _mock_maybe_create_imagepull_secret(*args, **kwargs):
@@ -348,11 +348,11 @@ def setup_mock_kubernetes_client(monkeypatch, jobs, pods, mock_job_base):
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_monitor.LaunchKubernetesMonitor",
+        "tracklab.sdk.launch.runner.kubernetes_monitor.LaunchKubernetesMonitor",
         AsyncMock(),
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.kubernetes_runner.LaunchKubernetesMonitor",
+        "tracklab.sdk.launch.runner.kubernetes_runner.LaunchKubernetesMonitor",
         AsyncMock(),
     )
 

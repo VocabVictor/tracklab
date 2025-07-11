@@ -13,20 +13,20 @@ import pytest
 import requests
 from hypothesis import given
 from hypothesis.strategies import from_regex, text
-from wandb.filesync.step_prepare import ResponsePrepare, StepPrepare
-from wandb.sdk.artifacts._validators import ARTIFACT_NAME_MAXLEN
-from wandb.sdk.artifacts.artifact import Artifact
-from wandb.sdk.artifacts.artifact_file_cache import ArtifactFileCache
-from wandb.sdk.artifacts.artifact_instance_cache import artifact_instance_cache
-from wandb.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
-from wandb.sdk.artifacts.artifact_state import ArtifactState
-from wandb.sdk.artifacts.exceptions import ArtifactNotLoggedError
-from wandb.sdk.artifacts.storage_policies.wandb_storage_policy import WandbStoragePolicy
+from tracklab.filesync.step_prepare import ResponsePrepare, StepPrepare
+from tracklab.sdk.artifacts._validators import ARTIFACT_NAME_MAXLEN
+from tracklab.sdk.artifacts.artifact import Artifact
+from tracklab.sdk.artifacts.artifact_file_cache import ArtifactFileCache
+from tracklab.sdk.artifacts.artifact_instance_cache import artifact_instance_cache
+from tracklab.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
+from tracklab.sdk.artifacts.artifact_state import ArtifactState
+from tracklab.sdk.artifacts.exceptions import ArtifactNotLoggedError
+from tracklab.sdk.artifacts.storage_policies.wandb_storage_policy import WandbStoragePolicy
 
 if TYPE_CHECKING:
     from typing import Protocol
 
-    from wandb.sdk.internal.internal_api import CreateArtifactFileSpecInput
+    from tracklab.sdk.internal.internal_api import CreateArtifactFileSpecInput
 
     class StoreFileFixture(Protocol):
         def __call__(
@@ -302,7 +302,7 @@ class TestStoreFile:
         ],
     )
     @mock.patch(
-        "wandb.sdk.artifacts.storage_policies.wandb_storage_policy.WandbStoragePolicy."
+        "tracklab.sdk.artifacts.storage_policies.wandb_storage_policy.WandbStoragePolicy."
         "s3_multipart_file_upload"
     )
     def test_multipart_upload_handle_response(
@@ -327,7 +327,7 @@ class TestStoreFile:
         policy = WandbStoragePolicy(api=api)
         # Mock minimum size for multipart so that we can test multipart
         with mock.patch(
-            "wandb.sdk.artifacts.storage_policies.wandb_storage_policy."
+            "tracklab.sdk.artifacts.storage_policies.wandb_storage_policy."
             "S3_MIN_MULTI_UPLOAD_SIZE",
             example_file.stat().st_size,
         ):

@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
-import wandb
+import tracklab
 import xgboost as xgb
 from sklearn.datasets import fetch_california_housing
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
-from wandb.integration.xgboost import WandbCallback
+from tracklab.integration.xgboost import WandbCallback
 
 # load data
 housing = fetch_california_housing()
@@ -18,7 +18,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=123
 )
 
-run = wandb.init(project="xgboost-housing")
+run = tracklab.init(project="xgboost-housing")
 
 # Define regressor
 bst_params = dict(
@@ -45,6 +45,6 @@ xg_reg.fit(
 # Evaluate
 preds = xg_reg.predict(X_test)
 rmse = np.sqrt(mean_squared_error(y_test, preds))
-wandb.log({"RMSE": rmse})
+tracklab.log({"RMSE": rmse})
 
 run.finish()

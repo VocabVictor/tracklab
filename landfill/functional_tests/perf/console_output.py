@@ -4,7 +4,7 @@ import sys
 
 import yea
 
-import wandb
+import tracklab
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
     parser.add_argument("--output-chunk", type=int, default=10)
     args = parser.parse_args()
 
-    run = wandb.init()
+    run = tracklab.init()
     for i in range(args.output_total):
         for _ in range(args.output_chunk):
             sys.stdout.write(".")

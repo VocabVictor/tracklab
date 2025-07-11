@@ -1,5 +1,5 @@
 import pytest
-import wandb
+import tracklab
 
 
 def test_get_artifact_collection_from_linked_artifact(linked_artifact):
@@ -44,8 +44,8 @@ def test_unlink_artifact(logged_artifact, linked_artifact, api):
 
 
 def test_link_artifact_from_run_logs_draft_artifacts_first(user):
-    with wandb.init() as run:
-        artifact = wandb.Artifact("test-artifact", "test-type")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("test-artifact", "test-type")
 
         assert artifact.is_draft() is True
 
@@ -60,8 +60,8 @@ def test_link_artifact_from_run_infers_target_path_from_run(user):
     collection = "test-collection"
     other_proj = "other-project"
 
-    with wandb.init() as run:
-        artifact = wandb.Artifact("test-artifact", "test-type")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("test-artifact", "test-type")
 
         # No explicit entity or project in target path
         link_a = run.link_artifact(artifact, collection)
@@ -75,12 +75,12 @@ def test_link_artifact_from_run_infers_target_path_from_run(user):
 
 
 def test_artifact_is_link(user, api):
-    run = wandb.init()
+    run = tracklab.init()
     artifact_type = "model"
     collection_name = "sequence_name"
 
     # test is_link upon logging/linking
-    artifact = wandb.Artifact(collection_name, artifact_type)
+    artifact = tracklab.Artifact(collection_name, artifact_type)
     run.log_artifact(artifact)
     artifact.wait()
     assert not artifact.is_link
@@ -120,11 +120,11 @@ def test_artifact_is_link(user, api):
 
 
 def test_linked_artifacts_field(user, api):
-    run = wandb.init()
+    run = tracklab.init()
     artifact_type = "model"
     collection_name = "sequence_name"
 
-    artifact = wandb.Artifact(collection_name, artifact_type)
+    artifact = tracklab.Artifact(collection_name, artifact_type)
     run.log_artifact(artifact)
     artifact.wait()
     assert not artifact.is_link

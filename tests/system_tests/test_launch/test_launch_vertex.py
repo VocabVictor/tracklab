@@ -1,11 +1,11 @@
 from unittest.mock import MagicMock
 
 import pytest
-import wandb
-from wandb.apis.internal import Api
-from wandb.sdk.launch import loader
-from wandb.sdk.launch._project_spec import EntryPoint
-from wandb.sdk.launch.environment.gcp_environment import GcpEnvironment
+import tracklab
+from tracklab.apis.internal import Api
+from tracklab.sdk.launch import loader
+from tracklab.sdk.launch._project_spec import EntryPoint
+from tracklab.sdk.launch.environment.gcp_environment import GcpEnvironment
 
 
 @pytest.fixture
@@ -29,36 +29,36 @@ async def test_vertex_resolved_submitted_job(use_local_wandb_backend, monkeypatc
 
     mock_env = MagicMock(spec=GcpEnvironment)
     monkeypatch.setattr(
-        wandb.sdk.launch.loader,
+        tracklab.sdk.launch.loader,
         "environment_from_config",
         lambda *args: mock_env,
     )
     monkeypatch.setattr(
-        wandb.sdk.launch.loader,
+        tracklab.sdk.launch.loader,
         "builder_from_config",
         lambda *args: MagicMock(),
     )
     monkeypatch.setattr(
-        wandb.sdk.launch.loader,
+        tracklab.sdk.launch.loader,
         "registry_from_config",
         lambda *args: None,
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.docker_image_exists",
+        "tracklab.sdk.launch.runner.local_container.docker_image_exists",
         lambda x: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.pull_docker_image",
+        "tracklab.sdk.launch.runner.local_container.pull_docker_image",
         lambda x: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.builder.noop.NoOpBuilder.build_image",
+        "tracklab.sdk.launch.builder.noop.NoOpBuilder.build_image",
         lambda *args, **kwargs: "testimage",
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.vertex_runner.launch_vertex_job",
+        "tracklab.sdk.launch.runner.vertex_runner.launch_vertex_job",
         mock_launch_vertex_job,
     )
 

@@ -14,9 +14,9 @@ assert:
   - :yea:exit: 0
 """
 
-import wandb
+import tracklab
 
-run = wandb.init(mode="offline")
+run = tracklab.init(mode="offline")
 run.log(dict(m1=1))
 run.log(dict(m2=2))
 run.finish()

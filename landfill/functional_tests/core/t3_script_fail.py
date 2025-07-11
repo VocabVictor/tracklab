@@ -18,9 +18,9 @@ assert:
   - :yea:exit: 1
 """
 
-import wandb
+import tracklab
 
-wandb.init()
-wandb.log(dict(m1=1))
-wandb.log(dict(m2=2))
+tracklab.init()
+tracklab.log(dict(m1=1))
+tracklab.log(dict(m2=2))
 print(1 / 0)

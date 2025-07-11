@@ -7,7 +7,7 @@ if __name__ == "__main__":
     logger.warning("lastResort (before configuring)")
 
     # Import wandb to trigger wb_logging.configure_wandb_logger().
-    import wandb  # noqa: F401
+    import tracklab  # noqa: F401
 
     # configure_wandb_logger() should prevent lastResort from being used for
     # messages logged to the "wandb" logger.

@@ -4,11 +4,11 @@ import time
 
 import yea
 
-import wandb
+import tracklab
 
 
 def main():
-    run = wandb.init()
+    run = tracklab.init()
     history = 200
     for i in range(history):
         print(i)

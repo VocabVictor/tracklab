@@ -25,9 +25,9 @@ import numpy as np
 from sklearn import datasets
 from sklearn.cluster import KMeans
 
-import wandb
+import tracklab
 
-wandb.init("my-scikit-integration")
+tracklab.init("my-scikit-integration")
 
 iris = datasets.load_iris()
 X, y = iris.data, iris.target
@@ -39,4 +39,4 @@ kmeans = KMeans(n_clusters=4, random_state=1)
 
 cluster_labels = kmeans.fit_predict(X)
 
-wandb.sklearn.plot_clusterer(kmeans, X, cluster_labels, labels, "KMeans")
+tracklab.sklearn.plot_clusterer(kmeans, X, cluster_labels, labels, "KMeans")

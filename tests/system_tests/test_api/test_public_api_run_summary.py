@@ -1,16 +1,16 @@
 import pytest
-import wandb
+import tracklab
 
 
 def test_delete_summary_metric_w_no_lazyload(user):
-    with wandb.init(project="test") as run:
+    with tracklab.init(project="test") as run:
         run_id = run.id
 
         metric = "test_val"
         for i in range(10):
             run.log({metric: i})
 
-    run = wandb.Api().run(f"test/{run_id}")
+    run = tracklab.Api().run(f"test/{run_id}")
     del run.summary[metric]
     run.update()
 

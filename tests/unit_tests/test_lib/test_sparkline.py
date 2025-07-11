@@ -1,4 +1,4 @@
-from wandb import wandb_lib
+from wandb import tracklab_lib
 
 sparkline = wandb_lib.sparkline
 

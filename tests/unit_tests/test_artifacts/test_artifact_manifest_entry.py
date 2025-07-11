@@ -3,8 +3,8 @@ import os
 from logging import getLogger
 from pathlib import Path, PurePath
 
-from wandb.sdk.artifacts.artifact import Artifact
-from wandb.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
+from tracklab.sdk.artifacts.artifact import Artifact
+from tracklab.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
 
 logger = getLogger(__name__)
 

@@ -1,7 +1,7 @@
 import re
 
 import pytest
-from wandb.sdk.launch.builder.templates._wandb_bootstrap import TORCH_DEP_REGEX
+from tracklab.sdk.launch.builder.templates._wandb_bootstrap import TORCH_DEP_REGEX
 
 
 @pytest.mark.parametrize(

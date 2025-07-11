@@ -2,14 +2,14 @@ import argparse
 import math
 import random
 
-import wandb
+import tracklab
 
 
 def main(attach_id: str, eval_step: int, project: str):
-    run = wandb.init(
+    run = tracklab.init(
         id=attach_id,
         project=project,
-        settings=wandb.Settings(
+        settings=tracklab.Settings(
             mode="shared",
             console="off",
             _disable_machine_info=True,

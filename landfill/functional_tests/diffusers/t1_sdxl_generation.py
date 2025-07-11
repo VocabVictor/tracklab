@@ -1,7 +1,7 @@
 import torch
 from diffusers import StableDiffusionXLImg2ImgPipeline, StableDiffusionXLPipeline
 
-from wandb.integration.diffusers import autolog
+from tracklab.integration.diffusers import autolog
 
 autolog()
 

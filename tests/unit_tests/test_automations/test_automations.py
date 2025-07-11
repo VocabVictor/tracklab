@@ -5,14 +5,14 @@ from typing import Any
 
 from pydantic import ValidationError
 from pytest import FixtureRequest, fixture, mark, raises
-from wandb.automations import ActionType, EventType, NewAutomation
-from wandb.automations._utils import (
+from tracklab.automations import ActionType, EventType, NewAutomation
+from tracklab.automations._utils import (
     EXCLUDED_INPUT_ACTIONS,
     EXCLUDED_INPUT_EVENTS,
     prepare_to_create,
 )
-from wandb.automations.actions import InputAction
-from wandb.automations.events import InputEvent
+from tracklab.automations.actions import InputAction
+from tracklab.automations.events import InputEvent
 
 
 class TestPrepareToCreate:

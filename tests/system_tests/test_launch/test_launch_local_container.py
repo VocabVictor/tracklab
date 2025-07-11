@@ -1,9 +1,9 @@
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.apis.internal import Api
-from wandb.sdk.launch import loader
-from wandb.sdk.launch._project_spec import EntryPoint
+from tracklab.apis.internal import Api
+from tracklab.sdk.launch import loader
+from tracklab.sdk.launch._project_spec import EntryPoint
 
 
 @pytest.mark.asyncio
@@ -18,20 +18,20 @@ async def test_local_container_entrypoint(use_local_wandb_backend, monkeypatch):
         return "testimage"
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container._run_entry_point",
+        "tracklab.sdk.launch.runner.local_container._run_entry_point",
         mock_run_entrypoint,
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.docker_image_exists",
+        "tracklab.sdk.launch.runner.local_container.docker_image_exists",
         lambda x: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.pull_docker_image",
+        "tracklab.sdk.launch.runner.local_container.pull_docker_image",
         lambda x: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.builder.noop.NoOpBuilder.build_image",
+        "tracklab.sdk.launch.builder.noop.NoOpBuilder.build_image",
         mock_build_image,
     )
 

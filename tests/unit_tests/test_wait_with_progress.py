@@ -3,8 +3,8 @@ import unittest.mock
 from typing import NoReturn
 
 import pytest
-import wandb.sdk.mailbox as mb
-from wandb.proto import wandb_server_pb2 as spb
+import tracklab.sdk.mailbox as mb
+from tracklab.proto import tracklab_server_pb2 as spb
 
 
 async def _loop_forever() -> NoReturn:

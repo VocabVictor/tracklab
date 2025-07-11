@@ -6,20 +6,20 @@ import tempfile
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.internal.job_builder import JobBuilder
-from wandb.sdk.launch.create_job import (
+from tracklab.sdk.internal.job_builder import JobBuilder
+from tracklab.sdk.launch.create_job import (
     _configure_job_builder_for_partial,
     _create_artifact_metadata,
     _create_repo_metadata,
     _dump_metadata_and_requirements,
     _make_code_artifact_name,
 )
-from wandb.sdk.launch.utils import get_current_python_version
+from tracklab.sdk.launch.utils import get_current_python_version
 
 
 def test_create_artifact_metadata(mocker):
     mocker.termwarn = MagicMock()
-    mocker.patch("wandb.termwarn", mocker.termwarn)
+    mocker.patch("tracklab.termwarn", mocker.termwarn)
     path = tempfile.TemporaryDirectory().name
     runtime = "3.9"
     entrypoint = "python test.py"
@@ -160,11 +160,11 @@ def test_create_repo_metadata_custom_dockerfile(monkeypatch, tmp_path):
         )
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.create_job.GitReference",
+        "tracklab.sdk.launch.create_job.GitReference",
         lambda *args: mock_git_ref(*args),
     )
     result = _create_repo_metadata(
-        "https://github.com/wandb/wandb.git", str(tmp_path), entrypoint=entrypoint
+        "https://github.com/wandb/tracklab.git", str(tmp_path), entrypoint=entrypoint
     )
     assert result is not None
 

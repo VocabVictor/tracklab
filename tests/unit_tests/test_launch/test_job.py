@@ -2,18 +2,18 @@ import json
 import os
 from unittest.mock import MagicMock
 
-from wandb.apis.public import Job
-from wandb.sdk.internal.job_builder import JobBuilder
+from tracklab.apis.public import Job
+from tracklab.sdk.internal.job_builder import JobBuilder
 
 
 def test_configure_notebook_repo_job(mocker, tmp_path):
     new_fname = "test.py"
     mocker.patch(
-        "wandb.apis.public.jobs.convert_jupyter_notebook_to_script",
+        "tracklab.apis.public.jobs.convert_jupyter_notebook_to_script",
         lambda fname, project_dir: new_fname,
     )
     mocker.patch(
-        "wandb.apis.public.jobs._fetch_git_repo", lambda dst_dir, uri, version: version
+        "tracklab.apis.public.jobs._fetch_git_repo", lambda dst_dir, uri, version: version
     )
 
     job_source = {
@@ -44,7 +44,7 @@ def test_configure_notebook_repo_job(mocker, tmp_path):
     mock_code_artifact = MagicMock()
     mock_code_artifact.download.side_effect = mock_download_code
 
-    mocker.patch("wandb.sdk.artifacts.artifact.Artifact._from_id", mock_artifact)
+    mocker.patch("tracklab.sdk.artifacts.artifact.Artifact._from_id", mock_artifact)
 
     mock_api = MagicMock()
     mock_api._artifact.return_value = mock_artifact
@@ -64,7 +64,7 @@ def test_configure_notebook_repo_job(mocker, tmp_path):
 def test_configure_notebook_artifact_job(mocker, tmp_path):
     new_fname = "test.py"
     mocker.patch(
-        "wandb.apis.public.jobs.convert_jupyter_notebook_to_script",
+        "tracklab.apis.public.jobs.convert_jupyter_notebook_to_script",
         lambda fname, project_dir: new_fname,
     )
 
@@ -93,7 +93,7 @@ def test_configure_notebook_artifact_job(mocker, tmp_path):
         with open(os.path.join(root, "test.ipynb"), "w") as f:
             f.write("hello")
 
-    mocker.patch("wandb.sdk.artifacts.artifact.Artifact._from_id", mock_artifact)
+    mocker.patch("tracklab.sdk.artifacts.artifact.Artifact._from_id", mock_artifact)
 
     mock_api = MagicMock()
     mock_api._artifact.return_value = mock_artifact

@@ -3,8 +3,8 @@
 import os
 import unittest.mock
 
-import wandb
-from wandb.apis.public import Api
+import tracklab
+from tracklab.apis.public import Api
 
 
 def test_agent_basic(user):
@@ -19,15 +19,15 @@ def test_agent_basic(user):
     }
 
     def train():
-        run = wandb.init()
+        run = tracklab.init()
         sweep_ids.append(run.sweep_id)
         sweep_configs.append(dict(run.config))
         sweep_resumed.append(run.resumed)
         run.finish()
 
-    sweep_id = wandb.sweep(sweep_config)
+    sweep_id = tracklab.sweep(sweep_config)
 
-    wandb.agent(sweep_id, function=train, count=1)
+    tracklab.agent(sweep_id, function=train, count=1)
 
     assert len(sweep_ids) == len(sweep_configs) == 1
     assert sweep_ids[0] == sweep_id
@@ -39,7 +39,7 @@ def test_agent_config_merge(user):
     sweep_configs = []
 
     def train():
-        run = wandb.init(config={"extra": 2})
+        run = tracklab.init(config={"extra": 2})
         sweep_configs.append(dict(run.config))
         run.finish()
 
@@ -50,8 +50,8 @@ def test_agent_config_merge(user):
     }
 
     with unittest.mock.patch.dict(os.environ, {"WANDB_CONSOLE": "off"}):
-        sweep_id = wandb.sweep(sweep_config)
-        wandb.agent(sweep_id, function=train, count=1)
+        sweep_id = tracklab.sweep(sweep_config)
+        tracklab.agent(sweep_id, function=train, count=1)
 
     assert len(sweep_configs) == 1
     assert sweep_configs[0] == {"a": 1, "extra": 2}
@@ -61,7 +61,7 @@ def test_agent_config_ignore(user):
     sweep_configs = []
 
     def train():
-        run = wandb.init(config={"a": "ignored", "extra": 2})
+        run = tracklab.init(config={"a": "ignored", "extra": 2})
         sweep_configs.append(dict(run.config))
         run.finish()
 
@@ -71,8 +71,8 @@ def test_agent_config_ignore(user):
         "parameters": {"a": {"values": [1, 2, 3]}},
     }
 
-    sweep_id = wandb.sweep(sweep_config)
-    wandb.agent(sweep_id, function=train, count=1)
+    sweep_id = tracklab.sweep(sweep_config)
+    tracklab.agent(sweep_id, function=train, count=1)
 
     assert len(sweep_configs) == 1
     assert sweep_configs[0] == {"a": 1, "extra": 2}
@@ -88,7 +88,7 @@ def test_agent_ignore_project_entity_run_id(user):
     public_api.create_project(project_name, user)
 
     def train():
-        run = wandb.init(entity="ign", project="ignored", id="also_ignored")
+        run = tracklab.init(entity="ign", project="ignored", id="also_ignored")
         sweep_projects.append(run.project)
         sweep_entities.append(run.entity)
         sweep_run_ids.append(run.id)
@@ -99,8 +99,8 @@ def test_agent_ignore_project_entity_run_id(user):
         "method": "grid",
         "parameters": {"a": {"values": [1, 2, 3]}},
     }
-    sweep_id = wandb.sweep(sweep_config, project=project_name)
-    wandb.agent(sweep_id, function=train, count=1, project=project_name)
+    sweep_id = tracklab.sweep(sweep_config, project=project_name)
+    tracklab.agent(sweep_id, function=train, count=1, project=project_name)
 
     assert len(sweep_projects) == len(sweep_entities) == 1
     assert sweep_projects[0] == "actual"

@@ -1,12 +1,12 @@
-import wandb
-from wandb.errors import term
+import tracklab
+from tracklab.errors import term
 
 
 def test_no_dynamic_text_if_silent(emulated_terminal):
     # Set up as if stderr is a terminal.
     _ = emulated_terminal
 
-    wandb.termsetup(wandb.Settings(silent=True), None)
+    tracklab.termsetup(tracklab.Settings(silent=True), None)
 
     with term.dynamic_text() as text:
         assert text is None
@@ -81,8 +81,8 @@ def test_static_and_dynamic_text(emulated_terminal):
         emulated_terminal.reset_capsys()
 
         text.set_text("my\nanimated\ntext")
-        wandb.termlog("static text above animated text")
-        wandb.termlog("static text #2")
+        tracklab.termlog("static text above animated text")
+        tracklab.termlog("static text #2")
         text.set_text("my\nanimated, updated\ntext")
 
         assert emulated_terminal.read_stderr() == [

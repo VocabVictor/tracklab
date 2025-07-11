@@ -3,8 +3,8 @@ import platform
 
 import numpy as np
 import pytest
-import wandb
-from wandb import wandb_sdk
+import tracklab
+from wandb import tracklab_sdk
 
 REFERENCE_ATTRIBUTES = set(
     [
@@ -76,7 +76,7 @@ def test_log_avoids_mutation(mock_run):
 
 
 def test_display(mock_run):
-    run = mock_run(settings=wandb.Settings(mode="offline"))
+    run = mock_run(settings=tracklab.Settings(mode="offline"))
     assert run.display() is False
 
 
@@ -111,7 +111,7 @@ def test_run_urls(mock_run):
     project = "lol"
     run_id = "my-run"
     run = mock_run(
-        settings=wandb.Settings(
+        settings=tracklab.Settings(
             base_url=base_url,
             entity=entity,
             project=project,
@@ -219,14 +219,14 @@ def test_run_pub_history(mock_run, record_q, parse_records):
 
 
 def test_use_artifact_offline(mock_run):
-    run = mock_run(settings=wandb.Settings(mode="offline"))
+    run = mock_run(settings=tracklab.Settings(mode="offline"))
     with pytest.raises(Exception) as e_info:
         run.use_artifact("boom-data")
         assert str(e_info.value) == "Cannot use artifact when in offline mode."
 
 
 def test_run_basic():
-    s = wandb.Settings()
+    s = tracklab.Settings()
     c = dict(
         param1=2,
         param2=4,
@@ -251,7 +251,7 @@ def test_run_basic():
 
 
 def test_run_sweep():
-    s = wandb.Settings()
+    s = tracklab.Settings()
     c = dict(param1=2, param2=4)
     sw = dict(param3=9)
     run = wandb_sdk.wandb_run.Run(settings=s, config=c, sweep_config=sw)
@@ -259,7 +259,7 @@ def test_run_sweep():
 
 
 def test_run_sweep_overlap():
-    s = wandb.Settings()
+    s = tracklab.Settings()
     c = dict(param1=2, param2=4)
     sw = dict(param2=8, param3=9)
     run = wandb_sdk.wandb_run.Run(settings=s, config=c, sweep_config=sw)
@@ -267,7 +267,7 @@ def test_run_sweep_overlap():
 
 
 def test_run_deepcopy():
-    s = wandb.Settings()
+    s = tracklab.Settings()
     c = dict(param1=2, param2=4)
     run = wandb_sdk.wandb_run.Run(settings=s, config=c)
     run2 = copy.deepcopy(run)
@@ -290,7 +290,7 @@ def test_resumed_run_resume_file_state(mocker, mock_run, tmp_path, settings, exp
     tmp_file = tmp_path / "test_resume.json"
     tmp_file.write_text("{'run_id': 'test'}")
 
-    mocker.patch("wandb.sdk.wandb_settings.Settings.resume_fname", tmp_file)
+    mocker.patch("tracklab.sdk.wandb_settings.Settings.resume_fname", tmp_file)
 
     run = mock_run(use_magic_mock=True, settings=settings)
     run._on_ready()

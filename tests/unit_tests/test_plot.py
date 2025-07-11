@@ -1,5 +1,5 @@
 import pytest
-from wandb.plot import confusion_matrix, line_series, pr_curve, roc_curve
+from tracklab.plot import confusion_matrix, line_series, pr_curve, roc_curve
 
 
 def test_roc_curve_no_title():

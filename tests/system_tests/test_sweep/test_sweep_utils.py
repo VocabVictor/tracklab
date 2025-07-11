@@ -2,7 +2,7 @@ import json
 
 import pytest
 import yaml
-from wandb.sdk.launch.sweeps import utils
+from tracklab.sdk.launch.sweeps import utils
 
 
 def test_parse_sweep_id():

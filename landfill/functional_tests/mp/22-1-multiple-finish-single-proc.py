@@ -1,6 +1,6 @@
-import wandb
+import tracklab
 
 if __name__ == "__main__":
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.finish()
     run.finish()

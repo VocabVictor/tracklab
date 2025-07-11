@@ -5,18 +5,18 @@ from typing import Dict
 from unittest.mock import Mock, patch
 
 import pytest
-import wandb
-from wandb.apis import internal, public
-from wandb.errors import CommError
-from wandb.sdk.launch.sweeps import SchedulerError, load_scheduler
-from wandb.sdk.launch.sweeps.scheduler import (
+import tracklab
+from tracklab.apis import internal, public
+from tracklab.errors import CommError
+from tracklab.sdk.launch.sweeps import SchedulerError, load_scheduler
+from tracklab.sdk.launch.sweeps.scheduler import (
     RunState,
     Scheduler,
     SchedulerState,
     SweepRun,
 )
-from wandb.sdk.launch.sweeps.scheduler_sweep import SweepScheduler
-from wandb.sdk.launch.sweeps.utils import construct_scheduler_args
+from tracklab.sdk.launch.sweeps.scheduler_sweep import SweepScheduler
+from tracklab.sdk.launch.sweeps.utils import construct_scheduler_args
 
 from .test_wandb_sweep import SWEEP_CONFIG_RANDOM
 
@@ -35,7 +35,7 @@ def _patch_wandb_run(monkeypatch, config=None):
     mocked_run.config = config
     mocked_run.id = "sweep-scheduler"
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._init_wandb_run",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._init_wandb_run",
         lambda _x: mocked_run,
     )
 
@@ -51,7 +51,7 @@ def test_sweep_scheduler_entity_project_sweep_id(
     _project = "test-project"
     api = internal.Api()
     # Entity, project, and sweep should be everything you need to create a scheduler
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     _ = Scheduler(
         api, sweep_id=sweep_id, entity=_entity, project=_project, num_workers=1
     )
@@ -72,7 +72,7 @@ def test_sweep_scheduler_start_failed(user, monkeypatch):
     _project = "test-project"
     api = internal.Api()
     # Entity, project, and sweep should be everything you need to create a scheduler
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
 
     api.stop_run = lambda run_id: True
     scheduler = SweepScheduler(api, sweep_id=sweep_id, entity=_entity, project=_project)
@@ -117,7 +117,7 @@ def test_sweep_scheduler_runcap(user, monkeypatch):
         return mock
 
     monkeypatch.setattr(
-        "wandb.sdk.launch._launch_add._launch_add",
+        "tracklab.sdk.launch._launch_add._launch_add",
         mock_launch_add,
     )
 
@@ -133,7 +133,7 @@ def test_sweep_scheduler_runcap(user, monkeypatch):
         self.exit()
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._get_next_sweep_run",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._get_next_sweep_run",
         mock_run_add_to_launch_queue,
     )
 
@@ -145,7 +145,7 @@ def test_sweep_scheduler_runcap(user, monkeypatch):
     # Entity, project, and sweep should be everything you need to create a scheduler
     api = internal.Api()
     api.get_run_state = mock_get_run_state
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     scheduler = SweepScheduler(
         api,
         sweep_id=sweep_id,
@@ -170,14 +170,14 @@ def test_sweep_scheduler_sweep_id_no_job(user, monkeypatch):
         self.state = SchedulerState.COMPLETED
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler.run",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler.run",
         mock_run_complete_scheduler,
     )
     _entity = user
     _project = "test-project"
     api = internal.Api()
     # Entity, project, and sweep
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     # No job
     scheduler = SweepScheduler(
         api, sweep_id=sweep_id, entity=_entity, project=_project, num_workers=1
@@ -191,7 +191,7 @@ def test_sweep_scheduler_sweep_id_with_job(user, monkeypatch):
     sweep_config = SWEEP_CONFIG_RANDOM
 
     # make a job
-    run = wandb.init()
+    run = tracklab.init()
     job_artifact = run._log_job_artifact_with_image("ljadnfakehbbr", args=[])
     job_name = job_artifact.wait().name
     sweep_config["job"] = job_name
@@ -201,7 +201,7 @@ def test_sweep_scheduler_sweep_id_with_job(user, monkeypatch):
         self.state = SchedulerState.COMPLETED
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler.run",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler.run",
         mock_run_complete_scheduler,
     )
 
@@ -209,7 +209,7 @@ def test_sweep_scheduler_sweep_id_with_job(user, monkeypatch):
     _project = "test-project"
     api = internal.Api()
     # Entity, project, and sweep
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     # Yes job
     scheduler = SweepScheduler(
         api, sweep_id=sweep_id, entity=_entity, project=_project, num_workers=1
@@ -225,7 +225,7 @@ def test_sweep_scheduler_base_scheduler_states(user, monkeypatch):
     _entity = user
     _project = "test-project"
     api = internal.Api()
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
 
     def mock_run_complete_scheduler(self, *args, **kwargs):
         self.state = SchedulerState.COMPLETED
@@ -238,12 +238,12 @@ def test_sweep_scheduler_base_scheduler_states(user, monkeypatch):
     api.get_run_state = mock_get_run_state
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._update_run_states",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._update_run_states",
         mock_run_complete_scheduler,
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
         lambda _: True,
     )
 
@@ -260,11 +260,11 @@ def test_sweep_scheduler_base_scheduler_states(user, monkeypatch):
         raise KeyboardInterrupt
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._update_run_states",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._update_run_states",
         mock_run_raise_keyboard_interrupt,
     )
 
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     _scheduler = Scheduler(
         api, sweep_id=sweep_id, entity=_entity, project=_project, num_workers=1
     )
@@ -275,7 +275,7 @@ def test_sweep_scheduler_base_scheduler_states(user, monkeypatch):
     def mock_run_raise_exception(*args, **kwargs):
         raise Exception("Generic exception")
 
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     _scheduler = Scheduler(
         api, sweep_id=sweep_id, entity=_entity, project=_project, num_workers=1
     )
@@ -290,7 +290,7 @@ def test_sweep_scheduler_base_scheduler_states(user, monkeypatch):
         self.exit()
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._update_run_states",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._update_run_states",
         mock_run_exit,
     )
 
@@ -299,7 +299,7 @@ def test_sweep_scheduler_base_scheduler_states(user, monkeypatch):
             return "running"
         return "finished"
 
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     _scheduler = Scheduler(
         api, sweep_id=sweep_id, entity=_entity, project=_project, num_workers=1
     )
@@ -316,7 +316,7 @@ def test_sweep_scheduler_base_run_states(user, monkeypatch):
     _entity = user
     _project = "test-project"
     api = internal.Api()
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
 
     # Mock api.get_run_state() to return crashed and running runs
     mock_run_states: Dict[str, RunState] = {
@@ -362,7 +362,7 @@ def test_sweep_scheduler_base_run_states(user, monkeypatch):
         raise CommError("Generic Exception")
 
     api.get_run_state = mock_get_run_state_raise_exception
-    sweep_id = wandb.sweep(sweep_config, entity=_entity, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=_entity, project=_project)
     _scheduler = Scheduler(
         api, sweep_id=sweep_id, entity=_entity, project=_project, num_workers=1
     )
@@ -385,7 +385,7 @@ def test_sweep_scheduler_base_add_to_launch_queue(user, monkeypatch):
 
     _project = "test-project"
     _job = "test-job:latest"
-    sweep_id = wandb.sweep(sweep_config, entity=user, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=user, project=_project)
 
     def mock_launch_add(*args, **kwargs):
         mock = Mock(spec=public.QueuedRun)
@@ -393,7 +393,7 @@ def test_sweep_scheduler_base_add_to_launch_queue(user, monkeypatch):
         return mock
 
     monkeypatch.setattr(
-        "wandb.sdk.launch._launch_add._launch_add",
+        "tracklab.sdk.launch._launch_add._launch_add",
         mock_launch_add,
     )
 
@@ -415,12 +415,12 @@ def test_sweep_scheduler_base_add_to_launch_queue(user, monkeypatch):
         self.exit()
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._get_next_sweep_run",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._get_next_sweep_run",
         mock_run_add_to_launch_queue,
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
         lambda _: True,
     )
 
@@ -429,7 +429,7 @@ def test_sweep_scheduler_base_add_to_launch_queue(user, monkeypatch):
         return True
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._stop_run",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._stop_run",
         mock_stop_run,
     )
 
@@ -454,7 +454,7 @@ def test_sweep_scheduler_base_add_to_launch_queue(user, monkeypatch):
     _scheduler._runs["foo_run"].queued_run.state = RunState.FINISHED
     assert _scheduler._runs["foo_run"].queued_run.args()[-2] == _project
 
-    sweep_id2 = wandb.sweep(sweep_config, entity=user, project=_project)
+    sweep_id2 = tracklab.sweep(sweep_config, entity=user, project=_project)
     _project_queue = "test-project-queue"
     _scheduler2 = Scheduler(
         api,
@@ -476,7 +476,7 @@ def test_sweep_scheduler_sweeps_stop_agent_heartbeat(user, monkeypatch):
     sweep_config = SWEEP_CONFIG_RANDOM
     _patch_wandb_run(monkeypatch)
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
         lambda _: True,
     )
 
@@ -496,7 +496,7 @@ def test_sweep_scheduler_sweeps_stop_agent_heartbeat(user, monkeypatch):
 
     _project = "test-project"
     _job = "test-job:latest"
-    sweep_id = wandb.sweep(sweep_config, entity=user, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=user, project=_project)
     scheduler = SweepScheduler(
         api,
         sweep_id=sweep_id,
@@ -514,13 +514,13 @@ def test_sweep_scheduler_sweeps_invalid_agent_heartbeat(user, monkeypatch):
     sweep_config = SWEEP_CONFIG_RANDOM
     _patch_wandb_run(monkeypatch)
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
         lambda _: True,
     )
 
     api = internal.Api()
     _project = "test-project"
-    sweep_id = wandb.sweep(sweep_config, entity=user, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=user, project=_project)
 
     def mock_agent_heartbeat(*args, **kwargs):
         return [{"type": "foo"}]
@@ -555,7 +555,7 @@ def test_sweep_scheduler_sweeps_invalid_agent_heartbeat(user, monkeypatch):
     api.agent_heartbeat = mock_agent_heartbeat
     api.get_run_state = mock_get_run_state
 
-    sweep_id = wandb.sweep(sweep_config, entity=user, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=user, project=_project)
     with pytest.raises(SchedulerError) as e:
         _scheduler = SweepScheduler(
             api,
@@ -576,7 +576,7 @@ def test_sweep_scheduler_sweeps_run_and_heartbeat(user, monkeypatch):
     sweep_config = SWEEP_CONFIG_RANDOM
     _patch_wandb_run(monkeypatch)
     monkeypatch.setattr(
-        "wandb.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
+        "tracklab.sdk.launch.sweeps.scheduler.Scheduler._try_load_executable",
         lambda _: True,
     )
 
@@ -601,7 +601,7 @@ def test_sweep_scheduler_sweeps_run_and_heartbeat(user, monkeypatch):
         return Mock(spec=public.QueuedRun)
 
     monkeypatch.setattr(
-        "wandb.sdk.launch._launch_add._launch_add",
+        "tracklab.sdk.launch._launch_add._launch_add",
         mock_launch_add,
     )
 
@@ -619,7 +619,7 @@ def test_sweep_scheduler_sweeps_run_and_heartbeat(user, monkeypatch):
 
     _project = "test-project"
     _job = "test-job:latest"
-    sweep_id = wandb.sweep(sweep_config, entity=user, project=_project)
+    sweep_id = tracklab.sweep(sweep_config, entity=user, project=_project)
 
     _scheduler = SweepScheduler(
         api,
@@ -640,12 +640,12 @@ def test_launch_sweep_scheduler_try_executable_works(user, test_settings, monkey
     _patch_wandb_run(monkeypatch)
     _project = "test-project"
     settings = test_settings({"project": _project})
-    run = wandb.init(settings=settings)
+    run = tracklab.init(settings=settings)
     job_artifact = run._log_job_artifact_with_image("lala-docker-123", args=[])
     job_name = f"{user}/{_project}/{job_artifact.wait().name}"
 
     run.finish()
-    sweep_id = wandb.sweep(SWEEP_CONFIG_RANDOM, entity=user, project=_project)
+    sweep_id = tracklab.sweep(SWEEP_CONFIG_RANDOM, entity=user, project=_project)
 
     _scheduler = SweepScheduler(
         internal.Api(),
@@ -664,7 +664,7 @@ def test_launch_sweep_scheduler_try_executable_fails(user, monkeypatch):
     _patch_wandb_run(monkeypatch)
     _project = "test-project"
     job_name = "nonexistent"
-    sweep_id = wandb.sweep(SWEEP_CONFIG_RANDOM, entity=user, project=_project)
+    sweep_id = tracklab.sweep(SWEEP_CONFIG_RANDOM, entity=user, project=_project)
 
     _scheduler = SweepScheduler(
         internal.Api(),
@@ -685,7 +685,7 @@ def test_launch_sweep_scheduler_try_executable_image(user, monkeypatch):
     _patch_wandb_run(monkeypatch)
     _project = "test-project"
     _image_uri = "some-image-wow"
-    sweep_id = wandb.sweep(SWEEP_CONFIG_RANDOM, entity=user, project=_project)
+    sweep_id = tracklab.sweep(SWEEP_CONFIG_RANDOM, entity=user, project=_project)
 
     _scheduler = SweepScheduler(
         internal.Api(),
@@ -753,7 +753,7 @@ def test_launch_sweep_scheduler_macro_args(user, monkeypatch, command):
         return mock
 
     monkeypatch.setattr(
-        "wandb.sdk.launch._launch_add._launch_add",
+        "tracklab.sdk.launch._launch_add._launch_add",
         mock_launch_add,
     )
 
@@ -769,7 +769,7 @@ def test_launch_sweep_scheduler_macro_args(user, monkeypatch, command):
     }
     # Entity, project, and sweep should be everything you need to create a scheduler
     api = internal.Api()
-    s = wandb.sweep(sweep_config, entity=user, project="t")
+    s = tracklab.sweep(sweep_config, entity=user, project="t")
     scheduler = SweepScheduler(
         api, sweep_id=s, entity=user, project="t", queue="q", num_workers=1
     )

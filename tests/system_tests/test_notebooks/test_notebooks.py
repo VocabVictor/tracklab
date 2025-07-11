@@ -7,17 +7,17 @@ import sys
 from unittest import mock
 
 import pytest
-import wandb
-import wandb.sdk.lib.apikey
-import wandb.util
+import tracklab
+import tracklab.sdk.lib.apikey
+import tracklab.util
 
 
 def test_login_timeout(notebook, monkeypatch):
     monkeypatch.setattr(
-        wandb.util, "prompt_choices", lambda x, input_timeout=None, jupyter=True: x[0]
+        tracklab.util, "prompt_choices", lambda x, input_timeout=None, jupyter=True: x[0]
     )
     monkeypatch.setattr(
-        wandb.wandb_lib.apikey,
+        tracklab.wandb_lib.apikey,
         "prompt_choices",
         lambda x, input_timeout=None, jupyter=True: x[0],
     )
@@ -75,7 +75,7 @@ def test_notebook_metadata_jupyter(mocked_module, notebook):
             {"url": base_url, "notebook_dir": "/test"}
         ]
         with mock.patch.object(
-            wandb.jupyter.requests,
+            tracklab.jupyter.requests,
             "get",
             lambda *args, **kwargs: mock.MagicMock(
                 json=lambda: [
@@ -89,7 +89,7 @@ def test_notebook_metadata_jupyter(mocked_module, notebook):
                 ]
             ),
         ):
-            meta = wandb.jupyter.notebook_metadata(False)
+            meta = tracklab.jupyter.notebook_metadata(False)
             assert meta == {"path": "test.ipynb", "root": "/test", "name": "test.ipynb"}
 
 
@@ -98,20 +98,20 @@ def test_notebook_metadata_no_servers(mocked_module):
         ipyconnect.return_value = "kernel-12345.json"
         serverapp = mocked_module("jupyter_server.serverapp")
         serverapp.list_running_servers.return_value = []
-        meta = wandb.jupyter.notebook_metadata(False)
+        meta = tracklab.jupyter.notebook_metadata(False)
         assert meta == {}
 
 
 def test_notebook_metadata_colab(mocked_module):
     # Needed for patching due to the lazy-load set up in wandb/__init__.py
-    import wandb.jupyter
+    import tracklab.jupyter
 
     colab = mocked_module("google.colab")
     colab._message.blocking_request.return_value = {
         "ipynb": {"metadata": {"colab": {"name": "koalab.ipynb"}}}
     }
     with mock.patch.object(
-        wandb.jupyter,
+        tracklab.jupyter,
         "notebook_metadata_from_jupyter_servers_and_kernel_id",
         lambda *args, **kwargs: {
             "path": "colab.ipynb",
@@ -119,8 +119,8 @@ def test_notebook_metadata_colab(mocked_module):
             "name": "colab.ipynb",
         },
     ):
-        wandb.jupyter.notebook_metadata_from_jupyter_servers_and_kernel_id()
-        meta = wandb.jupyter.notebook_metadata(False)
+        tracklab.jupyter.notebook_metadata_from_jupyter_servers_and_kernel_id()
+        meta = tracklab.jupyter.notebook_metadata(False)
         assert meta == {
             "root": "/content",
             "path": "colab.ipynb",
@@ -130,7 +130,7 @@ def test_notebook_metadata_colab(mocked_module):
 
 def test_notebook_metadata_kaggle(mocked_module):
     # Needed for patching due to the lazy-load set up in wandb/__init__.py
-    import wandb.jupyter
+    import tracklab.jupyter
 
     os.environ["KAGGLE_KERNEL_RUN_TYPE"] = "test"
     kaggle = mocked_module("kaggle_session")
@@ -140,11 +140,11 @@ def test_notebook_metadata_kaggle(mocked_module):
     }
     kaggle.UserSessionClient.return_value = kaggle_client
     with mock.patch.object(
-        wandb.jupyter,
+        tracklab.jupyter,
         "notebook_metadata_from_jupyter_servers_and_kernel_id",
         lambda *args, **kwargs: {},
     ):
-        meta = wandb.jupyter.notebook_metadata(False)
+        meta = tracklab.jupyter.notebook_metadata(False)
         assert meta == {
             "root": "/kaggle/working",
             "path": "kaggle.ipynb",
@@ -154,7 +154,7 @@ def test_notebook_metadata_kaggle(mocked_module):
 
 def test_notebook_not_exists(mocked_ipython, user, capsys):
     with mock.patch.dict(os.environ, {"WANDB_NOTEBOOK_NAME": "fake.ipynb"}):
-        run = wandb.init()
+        run = tracklab.init()
         _, err = capsys.readouterr()
         assert "WANDB_NOTEBOOK_NAME should be a path" in err
         run.finish()
@@ -162,20 +162,20 @@ def test_notebook_not_exists(mocked_ipython, user, capsys):
 
 def test_databricks_notebook_doesnt_hang_on_wandb_login(mocked_module):
     # test for WB-5264
-    # when we try to call wandb.login(), should fail with no-tty
+    # when we try to call tracklab.login(), should fail with no-tty
     with mock.patch.object(
-        wandb.sdk.lib.apikey,
+        tracklab.sdk.lib.apikey,
         "_is_databricks",
         return_value=True,
     ):
-        with pytest.raises(wandb.UsageError, match="tty"):
-            wandb.login()
+        with pytest.raises(tracklab.UsageError, match="tty"):
+            tracklab.login()
 
 
 def test_mocked_notebook_html_default(user, run_id, mocked_ipython):
-    wandb.load_ipython_extension(mocked_ipython)
-    mocked_ipython.register_magics.assert_called_with(wandb.jupyter.WandBMagics)
-    with wandb.init(id=run_id) as run:
+    tracklab.load_ipython_extension(mocked_ipython)
+    mocked_ipython.register_magics.assert_called_with(tracklab.jupyter.WandBMagics)
+    with tracklab.init(id=run_id) as run:
         run.log({"acc": 99, "loss": 0})
         run.finish()
     displayed_html = [args[0].strip() for args, _ in mocked_ipython.html.call_args_list]
@@ -186,7 +186,7 @@ def test_mocked_notebook_html_default(user, run_id, mocked_ipython):
 
 
 def test_mocked_notebook_html_quiet(user, run_id, mocked_ipython):
-    run = wandb.init(id=run_id, settings=wandb.Settings(quiet=True))
+    run = tracklab.init(id=run_id, settings=tracklab.Settings(quiet=True))
     run.log({"acc": 99, "loss": 0})
     run.finish()
     displayed_html = [args[0].strip() for args, _ in mocked_ipython.html.call_args_list]
@@ -197,7 +197,7 @@ def test_mocked_notebook_html_quiet(user, run_id, mocked_ipython):
 
 
 def test_mocked_notebook_run_display(user, mocked_ipython):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.display()
     displayed_html = [args[0].strip() for args, _ in mocked_ipython.html.call_args_list]
     for i, html in enumerate(displayed_html):
@@ -225,7 +225,7 @@ def test_notebook_creates_artifact_job(notebook):
     regex_string = r'http:\/\/localhost:\d+\/[^\/]+\/[^\/]+\/runs\/([^\'"]+)'
     run_id = re.search(regex_string, str(output)).group(1)
 
-    api = wandb.Api()
+    api = tracklab.Api()
     user = os.environ["WANDB_USERNAME"]
     run = api.run(f"{user}/uncategorized/{run_id}")
     used_artifacts = run.used_artifacts()
@@ -244,7 +244,7 @@ def test_notebook_creates_repo_job(notebook):
     regex_string = r'http:\/\/localhost:\d+\/[^\/]+\/[^\/]+\/runs\/([^\'"]+)'
     run_id = re.search(regex_string, str(output)).group(1)
 
-    api = wandb.Api()
+    api = tracklab.Api()
     user = os.environ["WANDB_USERNAME"]
     run = api.run(f"{user}/uncategorized/{run_id}")
     used_artifacts = run.used_artifacts()

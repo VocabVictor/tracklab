@@ -1,9 +1,9 @@
 import os
 
-import wandb
+import tracklab
 
 os.environ["WANDB_CODE_DIR"] = "."
 
-wandb.init(project="code-toad")
+tracklab.init(project="code-toad")
 
-# wandb.run.log_code()
+# tracklab.run.log_code()

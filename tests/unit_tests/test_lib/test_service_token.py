@@ -3,7 +3,7 @@ import pathlib
 import socket
 
 import pytest
-from wandb.sdk.lib.service import ipc_support, service_token
+from tracklab.sdk.lib.service import ipc_support, service_token
 
 
 @pytest.fixture

@@ -2,10 +2,10 @@ from typing import List
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.apis.internal import Api
-from wandb.sdk.launch._project_spec import LaunchProject
-from wandb.sdk.launch.errors import LaunchError
-from wandb.sdk.launch.runner.vertex_runner import VertexRunner, VertexSubmittedRun
+from tracklab.apis.internal import Api
+from tracklab.sdk.launch._project_spec import LaunchProject
+from tracklab.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.runner.vertex_runner import VertexRunner, VertexSubmittedRun
 
 
 class MockCustomJob:
@@ -107,7 +107,7 @@ def mock_aiplatform(mocker):
         return mock
 
     mocker.patch(
-        "wandb.sdk.launch.runner.vertex_runner.get_module",
+        "tracklab.sdk.launch.runner.vertex_runner.get_module",
         side_effect=_fake_get_module,
     )
     return mock

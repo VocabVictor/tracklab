@@ -5,8 +5,8 @@ import json
 from hypothesis import given
 from hypothesis.strategies import DrawFn, SearchStrategy, composite, sampled_from
 from pytest import raises
-from wandb.automations import MetricChangeFilter, MetricThresholdFilter, RunEvent
-from wandb.automations._filters.run_metrics import Agg, MetricAgg, MetricVal
+from tracklab.automations import MetricChangeFilter, MetricThresholdFilter, RunEvent
+from tracklab.automations._filters.run_metrics import Agg, MetricAgg, MetricVal
 
 from ._strategies import (
     aggs,

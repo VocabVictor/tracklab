@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 import pytest
-import wandb
+import tracklab
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def cleanup():
 
 
 def _cleanup():
-    wandb.finish()
+    tracklab.finish()
     if os.path.isdir("wandb"):
         shutil.rmtree("wandb")
     if os.path.isdir("artifacts"):
@@ -41,24 +41,24 @@ def test_artifact_run_lookup_apis(user, cleanup):
     artifact_2_name = f"a2-{str(time.time())}"
 
     # Initial setup
-    run_1 = wandb.init()
-    artifact = wandb.Artifact(artifact_1_name, "test_type")
-    artifact.add(wandb.Image(np.random.randint(0, 255, (10, 10))), "image")
+    run_1 = tracklab.init()
+    artifact = tracklab.Artifact(artifact_1_name, "test_type")
+    artifact.add(tracklab.Image(np.random.randint(0, 255, (10, 10))), "image")
     run_1.log_artifact(artifact)
-    artifact = wandb.Artifact(artifact_2_name, "test_type")
-    artifact.add(wandb.Image(np.random.randint(0, 255, (10, 10))), "image")
+    artifact = tracklab.Artifact(artifact_2_name, "test_type")
+    artifact.add(tracklab.Image(np.random.randint(0, 255, (10, 10))), "image")
     run_1.log_artifact(artifact)
     run_1.finish()
 
     # Create a second version for a1
-    run_2 = wandb.init()
-    artifact = wandb.Artifact(artifact_1_name, "test_type")
-    artifact.add(wandb.Image(np.random.randint(0, 255, (10, 10))), "image")
+    run_2 = tracklab.init()
+    artifact = tracklab.Artifact(artifact_1_name, "test_type")
+    artifact.add(tracklab.Image(np.random.randint(0, 255, (10, 10))), "image")
     run_2.log_artifact(artifact)
     run_2.finish()
 
     # Use both
-    run_3 = wandb.init()
+    run_3 = tracklab.init()
     a1 = run_3.use_artifact(artifact_1_name + ":latest")
     assert _runs_eq(a1.used_by(), [run_3])
     assert _run_eq(a1.logged_by(), run_2)
@@ -68,7 +68,7 @@ def test_artifact_run_lookup_apis(user, cleanup):
     run_3.finish()
 
     # Use both
-    run_4 = wandb.init()
+    run_4 = tracklab.init()
     a1 = run_4.use_artifact(artifact_1_name + ":latest")
     assert _runs_eq(a1.used_by(), [run_3, run_4])
     a2 = run_4.use_artifact(artifact_2_name + ":latest")
@@ -80,21 +80,21 @@ def test_artifact_creation_with_diff_type(user, cleanup):
     artifact_name = f"a1-{str(time.time())}"
 
     # create
-    with wandb.init() as run:
-        artifact = wandb.Artifact(artifact_name, "artifact_type_1")
-        artifact.add(wandb.Image(np.random.randint(0, 255, (10, 10))), "image")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact(artifact_name, "artifact_type_1")
+        artifact.add(tracklab.Image(np.random.randint(0, 255, (10, 10))), "image")
         run.log_artifact(artifact)
 
     # update
-    with wandb.init() as run:
-        artifact = wandb.Artifact(artifact_name, "artifact_type_1")
-        artifact.add(wandb.Image(np.random.randint(0, 255, (10, 10))), "image")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact(artifact_name, "artifact_type_1")
+        artifact.add(tracklab.Image(np.random.randint(0, 255, (10, 10))), "image")
         run.log_artifact(artifact)
 
     # invalid
-    with wandb.init() as run:
-        artifact = wandb.Artifact(artifact_name, "artifact_type_2")
-        artifact.add(wandb.Image(np.random.randint(0, 255, (10, 10))), "image_2")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact(artifact_name, "artifact_type_2")
+        artifact.add(tracklab.Image(np.random.randint(0, 255, (10, 10))), "image_2")
         did_err = False
         try:
             run.log_artifact(artifact)
@@ -107,7 +107,7 @@ def test_artifact_creation_with_diff_type(user, cleanup):
             )
         assert did_err
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = run.use_artifact(artifact_name + ":latest")
         # should work
         image = artifact.get("image")

@@ -2,12 +2,12 @@ import platform
 from unittest import mock
 
 import pytest
-from wandb.docker import is_buildx_installed, should_add_load_argument
+from tracklab.docker import is_buildx_installed, should_add_load_argument
 
 
 @pytest.fixture
 def mock_shell():
-    with mock.patch("wandb.docker.shell") as mock_shell:
+    with mock.patch("tracklab.docker.shell") as mock_shell:
         mock_shell.return_value = None
         yield mock_shell
 

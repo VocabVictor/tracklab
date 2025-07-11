@@ -19,7 +19,7 @@ def check_agent(handler):
 
 
 def main():
-    from wandb.integration.langchain import WandbTracer
+    from tracklab.integration.langchain import WandbTracer
 
     handler = WandbTracer()
     check_agent(handler)

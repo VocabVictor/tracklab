@@ -7,11 +7,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
 import torch.optim as optim
-import wandb
+import tracklab
 from metaflow import FlowSpec, Parameter, step
 from torch.optim.lr_scheduler import StepLR
 from torchvision import datasets, transforms
-from wandb.integration.metaflow import wandb_log
+from tracklab.integration.metaflow import tracklab_log
 
 os.environ["METAFLOW_USER"] = "test_user"
 os.environ["USER"] = os.environ["METAFLOW_USER"]
@@ -143,7 +143,7 @@ def train(model, device, train_loader, optimizer, epoch, log_interval, dry_run):
         loss.backward()
         optimizer.step()
         if batch_idx % log_interval == 0:
-            wandb.log(
+            tracklab.log(
                 {"epoch": epoch, "step": batch_idx * len(data), "loss": loss.item()}
             )
             if dry_run:
@@ -167,7 +167,7 @@ def test(model, device, test_loader):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    wandb.log({"test_loss": test_loss, "accuracy": correct / len(test_loader.dataset)})
+    tracklab.log({"test_loss": test_loss, "accuracy": correct / len(test_loader.dataset)})
 
 
 if __name__ == "__main__":

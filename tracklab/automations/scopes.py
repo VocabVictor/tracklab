@@ -1,28 +1,78 @@
-"""Automation scopes."""
+"""Scopes in which a W&B Automation can be triggered."""
 
-from typing import List, Dict, Any
-from enum import Enum
+from __future__ import annotations
+
+from typing import Literal, Union
+
+from pydantic import BeforeValidator, Field
+from typing_extensions import Annotated, TypeAlias, get_args
+
+from tracklab._pydantic import GQLBase
+from tracklab.automations._generated import (
+    ArtifactPortfolioScopeFields,
+    ArtifactSequenceScopeFields,
+    ProjectScopeFields,
+)
+
+from ._validators import LenientStrEnum, to_scope
 
 
-class ScopeType(Enum):
-    """Types of automation scopes."""
-    PROJECT = "project"
-    RUN = "run"
-    USER = "user"
-    GLOBAL = "global"
+# NOTE: Re-defined publicly with a more readable name for easier access
+class ScopeType(LenientStrEnum):
+    """The kind of scope that triggers an automation."""
+
+    PROJECT = "PROJECT"
+    ARTIFACT_COLLECTION = "ARTIFACT_COLLECTION"
 
 
-class Scope:
-    """Defines the scope for automation rules."""
-    
-    def __init__(self, scope_type: ScopeType, identifiers: List[str]):
-        self.scope_type = scope_type
-        self.identifiers = identifiers
-        
-    def matches(self, context: Dict[str, Any]) -> bool:
-        """Check if context matches this scope."""
-        # Basic implementation
-        return True
-        
-    def __repr__(self) -> str:
-        return f"Scope({self.scope_type.value}, {self.identifiers})"
+class _BaseScope(GQLBase):
+    scope_type: Annotated[ScopeType, Field(frozen=True)]
+
+
+class _ArtifactSequenceScope(_BaseScope, ArtifactSequenceScopeFields):
+    """An automation scope defined by a specific `ArtifactSequence`."""
+
+    scope_type: Literal[ScopeType.ARTIFACT_COLLECTION] = ScopeType.ARTIFACT_COLLECTION
+
+
+class _ArtifactPortfolioScope(_BaseScope, ArtifactPortfolioScopeFields):
+    """An automation scope defined by a specific `ArtifactPortfolio` (e.g. a registry collection)."""
+
+    scope_type: Literal[ScopeType.ARTIFACT_COLLECTION] = ScopeType.ARTIFACT_COLLECTION
+
+
+# for type annotations
+ArtifactCollectionScope = Annotated[
+    Union[_ArtifactSequenceScope, _ArtifactPortfolioScope],
+    BeforeValidator(to_scope),
+    Field(discriminator="typename__"),
+]
+"""An automation scope defined by a specific `ArtifactCollection`."""
+
+# for runtime type checks
+ArtifactCollectionScopeTypes: tuple[type, ...] = get_args(
+    ArtifactCollectionScope.__origin__  # type: ignore[attr-defined]
+)
+
+
+class ProjectScope(_BaseScope, ProjectScopeFields):
+    """An automation scope defined by a specific `Project`."""
+
+    scope_type: Literal[ScopeType.PROJECT] = ScopeType.PROJECT
+
+
+# for type annotations
+AutomationScope: TypeAlias = Annotated[
+    Union[_ArtifactSequenceScope, _ArtifactPortfolioScope, ProjectScope],
+    BeforeValidator(to_scope),
+    Field(discriminator="typename__"),
+]
+# for runtime type checks
+AutomationScopeTypes: tuple[type, ...] = get_args(AutomationScope.__origin__)  # type: ignore[attr-defined]
+
+
+__all__ = [
+    "ScopeType",
+    "ArtifactCollectionScope",
+    "ProjectScope",
+]

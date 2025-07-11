@@ -5,16 +5,16 @@ import platform
 
 import numpy as np
 
-import wandb
+import tracklab
 
 height = width = 2
 image = np.random.rand(height, width)
 
-with wandb.init() as run:
-    run.log({"normal": wandb.Image(image)})
-    run.log({"with/forward/slash": wandb.Image(image)})
+with tracklab.init() as run:
+    run.log({"normal": tracklab.Image(image)})
+    run.log({"with/forward/slash": tracklab.Image(image)})
     try:
-        run.log({"with\\backward\\slash": wandb.Image(image)})
+        run.log({"with\\backward\\slash": tracklab.Image(image)})
     except ValueError:
         assert platform.system() == "Windows", "only windows throw value error"
     else:

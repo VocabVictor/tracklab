@@ -1,6 +1,6 @@
 import multiprocessing
 
-import wandb
+import tracklab
 
 
 def mp_func():
@@ -12,9 +12,9 @@ def mp_func():
 
 
 def main():
-    wandb.init()
+    tracklab.init()
     context = multiprocessing.get_context("spawn")
     p = context.Process(target=mp_func)
     p.start()
     p.join()
-    wandb.finish()
+    tracklab.finish()

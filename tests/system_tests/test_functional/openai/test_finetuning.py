@@ -1,7 +1,7 @@
 import os
 
 from openai import OpenAI
-from wandb.integration.openai.fine_tuning import WandbLogger
+from tracklab.integration.openai.fine_tuning import WandbLogger
 
 
 def test_finetuning(wandb_backend_spy):

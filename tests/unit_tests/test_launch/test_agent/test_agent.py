@@ -4,14 +4,14 @@ import threading
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.errors import CommError
-from wandb.sdk.launch.agent.agent import (
+from tracklab.errors import CommError
+from tracklab.sdk.launch.agent.agent import (
     InternalAgentLogger,
     JobAndRunStatusTracker,
     LaunchAgent,
 )
-from wandb.sdk.launch.errors import LaunchDockerError, LaunchError
-from wandb.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT, LOG_PREFIX
+from tracklab.sdk.launch.errors import LaunchDockerError, LaunchError
+from tracklab.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT, LOG_PREFIX
 
 
 class AsyncMock(MagicMock):
@@ -35,12 +35,12 @@ def _setup(mocker):
     mocker.termwarn = MagicMock()
     mocker.termerror = MagicMock()
     mocker.wandb_init = MagicMock()
-    mocker.patch("wandb.termlog", mocker.termlog)
-    mocker.patch("wandb.termwarn", mocker.termwarn)
-    mocker.patch("wandb.termerror", mocker.termerror)
-    mocker.patch("wandb.init", mocker.wandb_init)
+    mocker.patch("tracklab.termlog", mocker.termlog)
+    mocker.patch("tracklab.termwarn", mocker.termwarn)
+    mocker.patch("tracklab.termerror", mocker.termerror)
+    mocker.patch("tracklab.init", mocker.wandb_init)
     mocker.logger = MagicMock()
-    mocker.patch("wandb.sdk.launch.agent.agent._logger", mocker.logger)
+    mocker.patch("tracklab.sdk.launch.agent.agent._logger", mocker.logger)
 
     mocker.status = MagicMock()
     mocker.status.state = "running"
@@ -57,7 +57,7 @@ def _setup(mocker):
 
     mocker.runner.run = _mock_runner_run
     mocker.patch(
-        "wandb.sdk.launch.agent.agent.loader.runner_from_config",
+        "tracklab.sdk.launch.agent.agent.loader.runner_from_config",
         return_value=mocker.runner,
     )
 
@@ -147,20 +147,20 @@ def _setup_requeue(mocker):
     mocker.project.run_id = "test-run-id"
 
     mocker.patch(
-        "wandb.sdk.launch.agent.agent.LaunchProject.from_spec",
+        "tracklab.sdk.launch.agent.agent.LaunchProject.from_spec",
         return_value=mocker.project,
     )
     mocker.patch(
-        "wandb.sdk.launch.agent.agent.loader.builder_from_config",
+        "tracklab.sdk.launch.agent.agent.loader.builder_from_config",
         return_value=None,
     )
     mocker.patch(
-        "wandb.sdk.launch.agent.agent.loader.runner_from_config",
+        "tracklab.sdk.launch.agent.agent.loader.runner_from_config",
         return_value=mocker.runner,
     )
 
     mocker.api.fail_run_queue_item = MagicMock()
-    mocker.patch("wandb.sdk.launch.agent.agent.launch_add", mocker.launch_add)
+    mocker.patch("tracklab.sdk.launch.agent.agent.launch_add", mocker.launch_add)
 
 
 @pytest.mark.asyncio
@@ -268,9 +268,9 @@ def _setup_thread_finish(mocker):
     mocker.termlog = MagicMock()
     mocker.termerror = MagicMock()
     mocker.wandb_init = MagicMock()
-    mocker.patch("wandb.termlog", mocker.termlog)
-    mocker.patch("wandb.termerror", mocker.termerror)
-    mocker.patch("wandb.init", mocker.wandb_init)
+    mocker.patch("tracklab.termlog", mocker.termlog)
+    mocker.patch("tracklab.termerror", mocker.termerror)
+    mocker.patch("tracklab.init", mocker.wandb_init)
 
 
 @pytest.mark.asyncio
@@ -304,7 +304,7 @@ async def test_thread_finish_sweep_fail(mocker, clean_agent):
     }
 
     mocker.api.get_run_state = MagicMock(return_value="pending")
-    mocker.patch("wandb.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
+    mocker.patch("tracklab.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
     agent = LaunchAgent(api=mocker.api, config=mock_config)
     mock_saver = MagicMock()
     job = JobAndRunStatusTracker("run_queue_item_id", "test-queue", mock_saver)
@@ -333,7 +333,7 @@ async def test_thread_finish_run_fail(mocker, clean_agent):
     }
 
     mocker.api.get_run_state.side_effect = CommError("failed")
-    mocker.patch("wandb.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
+    mocker.patch("tracklab.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
     agent = LaunchAgent(api=mocker.api, config=mock_config)
     mock_saver = MagicMock()
     job = JobAndRunStatusTracker("run_queue_item_id", "test-queue", mock_saver)
@@ -362,7 +362,7 @@ async def test_thread_finish_run_fail_start(mocker, clean_agent):
         "project": "test-project",
     }
     mocker.api.get_run_state.side_effect = CommError("failed")
-    mocker.patch("wandb.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
+    mocker.patch("tracklab.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
 
     agent = LaunchAgent(api=mocker.api, config=mock_config)
     mock_saver = MagicMock()
@@ -395,7 +395,7 @@ async def test_thread_finish_run_fail_start_old_server(mocker, clean_agent):
         "project": "test-project",
     }
     mocker.api.get_run_state.side_effect = CommError("failed")
-    mocker.patch("wandb.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
+    mocker.patch("tracklab.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 1)
 
     agent = LaunchAgent(api=mocker.api, config=mock_config)
     agent._gorilla_supports_fail_run_queue_items = False
@@ -494,13 +494,13 @@ async def test_thread_finish_no_run(mocker, clean_agent):
     job.project = MagicMock()
     job.completed_status = "finished"
     agent._jobs = {"thread_1": job}
-    mocker.patch("wandb.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 0)
+    mocker.patch("tracklab.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 0)
     await agent.finish_thread_id("thread_1")
     assert mocker.api.fail_run_queue_item.called
     assert mocker.api.fail_run_queue_item.call_args[0][0] == "run_queue_item_id"
     assert (
         mocker.api.fail_run_queue_item.call_args[0][1]
-        == "The submitted job exited successfully but failed to call wandb.init"
+        == "The submitted job exited successfully but failed to call tracklab.init"
     )
 
 
@@ -523,7 +523,7 @@ async def test_thread_failed_no_run(mocker, clean_agent):
     job.project = MagicMock()
     job.completed_status = "failed"
     agent._jobs = {"thread_1": job}
-    mocker.patch("wandb.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 0)
+    mocker.patch("tracklab.sdk.launch.agent.agent.RUN_INFO_GRACE_PERIOD", 0)
     await agent.finish_thread_id("thread_1")
     assert mocker.api.fail_run_queue_item.called
     assert mocker.api.fail_run_queue_item.call_args[0][0] == "run_queue_item_id"
@@ -604,8 +604,8 @@ async def test_thread_run_job_calls_finish_thread_id(mocker, exception, clean_ag
 @pytest.mark.asyncio
 async def test_inner_thread_run_job(mocker, clean_agent):
     _setup(mocker)
-    mocker.patch("wandb.sdk.launch.agent.agent.DEFAULT_STOPPED_RUN_TIMEOUT", new=0)
-    mocker.patch("wandb.sdk.launch.agent.agent.AGENT_POLLING_INTERVAL", new=0)
+    mocker.patch("tracklab.sdk.launch.agent.agent.DEFAULT_STOPPED_RUN_TIMEOUT", new=0)
+    mocker.patch("tracklab.sdk.launch.agent.agent.AGENT_POLLING_INTERVAL", new=0)
     mock_config = {
         "entity": "test-entity",
         "project": "test-project",
@@ -651,12 +651,12 @@ async def test_raise_warnings(mocker, clean_agent):
     mocker.runner = MagicMock()
     mocker.runner.run = AsyncMock(return_value=mocker.run)
     mocker.patch(
-        "wandb.sdk.launch.agent.agent.loader.runner_from_config",
+        "tracklab.sdk.launch.agent.agent.loader.runner_from_config",
         return_value=mocker.runner,
     )
 
-    mocker.patch("wandb.sdk.launch.agent.agent.DEFAULT_STOPPED_RUN_TIMEOUT", new=0)
-    mocker.patch("wandb.sdk.launch.agent.agent.AGENT_POLLING_INTERVAL", new=0)
+    mocker.patch("tracklab.sdk.launch.agent.agent.DEFAULT_STOPPED_RUN_TIMEOUT", new=0)
+    mocker.patch("tracklab.sdk.launch.agent.agent.AGENT_POLLING_INTERVAL", new=0)
     mock_config = {
         "entity": "test-entity",
         "project": "test-project",
@@ -760,7 +760,7 @@ def test_agent_inf_jobs(mocker):
         "max_jobs": -1,
     }
     mocker.patch(
-        "wandb.sdk.launch.agent.agent.LaunchAgent._init_agent_run", lambda x: None
+        "tracklab.sdk.launch.agent.agent.LaunchAgent._init_agent_run", lambda x: None
     )
     agent = LaunchAgent(MagicMock(), config)
     assert agent._max_jobs == float("inf")

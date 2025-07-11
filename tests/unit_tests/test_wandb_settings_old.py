@@ -1,7 +1,7 @@
 import os
 from unittest import mock
 
-from wandb.old.settings import Settings
+from tracklab.old.settings import Settings
 
 
 def test__global_path_default_exists_and_is_writable():

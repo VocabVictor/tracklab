@@ -6,7 +6,7 @@ import time
 import numpy as np
 from PIL import Image
 
-import wandb
+import tracklab
 
 WANDB_PROJECT_ENV = os.environ.get("WANDB_PROJECT")
 if WANDB_PROJECT_ENV is None:
@@ -115,7 +115,7 @@ def get_label_image_path(ndx):
 
 
 def get_dominant_id_ndx(np_image):
-    if isinstance(np_image, wandb.Image):
+    if isinstance(np_image, tracklab.Image):
         np_image = np.array(np_image.image)
     return BDD_ID_MAP[np.argmax(np.bincount(np_image.astype(int).flatten()))]
 
@@ -126,7 +126,7 @@ def clean_artifacts_dir():
 
 
 def mask_to_bounding(np_image):
-    if isinstance(np_image, wandb.Image):
+    if isinstance(np_image, tracklab.Image):
         np_image = np.array(np_image.image)
 
     data = []
@@ -255,7 +255,7 @@ def main():
         download_data()
 
         # Initialize the run
-        with wandb.init(
+        with tracklab.init(
             project=WANDB_PROJECT,  # The project to register this Run to
             job_type="create_dataset",  # The type of this Run. Runs of the same type can be grouped together in the UI
             config={  # Custom configuration parameters which you might want to tune or adjust for the Run
@@ -264,12 +264,12 @@ def main():
             },
         ) as run:
             # Setup a WandB Classes object. This will give additional metadata for visuals
-            class_set = wandb.Classes(
+            class_set = tracklab.Classes(
                 [{"name": name, "id": id} for name, id in zip(BDD_CLASSES, BDD_IDS)]
             )
 
             # Setup a WandB Table object to hold our dataset
-            table = wandb.Table(
+            table = tracklab.Table(
                 columns=[
                     "id",
                     "train_image",
@@ -281,7 +281,7 @@ def main():
 
             # Fill up the table
             for ndx in range(run.config["num_examples"]):
-                # First, we will build a wandb.Image to act as our raw example object
+                # First, we will build a tracklab.Image to act as our raw example object
                 #    classes: the classes which map to masks and/or box metadata
                 #    masks: the mask metadata. In this case, we use a 2d array where each cell corresponds to the label (this comes directlyfrom the dataset)
                 #    boxes: the bounding box metadata. For example sake, we create bounding boxes by looking at the mask data and creating boxes which fully encolose each class.
@@ -294,7 +294,7 @@ def main():
                 #                         },
                 #                         "class_id" : id_num,
                 #                     }
-                example = wandb.Image(
+                example = tracklab.Image(
                     get_scaled_train_image(ndx, run.config.scale_factor),
                     classes=class_set,
                     masks={
@@ -314,10 +314,10 @@ def main():
                 )
 
                 # Next, we create two additional images which may be helpful during analysis. Notice that the additional metadata is optional.
-                color_label = wandb.Image(
+                color_label = tracklab.Image(
                     get_scaled_color_mask(ndx, run.config.scale_factor)
                 )
-                label_mask = wandb.Image(
+                label_mask = tracklab.Image(
                     get_scaled_mask_label(ndx, run.config.scale_factor)
                 )
 
@@ -331,7 +331,7 @@ def main():
                 )
 
             # Create an Artifact (versioned folder)
-            artifact = wandb.Artifact(name="raw_data", type="dataset")
+            artifact = tracklab.Artifact(name="raw_data", type="dataset")
 
             # add the table to the artifact
             artifact.add(table, "raw_examples")
@@ -341,7 +341,7 @@ def main():
         print("Step 1/5 Complete")
 
         # This step should look familiar by now:
-        with wandb.init(
+        with tracklab.init(
             project=WANDB_PROJECT,
             job_type="split_dataset",
             config={
@@ -362,16 +362,16 @@ def main():
 
             # Create the tables
             train_count = int(len(data_table.data) * run.config.train_pct)
-            train_table = wandb.Table(
+            train_table = tracklab.Table(
                 columns=data_table.columns, data=data_table.data[:train_count]
             )
-            test_table = wandb.Table(
+            test_table = tracklab.Table(
                 columns=data_table.columns, data=data_table.data[train_count:]
             )
 
             # Create the artifacts
-            train_artifact = wandb.Artifact("train_data", "dataset")
-            test_artifact = wandb.Artifact("test_data", "dataset")
+            train_artifact = tracklab.Artifact("train_data", "dataset")
+            test_artifact = tracklab.Artifact("test_data", "dataset")
 
             # Save the tables to the artifacts
             train_artifact.add(train_table, "train_table")
@@ -383,7 +383,7 @@ def main():
         print("Step 2/5 Complete")
 
         # Again, create a run.
-        with wandb.init(project=WANDB_PROJECT, job_type="model_train") as run:
+        with tracklab.init(project=WANDB_PROJECT, job_type="model_train") as run:
             # Similar to before, we will load in the artifact and asset we need. In this case, the training data
             train_artifact = run.use_artifact("train_data:latest")
             train_table = train_artifact.get("train_table")
@@ -397,13 +397,13 @@ def main():
             scores, results = score_model(model, train_data, mask_data, n_classes)
 
             # Let's create a new table. Notice that we create many columns - an evaluation score for each class type.
-            results_table = wandb.Table(
+            results_table = tracklab.Table(
                 columns=["id", "pred_mask", "dominant_pred"] + BDD_CLASSES,
                 # Data construction is similar to before, but we now use the predicted masks and bound boxes.
                 data=[
                     [
                         train_table.data[ndx][0],
-                        wandb.Image(
+                        tracklab.Image(
                             train_table.data[ndx][1],
                             masks={
                                 "train_predicted_truth": {
@@ -424,18 +424,18 @@ def main():
             )
 
             # We create an artifact, add the table, and log it as part of the run.
-            results_artifact = wandb.Artifact("train_results", "dataset")
+            results_artifact = tracklab.Artifact("train_results", "dataset")
             results_artifact.add(results_table, "train_iou_score_table")
             run.log_artifact(results_artifact)
 
             # Finally, let's save the model as a flat file and add that to it's own artifact.
             model.save("model.pkl")
-            model_artifact = wandb.Artifact("trained_model", "model")
+            model_artifact = tracklab.Artifact("trained_model", "model")
             model_artifact.add_file("model.pkl")
             run.log_artifact(model_artifact)
         print("Step 3/5 Complete")
 
-        with wandb.init(project=WANDB_PROJECT, job_type="model_eval") as run:
+        with tracklab.init(project=WANDB_PROJECT, job_type="model_eval") as run:
             # Retrieve the test data
             test_artifact = run.use_artifact("test_data:latest")
             test_table = test_artifact.get("test_table")
@@ -450,11 +450,11 @@ def main():
             scores, results = score_model(model, test_data, mask_data, n_classes)
 
             # Create a predicted score table similar to step 3.
-            results_artifact = wandb.Artifact("test_results", "dataset")
+            results_artifact = tracklab.Artifact("test_results", "dataset")
             data = [
                 [
                     test_table.data[ndx][0],
-                    wandb.Image(
+                    tracklab.Image(
                         test_table.data[ndx][1],
                         masks={
                             "test_predicted_truth": {
@@ -473,7 +473,7 @@ def main():
 
             # And log out the results.
             results_artifact.add(
-                wandb.Table(
+                tracklab.Table(
                     ["id", "pred_mask_test", "dominant_pred_test"] + BDD_CLASSES,
                     data=data,
                 ),
@@ -482,7 +482,7 @@ def main():
             run.log_artifact(results_artifact)
         print("Step 4/5 Complete")
 
-        with wandb.init(project=WANDB_PROJECT, job_type="model_result_analysis") as run:
+        with tracklab.init(project=WANDB_PROJECT, job_type="model_result_analysis") as run:
             # Retrieve the original raw dataset
             dataset_artifact = run.use_artifact("raw_data:latest")
             data_table = dataset_artifact.get("raw_examples")
@@ -495,9 +495,9 @@ def main():
             test_table = test_artifact.get("test_iou_score_table")
 
             # Join the tables on ID column and log them as outputs.
-            train_results = wandb.JoinedTable(train_table, data_table, "id")
-            test_results = wandb.JoinedTable(test_table, data_table, "id")
-            artifact = wandb.Artifact("summary_results", "dataset")
+            train_results = tracklab.JoinedTable(train_table, data_table, "id")
+            test_results = tracklab.JoinedTable(test_table, data_table, "id")
+            artifact = tracklab.Artifact("summary_results", "dataset")
             artifact.add(train_results, "train_results")
             artifact.add(test_results, "test_results")
             run.log_artifact(artifact)

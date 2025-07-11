@@ -10,11 +10,11 @@ import boto3
 import botocore
 import google.cloud.storage
 import numpy as np
-import wandb
+import tracklab
 from bokeh.plotting import figure
 from pytest import MonkeyPatch, TempPathFactory, fail, fixture, raises
-from wandb.data_types import WBValue
-from wandb.sdk.lib.hashutil import b64_to_hex_id
+from tracklab.data_types import WBValue
+from tracklab.sdk.lib.hashutil import b64_to_hex_id
 
 TABLE_COLUMNS = [
     "id",
@@ -63,15 +63,15 @@ def image_path_2(tmp_assets_dir: Path) -> Path:
 # ---------------------------------------------------------------------------
 # Session-scoped factories for creating wandb objects
 @fixture(scope="session")
-def make_image() -> Callable[[Path], wandb.Image]:
-    """Factory for creating wandb.Image objects."""
+def make_image() -> Callable[[Path], tracklab.Image]:
+    """Factory for creating tracklab.Image objects."""
 
-    def _make_wandb_image(image_path: Path) -> wandb.Image:
+    def _make_wandb_image(image_path: Path) -> tracklab.Image:
         class_labels = {1: "tree", 2: "car", 3: "road"}
         file_path = str(image_path)
-        return wandb.Image(
+        return tracklab.Image(
             file_path,
-            classes=wandb.Classes(
+            classes=tracklab.Classes(
                 [
                     {"id": 1, "name": "tree"},
                     {"id": 2, "name": "car"},
@@ -147,10 +147,10 @@ def make_image() -> Callable[[Path], wandb.Image]:
 
 
 @fixture(scope="session")
-def make_point_cloud() -> Callable[[], wandb.Object3D]:
-    """Factory for creating wandb.Object3D objects."""
+def make_point_cloud() -> Callable[[], tracklab.Object3D]:
+    """Factory for creating tracklab.Object3D objects."""
 
-    def _make_point_cloud() -> wandb.Object3D:
+    def _make_point_cloud() -> tracklab.Object3D:
         # Generate a symmetric pattern
         point_count = 20_000
 
@@ -178,43 +178,43 @@ def make_point_cloud() -> Callable[[], wandb.Object3D]:
 
             return np.column_stack([x, y, z, r, g, b])
 
-        return wandb.Object3D(wave_pattern(theta, chi, 0))
+        return tracklab.Object3D(wave_pattern(theta, chi, 0))
 
     return _make_point_cloud
 
 
 @fixture(scope="session")
-def make_bokeh() -> Callable[[], wandb.Bokeh]:
-    """Factory for creating wandb.Bokeh objects."""
+def make_bokeh() -> Callable[[], tracklab.Bokeh]:
+    """Factory for creating tracklab.Bokeh objects."""
 
-    def _make_bokeh() -> wandb.Bokeh:
+    def _make_bokeh() -> tracklab.Bokeh:
         x = [1, 2, 3, 4, 5]
         y = [6, 7, 2, 4, 5]
         p = figure(title="simple line example", x_axis_label="x", y_axis_label="y")
         p.line(x, y, legend_label="Temp.", line_width=2)
 
-        return wandb.data_types.Bokeh(p)
+        return tracklab.data_types.Bokeh(p)
 
     return _make_bokeh
 
 
 @fixture(scope="session")
-def make_html() -> Callable[[], wandb.Html]:
-    """Factory for creating wandb.Html objects."""
+def make_html() -> Callable[[], tracklab.Html]:
+    """Factory for creating tracklab.Html objects."""
 
-    def _make_html() -> wandb.Html:
-        return wandb.Html("<p>Embedded</p><iframe src='https://wandb.ai'></iframe>")
+    def _make_html() -> tracklab.Html:
+        return tracklab.Html("<p>Embedded</p><iframe src='https://tracklab.ai'></iframe>")
 
     return _make_html
 
 
 @fixture(scope="session")
-def make_video() -> Callable[[], wandb.Video]:
-    """Factory for creating wandb.Video objects."""
+def make_video() -> Callable[[], tracklab.Video]:
+    """Factory for creating tracklab.Video objects."""
 
-    def _make_video() -> wandb.Video:
+    def _make_video() -> tracklab.Video:
         # time, channel, height, width
-        return wandb.Video(
+        return tracklab.Video(
             np.random.randint(0, high=255, size=(4, 3, 10, 10), dtype=np.uint8)
         )
 
@@ -222,12 +222,12 @@ def make_video() -> Callable[[], wandb.Video]:
 
 
 @fixture(scope="session")
-def make_audio() -> Callable[[int, str], wandb.Audio]:
-    """Factory for creating wandb.Audio objects."""
+def make_audio() -> Callable[[int, str], tracklab.Audio]:
+    """Factory for creating tracklab.Audio objects."""
 
     def _make_wandb_audio(
         frequency: int = 440, caption: str = "four forty"
-    ) -> wandb.Audio:
+    ) -> tracklab.Audio:
         sample_rate = 44_100
         duration_seconds = 1
 
@@ -238,7 +238,7 @@ def make_audio() -> Callable[[int, str], wandb.Audio]:
             * frequency
             / sample_rate
         )
-        return wandb.Audio(data, sample_rate, caption)
+        return tracklab.Audio(data, sample_rate, caption)
 
     return _make_wandb_audio
 
@@ -251,12 +251,12 @@ _AUDIO_REF_URIS = {
 
 
 @fixture(scope="session")
-def make_audio_ref() -> Callable[[Literal["https", "s3", "gs"]], wandb.Audio]:
-    """Factory for creating reference wandb.Audio objects."""
+def make_audio_ref() -> Callable[[Literal["https", "s3", "gs"]], tracklab.Audio]:
+    """Factory for creating reference tracklab.Audio objects."""
 
-    def _make_wandb_audio_ref(uri_scheme: Literal["https", "s3", "gs"]) -> wandb.Audio:
+    def _make_wandb_audio_ref(uri_scheme: Literal["https", "s3", "gs"]) -> tracklab.Audio:
         uri = _AUDIO_REF_URIS[uri_scheme]
-        return wandb.Audio(uri, caption=f"star wars {uri_scheme}")
+        return tracklab.Audio(uri, caption=f"star wars {uri_scheme}")
 
     return _make_wandb_audio_ref
 
@@ -272,8 +272,8 @@ def make_table(
     make_bokeh,
     make_audio,
     make_audio_ref,
-) -> Callable[[], wandb.Table]:
-    """Factory for creating wandb.Table objects."""
+) -> Callable[[], tracklab.Table]:
+    """Factory for creating tracklab.Table objects."""
     # Reuse these values across the session
     pc1 = make_point_cloud()
     pc2 = make_point_cloud()
@@ -292,15 +292,15 @@ def make_table(
 
     np_data = np.random.randint(255, size=(4, 16, 16, 3))
 
-    def _make_wandb_table() -> wandb.Table:
-        classes = wandb.Classes(
+    def _make_wandb_table() -> tracklab.Table:
+        classes = tracklab.Classes(
             [
                 {"id": 1, "name": "tree"},
                 {"id": 2, "name": "car"},
                 {"id": 3, "name": "road"},
             ]
         )
-        table = wandb.Table(
+        table = tracklab.Table(
             # Exclude the last column, which will be added via a numpy array
             columns=TABLE_COLUMNS[:-1],
             data=[
@@ -374,12 +374,12 @@ def make_table(
 
 @fixture(scope="session")
 def make_joined_table(
-    make_table: Callable[[], wandb.Table],
-) -> Callable[[], wandb.JoinedTable]:
-    """Factory for creating wandb.JoinedTable objects."""
+    make_table: Callable[[], tracklab.Table],
+) -> Callable[[], tracklab.JoinedTable]:
+    """Factory for creating tracklab.JoinedTable objects."""
 
-    def _make_wandb_joinedtable() -> wandb.JoinedTable:
-        return wandb.JoinedTable(make_table(), make_table(), "id")
+    def _make_wandb_joinedtable() -> tracklab.JoinedTable:
+        return tracklab.JoinedTable(make_table(), make_table(), "id")
 
     return _make_wandb_joinedtable
 
@@ -387,66 +387,66 @@ def make_joined_table(
 # ---------------------------------------------------------------------------
 # Function-scoped fixtures of wandb objects
 @fixture
-def image(make_image, image_path_1) -> wandb.Image:
-    """A single wandb.Image object from an image file."""
+def image(make_image, image_path_1) -> tracklab.Image:
+    """A single tracklab.Image object from an image file."""
     return make_image(image_path_1)
 
 
 @fixture
 def image_pair(
     make_image, image_path_1, image_path_2
-) -> tuple[wandb.Image, wandb.Image]:
-    """A pair of wandb.Image objects from two different image files."""
+) -> tuple[tracklab.Image, tracklab.Image]:
+    """A pair of tracklab.Image objects from two different image files."""
     return make_image(image_path_1), make_image(image_path_2)
 
 
 @fixture
-def point_cloud(make_point_cloud) -> wandb.Object3D:
+def point_cloud(make_point_cloud) -> tracklab.Object3D:
     return make_point_cloud()
 
 
 @fixture
-def bokeh(make_bokeh) -> wandb.Bokeh:
+def bokeh(make_bokeh) -> tracklab.Bokeh:
     return make_bokeh()
 
 
 @fixture
-def html(make_html) -> wandb.Html:
+def html(make_html) -> tracklab.Html:
     return make_html()
 
 
 @fixture
-def video(make_video) -> wandb.Video:
+def video(make_video) -> tracklab.Video:
     return make_video()
 
 
 @fixture
-def audio(make_audio) -> wandb.Audio:
+def audio(make_audio) -> tracklab.Audio:
     return make_audio()
 
 
 @fixture
-def audio_ref_https(make_audio_ref) -> wandb.Audio:
+def audio_ref_https(make_audio_ref) -> tracklab.Audio:
     return make_audio_ref("https")
 
 
 @fixture
-def audio_ref_s3(make_audio_ref) -> wandb.Audio:
+def audio_ref_s3(make_audio_ref) -> tracklab.Audio:
     return make_audio_ref("s3")
 
 
 @fixture
-def audio_ref_gs(make_audio_ref) -> wandb.Audio:
+def audio_ref_gs(make_audio_ref) -> tracklab.Audio:
     return make_audio_ref("gs")
 
 
 @fixture
-def table(make_table) -> wandb.Table:
+def table(make_table) -> tracklab.Table:
     return make_table()
 
 
 @fixture
-def joined_table(make_joined_table) -> wandb.JoinedTable:
+def joined_table(make_joined_table) -> tracklab.JoinedTable:
     return make_joined_table()
 
 
@@ -481,16 +481,16 @@ def test_artifact_add_reference_via_url(user, api, tmp_path: Path):
     Path(orig_file_path).write_text(orig_text)
 
     # Create an artifact with such file stored
-    with wandb.init() as run_1:
-        artifact = wandb.Artifact(name_1, artifact_type)
+    with tracklab.init() as run_1:
+        artifact = tracklab.Artifact(name_1, artifact_type)
 
         artifact.add_file(orig_file_path, subpath_1)
 
         run_1.log_artifact(artifact)
 
     # Create an middle artifact with such file referenced (notice no need to download)
-    with wandb.init() as run_2:
-        artifact = wandb.Artifact(name_2, artifact_type)
+    with tracklab.init() as run_2:
+        artifact = tracklab.Artifact(name_2, artifact_type)
 
         used_artifact_1 = run_2.use_artifact(f"{name_1}:latest")
         artifact_1_ref = (
@@ -501,8 +501,8 @@ def test_artifact_add_reference_via_url(user, api, tmp_path: Path):
         run_2.log_artifact(artifact)
 
     # Create a downstream artifact that is referencing the middle's reference
-    with wandb.init() as run_3:
-        artifact = wandb.Artifact(name_3, artifact_type)
+    with tracklab.init() as run_3:
+        artifact = tracklab.Artifact(name_3, artifact_type)
 
         used_artifact_2 = run_3.use_artifact(f"{name_2}:latest")
         artifact_2_ref = (
@@ -555,16 +555,16 @@ def test_add_reference_via_artifact_entry(user, api, tmp_path: Path):
     Path(orig_file_path).write_text(orig_text)
 
     # Create a super important file
-    with wandb.init() as run_1:
-        artifact_1 = wandb.Artifact(name_1, artifact_type)
+    with tracklab.init() as run_1:
+        artifact_1 = tracklab.Artifact(name_1, artifact_type)
 
         artifact_1.add_file(orig_file_path, subpath_1)
 
         run_1.log_artifact(artifact_1)
 
     # Create an middle artifact with such file referenced (notice no need to download)
-    with wandb.init() as run_2:
-        artifact_2 = wandb.Artifact(name_2, artifact_type)
+    with tracklab.init() as run_2:
+        artifact_2 = tracklab.Artifact(name_2, artifact_type)
 
         used_artifact_1 = run_2.use_artifact(f"{name_1}:latest")
         artifact_1_ref = used_artifact_1.get_entry(subpath_1)
@@ -573,8 +573,8 @@ def test_add_reference_via_artifact_entry(user, api, tmp_path: Path):
         run_2.log_artifact(artifact_2)
 
     # Create a downstream artifact that is referencing the middle's reference
-    with wandb.init() as run_3:
-        artifact_3 = wandb.Artifact(name_3, artifact_type)
+    with tracklab.init() as run_3:
+        artifact_3 = tracklab.Artifact(name_3, artifact_type)
 
         used_artifact_2 = run_3.use_artifact(f"{name_2}:latest")
         artifact_2_ref = used_artifact_2.get_entry(subpath_2)
@@ -614,8 +614,8 @@ def test_get_artifact_obj_by_name(
     image_1, image_2 = image_pair
 
     # TODO: test more robustly for every Media type, nested objects (eg. Table -> Image), and references.
-    with wandb.init() as run:
-        artifact = wandb.Artifact(artifact_name, artifact_type)
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact(artifact_name, artifact_type)
         artifact.add(image_1, "I1")
         artifact.add(table, "T1")
         run.log_artifact(artifact)
@@ -640,16 +640,16 @@ def test_adding_artifact_by_object(user, api, image):
     """Test adding wandb Media objects to an artifact by passing the object itself."""
 
     # Create an artifact with such file stored
-    with wandb.init() as run:
-        artifact = wandb.Artifact("upstream_media", "database")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("upstream_media", "database")
 
         artifact.add(image, "I1")
 
         run.log_artifact(artifact)
 
     # Create an middle artifact with such file referenced (notice no need to download)
-    with wandb.init() as run:
-        artifact = wandb.Artifact("downstream_media", "database")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("downstream_media", "database")
 
         upstream_artifact = run.use_artifact("upstream_media:latest")
         artifact.add(upstream_artifact.get("I1"), "T2")
@@ -662,14 +662,14 @@ def test_adding_artifact_by_object(user, api, image):
 
 
 def test_image_reference_artifact(user, api, image, cleanup_temp_subdirs):
-    with wandb.init() as run:
-        artifact = wandb.Artifact("image_data", "data")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("image_data", "data")
         artifact.add(image, "image")
         run.log_artifact(artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_1 = run.use_artifact("image_data:latest")
-        artifact = wandb.Artifact("reference_data", "data")
+        artifact = tracklab.Artifact("reference_data", "data")
         artifact.add(artifact_1.get("image"), "image_2")
         run.log_artifact(artifact)
 
@@ -680,15 +680,15 @@ def test_image_reference_artifact(user, api, image, cleanup_temp_subdirs):
 
 
 def test_nested_reference_artifact(user, api, image):
-    with wandb.init() as run:
-        artifact = wandb.Artifact("image_data", "data")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("image_data", "data")
         artifact.add(image, "image")
         run.log_artifact(artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_1 = run.use_artifact("image_data:latest")
-        artifact = wandb.Artifact("reference_data", "data")
-        table = wandb.Table(["image"], [[artifact_1.get("image")]])
+        artifact = tracklab.Artifact("reference_data", "data")
+        table = tracklab.Table(["image"], [[artifact_1.get("image")]])
         artifact.add(table, "table_2")
         run.log_artifact(artifact)
 
@@ -707,28 +707,28 @@ def test_table_slice_reference_artifact(
     cleanup_temp_subdirs: Callable[[], None],
     anon_storage_handlers: None,
 ):
-    with wandb.init() as run:
-        artifact = wandb.Artifact("table_data", "data")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("table_data", "data")
         artifact.add(table, "table")
         run.log_artifact(artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_1 = run.use_artifact("table_data:latest")
         t1 = artifact_1.get("table")
-        artifact = wandb.Artifact("intermediate_data", "data")
-        i1 = wandb.Table(t1.columns, t1.data[:1])
-        i2 = wandb.Table(t1.columns, t1.data[1:])
+        artifact = tracklab.Artifact("intermediate_data", "data")
+        i1 = tracklab.Table(t1.columns, t1.data[:1])
+        i2 = tracklab.Table(t1.columns, t1.data[1:])
         artifact.add(i1, "table1")
         artifact.add(i2, "table2")
         run.log_artifact(artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_2 = run.use_artifact("intermediate_data:latest")
         i1 = artifact_2.get("table1")
         i2 = artifact_2.get("table2")
-        artifact = wandb.Artifact("reference_data", "data")
-        table1 = wandb.Table(t1.columns, i1.data)
-        table2 = wandb.Table(t1.columns, i2.data)
+        artifact = tracklab.Artifact("reference_data", "data")
+        table1 = tracklab.Table(t1.columns, i1.data)
+        table2 = tracklab.Table(t1.columns, i2.data)
         artifact.add(table1, "table1")
         artifact.add(table2, "table2")
         run.log_artifact(artifact)
@@ -797,8 +797,8 @@ class TestMediaObjectReferentialEquality:
         mid_name = f"mid-artifact-{worker_id}"
         down_name = f"down-artifact-{worker_id}"
 
-        with wandb.init() as run:
-            orig_artifact = wandb.Artifact(orig_name, "database")
+        with tracklab.init() as run:
+            orig_artifact = tracklab.Artifact(orig_name, "database")
             orig_artifact.add(orig_obj, "obj1")
             run.log_artifact(orig_artifact)
 
@@ -806,17 +806,17 @@ class TestMediaObjectReferentialEquality:
         orig_dir = orig_artifact_ref._default_root()
         obj1 = orig_artifact_ref.get("obj1")
 
-        if isinstance(orig_obj, (wandb.Table, wandb.JoinedTable)):
+        if isinstance(orig_obj, (tracklab.Table, tracklab.JoinedTable)):
             orig_obj._eq_debug(obj1, True)
         else:
             assert orig_obj == obj1
 
         assert (Path(orig_dir) / f"obj1.{orig_obj._log_type}.json").is_file()
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             orig_artifact_ref = run.use_artifact(f"{orig_name}:latest")
 
-            mid_artifact = wandb.Artifact(mid_name, "database")
+            mid_artifact = tracklab.Artifact(mid_name, "database")
             mid_obj = orig_artifact_ref.get("obj1")
             mid_artifact.add(mid_obj, "obj2")
 
@@ -826,15 +826,15 @@ class TestMediaObjectReferentialEquality:
         mid_dir = mid_artifact_ref._default_root()
         obj2 = mid_artifact_ref.get("obj2")
 
-        if isinstance(orig_obj, (wandb.Table, wandb.JoinedTable)):
+        if isinstance(orig_obj, (tracklab.Table, tracklab.JoinedTable)):
             orig_obj._eq_debug(obj2, True)
         else:
             assert orig_obj == obj2
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             mid_artifact_ref = run.use_artifact(f"{mid_name}:latest")
 
-            down_artifact = wandb.Artifact(down_name, "database")
+            down_artifact = tracklab.Artifact(down_name, "database")
             down_obj = mid_artifact_ref.get("obj2")
             down_artifact.add(down_obj, "obj3")
 
@@ -843,7 +843,7 @@ class TestMediaObjectReferentialEquality:
         down_artifact_ref = api.artifact(f"{down_name}:latest")
         obj3 = down_artifact_ref.get("obj3")
 
-        if isinstance(orig_obj, (wandb.Table, wandb.JoinedTable)):
+        if isinstance(orig_obj, (tracklab.Table, tracklab.JoinedTable)):
             orig_obj._eq_debug(obj3, True)
         else:
             assert orig_obj == obj3
@@ -859,22 +859,22 @@ def test_joined_table_referential(
     src_image_3 = make_image(image_path_1)
     src_image_4 = make_image(image_path_1)
 
-    src_table_1 = wandb.Table(["id", "image"], [[1, src_image_1], [2, src_image_2]])
-    src_table_2 = wandb.Table(["id", "image"], [[1, src_image_3], [2, src_image_4]])
+    src_table_1 = tracklab.Table(["id", "image"], [[1, src_image_1], [2, src_image_2]])
+    src_table_2 = tracklab.Table(["id", "image"], [[1, src_image_3], [2, src_image_4]])
 
-    src_jt_1 = wandb.JoinedTable(src_table_1, src_table_2, "id")
+    src_jt_1 = tracklab.JoinedTable(src_table_1, src_table_2, "id")
 
-    with wandb.init() as run:
-        orig_artifact = wandb.Artifact("art1", "database")
+    with tracklab.init() as run:
+        orig_artifact = tracklab.Artifact("art1", "database")
         orig_artifact.add(src_jt_1, "src_jt_1")
         run.log_artifact(orig_artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         art1 = run.use_artifact("art1:latest")
 
         src_jt_1 = art1.get("src_jt_1")
-        src_jt_2 = wandb.JoinedTable(src_jt_1._table1, src_jt_1._table2, "id")
-        art2 = wandb.Artifact("art2", "database")
+        src_jt_2 = tracklab.JoinedTable(src_jt_1._table1, src_jt_1._table2, "id")
+        art2 = tracklab.Artifact("art2", "database")
         art2.add(src_jt_2, "src_jt_2")
 
         run.log_artifact(art2)
@@ -899,26 +899,26 @@ def test_joined_table_add_by_path(
     src_image_3 = make_image(image_path_1)
     src_image_4 = make_image(image_path_1)
 
-    src_table_1 = wandb.Table(["id", "image"], [[1, src_image_1], [2, src_image_2]])
-    src_table_2 = wandb.Table(["id", "image"], [[1, src_image_3], [2, src_image_4]])
+    src_table_1 = tracklab.Table(["id", "image"], [[1, src_image_1], [2, src_image_2]])
+    src_table_2 = tracklab.Table(["id", "image"], [[1, src_image_3], [2, src_image_4]])
 
     table_name_1 = "src_table_1"
     table_name_2 = "src_table_2"
 
-    with wandb.init() as run:
-        tables = wandb.Artifact(artifact_name_1, artifact_type)
+    with tracklab.init() as run:
+        tables = tracklab.Artifact(artifact_name_1, artifact_type)
         tables.add(src_table_1, table_name_1)
         tables.add(src_table_2, table_name_2)
 
         # Should be able to add by name directly
-        jt = wandb.JoinedTable(
+        jt = tracklab.JoinedTable(
             f"{table_name_1}.table.json", f"{table_name_2}.table.json", "id"
         )
         tables.add(jt, "jt")
 
         # Make sure it errors when you are not referencing the correct table names
         bad_table_name = "bad_table_name"
-        jt_bad = wandb.JoinedTable(
+        jt_bad = tracklab.JoinedTable(
             f"{bad_table_name}.table.json", f"{bad_table_name}.table.json", "id"
         )
         with raises(ValueError):
@@ -927,12 +927,12 @@ def test_joined_table_add_by_path(
         run.log_artifact(tables)
 
     cleanup_temp_subdirs()
-    with wandb.init() as run:
-        tables_2 = wandb.Artifact(artifact_name_2, artifact_type)
+    with tracklab.init() as run:
+        tables_2 = tracklab.Artifact(artifact_name_2, artifact_type)
         upstream = run.use_artifact(f"{artifact_name_1}:latest")
 
         # Able to add by reference
-        jt = wandb.JoinedTable(
+        jt = tracklab.JoinedTable(
             upstream.get_entry(table_name_1), upstream.get_entry(table_name_2), "id"
         )
         tables_2.add(jt, "jt")
@@ -943,7 +943,7 @@ def test_joined_table_add_by_path(
     tables_2 = api.artifact(f"{artifact_name_2}:latest")
     jt_2 = tables_2.get("jt")
     assert (
-        wandb.JoinedTable(upstream.get(table_name_1), upstream.get(table_name_2), "id")
+        tracklab.JoinedTable(upstream.get(table_name_1), upstream.get(table_name_2), "id")
         == jt_2
     )
 
@@ -954,35 +954,35 @@ def test_image_reference_with_preferred_path(
     orig_path_1 = str(image_path_1)
     orig_path_2 = str(image_path_2)
     desired_artifact_path = "images/sample.png"
-    with wandb.init() as run:
-        artifact = wandb.Artifact("artifact_1", type="test_artifact")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("artifact_1", type="test_artifact")
 
         # manually add the image to a desired path
         artifact.add_file(orig_path_1, desired_artifact_path)
 
         # create an image that uses this image (it should be smart enough not to add the image twice)
-        image_1 = wandb.Image(orig_path_1)
-        image_2 = wandb.Image(orig_path_2)  # this one does not have the path preadded
+        image_1 = tracklab.Image(orig_path_1)
+        image_2 = tracklab.Image(orig_path_2)  # this one does not have the path preadded
 
         # add the image to the table
-        table = wandb.Table(["image"], data=[[image_1], [image_2]])
+        table = tracklab.Table(["image"], data=[[image_1], [image_2]])
 
         # add the table to the artifact
         artifact.add(table, "table")
         run.log_artifact(artifact)
 
     cleanup_temp_subdirs()
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_1 = run.use_artifact("artifact_1:latest")
         original_table = artifact_1.get("table")
 
-        artifact = wandb.Artifact("artifact_2", type="test_artifact")
+        artifact = tracklab.Artifact("artifact_2", type="test_artifact")
 
         # add the image by reference
-        image_1 = wandb.Image(original_table.data[0][0])
-        image_2 = wandb.Image(original_table.data[1][0])
+        image_1 = tracklab.Image(original_table.data[0][0])
+        image_2 = tracklab.Image(original_table.data[1][0])
         # add the image to the table
-        table = wandb.Table(["image"], data=[[image_1], [image_2]])
+        table = tracklab.Table(["image"], data=[[image_1], [image_2]])
         # add the table to the artifact
         artifact.add(table, "table")
         run.log_artifact(artifact)
@@ -1004,14 +1004,14 @@ def test_simple_partition_table(user, api):
     data = [[i, i * i, 2**i] for i in range(5)]
 
     # Add Data
-    with wandb.init() as run:
-        artifact = wandb.Artifact(artifact_name, type=artifact_type)
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact(artifact_name, type=artifact_type)
 
         for i, row in enumerate(data):
-            table = wandb.Table(columns=columns, data=[row])
+            table = tracklab.Table(columns=columns, data=[row])
             artifact.add(table, f"{table_parts_dir}/{i}")
 
-        partition_table = wandb.data_types.PartitionedTable(parts_path=table_parts_dir)
+        partition_table = tracklab.data_types.PartitionedTable(parts_path=table_parts_dir)
         artifact.add(partition_table, table_name)
 
         run.log_artifact(artifact)
@@ -1033,10 +1033,10 @@ def test_distributed_artifact_simple(user, api):
 
     # Add Data
     for i in range(count):
-        with wandb.init(group=group_name) as run:
-            artifact = wandb.Artifact(artifact_name, type=artifact_type)
+        with tracklab.init(group=group_name) as run:
+            artifact = tracklab.Artifact(artifact_name, type=artifact_type)
 
-            image = wandb.Image(np.random.randint(0, 255, (10, 10)))
+            image = tracklab.Image(np.random.randint(0, 255, (10, 10)))
             path = f"image_{i}"
             images.append(image)
             image_paths.append(path)
@@ -1045,8 +1045,8 @@ def test_distributed_artifact_simple(user, api):
             run.upsert_artifact(artifact)
 
     # Finish
-    with wandb.init(group=group_name) as run:
-        artifact = wandb.Artifact(artifact_name, type=artifact_type)
+    with tracklab.init(group=group_name) as run:
+        artifact = tracklab.Artifact(artifact_name, type=artifact_type)
         run.finish_artifact(artifact)
 
     # test
@@ -1083,8 +1083,8 @@ def cleanup_temp_subdirs(tmp_path: Path) -> Callable[[], None]:
 
 @fixture(scope="session")
 def anon_storage_handlers():
-    from wandb.sdk.artifacts.storage_handlers.gcs_handler import GCSHandler
-    from wandb.sdk.artifacts.storage_handlers.s3_handler import S3Handler
+    from tracklab.sdk.artifacts.storage_handlers.gcs_handler import GCSHandler
+    from tracklab.sdk.artifacts.storage_handlers.s3_handler import S3Handler
 
     def init_boto(self):
         if self._s3 is not None:

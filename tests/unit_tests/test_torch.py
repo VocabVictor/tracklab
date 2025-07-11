@@ -1,7 +1,7 @@
 import pytest
 import torch
 import torch.nn as nn
-from wandb.integration.torch import wandb_torch
+from tracklab.integration.torch import tracklab_torch
 
 
 def test_nested_shape():

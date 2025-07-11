@@ -2,11 +2,11 @@ import pathlib
 
 import pandas as pd
 
-import wandb
+import tracklab
 
 
 def main():
-    wandb.init(name=pathlib.Path(__file__).stem)
+    tracklab.init(name=pathlib.Path(__file__).stem)
 
     # Get a pandas DataFrame object of all the data in the csv file:
     df = pd.read_csv(pathlib.Path(__file__).parent.resolve() / "tweets.csv")
@@ -47,20 +47,20 @@ def main():
     print("y", y_probas.shape)
 
     # ROC
-    wandb.log({"roc": wandb.plot.roc_curve(y_test, y_probas, nb.classes_)})
-    wandb.log(
+    tracklab.log({"roc": tracklab.plot.roc_curve(y_test, y_probas, nb.classes_)})
+    tracklab.log(
         {
-            "roc_with_title": wandb.plot.roc_curve(
+            "roc_with_title": tracklab.plot.roc_curve(
                 y_test, y_probas, nb.classes_, title="MY ROC TITLE"
             )
         }
     )
 
     # Precision Recall
-    wandb.log({"pr": wandb.plot.pr_curve(y_test, y_probas, nb.classes_)})
-    wandb.log(
+    tracklab.log({"pr": tracklab.plot.pr_curve(y_test, y_probas, nb.classes_)})
+    tracklab.log(
         {
-            "pr_with_title": wandb.plot.pr_curve(
+            "pr_with_title": tracklab.plot.pr_curve(
                 y_test, y_probas, nb.classes_, title="MY PR TITLE"
             )
         }
@@ -73,17 +73,17 @@ def main():
     y_pred_inds = [class_ind_map[class_name] for class_name in y_pred]
     y_true_inds = [class_ind_map[class_name] for class_name in y_test]
     # test workflow with classes
-    wandb.log(
+    tracklab.log(
         {
-            "conf_mat": wandb.plot.confusion_matrix(
+            "conf_mat": tracklab.plot.confusion_matrix(
                 preds=y_pred_inds, y_true=y_true_inds, class_names=nb.classes_
             )
         }
     )
     # test workflow without classes
-    wandb.log(
+    tracklab.log(
         {
-            "conf_mat_noclass": wandb.plot.confusion_matrix(
+            "conf_mat_noclass": tracklab.plot.confusion_matrix(
                 preds=y_pred_inds, y_true=y_true_inds
             )
         }
@@ -91,18 +91,18 @@ def main():
     # test workflow with multiples of inds
     y_pred_mult = [y_pred_ind * 5 for y_pred_ind in y_pred_inds]
     y_true_mult = [y_true_ind * 5 for y_true_ind in y_true_inds]
-    wandb.log(
+    tracklab.log(
         {
-            "conf_mat_noclass_mult": wandb.plot.confusion_matrix(
+            "conf_mat_noclass_mult": tracklab.plot.confusion_matrix(
                 preds=y_pred_mult, y_true=y_true_mult, title="I HAVE A TITLE"
             )
         }
     )
 
     # test probs workflow
-    wandb.log(
+    tracklab.log(
         {
-            "conf_mat_probs": wandb.plot.confusion_matrix(
+            "conf_mat_probs": tracklab.plot.confusion_matrix(
                 probs=y_probas, y_true=y_true_inds, class_names=nb.classes_
             )
         }

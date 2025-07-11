@@ -1,4 +1,4 @@
-import wandb.util as util
+import tracklab.util as util
 
 util.get_module("PIL.Image", lazy=True)
 

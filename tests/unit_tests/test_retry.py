@@ -6,7 +6,7 @@ from typing import Iterator
 from unittest import mock
 
 import pytest
-from wandb.sdk.lib import retry
+from tracklab.sdk.lib import retry
 
 
 @dataclasses.dataclass
@@ -27,10 +27,10 @@ def mock_time() -> Iterator[MockTime]:
         )  # let the event loop shuffle stuff around
 
     with mock.patch(
-        "wandb.sdk.lib.retry.NOW_FN",
+        "tracklab.sdk.lib.retry.NOW_FN",
         wraps=lambda: now,
     ) as mock_now, mock.patch(
-        "wandb.sdk.lib.retry.SLEEP_FN", side_effect=_sleep
+        "tracklab.sdk.lib.retry.SLEEP_FN", side_effect=_sleep
     ) as mock_sleep:
         yield MockTime(now=mock_now, sleep=mock_sleep)
 

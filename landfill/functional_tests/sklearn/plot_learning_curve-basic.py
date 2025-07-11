@@ -23,9 +23,9 @@ from sklearn import datasets
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-import wandb
+import tracklab
 
-wandb.init("my-scikit-integration")
+tracklab.init("my-scikit-integration")
 
 wbcd = wisconsin_breast_cancer_data = datasets.load_breast_cancer()
 
@@ -34,4 +34,4 @@ X_train, _, y_train, _ = train_test_split(wbcd.data, wbcd.target, test_size=0.2)
 model = RandomForestClassifier()
 model.fit(X_train, y_train)
 
-wandb.sklearn.plot_learning_curve(model, X_train, y_train)
+tracklab.sklearn.plot_learning_curve(model, X_train, y_train)

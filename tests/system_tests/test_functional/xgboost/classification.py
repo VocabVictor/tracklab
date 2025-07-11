@@ -1,14 +1,14 @@
-import wandb
+import tracklab
 from sklearn.datasets import load_wine
 from sklearn.model_selection import train_test_split
-from wandb.integration.xgboost import WandbCallback
+from tracklab.integration.xgboost import WandbCallback
 from xgboost import XGBClassifier
 
 X, y = load_wine(return_X_y=True, as_frame=True)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1)
 
-run = wandb.init(project="wine-xgboost")
+run = tracklab.init(project="wine-xgboost")
 
 model = XGBClassifier(
     use_label_encoder=False,

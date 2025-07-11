@@ -9,7 +9,7 @@ import torch.optim as optim
 from PIL import Image
 from torchvision import transforms
 
-import wandb
+import tracklab
 
 SEED = 1
 BATCH_SIZE = 32
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     torch.manual_seed(SEED)
     mp.set_start_method("spawn")
 
-    run = wandb.init()
+    run = tracklab.init()
 
     processes = []
     for rank in range(2):

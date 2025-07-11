@@ -2,9 +2,9 @@ import json
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
-import wandb
-from wandb.cli import cli
-from wandb.sdk.launch.errors import LaunchError
+import tracklab
+from tracklab.cli import cli
+from tracklab.sdk.launch.errors import LaunchError
 
 REPO_CONST = "test-repo"
 IMAGE_CONST = "fake-image"
@@ -12,14 +12,14 @@ QUEUE_NAME = "test_queue"
 
 
 def _setup_agent(monkeypatch, pop_func):
-    monkeypatch.setattr("wandb.sdk.launch.agent.LaunchAgent.pop_from_queue", pop_func)
+    monkeypatch.setattr("tracklab.sdk.launch.agent.LaunchAgent.pop_from_queue", pop_func)
 
     monkeypatch.setattr(
-        "wandb.init", lambda project, entity, settings, id, job_type: None
+        "tracklab.init", lambda project, entity, settings, id, job_type: None
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.create_launch_agent",
+        "tracklab.sdk.internal.internal_api.Api.create_launch_agent",
         lambda c, e, p, q, a, v, g: {"launchAgentId": "mock_agent_id"},
     )
 
@@ -32,11 +32,11 @@ def test_agent_stop_polling(runner, monkeypatch, user, test_settings):
     _setup_agent(monkeypatch, patched_pop_empty_queue)
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.get_launch_agent",
+        "tracklab.sdk.internal.internal_api.Api.get_launch_agent",
         lambda c, i, g: {"id": "mock_agent_id", "name": "blah", "stopPolling": True},
     )
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.update_launch_agent_status",
+        "tracklab.sdk.internal.internal_api.Api.update_launch_agent_status",
         lambda c, i, s, g: {"success": True},
     )
 
@@ -61,11 +61,11 @@ def test_agent_update_failed(runner, monkeypatch, user, test_settings):
     _setup_agent(monkeypatch, patched_pop_empty_queue)
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.get_launch_agent",
+        "tracklab.sdk.internal.internal_api.Api.get_launch_agent",
         lambda c, i, g: {"id": "mock_agent_id", "name": "blah", "stopPolling": False},
     )
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.update_launch_agent_status",
+        "tracklab.sdk.internal.internal_api.Api.update_launch_agent_status",
         lambda c, i, s, g: {"success": False},
     )
 
@@ -89,21 +89,21 @@ def test_launch_agent_launch_error_continue(runner, monkeypatch, user, test_sett
         raise KeyboardInterrupt
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.agent.LaunchAgent.fail_run_queue_item",
+        "tracklab.sdk.launch.agent.LaunchAgent.fail_run_queue_item",
         lambda c, run_queue_item_id, message, phase, files: print_then_exit(),
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.agent.LaunchAgent.run_job",
+        "tracklab.sdk.launch.agent.LaunchAgent.run_job",
         lambda a, b, c, d: raise_(LaunchError("blah blah")),
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.get_launch_agent",
+        "tracklab.sdk.internal.internal_api.Api.get_launch_agent",
         lambda c, i, g: {"id": "mock_agent_id", "name": "blah", "stopPolling": False},
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.update_launch_agent_status",
+        "tracklab.sdk.internal.internal_api.Api.update_launch_agent_status",
         lambda c, i, s, g: {"success": True},
     )
 
@@ -168,15 +168,15 @@ def test_launch_supplied_docker_image(
     monkeypatch,
 ):
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.pull_docker_image",
+        "tracklab.sdk.launch.runner.local_container.pull_docker_image",
         lambda docker_image: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container.docker_image_exists",
+        "tracklab.sdk.launch.runner.local_container.docker_image_exists",
         lambda docker_image: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.runner.local_container._run_entry_point",
+        "tracklab.sdk.launch.runner.local_container._run_entry_point",
         patched_run_run_entry,
     )
 
@@ -184,7 +184,7 @@ def test_launch_supplied_docker_image(
         pass
 
     monkeypatch.setattr(
-        wandb.sdk.launch.builder.build,
+        tracklab.sdk.launch.builder.build,
         "validate_docker_installation",
         _mock_validate_docker_installation,
     )
@@ -217,11 +217,11 @@ def test_launch_supplied_logfile(runner, monkeypatch, wandb_caplog, user):
     _setup_agent(monkeypatch, patched_pop_empty_queue)
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.get_launch_agent",
+        "tracklab.sdk.internal.internal_api.Api.get_launch_agent",
         lambda c, i, g: {"id": "mock_agent_id", "name": "blah", "stopPolling": True},
     )
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.update_launch_agent_status",
+        "tracklab.sdk.internal.internal_api.Api.update_launch_agent_status",
         lambda c, i, s, g: {"success": True},
     )
 
@@ -321,7 +321,7 @@ def test_launch_template_vars(command_inputs, expected_error, runner, monkeypatc
             raise Exception(args)
 
     monkeypatch.setattr(
-        "wandb.cli.cli._launch_add",
+        "tracklab.cli.cli._launch_add",
         patched_launch_add,
     )
 
@@ -329,11 +329,11 @@ def test_launch_template_vars(command_inputs, expected_error, runner, monkeypatc
         return Mock()
 
     monkeypatch.setattr(
-        "wandb.cli.cli.PublicApi",
+        "tracklab.cli.cli.PublicApi",
         patched_public_api,
     )
 
-    monkeypatch.setattr("wandb.cli.cli.launch_utils.check_logged_in", lambda _: None)
+    monkeypatch.setattr("tracklab.cli.cli.launch_utils.check_logged_in", lambda _: None)
 
     def patched_run_queue(*args, **kwargs):
         mock_rq = Mock()
@@ -342,7 +342,7 @@ def test_launch_template_vars(command_inputs, expected_error, runner, monkeypatc
         return mock_rq
 
     monkeypatch.setattr(
-        "wandb.cli.cli.RunQueue",
+        "tracklab.cli.cli.RunQueue",
         patched_run_queue,
     )
 
@@ -365,8 +365,8 @@ def test_launch_from_uri_creates_job(
     mock_job_artifact.name = "test:latest"
     mock_create_job_function = MagicMock(return_value=(mock_job_artifact, None, None))
     mock_launch_function = AsyncMock()
-    mocker.patch("wandb.sdk.launch._launch._launch", mock_launch_function)
-    mocker.patch("wandb.sdk.launch.create_job._create_job", mock_create_job_function)
+    mocker.patch("tracklab.sdk.launch._launch._launch", mock_launch_function)
+    mocker.patch("tracklab.sdk.launch.create_job._create_job", mock_create_job_function)
 
     result = "none"
     with runner.isolated_filesystem():

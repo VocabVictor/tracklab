@@ -1,4 +1,4 @@
-"""Tests for the `wandb.apis.PublicApi` module."""
+"""Tests for the `tracklab.apis.PublicApi` module."""
 
 import json
 from typing import Any, Dict, List, Optional
@@ -6,13 +6,13 @@ from unittest import mock
 
 import pytest
 import requests
-import wandb
-import wandb.apis.public
-import wandb.util
+import tracklab
+import tracklab.apis.public
+import tracklab.util
 from wandb import Api
-from wandb.apis.public import File
-from wandb.errors.errors import CommError
-from wandb.old.summary import Summary
+from tracklab.apis.public import File
+from tracklab.errors.errors import CommError
+from tracklab.old.summary import Summary
 
 
 @pytest.mark.parametrize(
@@ -23,12 +23,12 @@ from wandb.old.summary import Summary
     ],
 )
 def test_from_path_bad_path(user, path):
-    with pytest.raises(wandb.Error, match="Invalid path"):
+    with pytest.raises(tracklab.Error, match="Invalid path"):
         Api().from_path(path)
 
 
 def test_from_path_bad_report_path(user):
-    with pytest.raises(wandb.Error, match="Invalid report path"):
+    with pytest.raises(tracklab.Error, match="Invalid report path"):
         Api().from_path("test/test/reports/test-foo")
 
 
@@ -41,7 +41,7 @@ def test_from_path_bad_report_path(user):
 )
 def test_from_path_report_type(user, path):
     report = Api().from_path(path)
-    assert isinstance(report, wandb.apis.public.BetaReport)
+    assert isinstance(report, tracklab.apis.public.BetaReport)
 
 
 def test_project_to_html(user):
@@ -55,7 +55,7 @@ def test_project_to_html(user):
 )
 def test_run_metadata(user):
     project = "test_metadata"
-    run = wandb.init(project=project)
+    run = tracklab.init(project=project)
     run.finish()
 
     metadata = Api().run(f"{run.entity}/{project}/{run.id}").metadata
@@ -160,8 +160,8 @@ def test_from_path(stub_run_gql_once):
 
     # Second call should be cached and not make a second query.
     assert spy.total_calls == 1
-    assert isinstance(run1, wandb.apis.public.Run)
-    assert isinstance(run2, wandb.apis.public.Run)
+    assert isinstance(run1, tracklab.apis.public.Run)
+    assert isinstance(run2, tracklab.apis.public.Run)
 
 
 def test_display(stub_run_gql_once):
@@ -288,7 +288,7 @@ def test_run_update(wandb_backend_spy):
         upsert_bucket_spy,
     )
 
-    seed_run = wandb.init(config={"foo": "not_bar"})
+    seed_run = tracklab.init(config={"foo": "not_bar"})
     seed_run.log(dict(acc=100, loss=0))
     seed_run.finish()
 
@@ -330,7 +330,7 @@ def test_run_file_direct(
     wandb_backend_spy,
 ):
     file_name = "weights.h5"
-    direct_url = f"https://api.wandb.ai/storage?file={file_name}&direct=true"
+    direct_url = f"https://api.tracklab.ai/storage?file={file_name}&direct=true"
     stub_run_gql_once()
     gql = wandb_backend_spy.gql
     wandb_backend_spy.stub_gql(
@@ -366,7 +366,7 @@ def test_run_file_direct(
 
 # TODO: how to seed this run faster?
 def test_run_retry(wandb_backend_spy):
-    with wandb.init() as seed_run:
+    with tracklab.init() as seed_run:
         seed_run.log(dict(acc=100, loss=0))
 
     gql = wandb_backend_spy.gql
@@ -726,7 +726,7 @@ def test_run_parses_run_project_id(user, stub_run_gql_once):
     if not File(api.client, {})._server_accepts_project_id_for_delete_file():
         pytest.skip("Server does not support project_id for deletion")
 
-    with wandb.init(project="test") as run:
+    with tracklab.init(project="test") as run:
         run.log({"scalar": 1})
 
     run = api.run(f"{user}/test/{run.id}")
@@ -741,7 +741,7 @@ def test_run_fails_parse_run_project_id(user, stub_run_gql_once):
     if not File(api.client, {})._server_accepts_project_id_for_delete_file():
         pytest.skip("Server does not support project_id for deletion")
 
-    with wandb.init(project="test") as run:
+    with tracklab.init(project="test") as run:
         run.log({"scalar": 1})
 
     with pytest.raises(CommError):

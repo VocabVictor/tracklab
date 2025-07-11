@@ -4,7 +4,7 @@ import asyncio
 from typing import Any, Coroutine
 
 import pytest
-from wandb.sdk.lib import asyncio_compat
+from tracklab.sdk.lib import asyncio_compat
 
 
 async def _fail_after_timeout(

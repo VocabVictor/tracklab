@@ -23,9 +23,9 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
-import wandb
+import tracklab
 
-run = wandb.init("my-scikit-integration")
+run = tracklab.init("my-scikit-integration")
 
 wbcd = wisconsin_breast_cancer_data = datasets.load_breast_cancer()
 
@@ -37,6 +37,6 @@ labels = wbcd.target_names
 model = KNeighborsClassifier()
 model.fit(X_train, y_train)
 
-wandb.sklearn.plot_feature_importances(model)
+tracklab.sklearn.plot_feature_importances(model)
 
 run.finish()

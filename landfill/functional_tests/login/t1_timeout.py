@@ -3,12 +3,12 @@
 
 import time
 
-import wandb
+import tracklab
 
 timeout = 4
 slop = 0.50
 tm_start = time.time()
-result = wandb.login(timeout=timeout, relogin=True)
+result = tracklab.login(timeout=timeout, relogin=True)
 tm_elapsed = time.time() - tm_start
 print(f"time elapsed: {tm_elapsed}")
 print(f"result: {result}")

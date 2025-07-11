@@ -1,124 +1,184 @@
-"""Scikit-learn utilities for TrackLab."""
+"""Shared utilities for the modules in wandb.sklearn."""
 
-try:
-    import sklearn
-    _sklearn_available = True
-except ImportError:
-    _sklearn_available = False
-    sklearn = None
+from collections.abc import Iterable, Sequence
 
-from typing import Any, Optional, Dict
-import json
+import numpy as np
+import pandas as pd
+import scipy
+import sklearn
+
+import tracklab
+
+chart_limit = 1000
 
 
-def log_sklearn_model(model: Any, 
-                      X_test: Any = None, 
-                      y_test: Any = None,
-                      name: str = "sklearn_model"):
-    """Log scikit-learn model information and performance."""
-    if not _sklearn_available:
-        print("Warning: scikit-learn not available")
-        return
-        
+def check_against_limit(count, chart, limit=None):
+    if limit is None:
+        limit = chart_limit
+    if count > limit:
+        warn_chart_limit(limit, chart)
+        return True
+    else:
+        return False
+
+
+def warn_chart_limit(limit, chart):
+    warning = f"using only the first {limit} datapoints to create chart {chart}"
+    wandb.termwarn(warning)
+
+
+def encode_labels(df):
+    le = sklearn.preprocessing.LabelEncoder()
+    # apply le on categorical feature columns
+    categorical_cols = df.select_dtypes(
+        exclude=["int", "float", "float64", "float32", "int32", "int64"]
+    ).columns
+    df[categorical_cols] = df[categorical_cols].apply(lambda col: le.fit_transform(col))
+
+
+def test_types(**kwargs):
+    test_passed = True
+    for k, v in kwargs.items():
+        # check for incorrect types
+        if (
+            (k == "X")
+            or (k == "X_test")
+            or (k == "y")
+            or (k == "y_test")
+            or (k == "y_true")
+            or (k == "y_probas")
+        ):
+            # FIXME: do this individually
+            if not isinstance(
+                v,
+                (
+                    Sequence,
+                    Iterable,
+                    np.ndarray,
+                    np.generic,
+                    pd.DataFrame,
+                    pd.Series,
+                    list,
+                ),
+            ):
+                wandb.termerror(f"{k} is not an array. Please try again.")
+                test_passed = False
+        # check for classifier types
+        if k == "model":
+            if (not sklearn.base.is_classifier(v)) and (
+                not sklearn.base.is_regressor(v)
+            ):
+                wandb.termerror(
+                    f"{k} is not a classifier or regressor. Please try again."
+                )
+                test_passed = False
+        elif k == "clf" or k == "binary_clf":
+            if not (sklearn.base.is_classifier(v)):
+                wandb.termerror(f"{k} is not a classifier. Please try again.")
+                test_passed = False
+        elif k == "regressor":
+            if not sklearn.base.is_regressor(v):
+                wandb.termerror(f"{k} is not a regressor. Please try again.")
+                test_passed = False
+        elif k == "clusterer":
+            if not (getattr(v, "_estimator_type", None) == "clusterer"):
+                wandb.termerror(f"{k} is not a clusterer. Please try again.")
+                test_passed = False
+    return test_passed
+
+
+def test_fitted(model):
     try:
-        import tracklab
-        if tracklab.run is None:
-            return
-            
-        # Log model type and parameters
-        model_info = {
-            f"{name}/model_type": model.__class__.__name__,
-            f"{name}/parameters": str(model.get_params())
-        }
-        
-        # Log model performance if test data provided
-        if X_test is not None and y_test is not None:
-            try:
-                score = model.score(X_test, y_test)
-                model_info[f"{name}/test_score"] = score
-                
-                # Log predictions for classification
-                if hasattr(model, 'predict_proba'):
-                    y_pred = model.predict(X_test)
-                    
-                    # Calculate additional metrics for classification
-                    try:
-                        from sklearn.metrics import classification_report, confusion_matrix
-                        
-                        # Classification report
-                        report = classification_report(y_test, y_pred, output_dict=True)
-                        model_info[f"{name}/precision"] = report['weighted avg']['precision']
-                        model_info[f"{name}/recall"] = report['weighted avg']['recall']
-                        model_info[f"{name}/f1_score"] = report['weighted avg']['f1-score']
-                        
-                    except ImportError:
-                        pass
-                        
-            except Exception as e:
-                print(f"Warning: Could not calculate model performance: {e}")
-                
-        tracklab.run.log(model_info)
-        
-    except ImportError:
-        pass
+        model.predict(np.zeros((7, 3)))
+    except sklearn.exceptions.NotFittedError:
+        wandb.termerror("Please fit the model before passing it in.")
+        return False
+    except AttributeError:
+        # Some clustering models (LDA, PCA, Agglomerative) don't implement ``predict``
+        try:
+            sklearn.utils.validation.check_is_fitted(
+                model,
+                [
+                    "coef_",
+                    "estimator_",
+                    "labels_",
+                    "n_clusters_",
+                    "children_",
+                    "components_",
+                    "n_components_",
+                    "n_iter_",
+                    "n_batch_iter_",
+                    "explained_variance_",
+                    "singular_values_",
+                    "mean_",
+                ],
+                all_or_any=any,
+            )
+        except sklearn.exceptions.NotFittedError:
+            wandb.termerror("Please fit the model before passing it in.")
+            return False
+        else:
+            return True
+    except Exception:
+        # Assume it's fitted, since ``NotFittedError`` wasn't raised
+        return True
 
 
-def log_feature_importance(model: Any, feature_names: Optional[list] = None, name: str = "feature_importance"):
-    """Log feature importance for models that support it."""
-    if not _sklearn_available:
-        return
-        
-    try:
-        import tracklab
-        if tracklab.run is None:
-            return
-            
-        if hasattr(model, 'feature_importances_'):
-            importances = model.feature_importances_
-            
-            if feature_names is None:
-                feature_names = [f"feature_{i}" for i in range(len(importances))]
-                
-            # Create feature importance data
-            importance_data = [
-                {"feature": feat, "importance": float(imp)} 
-                for feat, imp in zip(feature_names, importances)
-            ]
-            
-            # Sort by importance
-            importance_data.sort(key=lambda x: x['importance'], reverse=True)
-            
-            # Log top features
-            top_features = importance_data[:10]  # Top 10 features
-            for i, item in enumerate(top_features):
-                tracklab.run.log({
-                    f"{name}/top_{i+1}_feature": item['feature'],
-                    f"{name}/top_{i+1}_importance": item['importance']
-                })
-                
-        elif hasattr(model, 'coef_'):
-            # For linear models, use coefficients
-            coef = model.coef_
-            if coef.ndim > 1:
-                coef = coef[0]  # Take first class for multiclass
-                
-            if feature_names is None:
-                feature_names = [f"feature_{i}" for i in range(len(coef))]
-                
-            # Log top coefficients by absolute value
-            coef_data = [
-                {"feature": feat, "coefficient": float(c)} 
-                for feat, c in zip(feature_names, coef)
-            ]
-            
-            coef_data.sort(key=lambda x: abs(x['coefficient']), reverse=True)
-            
-            top_coef = coef_data[:10]
-            for i, item in enumerate(top_coef):
-                tracklab.run.log({
-                    f"{name}/top_{i+1}_feature": item['feature'],
-                    f"{name}/top_{i+1}_coefficient": item['coefficient']
-                })
-                
-    except ImportError:
-        pass
+# Test Asummptions for plotting parameters and datasets
+def test_missing(**kwargs):
+    test_passed = True
+    for k, v in kwargs.items():
+        # Missing/empty params/datapoint arrays
+        if v is None:
+            wandb.termerror(f"{k} is None. Please try again.")
+            test_passed = False
+        if (k == "X") or (k == "X_test"):
+            if isinstance(v, scipy.sparse.csr.csr_matrix):
+                v = v.toarray()
+            elif isinstance(v, (pd.DataFrame, pd.Series)):
+                v = v.to_numpy()
+            elif isinstance(v, list):
+                v = np.asarray(v)
+
+            # Warn the user about missing values
+            missing = 0
+            missing = np.count_nonzero(pd.isnull(v))
+            if missing > 0:
+                wandb.termwarn(f"{k} contains {missing} missing values. ")
+                test_passed = False
+            # Ensure the dataset contains only integers
+            non_nums = 0
+            if v.ndim == 1:
+                non_nums = sum(
+                    1
+                    for val in v
+                    if (
+                        not isinstance(val, (int, float, complex))
+                        and not isinstance(val, np.number)
+                    )
+                )
+            else:
+                non_nums = sum(
+                    1
+                    for sl in v
+                    for val in sl
+                    if (
+                        not isinstance(val, (int, float, complex))
+                        and not isinstance(val, np.number)
+                    )
+                )
+            if non_nums > 0:
+                wandb.termerror(
+                    f"{k} contains values that are not numbers. Please vectorize, label encode or one hot encode {k} "
+                    "and call the plotting function again."
+                )
+                test_passed = False
+    return test_passed
+
+
+def round_3(n):
+    return round(n, 3)
+
+
+def round_2(n):
+    return round(n, 2)

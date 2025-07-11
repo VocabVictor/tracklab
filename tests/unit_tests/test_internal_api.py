@@ -9,19 +9,19 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 import requests
-import wandb.errors
-import wandb.sdk.internal.internal_api
-import wandb.sdk.internal.progress
+import tracklab.errors
+import tracklab.sdk.internal.internal_api
+import tracklab.sdk.internal.progress
 from pytest_mock import MockerFixture
 from responses import RequestsMock
-from wandb.apis import internal
-from wandb.errors import CommError
-from wandb.proto.wandb_internal_pb2 import ServerFeature
-from wandb.sdk.internal.internal_api import (
+from tracklab.apis import internal
+from tracklab.errors import CommError
+from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.sdk.internal.internal_api import (
     _match_org_with_fetched_org_entities,
     _OrgNames,
 )
-from wandb.sdk.lib import retry
+from tracklab.sdk.lib import retry
 
 from .test_retry import MockTime, mock_time  # noqa: F401
 
@@ -104,7 +104,7 @@ def test_internal_api_with_no_write_global_config_dir(tmp_path):
 
 @pytest.fixture
 def mock_gql():
-    with patch("wandb.sdk.internal.internal_api.Api.gql") as mock:
+    with patch("tracklab.sdk.internal.internal_api.Api.gql") as mock:
         mock.return_value = None
         yield mock
 
@@ -706,7 +706,7 @@ class TestUploadFileRetry:
         handler = Mock(side_effect=[(400, {}, "")])
         mock_responses.add_callback("PUT", "http://example.com/upload-dst", handler)
 
-        with pytest.raises(wandb.errors.CommError):
+        with pytest.raises(tracklab.errors.CommError):
             internal.InternalApi().upload_file_retry(
                 "http://example.com/upload-dst",
                 example_file.open("rb"),
@@ -722,7 +722,7 @@ class TestUploadFileRetry:
         handler = Mock(return_value=(500, {}, ""))
         mock_responses.add_callback("PUT", "http://example.com/upload-dst", handler)
 
-        with pytest.raises(wandb.errors.CommError):
+        with pytest.raises(tracklab.errors.CommError):
             internal.InternalApi().upload_file_retry(
                 "http://example.com/upload-dst",
                 example_file.open("rb"),
@@ -744,7 +744,7 @@ ENABLED_FEATURE_RESPONSE = {
 
 @pytest.fixture
 def mock_client(mocker: MockerFixture):
-    mock = mocker.patch("wandb.sdk.internal.internal_api.Client")
+    mock = mocker.patch("tracklab.sdk.internal.internal_api.Client")
     mock.return_value = mocker.Mock()
     yield mock.return_value
 

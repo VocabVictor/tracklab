@@ -2,15 +2,15 @@ import platform
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch._project_spec import EntryPoint
-from wandb.sdk.launch.builder.docker_builder import DockerBuilder
-from wandb.sdk.launch.registry.local_registry import LocalRegistry
+from tracklab.sdk.launch._project_spec import EntryPoint
+from tracklab.sdk.launch.builder.docker_builder import DockerBuilder
+from tracklab.sdk.launch.registry.local_registry import LocalRegistry
 
 
 @pytest.fixture
 def mock_ecr_registry(monkeypatch):
     monkeypatch.setattr(
-        "wandb.sdk.launch.builder.docker_builder.registry_from_uri",
+        "tracklab.sdk.launch.builder.docker_builder.registry_from_uri",
         lambda uri: uri,
     )
 
@@ -34,7 +34,7 @@ def test_docker_builder_with_uri(mock_ecr_registry):
 def mock_validate_docker_installation(mocker):
     """Mock the validate_docker_installation function for testing."""
     mocker.patch(
-        "wandb.sdk.launch.builder.docker_builder.validate_docker_installation",
+        "tracklab.sdk.launch.builder.docker_builder.validate_docker_installation",
         return_value=True,
     )
 
@@ -54,7 +54,7 @@ def mock_build_context_manager(mocker):
         )
     )
     mocker.patch(
-        "wandb.sdk.launch.builder.docker_builder.BuildContextManager",
+        "tracklab.sdk.launch.builder.docker_builder.BuildContextManager",
         return_value=mock_context_manager,
     )
     return mock_context_manager
@@ -82,7 +82,7 @@ def mock_launch_project():
 def mock_docker_build(mocker):
     """Mock the docker build command for testing."""
     mock_build = MagicMock(return_value="build logs")
-    mocker.patch("wandb.sdk.launch.builder.docker_builder.docker.build", mock_build)
+    mocker.patch("tracklab.sdk.launch.builder.docker_builder.docker.build", mock_build)
     return mock_build
 
 

@@ -2,9 +2,9 @@ import queue
 from collections import defaultdict
 from unittest.mock import MagicMock
 
-import wandb
-from wandb.proto import wandb_internal_pb2 as pb
-from wandb.sdk.internal import handler, sample, settings_static
+import tracklab
+from tracklab.proto import tracklab_internal_pb2 as pb
+from tracklab.sdk.internal import handler, sample, settings_static
 
 
 def test_handle_bigint(test_settings):
@@ -37,7 +37,7 @@ def test_handle_bigint(test_settings):
 
     history = result.response.sampled_history_response
     sampled_history = {
-        item.key: wandb.util.downsample(item.values_float or item.values_int, 40)
+        item.key: tracklab.util.downsample(item.values_float or item.values_int, 40)
         for item in history.item
     }
     assert sampled_history["ints"] == [1]

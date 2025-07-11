@@ -7,20 +7,20 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-import wandb
+import tracklab
 from wandb import Api, Artifact
-from wandb.errors import CommError
-from wandb.sdk.artifacts import artifact_file_cache
-from wandb.sdk.artifacts._internal_artifact import InternalArtifact
-from wandb.sdk.artifacts._validators import (
+from tracklab.errors import CommError
+from tracklab.sdk.artifacts import artifact_file_cache
+from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
+from tracklab.sdk.artifacts._validators import (
     ARTIFACT_NAME_MAXLEN,
     RESERVED_ARTIFACT_TYPE_PREFIX,
 )
-from wandb.sdk.artifacts.exceptions import ArtifactFinalizedError, WaitTimeoutError
-from wandb.sdk.artifacts.staging import get_staging_dir
-from wandb.sdk.lib.hashutil import md5_string
+from tracklab.sdk.artifacts.exceptions import ArtifactFinalizedError, WaitTimeoutError
+from tracklab.sdk.artifacts.staging import get_staging_dir
+from tracklab.sdk.lib.hashutil import md5_string
 
-sm = wandb.wandb_sdk.internal.sender.SendManager
+sm = tracklab.wandb_sdk.internal.sender.SendManager
 
 
 def test_add_table_from_dataframe(user):
@@ -35,14 +35,14 @@ def test_add_table_from_dataframe(user):
         [[current_time + timedelta(days=i)] for i in range(10)], columns=["date"]
     )
 
-    wb_table_float = wandb.Table(dataframe=df_float)
-    wb_table_float32 = wandb.Table(dataframe=df_float32)
-    wb_table_float32_recast = wandb.Table(dataframe=df_float32.astype(np.float64))
-    wb_table_bool = wandb.Table(dataframe=df_bool)
-    wb_table_timestamp = wandb.Table(dataframe=df_timestamp)
+    wb_table_float = tracklab.Table(dataframe=df_float)
+    wb_table_float32 = tracklab.Table(dataframe=df_float32)
+    wb_table_float32_recast = tracklab.Table(dataframe=df_float32.astype(np.float64))
+    wb_table_bool = tracklab.Table(dataframe=df_bool)
+    wb_table_timestamp = tracklab.Table(dataframe=df_timestamp)
 
-    run = wandb.init()
-    artifact = wandb.Artifact("table-example", "dataset")
+    run = tracklab.init()
+    artifact = tracklab.Artifact("table-example", "dataset")
     artifact.add(wb_table_float, "wb_table_float")
     artifact.add(wb_table_float32_recast, "wb_table_float32_recast")
     artifact.add(wb_table_float32, "wb_table_float32")
@@ -62,8 +62,8 @@ def test_add_table_from_dataframe(user):
 
 
 def test_artifact_error_for_invalid_aliases(user):
-    run = wandb.init()
-    artifact = wandb.Artifact("test-artifact", "dataset")
+    run = tracklab.init()
+    artifact = tracklab.Artifact("test-artifact", "dataset")
     error_aliases = [["latest", "workflow:boom"], ["workflow/boom/test"]]
     for aliases in error_aliases:
         with pytest.raises(ValueError) as e_info:
@@ -93,7 +93,7 @@ def test_artifact_error_for_invalid_name(tmp_path, user, api, invalid_name):
 
     # It should not be possible to log the artifact
     with pytest.raises(ValueError):
-        with wandb.init() as run:
+        with tracklab.init() as run:
             logged = run.log_artifact(file_path, name=invalid_name)
             logged.wait()
 
@@ -109,9 +109,9 @@ def test_artifact_upsert_no_id(user):
     artifact_type = "dataset"
 
     # Upsert without a group or id should fail
-    run = wandb.init()
-    artifact = wandb.Artifact(name=artifact_name, type=artifact_type)
-    image = wandb.Image(np.random.randint(0, 255, (10, 10)))
+    run = tracklab.init()
+    artifact = tracklab.Artifact(name=artifact_name, type=artifact_type)
+    image = tracklab.Image(np.random.randint(0, 255, (10, 10)))
     artifact.add(image, "image_1")
     with pytest.raises(TypeError):
         run.upsert_artifact(artifact)
@@ -126,9 +126,9 @@ def test_artifact_upsert_group_id(user):
     artifact_type = "dataset"
 
     # Upsert with a group should succeed
-    run = wandb.init(group=group_name)
-    artifact = wandb.Artifact(name=artifact_name, type=artifact_type)
-    image = wandb.Image(np.random.randint(0, 255, (10, 10)))
+    run = tracklab.init(group=group_name)
+    artifact = tracklab.Artifact(name=artifact_name, type=artifact_type)
+    image = tracklab.Image(np.random.randint(0, 255, (10, 10)))
     artifact.add(image, "image_1")
     run.upsert_artifact(artifact)
     run.finish()
@@ -142,9 +142,9 @@ def test_artifact_upsert_distributed_id(user):
     artifact_type = "dataset"
 
     # Upsert with a distributed_id should succeed
-    run = wandb.init()
-    artifact = wandb.Artifact(name=artifact_name, type=artifact_type)
-    image = wandb.Image(np.random.randint(0, 255, (10, 10)))
+    run = tracklab.init()
+    artifact = tracklab.Artifact(name=artifact_name, type=artifact_type)
+    image = tracklab.Image(np.random.randint(0, 255, (10, 10)))
     artifact.add(image, "image_2")
     run.upsert_artifact(artifact, distributed_id=group_name)
     run.finish()
@@ -157,8 +157,8 @@ def test_artifact_finish_no_id(user):
     artifact_type = "dataset"
 
     # Finish without a distributed_id should fail
-    run = wandb.init()
-    artifact = wandb.Artifact(artifact_name, type=artifact_type)
+    run = tracklab.init()
+    artifact = tracklab.Artifact(artifact_name, type=artifact_type)
     with pytest.raises(TypeError):
         run.finish_artifact(artifact)
     run.finish()
@@ -172,8 +172,8 @@ def test_artifact_finish_group_id(user):
     artifact_type = "dataset"
 
     # Finish with a distributed_id should succeed
-    run = wandb.init(group=group_name)
-    artifact = wandb.Artifact(artifact_name, type=artifact_type)
+    run = tracklab.init(group=group_name)
+    artifact = tracklab.Artifact(artifact_name, type=artifact_type)
     run.finish_artifact(artifact)
     run.finish()
 
@@ -186,8 +186,8 @@ def test_artifact_finish_distributed_id(user):
     artifact_type = "dataset"
 
     # Finish with a distributed_id should succeed
-    run = wandb.init()
-    artifact = wandb.Artifact(artifact_name, type=artifact_type)
+    run = tracklab.init()
+    artifact = tracklab.Artifact(artifact_name, type=artifact_type)
     run.finish_artifact(artifact, distributed_id=group_name)
     run.finish()
 
@@ -200,7 +200,7 @@ def test_add_file_respects_incremental(tmp_path, user, api, incremental):
     # Setup: create and log the original artifact
     orig_filepath = tmp_path / "orig.txt"
     orig_filepath.write_text("orig data")
-    with wandb.init() as orig_run:
+    with tracklab.init() as orig_run:
         orig_artifact = Artifact(art_name, art_type)
         orig_artifact.add_file(str(orig_filepath))
 
@@ -209,7 +209,7 @@ def test_add_file_respects_incremental(tmp_path, user, api, incremental):
     # Now add data from a new file to the same artifact, with or without `incremental=True`
     new_filepath = tmp_path / "new.txt"
     new_filepath.write_text("new data")
-    with wandb.init() as new_run:
+    with tracklab.init() as new_run:
         new_artifact = Artifact(art_name, art_type, incremental=incremental)
         new_artifact.add_file(str(new_filepath))
 
@@ -227,15 +227,15 @@ def test_add_file_respects_incremental(tmp_path, user, api, incremental):
 @pytest.mark.flaky
 @pytest.mark.xfail(reason="flaky on CI")
 def test_edit_after_add(user):
-    artifact = wandb.Artifact(name="hi-art", type="dataset")
+    artifact = tracklab.Artifact(name="hi-art", type="dataset")
     filename = "file1.txt"
     open(filename, "w").write("hello!")
     artifact.add_file(filename)
     open(filename, "w").write("goodbye.")
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
         artifact.wait()
-    with wandb.init() as run:
+    with tracklab.init() as run:
         art_path = run.use_artifact("hi-art:latest").download()
 
     # The file from the retrieved artifact should match the original.
@@ -245,13 +245,13 @@ def test_edit_after_add(user):
 
 
 def test_remove_after_log(user):
-    with wandb.init() as run:
-        artifact = wandb.Artifact(name="hi-art", type="dataset")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact(name="hi-art", type="dataset")
         artifact.add_reference(Path(__file__).as_uri())
         run.log_artifact(artifact)
         artifact.wait()
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         retrieved = run.use_artifact("hi-art:latest")
 
         with pytest.raises(ArtifactFinalizedError):
@@ -268,7 +268,7 @@ def test_download_respects_skip_cache(user, tmp_path, monkeypatch, skip_download
     monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path / "cache"))
     cache = artifact_file_cache.get_artifact_file_cache()
 
-    artifact = wandb.Artifact(name="cache-test", type="dataset")
+    artifact = tracklab.Artifact(name="cache-test", type="dataset")
     orig_content = "test123"
     file_path = Path(tmp_path / "text.txt")
     file_path.write_text(orig_content)
@@ -276,7 +276,7 @@ def test_download_respects_skip_cache(user, tmp_path, monkeypatch, skip_download
     # Don't skip cache for setup
     entry = artifact.add_file(file_path, policy="immutable", skip_cache=True)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
     artifact.wait()
 
@@ -314,7 +314,7 @@ def test_uploaded_artifacts_are_unstaged(user, tmp_path, monkeypatch):
     def dir_size():
         return sum(f.stat().st_size for f in staging_dir.rglob("*") if f.is_file())
 
-    artifact = wandb.Artifact(name="stage-test", type="dataset")
+    artifact = tracklab.Artifact(name="stage-test", type="dataset")
     with open("random.bin", "wb") as f:
         f.write(np.random.bytes(4096))
     artifact.add_file("random.bin")
@@ -322,7 +322,7 @@ def test_uploaded_artifacts_are_unstaged(user, tmp_path, monkeypatch):
     # The file is staged until it's finalized.
     assert dir_size() == 4096
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
 
     # The staging directory should be empty again.
@@ -331,18 +331,18 @@ def test_uploaded_artifacts_are_unstaged(user, tmp_path, monkeypatch):
 
 def test_large_manifests_passed_by_file(user, monkeypatch, mocker):
     writer_spy = mocker.spy(
-        wandb.sdk.interface.interface.InterfaceBase,
+        tracklab.sdk.interface.interface.InterfaceBase,
         "_write_artifact_manifest_file",
     )
     monkeypatch.setattr(
-        wandb.sdk.interface.interface,
+        tracklab.sdk.interface.interface,
         "MANIFEST_FILE_SIZE_THRESHOLD",
         0,
     )
 
     content = "test content\n"
-    with wandb.init() as run:
-        artifact = wandb.Artifact(name="large-manifest", type="dataset")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact(name="large-manifest", type="dataset")
         with artifact.new_file("test_file.txt") as f:
             f.write(content)
         artifact.manifest.entries["test_file.txt"].extra["test_key"] = {"x": 1}
@@ -355,7 +355,7 @@ def test_large_manifests_passed_by_file(user, monkeypatch, mocker):
     # The file should have been cleaned up and deleted by the receiving process.
     assert not os.path.exists(file_written)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = run.use_artifact("large-manifest:latest")
         assert len(artifact.manifest) == 1
         entry = artifact.manifest.entries.get("test_file.txt")
@@ -375,7 +375,7 @@ def test_mutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch, api):
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
-    artifact = wandb.Artifact(name="stage-test", type="dataset")
+    artifact = tracklab.Artifact(name="stage-test", type="dataset")
     with open(data_path, "w") as f:
         f.write("test 123")
     manifest_entry = artifact.add_file(data_path)
@@ -385,7 +385,7 @@ def test_mutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch, api):
     assert len(staging_files) == 1
     assert staging_files[0].read_text() == "test 123"
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
 
     # The file is cached
@@ -406,7 +406,7 @@ def test_mutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
-    artifact = wandb.Artifact(name="stage-test", type="dataset")
+    artifact = tracklab.Artifact(name="stage-test", type="dataset")
     with open(data_path, "w") as f:
         f.write("test 123")
     manifest_entry = artifact.add_file(data_path, skip_cache=True)
@@ -416,7 +416,7 @@ def test_mutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
     assert len(staging_files) == 1
     assert staging_files[0].read_text() == "test 123"
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
 
     # The file is not cached
@@ -437,7 +437,7 @@ def test_immutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch):
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
-    artifact = wandb.Artifact(name="stage-test", type="dataset")
+    artifact = tracklab.Artifact(name="stage-test", type="dataset")
     with open(data_path, "w") as f:
         f.write("test 123")
     manifest_entry = artifact.add_file(data_path, policy="immutable")
@@ -446,7 +446,7 @@ def test_immutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch):
     staging_files = list(staging_dir.iterdir())
     assert len(staging_files) == 0
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
 
     # The file is cached
@@ -463,7 +463,7 @@ def test_immutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
-    artifact = wandb.Artifact(name="stage-test", type="dataset")
+    artifact = tracklab.Artifact(name="stage-test", type="dataset")
     with open(data_path, "w") as f:
         f.write("test 123")
     manifest_entry = artifact.add_file(data_path, skip_cache=True, policy="immutable")
@@ -472,7 +472,7 @@ def test_immutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
     staging_files = list(staging_dir.iterdir())
     assert len(staging_files) == 0
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
 
     # The file is cached
@@ -481,17 +481,17 @@ def test_immutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
 
 
 def test_local_references(user):
-    run = wandb.init()
+    run = tracklab.init()
 
     def make_table():
-        return wandb.Table(columns=[], data=[])
+        return tracklab.Table(columns=[], data=[])
 
     t1 = make_table()
-    artifact1 = wandb.Artifact("test_local_references", "dataset")
+    artifact1 = tracklab.Artifact("test_local_references", "dataset")
     artifact1.add(t1, "t1")
     assert artifact1.manifest.entries["t1.table.json"].ref is None
     run.log_artifact(artifact1)
-    artifact2 = wandb.Artifact("test_local_references_2", "dataset")
+    artifact2 = tracklab.Artifact("test_local_references_2", "dataset")
     artifact2.add(t1, "t2")
     assert artifact2.manifest.entries["t2.table.json"].ref is not None
     run.finish()
@@ -501,8 +501,8 @@ def test_artifact_wait_success(user):
     # Test artifact wait() timeout parameter
     timeout = 60
     leeway = 0.50
-    run = wandb.init()
-    artifact = wandb.Artifact("art", type="dataset")
+    run = tracklab.init()
+    artifact = tracklab.Artifact("art", type="dataset")
     start_timestamp = time.time()
     run.log_artifact(artifact).wait(timeout=timeout)
     elapsed_time = time.time() - start_timestamp
@@ -514,10 +514,10 @@ def test_artifact_wait_success(user):
 def test_artifact_wait_failure(user, timeout):
     # Test to expect WaitTimeoutError when wait timeout is reached and large image
     # wasn't uploaded yet
-    image = wandb.Image(np.random.randint(0, 255, (10, 10)))
-    run = wandb.init()
+    image = tracklab.Image(np.random.randint(0, 255, (10, 10)))
+    run = tracklab.init()
     with pytest.raises(WaitTimeoutError):
-        artifact = wandb.Artifact("art", type="image")
+        artifact = tracklab.Artifact("art", type="image")
         artifact.add(image, "image")
         run.log_artifact(artifact).wait(timeout=timeout)
     run.finish()
@@ -530,13 +530,13 @@ def test_check_existing_artifact_before_download(user, tmp_path, monkeypatch):
 
     original_file = tmp_path / "test.txt"
     original_file.write_text("hello")
-    with wandb.init() as run:
-        artifact = wandb.Artifact("art", type="dataset")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("art", type="dataset")
         artifact.add_file(original_file)
         run.log_artifact(artifact)
 
     # Download the artifact
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_path = run.use_artifact("art:latest").download()
         assert os.path.exists(artifact_path)
 
@@ -550,7 +550,7 @@ def test_check_existing_artifact_before_download(user, tmp_path, monkeypatch):
     monkeypatch.setattr(shutil, "copy2", fail_copy)
 
     # Download the artifact again; it should be left in place despite the absent cache.
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_path = Path(run.use_artifact("art:latest").download())
         file1 = artifact_path / "test.txt"
         assert file1.is_file()
@@ -561,13 +561,13 @@ def test_check_changed_artifact_then_download(user, tmp_path):
     """*Do* re-download an artifact if it's been modified in place."""
     original_file = tmp_path / "test.txt"
     original_file.write_text("hello")
-    with wandb.init() as run:
-        artifact = wandb.Artifact("art", type="dataset")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("art", type="dataset")
         artifact.add_file(original_file)
         run.log_artifact(artifact)
 
     # Download the artifact
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_path = Path(run.use_artifact("art:latest").download())
         file1 = artifact_path / "test.txt"
         assert file1.is_file()
@@ -577,7 +577,7 @@ def test_check_changed_artifact_then_download(user, tmp_path):
     file1.write_text("goodbye")
 
     # Download it again; it should be replaced with the original version.
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact_path = Path(run.use_artifact("art:latest").download())
         file2 = artifact_path / "test.txt"
         assert file1 == file2  # Same path, but the content should have changed.
@@ -587,7 +587,7 @@ def test_check_changed_artifact_then_download(user, tmp_path):
 
 @pytest.mark.parametrize("path_type", [str, Path])
 def test_log_dir_directly(example_files, user, path_type):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run_id = run.id
         artifact = run.log_artifact(path_type(example_files))
     artifact.wait()
@@ -599,7 +599,7 @@ def test_log_dir_directly(example_files, user, path_type):
 
 @pytest.mark.parametrize("path_type", [str, Path])
 def test_log_file_directly(example_file, user, path_type):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run_id = run.id
         artifact = run.log_artifact(path_type(example_file))
     artifact.wait()
@@ -610,7 +610,7 @@ def test_log_file_directly(example_file, user, path_type):
 
 
 def test_log_reference_directly(example_files, user):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run_id = run.id
         artifact = run.log_artifact(example_files.resolve().as_uri())
     artifact.wait()
@@ -632,7 +632,7 @@ def test_artifact_download_root(logged_artifact, monkeypatch, tmp_path):
 
 
 def test_log_and_download_with_path_prefix(user, tmp_path):
-    artifact = wandb.Artifact(name="test-artifact", type="dataset")
+    artifact = tracklab.Artifact(name="test-artifact", type="dataset")
     file_paths = [
         tmp_path / "some-prefix" / "one.txt",
         tmp_path / "some-prefix-two.txt",
@@ -645,10 +645,10 @@ def test_log_and_download_with_path_prefix(user, tmp_path):
         file_path.write_text(f"Content of {file_path.name}")
     artifact.add_dir(tmp_path)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         logged_artifact = run.use_artifact("test-artifact:latest")
         download_dir = Path(logged_artifact.download(path_prefix="some-prefix"))
 
@@ -660,7 +660,7 @@ def test_log_and_download_with_path_prefix(user, tmp_path):
     assert not (download_dir / "other-thing.txt").exists()
     shutil.rmtree(download_dir)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         logged_artifact = run.use_artifact("test-artifact:latest")
         download_dir = Path(logged_artifact.download(path_prefix="some-prefix/"))
 
@@ -671,7 +671,7 @@ def test_log_and_download_with_path_prefix(user, tmp_path):
 
     shutil.rmtree(download_dir)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         logged_artifact = run.use_artifact("test-artifact:latest")
         download_dir = Path(logged_artifact.download(path_prefix=""))
 
@@ -696,7 +696,7 @@ def test_retrieve_missing_artifact(logged_artifact):
 
 
 def test_new_draft(user):
-    art = wandb.Artifact("test-artifact", "test-type")
+    art = tracklab.Artifact("test-artifact", "test-type")
     with art.new_file("boom.txt", "w") as f:
         f.write("detonation")
 
@@ -704,7 +704,7 @@ def test_new_draft(user):
     art.ttl = None
 
     project = "test"
-    with wandb.init(project=project) as run:
+    with tracklab.init(project=project) as run:
         run.log_artifact(art, aliases=["a"])
         run.link_artifact(art, f"{project}/my-sample-portfolio")
 
@@ -740,7 +740,7 @@ def test_new_draft(user):
     with draft.new_file("bang.txt", "w") as f:
         f.write("expansion")
 
-    with wandb.init(project=project) as run:
+    with tracklab.init(project=project) as run:
         run.log_artifact(draft)
 
     child = Api().artifact(f"{project}/test-artifact:latest")
@@ -768,7 +768,7 @@ def test_used_artifacts_preserve_original_project(user, api, logged_artifact):
     artifact_path = f"{user}/{orig_project}/{logged_artifact.name}"
 
     # Use the artifact within a *different* project
-    with wandb.init(entity=user, project=new_project) as run:
+    with tracklab.init(entity=user, project=new_project) as run:
         art = run.use_artifact(artifact_path)
         art.download()
 
@@ -785,9 +785,9 @@ def test_used_artifacts_preserve_original_project(user, api, logged_artifact):
 
 def test_internal_artifacts(user):
     internal_type = RESERVED_ARTIFACT_TYPE_PREFIX + "invalid"
-    with wandb.init() as run:
+    with tracklab.init() as run:
         with pytest.raises(ValueError, match="is reserved for internal use"):
-            artifact = wandb.Artifact(name="test-artifact", type=internal_type)
+            artifact = tracklab.Artifact(name="test-artifact", type=internal_type)
 
         artifact = InternalArtifact(name="test-artifact", type=internal_type)
         run.log_artifact(artifact)

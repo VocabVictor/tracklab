@@ -1,4 +1,4 @@
-from wandb.sdk.lib.fsm import Fsm, FsmEntry
+from tracklab.sdk.lib.fsm import Fsm, FsmEntry
 
 # TODO(testing): investigate if we can use unittest.mock and Call() tracking
 

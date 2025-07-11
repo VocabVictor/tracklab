@@ -1,5 +1,5 @@
 import pytest
-from wandb.sdk.artifacts._validators import (
+from tracklab.sdk.artifacts._validators import (
     REGISTRY_PREFIX,
     RESERVED_ARTIFACT_TYPE_PREFIX,
     validate_artifact_type,

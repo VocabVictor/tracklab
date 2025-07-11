@@ -5,10 +5,10 @@ import string
 
 import pytest
 from google.protobuf.wrappers_pb2 import BoolValue, StringValue
-from wandb.proto import wandb_settings_pb2
-from wandb.sdk.internal.job_builder import JobBuilder
-from wandb.sdk.internal.settings_static import SettingsStatic
-from wandb.util import make_artifact_name_safe
+from tracklab.proto import tracklab_settings_pb2
+from tracklab.sdk.internal.job_builder import JobBuilder
+from tracklab.sdk.internal.settings_static import SettingsStatic
+from tracklab.util import make_artifact_name_safe
 
 
 def str_of_length(n):
@@ -92,7 +92,7 @@ def test_build_repo_notebook_job(runner, tmp_path, api, mocker):
 
     mocker.patch("os.path.exists", side_effect=exists)
     # patch in_jupyter to return True
-    mocker.patch("wandb.sdk.lib.ipython.in_jupyter", return_value=True)
+    mocker.patch("tracklab.sdk.lib.ipython.in_jupyter", return_value=True)
     with runner.isolated_filesystem():
         with open("requirements.txt", "w") as f:
             f.write("numpy==1.19.0")
@@ -175,7 +175,7 @@ def test_build_artifact_notebook_job(runner, tmp_path, mocker, api):
 
     mocker.patch("os.path.exists", side_effect=exists)
     # patch in_jupyter to return True
-    mocker.patch("wandb.sdk.lib.ipython.in_jupyter", return_value=True)
+    mocker.patch("tracklab.sdk.lib.ipython.in_jupyter", return_value=True)
     with runner.isolated_filesystem():
         with open("requirements.txt", "w") as f:
             f.write("numpy==1.19.0")
@@ -223,7 +223,7 @@ def test_build_artifact_notebook_job_no_program(
     artifact_name = str_of_length(129)
 
     # patch in_jupyter to return True
-    mocker.patch("wandb.sdk.lib.ipython.in_jupyter", return_value=True)
+    mocker.patch("tracklab.sdk.lib.ipython.in_jupyter", return_value=True)
 
     with runner.isolated_filesystem():
         with open("requirements.txt", "w") as f:
@@ -250,7 +250,7 @@ def test_build_artifact_notebook_job_no_program(
 
         assert not artifact
         out = capfd.readouterr().err
-        _msg = "No program path found when generating artifact job source for a non-colab notebook run. See https://docs.wandb.ai/guides/launch/create-job"
+        _msg = "No program path found when generating artifact job source for a non-colab notebook run. See https://docs.tracklab.ai/guides/launch/create-job"
         if verbose:
             assert _msg in out
         else:
@@ -267,7 +267,7 @@ def test_build_artifact_notebook_job_no_metadata(
     api,
 ):
     # patch in_jupyter to return True
-    mocker.patch("wandb.sdk.lib.ipython.in_jupyter", return_value=True)
+    mocker.patch("tracklab.sdk.lib.ipython.in_jupyter", return_value=True)
 
     artifact_name = str_of_length(129)
     with runner.isolated_filesystem():
@@ -315,7 +315,7 @@ def test_build_artifact_notebook_job_no_program_metadata(
         "python": "3.7",
     }
     # patch in_jupyter to return True
-    mocker.patch("wandb.sdk.lib.ipython.in_jupyter", return_value=True)
+    mocker.patch("tracklab.sdk.lib.ipython.in_jupyter", return_value=True)
 
     artifact_name = str_of_length(129)
     with runner.isolated_filesystem():

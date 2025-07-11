@@ -2,10 +2,10 @@ import os
 from unittest import mock
 
 import pytest
-import wandb
-import wandb.analytics
-import wandb.env
-import wandb.util
+import tracklab
+import tracklab.analytics
+import tracklab.env
+import tracklab.util
 from sentry_sdk.utils import sentry_sdk
 
 from .sentry_relay import MetricRelayServer, SentryResponse
@@ -32,8 +32,8 @@ def test_wandb_sentry_does_not_interfer_with_global_sentry_sdk(
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key="WANDB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
@@ -48,7 +48,7 @@ def test_wandb_sentry_does_not_interfer_with_global_sentry_sdk(
             ),
             default_integrations=False,
         )
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
 
         # Assert wandb Sentry scope and dsn are different from the other Sentry client
@@ -67,15 +67,15 @@ def test_wandb_error_reporting_disabled(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "false",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "false",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key="WANDB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
         },
     ):
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
         wandb_sentry.configure_scope(tags={"entity": "tag"})
         wandb_sentry_event_id = wandb_sentry.message("wandb sentry message")
@@ -111,8 +111,8 @@ def test_wandb_sentry_init_after_client_init(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key=expected_wandb_sentry_response.public_key,
                 port=relay.port,
                 project=expected_wandb_sentry_response.project_id,
@@ -127,7 +127,7 @@ def test_wandb_sentry_init_after_client_init(relay: MetricRelayServer):
             ),
             default_integrations=False,
         )
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
 
         sentry_sdk.set_tag("test", "tag")
@@ -180,8 +180,8 @@ def test_wandb_sentry_init_after_client_write(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key=expected_wandb_sentry_response.public_key,
                 port=relay.port,
                 project=expected_wandb_sentry_response.project_id,
@@ -204,7 +204,7 @@ def test_wandb_sentry_init_after_client_write(relay: MetricRelayServer):
         )
 
         # Init wandb sentry and send events
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
         wandb_sentry.configure_scope(tags={"entity": "tag"})
         wandb_sentry_event_id = wandb_sentry.message(
@@ -250,15 +250,15 @@ def test_wandb_sentry_initialized_first(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key=expected_wandb_sentry_response.public_key,
                 port=relay.port,
                 project=expected_wandb_sentry_response.project_id,
             ),
         },
     ):
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
         wandb_sentry.configure_scope(tags={"entity": "tag"})
 
@@ -330,8 +330,8 @@ def test_wandb_sentry_write_first(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key=expected_wandb_sentry_responses[0].public_key,
                 port=relay.port,
                 project=expected_wandb_sentry_responses[0].project_id,
@@ -339,7 +339,7 @@ def test_wandb_sentry_write_first(relay: MetricRelayServer):
         },
     ):
         # Configure and send wandb sentry event before initializing client sentry
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
         wandb_sentry.configure_scope(tags={"entity": "tag"})
 
@@ -412,8 +412,8 @@ def test_wandb_sentry_exception(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key=expected_wandb_sentry_response.public_key,
                 port=relay.port,
                 project=expected_wandb_sentry_response.project_id,
@@ -428,7 +428,7 @@ def test_wandb_sentry_exception(relay: MetricRelayServer):
             ),
             default_integrations=False,
         )
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
 
         # Send sentry events
@@ -486,15 +486,15 @@ def test_repeated_messages_does_not_call_sentry(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key=expected_wandb_sentry_response.public_key,
                 port=relay.port,
                 project=expected_wandb_sentry_response.project_id,
             ),
         },
     ):
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
         wandb_sentry.configure_scope(tags={"entity": "tag"})
 
@@ -526,15 +526,15 @@ def test_wandb_configure_without_tags_does_not_create_session(relay: MetricRelay
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key="WANDB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
         },
     ):
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
         wandb_sentry.configure_scope()
 
@@ -551,15 +551,15 @@ def test_wandb_configure_with_tags_creates_session(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key="WANDB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
         },
     ):
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
         wandb_sentry.configure_scope(tags={"entity": "tag"})
 
@@ -582,15 +582,15 @@ def test_wandb_sentry_event_with_runtime_tags(relay: MetricRelayServer):
     with mock.patch.dict(
         os.environ,
         {
-            wandb.env.ERROR_REPORTING: "true",
-            wandb.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
+            tracklab.env.ERROR_REPORTING: "true",
+            tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
                 key="WANDB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
         },
     ):
-        wandb_sentry = wandb.analytics.Sentry()
+        wandb_sentry = tracklab.analytics.Sentry()
         wandb_sentry.setup()
 
         for runtime in python_runtime:

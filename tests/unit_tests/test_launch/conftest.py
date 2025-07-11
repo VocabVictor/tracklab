@@ -1,5 +1,5 @@
 import pytest
-from wandb.apis.internal import InternalApi
+from tracklab.apis.internal import InternalApi
 
 
 @pytest.fixture

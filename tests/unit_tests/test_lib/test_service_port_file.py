@@ -1,7 +1,7 @@
 from unittest import mock
 
 import pytest
-from wandb.sdk.lib.service import ipc_support, service_port_file, service_token
+from tracklab.sdk.lib.service import ipc_support, service_port_file, service_token
 
 
 @pytest.fixture(autouse=True)

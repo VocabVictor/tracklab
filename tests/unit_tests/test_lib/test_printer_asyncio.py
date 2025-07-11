@@ -4,16 +4,16 @@ import contextlib
 from typing import Any, Iterator
 
 import pytest
-import wandb
-from wandb.sdk.lib import printer, printer_asyncio
-from wandb.sdk.lib.printer import _PrinterTerm
+import tracklab
+from tracklab.sdk.lib import printer, printer_asyncio
+from tracklab.sdk.lib.printer import _PrinterTerm
 
 
 class MockDynamicTextPrinter(_PrinterTerm):
     """Test printer that captures text set through dynamic text."""
 
     def __init__(self) -> None:
-        super().__init__(settings=wandb.Settings())
+        super().__init__(settings=tracklab.Settings())
         self._captured_text: list[str] = []
 
     @property

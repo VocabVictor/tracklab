@@ -1,9 +1,9 @@
 import jax.numpy as jnp
-import wandb
+import tracklab
 
 
 def test_log_bfloat16(wandb_backend_spy):
-    run = wandb.init()
+    run = tracklab.init()
     m1 = jnp.array(1.0, dtype=jnp.float32)
     m2 = jnp.array(2.0, dtype=jnp.bfloat16)
     m3 = jnp.array([3.0, 4.0], dtype=jnp.bfloat16)

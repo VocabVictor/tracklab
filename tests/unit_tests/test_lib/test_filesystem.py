@@ -13,8 +13,8 @@ from unittest.mock import Mock, patch
 import pytest
 
 # from pyfakefs.fake_filesystem import OSType
-from wandb.sdk.lib import filesystem
-from wandb.sdk.lib.filesystem import (
+from tracklab.sdk.lib import filesystem
+from tracklab.sdk.lib.filesystem import (
     check_exists,
     copy_or_overwrite_changed,
     mkdir_allow_fallback,

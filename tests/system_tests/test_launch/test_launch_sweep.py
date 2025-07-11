@@ -1,10 +1,10 @@
 import json
 
-import wandb
-from wandb.apis.public import Api as PublicApi
-from wandb.cli import cli
-from wandb.sdk.launch.sweeps.scheduler import Scheduler
-from wandb.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT, construct_launch_spec
+import tracklab
+from tracklab.apis.public import Api as PublicApi
+from tracklab.cli import cli
+from tracklab.sdk.launch.sweeps.scheduler import Scheduler
+from tracklab.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT, construct_launch_spec
 
 
 def test_sweeps_on_launch(
@@ -14,19 +14,19 @@ def test_sweeps_on_launch(
 ):
     _ = use_local_wandb_backend
     monkeypatch.setattr(
-        wandb.sdk.launch.builder.build,
+        tracklab.sdk.launch.builder.build,
         "validate_docker_installation",
         lambda: None,
     )
 
     monkeypatch.setattr(
-        wandb.docker,
+        tracklab.docker,
         "build",
         lambda tags, file, context_path: None,
     )
 
     monkeypatch.setattr(
-        wandb.docker,
+        tracklab.docker,
         "push",
         lambda *_: None,
     )
@@ -34,10 +34,10 @@ def test_sweeps_on_launch(
     proj = "test_project2"
     queue = "existing-queue"
 
-    with wandb.init(settings=wandb.Settings(project=proj)):
+    with tracklab.init(settings=tracklab.Settings(project=proj)):
         pass
 
-    api = wandb.sdk.internal.internal_api.Api()
+    api = tracklab.sdk.internal.internal_api.Api()
     api.create_run_queue(entity=user, project=proj, queue_name=queue, access="USER")
 
     sweep_config = {
@@ -119,15 +119,15 @@ def test_sweeps_on_launch(
 
 def test_sweep_scheduler_job_with_queue(runner, user, mocker):
     # Can't download artifacts in tests, so patch this
-    mocker.patch("wandb.sdk.launch.sweeps.utils.check_job_exists", return_value=True)
+    mocker.patch("tracklab.sdk.launch.sweeps.utils.check_job_exists", return_value=True)
     queue = "queue"
-    settings = wandb.Settings(project=LAUNCH_DEFAULT_PROJECT)
-    run = wandb.init(settings=settings)
+    settings = tracklab.Settings(project=LAUNCH_DEFAULT_PROJECT)
+    run = tracklab.init(settings=settings)
 
     job_artifact = run._log_job_artifact_with_image("docker_image", args=[])
     job_name = job_artifact.wait().name
 
-    api = wandb.sdk.internal.internal_api.Api()
+    api = tracklab.sdk.internal.internal_api.Api()
     res = api.create_default_resource_config(
         user,
         "local-container",
@@ -163,7 +163,7 @@ def test_sweep_scheduler_job_with_queue(runner, user, mocker):
             "method": "grid",
             "parameters": {"parameter1": {"values": [1, 2, 3]}},
         }
-        wandb.sweep(sweep_config)
+        tracklab.sweep(sweep_config)
         res = runner.invoke(
             cli.launch_sweep,
             ["config.json", "--queue", queue],

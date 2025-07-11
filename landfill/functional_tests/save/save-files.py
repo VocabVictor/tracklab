@@ -17,7 +17,7 @@ assert:
 import os
 import tempfile
 
-import wandb
+import tracklab
 
 
 def write_file(fname):
@@ -29,7 +29,7 @@ def test_save_file():
     with tempfile.TemporaryDirectory() as tmpdir:
         fname = os.path.join(tmpdir, "newfile.txt")
         write_file(fname)
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.config.id = "save_file"
             run.save(fname, base_path=tmpdir)
 
@@ -40,7 +40,7 @@ def test_save_file_in_dir():
         fname = os.path.join(tmpdir, "newdir", "newfile.txt")
         os.mkdir(dirname)
         write_file(fname)
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.config.id = "save_file_in_dir"
             run.save(fname, base_path=tmpdir)
 

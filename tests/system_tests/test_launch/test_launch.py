@@ -2,11 +2,11 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
-import wandb
-from wandb.errors import CommError
-from wandb.sdk.internal.internal_api import Api as InternalApi
-from wandb.sdk.launch._launch import _launch
-from wandb.sdk.launch.errors import LaunchError
+import tracklab
+from tracklab.errors import CommError
+from tracklab.sdk.internal.internal_api import Api as InternalApi
+from tracklab.sdk.launch._launch import _launch
+from tracklab.sdk.launch.errors import LaunchError
 
 
 class MockBuilder:
@@ -24,40 +24,40 @@ class MockBuilder:
 async def test_launch_incorrect_backend(runner, user, monkeypatch):
     proj = "test1"
     entry_point = ["python", "/examples/examples/launch/launch-quickstart/train.py"]
-    settings = wandb.Settings(project=proj)
+    settings = tracklab.Settings(project=proj)
     api = InternalApi()
 
     monkeypatch.setattr(
-        wandb.sdk.launch.builder.build,
+        tracklab.sdk.launch.builder.build,
         "LaunchProject",
         lambda *args, **kwargs: MagicMock(),
     )
 
     monkeypatch.setattr(
-        wandb.sdk.launch.builder.build,
+        tracklab.sdk.launch.builder.build,
         "validate_docker_installation",
         lambda: None,
     )
 
     monkeypatch.setattr(
-        "wandb.docker",
+        "tracklab.docker",
         lambda: None,
     )
     monkeypatch.setattr(
-        "wandb.sdk.launch.loader.environment_from_config",
+        "tracklab.sdk.launch.loader.environment_from_config",
         lambda *args, **kawrgs: None,
     )
     (
         monkeypatch.setattr(
-            "wandb.sdk.launch.loader.registry_from_config", lambda *args, **kawrgs: None
+            "tracklab.sdk.launch.loader.registry_from_config", lambda *args, **kawrgs: None
         ),
     )
 
     monkeypatch.setattr(
-        "wandb.sdk.launch.loader.builder_from_config",
+        "tracklab.sdk.launch.loader.builder_from_config",
         lambda *args, **kawrgs: MockBuilder(),
     )
-    r = wandb.init(settings=settings)
+    r = tracklab.init(settings=settings)
     r.finish()
     with pytest.raises(
         LaunchError,
@@ -77,10 +77,10 @@ def test_launch_multi_run(runner, user):
     with runner.isolated_filesystem(), mock.patch.dict(
         "os.environ", {"WANDB_RUN_ID": "test", "WANDB_LAUNCH": "true"}
     ):
-        with wandb.init() as run1:
+        with tracklab.init() as run1:
             pass
 
-        with wandb.init() as run2:
+        with tracklab.init() as run2:
             pass
 
         assert run1.id == "test"
@@ -111,7 +111,7 @@ def test_launch_wandb_init_launch_envs(
             "WANDB_LAUNCH_TRACE_ID": "test123",
         },
     ):
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.log({"test": 1})
 
         with wandb_backend_spy.freeze() as snapshot:

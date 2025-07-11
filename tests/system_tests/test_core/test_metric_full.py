@@ -1,12 +1,12 @@
 import math
 
 import pytest
-import wandb
+import tracklab
 
 
 @pytest.mark.parametrize("summary_type", [None, "copy"])
 def test_default_summary_type_is_last(wandb_backend_spy, summary_type):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("*", summary=summary_type)
         run.log(dict(mystep=1, val=2))
         run.log(dict(mystep=2, val=8))
@@ -22,7 +22,7 @@ def test_default_summary_type_is_last(wandb_backend_spy, summary_type):
 
 
 def test_summary_type_none(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("*", summary="copy")
         run.define_metric("val", summary="none")
         run.log(dict(val=1, other=1))
@@ -36,7 +36,7 @@ def test_summary_type_none(wandb_backend_spy):
 
 
 def test_metric_glob(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("*", step_metric="mystep")
         run.log(dict(mystep=1, val=2))
 
@@ -47,7 +47,7 @@ def test_metric_glob(wandb_backend_spy):
 
 
 def test_metric_nosummary(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("val")
         run.log(dict(val2=4))
         run.log(dict(val2=1))
@@ -58,7 +58,7 @@ def test_metric_nosummary(wandb_backend_spy):
 
 
 def test_metric_none(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("val2", summary="none")
         run.log(dict(val2=4))
         run.log(dict(val2=1))
@@ -69,7 +69,7 @@ def test_metric_none(wandb_backend_spy):
 
 
 def test_metric_sum_none(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("val")
         run.log(dict(mystep=1, val=2))
         run.log(dict(mystep=1, val=8))
@@ -94,7 +94,7 @@ def test_metric_sum_none(wandb_backend_spy):
     ],
 )
 def test_metric_summary(summary, expected):
-    with wandb.init(mode="offline") as run:
+    with tracklab.init(mode="offline") as run:
         run.define_metric("val", summary=summary)
         run.log({"val": 1})
         run.log({"val": 8})
@@ -112,7 +112,7 @@ def test_metric_summary(summary, expected):
     ],
 )
 def test_metric_summary_string_type(summary, expected):
-    with wandb.init(mode="offline") as run:
+    with tracklab.init(mode="offline") as run:
         run.define_metric("val", summary=summary)
         run.log({"val": 1})
         run.log({"val": "oops a string"})
@@ -131,7 +131,7 @@ def _gen_metric_sync_step(run):
 
 
 def test_metric_no_sync_step(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric(
             "val",
             summary="min",
@@ -157,7 +157,7 @@ def test_metric_no_sync_step(wandb_backend_spy):
 
 
 def test_metric_sync_step(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("val", summary="min", step_metric="mystep", step_sync=True)
         _gen_metric_sync_step(run)
 
@@ -180,8 +180,8 @@ def test_metric_sync_step(wandb_backend_spy):
 
 
 def test_metric_mult(wandb_backend_spy):
-    with wandb.init(
-        settings=wandb.Settings(x_server_side_expand_glob_metrics=False),
+    with tracklab.init(
+        settings=tracklab.Settings(x_server_side_expand_glob_metrics=False),
     ) as run:
         run.define_metric("mystep", hidden=True)
         run.define_metric("*", step_metric="mystep")
@@ -193,8 +193,8 @@ def test_metric_mult(wandb_backend_spy):
 
 
 def test_metric_goal(wandb_backend_spy):
-    with wandb.init(
-        settings=wandb.Settings(x_server_side_expand_glob_metrics=False),
+    with tracklab.init(
+        settings=tracklab.Settings(x_server_side_expand_glob_metrics=False),
     ) as run:
         run.define_metric("mystep", hidden=True)
         run.define_metric("*", step_metric="mystep", goal="maximize")
@@ -206,7 +206,7 @@ def test_metric_goal(wandb_backend_spy):
 
 
 def test_metric_nan_mean(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("val", summary="mean")
         run.log(dict(mystep=1, val=2))
         run.log(dict(mystep=1, val=float("nan")))
@@ -218,7 +218,7 @@ def test_metric_nan_mean(wandb_backend_spy):
 
 
 def test_metric_nan_min_norm(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("val", summary="min")
         run.log(dict(mystep=1, val=float("nan")))
 
@@ -228,7 +228,7 @@ def test_metric_nan_min_norm(wandb_backend_spy):
 
 
 def test_metric_nan_min_more(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("val", summary="min")
         run.log(dict(mystep=1, val=float("nan")))
         run.log(dict(mystep=1, val=4))
@@ -239,7 +239,7 @@ def test_metric_nan_min_more(wandb_backend_spy):
 
 
 def test_metric_nested_default(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(dict(this=dict(that=3)))
         run.log(dict(this=dict(that=2)))
         run.log(dict(this=dict(that=4)))
@@ -250,7 +250,7 @@ def test_metric_nested_default(wandb_backend_spy):
 
 
 def test_metric_nested_copy(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("this.that", summary="copy")
         run.log(dict(this=dict(that=3)))
         run.log(dict(this=dict(that=2)))
@@ -262,7 +262,7 @@ def test_metric_nested_copy(wandb_backend_spy):
 
 
 def test_metric_nested_min(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("this.that", summary="min")
         run.log(dict(this=dict(that=3)))
         run.log(dict(this=dict(that=2)))
@@ -274,7 +274,7 @@ def test_metric_nested_min(wandb_backend_spy):
 
 
 def test_metric_nested_mult(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("this.that", summary="min,max")
         run.log(dict(this=dict(that=3)))
         run.log(dict(this=dict(that=2)))
@@ -291,7 +291,7 @@ def test_metric_nested_mult(wandb_backend_spy):
 
 def test_metric_dotted(wandb_backend_spy):
     """Escape dots in metric definitions."""
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("test\\this\\.that", summary="min")
         run.log({"test\\this.that": 3})
         run.log({"test\\this.that": 2})
@@ -307,7 +307,7 @@ def test_metric_dotted(wandb_backend_spy):
 
 
 def test_metric_nested_glob(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.define_metric("*", summary="min,max")
         run.log(dict(this=dict(that=3)))
         run.log(dict(this=dict(that=2)))
@@ -320,8 +320,8 @@ def test_metric_nested_glob(wandb_backend_spy):
 
 @pytest.mark.parametrize("name", ["m", "*"])
 def test_metric_overwrite_false(wandb_backend_spy, name):
-    with wandb.init(
-        settings=wandb.Settings(x_server_side_expand_glob_metrics=False),
+    with tracklab.init(
+        settings=tracklab.Settings(x_server_side_expand_glob_metrics=False),
     ) as run:
         run.define_metric(name, summary="min")
         run.define_metric(name, summary="max", overwrite=False)
@@ -336,8 +336,8 @@ def test_metric_overwrite_false(wandb_backend_spy, name):
 
 @pytest.mark.parametrize("name", ["m", "*"])
 def test_metric_overwrite_true(wandb_backend_spy, name):
-    with wandb.init(
-        settings=wandb.Settings(x_server_side_expand_glob_metrics=False),
+    with tracklab.init(
+        settings=tracklab.Settings(x_server_side_expand_glob_metrics=False),
     ) as run:
         run.define_metric(name, summary="min")
         run.define_metric(name, summary="max", overwrite=True)
@@ -417,8 +417,8 @@ def test_metric_expand_glob(
         ),
     )
 
-    with wandb.init(
-        settings=wandb.Settings(
+    with tracklab.init(
+        settings=tracklab.Settings(
             x_server_side_expand_glob_metrics=enable_expand_glob_metrics,
         )
     ) as run:

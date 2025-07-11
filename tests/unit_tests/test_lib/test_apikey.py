@@ -3,8 +3,8 @@ import stat
 from unittest import mock
 
 import pytest
-from wandb import wandb, wandb_lib
-from wandb.sdk.lib.apikey import _api_key_prompt_str
+from wandb import tracklab, wandb_lib
+from tracklab.sdk.lib.apikey import _api_key_prompt_str
 
 
 def test_write_netrc(mock_wandb_log):
@@ -18,7 +18,7 @@ def test_write_netrc(mock_wandb_log):
 
 
 def test_write_netrc_update_existing(tmp_path):
-    settings = wandb.Settings(base_url="http://localhost")
+    settings = tracklab.Settings(base_url="http://localhost")
     old_api_key = "X" * 40
     netrc_path = str(tmp_path / "netrc")
     os.environ["NETRC"] = netrc_path
@@ -61,7 +61,7 @@ def test_netrc_permission_errors(
     os.environ["NETRC"] = netrc_path
     api_key = "X" * 40
     with mock.patch(
-        "wandb.sdk.lib.apikey.check_netrc_access",
+        "tracklab.sdk.lib.apikey.check_netrc_access",
         return_value=wandb_lib.apikey._NetrcPermissions(
             exists=True,
             read_access=read_permission,
@@ -117,7 +117,7 @@ def test_write_netrc_permission_oserror(tmp_path, mock_wandb_log):
 
 def test_read_apikey(tmp_path, monkeypatch):
     monkeypatch.setenv("NETRC", str(tmp_path / "netrc"))
-    settings = wandb.Settings(base_url="http://localhost")
+    settings = tracklab.Settings(base_url="http://localhost")
     netrc_path = str(tmp_path / "netrc")
     with open(netrc_path, "w") as f:
         f.write("machine localhost\n  login random-user\n  password " + "X" * 40)
@@ -129,11 +129,11 @@ def test_read_apikey(tmp_path, monkeypatch):
 
 def test_read_apikey_no_netrc_access(tmp_path, monkeypatch, mock_wandb_log):
     monkeypatch.setenv("NETRC", str(tmp_path / "netrc"))
-    settings = wandb.Settings(base_url="http://localhost")
+    settings = tracklab.Settings(base_url="http://localhost")
     netrc_path = str(tmp_path / "netrc")
 
     with mock.patch(
-        "wandb.sdk.lib.apikey.check_netrc_access",
+        "tracklab.sdk.lib.apikey.check_netrc_access",
         return_value=wandb_lib.apikey._NetrcPermissions(
             exists=True,
             read_access=False,

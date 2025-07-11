@@ -3,10 +3,10 @@ import os
 from unittest import mock
 
 import pytest
-import wandb
+import tracklab
 from click.testing import CliRunner
-from wandb.cli import cli
-from wandb.sdk.lib.apikey import get_netrc_file_path
+from tracklab.cli import cli
+from tracklab.sdk.lib.apikey import get_netrc_file_path
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def empty_netrc(monkeypatch):
     class FakeNet:
         @property
         def hosts(self):
-            return {"api.wandb.ai": None}
+            return {"api.tracklab.ai": None}
 
     monkeypatch.setattr(netrc, "netrc", lambda *args: FakeNet())
 
@@ -22,7 +22,7 @@ def empty_netrc(monkeypatch):
 @pytest.mark.xfail(reason="This test is flakey on CI")
 def test_init_reinit(runner, empty_netrc, user):
     with runner.isolated_filesystem(), mock.patch(
-        "wandb.sdk.lib.apikey.len", return_value=40
+        "tracklab.sdk.lib.apikey.len", return_value=40
     ):
         result = runner.invoke(cli.login, [user])
         result = runner.invoke(cli.init, input="y\n\n\n")
@@ -38,7 +38,7 @@ def test_init_reinit(runner, empty_netrc, user):
 @pytest.mark.xfail(reason="This test is flakey on CI")
 def test_init_add_login(runner, empty_netrc, user):
     with runner.isolated_filesystem(), mock.patch(
-        "wandb.sdk.lib.apikey.len", return_value=40
+        "tracklab.sdk.lib.apikey.len", return_value=40
     ):
         with open("netrc", "w") as f:
             f.write("previous config")
@@ -71,7 +71,7 @@ def test_pull(runner, user):
     with runner.isolated_filesystem():
         project_name = "test_pull"
         file_name = "weights.h5"
-        with wandb.init(project=project_name) as run:
+        with tracklab.init(project=project_name) as run:
             with open(file_name, "w") as f:
                 f.write("WEIGHTS")
             run.save(file_name)
@@ -110,7 +110,7 @@ def test_sync_tensorboard(
 ):
     with runner.isolated_filesystem():
         project_name = "test_sync_tensorboard"
-        run = wandb.init(project=project_name)
+        run = tracklab.init(project=project_name)
         run.finish()
 
         copy_asset(tb_file_name)
@@ -140,7 +140,7 @@ def test_sync_wandb_run(runner, wandb_backend_spy, user, copy_asset):
     # (as we used to use a mock backend)
     # todo: create a new test asset that will contain an artifact
     with runner.isolated_filesystem(), mock.patch(
-        "wandb.sdk.artifacts.artifact_saver.ArtifactSaver.save", return_value=None
+        "tracklab.sdk.artifacts.artifact_saver.ArtifactSaver.save", return_value=None
     ):
         copy_asset("wandb")
 
@@ -159,7 +159,7 @@ def test_sync_wandb_run(runner, wandb_backend_spy, user, copy_asset):
 
 def test_sync_wandb_run_and_tensorboard(runner, wandb_backend_spy, user, copy_asset):
     with runner.isolated_filesystem(), mock.patch(
-        "wandb.sdk.artifacts.artifact_saver.ArtifactSaver.save", return_value=None
+        "tracklab.sdk.artifacts.artifact_saver.ArtifactSaver.save", return_value=None
     ):
         run_dir = os.path.join("wandb", "offline-run-20210216_154407-g9dvvkua")
         copy_asset("wandb")
@@ -190,7 +190,7 @@ def test_cli_offline(user, runner):
         result = runner.invoke(cli.offline)
         assert result.exit_code == 0
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             assert run.settings._offline
             assert run.settings.mode == "offline"
 
@@ -205,7 +205,7 @@ def test_login_key_arg(runner):
 
 
 def test_login_key_prompt(monkeypatch):
-    monkeypatch.setattr(wandb.sdk.lib.apikey, "isatty", lambda _: True)
+    monkeypatch.setattr(tracklab.sdk.lib.apikey, "isatty", lambda _: True)
     monkeypatch.delenv("WANDB_API_KEY", raising=False)
     runner = CliRunner()
 

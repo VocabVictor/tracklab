@@ -5,10 +5,10 @@ import kfp
 import kfp.dsl as dsl
 from kfp import components
 from kubernetes.client.models import V1EnvVar
-from wandb_probe import wandb_probe_package
+from wandb_probe import tracklab_probe_package
 
-import wandb
-from wandb.integration.kfp import wandb_log
+import tracklab
+from tracklab.integration.kfp import tracklab_log
 
 
 def add_wandb_env_variables(op):
@@ -127,7 +127,7 @@ def train_model(
             loss.backward()
             optimizer.step()
             if batch_idx % log_interval == 0:
-                wandb.log(
+                tracklab.log(
                     {"epoch": epoch, "step": batch_idx * len(data), "loss": loss.item()}
                 )
                 if dry_run:
@@ -150,7 +150,7 @@ def train_model(
                 correct += pred.eq(target.view_as(pred)).sum().item()
 
         test_loss /= len(test_loader.dataset)
-        wandb.log(
+        tracklab.log(
             {"test_loss": test_loss, "accuracy": correct / len(test_loader.dataset)}
         )
 

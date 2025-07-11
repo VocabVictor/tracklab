@@ -4,10 +4,10 @@ import json
 import os
 
 import pytest
-import wandb
-from wandb.proto import wandb_internal_pb2  # type: ignore
+import tracklab
+from tracklab.proto import tracklab_internal_pb2  # type: ignore
 
-datastore = wandb.wandb_sdk.internal.datastore
+datastore = tracklab.wandb_sdk.internal.datastore
 
 
 FNAME = "test.dat"
@@ -40,9 +40,9 @@ def check(
 
 @pytest.fixture()
 def force_internal_process():
-    wandb._IS_INTERNAL_PROCESS = True
+    tracklab._IS_INTERNAL_PROCESS = True
     yield
-    wandb._IS_INTERNAL_PROCESS = False
+    tracklab._IS_INTERNAL_PROCESS = False
 
 
 @pytest.fixture()

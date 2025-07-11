@@ -1,0 +1,1966 @@
+TrackLab Landfill 测试结果 - Fri Jul 11 16:46:06 CST 2025
+===================================
+[1] ❌ landfill/functional_tests/artifacts/link-artifact.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/link-artifact.py", line 8, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[2] ❌ landfill/functional_tests/artifacts/link-model-outside-run.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/link-model-outside-run.py", line 5, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[3] ❌ landfill/functional_tests/artifacts/link-model.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/link-model.py", line 5, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[4] ❌ landfill/functional_tests/artifacts/log-artifact.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/log-artifact.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[5] ❌ landfill/functional_tests/artifacts/log-image-artifact-path.py (退出码: 1, 1s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/log-image-artifact-path.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[6] ❌ landfill/functional_tests/artifacts/log-model.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/log-model.py", line 5, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[7] ❌ landfill/functional_tests/artifacts/log-unicode-artifact.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/log-unicode-artifact.py", line 1, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[8] ❌ landfill/functional_tests/artifacts/public-link-model.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/public-link-model.py", line 5, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[9] ❌ landfill/functional_tests/artifacts/public_collections.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/public_collections.py", line 1, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[10] ❌ landfill/functional_tests/artifacts/use-and-link-model.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/use-and-link-model.py", line 5, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[11] ❌ landfill/functional_tests/artifacts/use-model-error.py (退出码: 1, 1s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/use-model-error.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[12] ❌ landfill/functional_tests/artifacts/use-model-outside-run-error.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/use-model-outside-run-error.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[13] ❌ landfill/functional_tests/artifacts/use-model.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/artifacts/use-model.py", line 5, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[14] ❌ landfill/functional_tests/code_save/code_save.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/code_save/code_save.py", line 7, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[15] ✅ landfill/functional_tests/code_save/log_code/fake_lib.py (0s)
+[16] ❌ landfill/functional_tests/code_save/log_code/log_code.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/code_save/log_code/log_code.py", line 8, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[17] ✅ landfill/functional_tests/code_save/log_code/subdir/another_lib.py (0s)
+[18] ❌ landfill/functional_tests/cohere/t1_cohere_generation.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/cohere/t1_cohere_generation.py", line 1, in <module>
+          import cohere
+      ModuleNotFoundError: No module named 'cohere'
+
+[19] ❌ landfill/functional_tests/cohere/t2_cohere_chat.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/cohere/t2_cohere_chat.py", line 1, in <module>
+          import cohere
+      ModuleNotFoundError: No module named 'cohere'
+
+[20] ❌ landfill/functional_tests/cohere/t3_cohere_chat_with_history.py (退出码: 1, 1s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/cohere/t3_cohere_chat_with_history.py", line 1, in <module>
+          import cohere
+      ModuleNotFoundError: No module named 'cohere'
+
+[21] ❌ landfill/functional_tests/cohere/t4_cohere_classification.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/cohere/t4_cohere_classification.py", line 1, in <module>
+          import cohere
+      ModuleNotFoundError: No module named 'cohere'
+
+[22] ❌ landfill/functional_tests/cohere/t5_cohere_summarization.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/cohere/t5_cohere_summarization.py", line 1, in <module>
+          import cohere
+      ModuleNotFoundError: No module named 'cohere'
+
+[23] ❌ landfill/functional_tests/cohere/t6_cohere_rerank.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/cohere/t6_cohere_rerank.py", line 1, in <module>
+          import cohere
+      ModuleNotFoundError: No module named 'cohere'
+
+[24] ❌ landfill/functional_tests/core/t1_without_finish.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t1_without_finish.py", line 23, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[25] ❌ landfill/functional_tests/core/t2_with_finish.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t2_with_finish.py", line 20, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[26] ❌ landfill/functional_tests/core/t3_script_fail.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t3_script_fail.py", line 21, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[27] ❌ landfill/functional_tests/core/t4_multiple_init.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t4_multiple_init.py", line 21, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[28] ❌ landfill/functional_tests/core/t5_log_media.py (退出码: 1, 1s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t5_log_media.py", line 28, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[29] ❌ landfill/functional_tests/core/t6_log_images.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t6_log_images.py", line 8, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[30] ❌ landfill/functional_tests/core/t7_config_numpy_keys.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t7_config_numpy_keys.py", line 18, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[31] ❌ landfill/functional_tests/core/t8_init_fail.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/core/t8_init_fail.py", line 22, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[32] ❌ landfill/functional_tests/diffusers/t1_sdxl_generation.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/diffusers/t1_sdxl_generation.py", line 2, in <module>
+          from diffusers import StableDiffusionXLImg2ImgPipeline, StableDiffusionXLPipeline
+      ModuleNotFoundError: No module named 'diffusers'
+
+[33] ❌ landfill/functional_tests/diffusers/t2_pixart_alpha_generation.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/diffusers/t2_pixart_alpha_generation.py", line 2, in <module>
+          from diffusers import PixArtAlphaPipeline
+      ModuleNotFoundError: No module named 'diffusers'
+
+[34] ❌ landfill/functional_tests/diffusers/t3_sd_batched_generation.py (退出码: 1, 1s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/diffusers/t3_sd_batched_generation.py", line 2, in <module>
+          from diffusers import DiffusionPipeline
+      ModuleNotFoundError: No module named 'diffusers'
+
+[35] ❌ landfill/functional_tests/diffusers/t4_audioldm2_generation.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/diffusers/t4_audioldm2_generation.py", line 2, in <module>
+          from diffusers import AudioLDM2Pipeline
+      ModuleNotFoundError: No module named 'diffusers'
+
+[36] ❌ landfill/functional_tests/diffusers/t5_animatediff_generation.py (退出码: 1, 2s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/diffusers/t5_animatediff_generation.py", line 2, in <module>
+          from diffusers import AnimateDiffPipeline, DDIMScheduler, MotionAdapter
+      ModuleNotFoundError: No module named 'diffusers'
+
+[37] ❌ landfill/functional_tests/fastai/t1_v1.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/fastai/t1_v1.py", line 1, in <module>
+          from fastai.vision import *  # noqa: F403
+      ModuleNotFoundError: No module named 'fastai'
+
+[38] ❌ landfill/functional_tests/flow/flow_basic.py (退出码: 1, 1s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/flow/flow_basic.py", line 1, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[39] ❌ landfill/functional_tests/flow/flow_basic_clear_env.py (退出码: 1, 0s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/flow/flow_basic_clear_env.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[40] ❌ landfill/functional_tests/hf_pipelines/t1_text_classification.py (退出码: 1, 5s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t1_text_classification.py", line 3, in <module>
+          from tracklab.integration.huggingface import autolog as hf_autolog
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[41] ❌ landfill/functional_tests/hf_pipelines/t2_question_answering.py (退出码: 1, 4s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t2_question_answering.py", line 3, in <module>
+          from tracklab.integration.huggingface import autolog as hf_autolog
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[42] ❌ landfill/functional_tests/hf_pipelines/t3_summarization.py (退出码: 1, 5s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t3_summarization.py", line 3, in <module>
+          from tracklab.integration.huggingface import autolog as hf_autolog
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[43] ❌ landfill/functional_tests/hf_pipelines/t4_translation.py (退出码: 1, 5s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t4_translation.py", line 3, in <module>
+          from tracklab.integration.huggingface import autolog as hf_autolog
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[44] ❌ landfill/functional_tests/hf_pipelines/t5_text2text_generation.py (退出码: 1, 22s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t5_text2text_generation.py", line 1, in <module>
+          from transformers import pipeline
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/transformers/__init__.py", line 27, in <module>
+          from . import dependency_versions_check
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/transformers/dependency_versions_check.py", line 16, in <module>
+          from .utils.versions import require_version, require_version_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/transformers/utils/__init__.py", line 24, in <module>
+          from .args_doc import (
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/transformers/utils/args_doc.py", line 22, in <module>
+          import regex as re
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/regex/__init__.py", line 1, in <module>
+          from .regex import *
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/regex/regex.py", line 417, in <module>
+          import regex._regex_core as _regex_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/regex/_regex_core.py", line 21, in <module>
+          import regex._regex as _regex
+      ModuleNotFoundError: No module named 'regex._regex'
+
+[45] ❌ landfill/functional_tests/hf_pipelines/t6_text_generation.py (退出码: 1, 15s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t6_text_generation.py", line 1, in <module>
+          from transformers import pipeline
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/__init__.py", line 27, in <module>
+          from . import dependency_versions_check
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/dependency_versions_check.py", line 16, in <module>
+          from .utils.versions import require_version, require_version_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/utils/__init__.py", line 24, in <module>
+          from .args_doc import (
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/utils/args_doc.py", line 22, in <module>
+          import regex as re
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/__init__.py", line 1, in <module>
+          from .regex import *
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/regex.py", line 417, in <module>
+          import regex._regex_core as _regex_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/_regex_core.py", line 21, in <module>
+          import regex._regex as _regex
+      ModuleNotFoundError: No module named 'regex._regex'
+
+[46] ❌ landfill/functional_tests/hf_pipelines/t7_conversational.py (退出码: 1, 17s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t7_conversational.py", line 1, in <module>
+          from transformers import Conversation, pipeline
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/__init__.py", line 27, in <module>
+          from . import dependency_versions_check
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/dependency_versions_check.py", line 16, in <module>
+          from .utils.versions import require_version, require_version_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/utils/__init__.py", line 24, in <module>
+          from .args_doc import (
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/utils/args_doc.py", line 22, in <module>
+          import regex as re
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/__init__.py", line 1, in <module>
+          from .regex import *
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/regex.py", line 417, in <module>
+          import regex._regex_core as _regex_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/_regex_core.py", line 21, in <module>
+          import regex._regex as _regex
+      ModuleNotFoundError: No module named 'regex._regex'
+
+[47] ❌ landfill/functional_tests/hf_pipelines/t8_custom_table_name_and_latest_id.py (退出码: 1, 15s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/hf_pipelines/t8_custom_table_name_and_latest_id.py", line 3, in <module>
+          from transformers import pipeline
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/__init__.py", line 27, in <module>
+          from . import dependency_versions_check
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/dependency_versions_check.py", line 16, in <module>
+          from .utils.versions import require_version, require_version_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/utils/__init__.py", line 24, in <module>
+          from .args_doc import (
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/transformers/utils/args_doc.py", line 22, in <module>
+          import regex as re
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/__init__.py", line 1, in <module>
+          from .regex import *
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/regex.py", line 417, in <module>
+          import regex._regex_core as _regex_core
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/regex/_regex_core.py", line 21, in <module>
+          import regex._regex as _regex
+      ModuleNotFoundError: No module named 'regex._regex'
+
+[48] ❌ landfill/functional_tests/kfp/kfp-pipeline-helper.py (退出码: 1, 7s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/kfp/kfp-pipeline-helper.py", line 5, in <module>
+          import kfp
+      ModuleNotFoundError: No module named 'kfp'
+
+[49] ❌ landfill/functional_tests/kfp/kfp-pipeline-pytorch.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/kfp/kfp-pipeline-pytorch.py", line 4, in <module>
+          import kfp
+      ModuleNotFoundError: No module named 'kfp'
+
+[50] ❌ landfill/functional_tests/kfp/kfp-pipeline-simple.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/kfp/kfp-pipeline-simple.py", line 4, in <module>
+          import kfp
+      ModuleNotFoundError: No module named 'kfp'
+
+[51] ❌ landfill/functional_tests/kfp/kfp-pipeline-sklearn.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/kfp/kfp-pipeline-sklearn.py", line 5, in <module>
+          import kfp
+      ModuleNotFoundError: No module named 'kfp'
+
+[52] ✅ landfill/functional_tests/kfp/wandb_probe.py (6s)
+[53] ❌ landfill/functional_tests/langchain/t1_v1.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/langchain/t1_v1.py", line 30, in <module>
+          main()
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/langchain/t1_v1.py", line 23, in main
+          from tracklab.integration.langchain import WandbTracer
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[54] ❌ landfill/functional_tests/langchain/t2_v1.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/langchain/t2_v1.py", line 1, in <module>
+          from langchain.agents import AgentType, initialize_agent, load_tools
+      ModuleNotFoundError: No module named 'langchain'
+
+[55] ❌ landfill/functional_tests/lightgbm/t1_regression.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/lightgbm/t1_regression.py", line 4, in <module>
+          import lightgbm as lgb
+      ModuleNotFoundError: No module named 'lightgbm'
+
+[56] ❌ landfill/functional_tests/lightgbm/t2_regression.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/lightgbm/t2_regression.py", line 4, in <module>
+          import lightgbm as lgb
+      ModuleNotFoundError: No module named 'lightgbm'
+
+[57] ❌ landfill/functional_tests/lightning_fabric/pl_base.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/lightning_fabric/pl_base.py", line 3, in <module>
+          import torch
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/torch/__init__.py", line 994, in <module>
+          raise ImportError(
+      ImportError: Failed to load PyTorch C extensions:
+          It appears that PyTorch has loaded the `torch/_C` folder
+          of the PyTorch repository rather than the C extensions which
+          are expected in the `torch._C` namespace. This can occur when
+          using the `install` workflow. e.g.
+              $ python setup.py install && python -c "import torch"
+      
+          This error can generally be solved using the `develop` workflow
+              $ python setup.py develop && python -c "import torch"  # This should succeed
+          or by running Python from a different directory.
+
+[58] ❌ landfill/functional_tests/lightning_fabric/test_fabric_logging.py (退出码: 1, 7s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/lightning_fabric/test_fabric_logging.py", line 5, in <module>
+          import lightning as l
+      ModuleNotFoundError: No module named 'lightning'
+
+[59] ❌ landfill/functional_tests/lightning_fabric/test_lightning_trainer_logging.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/lightning_fabric/test_lightning_trainer_logging.py", line 4, in <module>
+          import lightning as pl
+      ModuleNotFoundError: No module named 'lightning'
+
+[60] ❌ landfill/functional_tests/lightning_fabric/test_logger_logging.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/numpy/_core/__init__.py", line 23, in <module>
+          from . import multiarray
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/numpy/_core/multiarray.py", line 10, in <module>
+          from . import overrides
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/numpy/_core/overrides.py", line 7, in <module>
+          from numpy._core._multiarray_umath import (
+      ModuleNotFoundError: No module named 'numpy._core._multiarray_umath'
+      
+      During handling of the above exception, another exception occurred:
+      
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/numpy/__init__.py", line 114, in <module>
+          from numpy.__config__ import show_config
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/numpy/__config__.py", line 4, in <module>
+          from numpy._core._multiarray_umath import (
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/numpy/_core/__init__.py", line 49, in <module>
+          raise ImportError(msg)
+      ImportError: 
+      
+      IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+      
+      Importing the numpy C-extensions failed. This error can happen for
+      many reasons, often due to issues with your setup or how NumPy was
+      installed.
+      
+      We have compiled some common reasons and troubleshooting tips at:
+      
+          https://numpy.org/devdocs/user/troubleshooting-importerror.html
+      
+      Please note and check the following:
+      
+        * The Python version is: Python3.10 from "/home/Master/YangKY/.mamba/envs/tracklab/bin/python"
+        * The NumPy version is: "2.2.6"
+      
+      and make sure that they are the versions you expect.
+      Please carefully study the documentation linked above for further help.
+      
+      Original error was: No module named 'numpy._core._multiarray_umath'
+      
+      
+      The above exception was the direct cause of the following exception:
+      
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/lightning_fabric/test_logger_logging.py", line 3, in <module>
+          import numpy as np
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/python3.10/site-packages/numpy/__init__.py", line 119, in <module>
+          raise ImportError(msg) from e
+      ImportError: Error importing numpy: you should not try to import numpy from
+              its source directory; please exit the numpy source tree, and relaunch
+              your python interpreter from there.
+
+[61] ❌ landfill/functional_tests/llm/t1_llm_jerome_battle.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/llm/t1_llm_jerome_battle.py", line 1, in <module>
+          import cohere
+      ModuleNotFoundError: No module named 'cohere'
+
+[62] ❌ landfill/functional_tests/login/t1_timeout.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/login/t1_timeout.py", line 6, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[63] ❌ landfill/functional_tests/login/t2_login_init.py (退出码: 1, 12s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/login/t2_login_init.py", line 7, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[64] ❌ landfill/functional_tests/login/t3_login_cloud_local_key.py (退出码: 1, 16s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/login/t3_login_cloud_local_key.py", line 6, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[65] ❌ landfill/functional_tests/mp/01-1-simple.py (退出码: 1, 9s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/01-1-simple.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[66] ❌ landfill/functional_tests/mp/01-2-simple-no-finish.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/01-2-simple-no-finish.py", line 2, in <module>
+          import torch
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/torch/__init__.py", line 994, in <module>
+          raise ImportError(
+      ImportError: Failed to load PyTorch C extensions:
+          It appears that PyTorch has loaded the `torch/_C` folder
+          of the PyTorch repository rather than the C extensions which
+          are expected in the `torch._C` namespace. This can occur when
+          using the `install` workflow. e.g.
+              $ python setup.py install && python -c "import torch"
+      
+          This error can generally be solved using the `develop` workflow
+              $ python setup.py develop && python -c "import torch"  # This should succeed
+          or by running Python from a different directory.
+
+[67] ❌ landfill/functional_tests/mp/02-sequential.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/02-sequential.py", line 4, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[68] ❌ landfill/functional_tests/mp/03-parent-child.py (退出码: 1, 13s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/03-parent-child.py", line 9, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[69] ❌ landfill/functional_tests/mp/04-pool.py (退出码: 1, 12s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/04-pool.py", line 8, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[70] ❌ landfill/functional_tests/mp/05-pool-nofinish.py (退出码: 1, 14s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/05-pool-nofinish.py", line 8, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[71] ❌ landfill/functional_tests/mp/07-attach.py (退出码: 1, 13s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/07-attach.py", line 8, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[72] ❌ landfill/functional_tests/mp/08-multiple.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/08-multiple.py", line 4, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[73] ❌ landfill/functional_tests/mp/09-simple-nofinish.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/09-simple-nofinish.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[74] ❌ landfill/functional_tests/mp/10-metric.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/10-metric.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[75] ❌ landfill/functional_tests/mp/11-teardown.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/11-teardown.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[76] ❌ landfill/functional_tests/mp/12-alert.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/12-alert.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[77] ❌ landfill/functional_tests/mp/14-artifact-log.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/14-artifact-log.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[78] ❌ landfill/functional_tests/mp/15-simple-noml.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/15-simple-noml.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[79] ❌ landfill/functional_tests/mp/16-offline.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/16-offline.py", line 4, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[80] ❌ landfill/functional_tests/mp/17-service-crash.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/17-service-crash.py", line 3, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[81] ❌ landfill/functional_tests/mp/18-multiple-crash.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/18-multiple-crash.py", line 22, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[82] ❌ landfill/functional_tests/mp/19-1-log-image-sequence.py (退出码: 1, 9s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/__init__.py", line 23, in <module>
+          from . import multiarray
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/multiarray.py", line 10, in <module>
+          from . import overrides
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/overrides.py", line 7, in <module>
+          from numpy._core._multiarray_umath import (
+      ModuleNotFoundError: No module named 'numpy._core._multiarray_umath'
+      
+      During handling of the above exception, another exception occurred:
+      
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/__init__.py", line 114, in <module>
+          from numpy.__config__ import show_config
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/__config__.py", line 4, in <module>
+          from numpy._core._multiarray_umath import (
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/__init__.py", line 49, in <module>
+          raise ImportError(msg)
+      ImportError: 
+      
+      IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+      
+      Importing the numpy C-extensions failed. This error can happen for
+      many reasons, often due to issues with your setup or how NumPy was
+      installed.
+      
+      We have compiled some common reasons and troubleshooting tips at:
+      
+          https://numpy.org/devdocs/user/troubleshooting-importerror.html
+      
+      Please note and check the following:
+      
+        * The Python version is: Python3.10 from "/home/Master/YangKY/.mamba/envs/tracklab/bin/python"
+        * The NumPy version is: "2.2.6"
+      
+      and make sure that they are the versions you expect.
+      Please carefully study the documentation linked above for further help.
+      
+      Original error was: No module named 'numpy._core._multiarray_umath'
+      
+      
+      The above exception was the direct cause of the following exception:
+      
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/19-1-log-image-sequence.py", line 10, in <module>
+          import numpy as np
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/__init__.py", line 119, in <module>
+          raise ImportError(msg) from e
+      ImportError: Error importing numpy: you should not try to import numpy from
+              its source directory; please exit the numpy source tree, and relaunch
+              your python interpreter from there.
+
+[83] ❌ landfill/functional_tests/mp/19-2-log-image-sequence-attach.py (退出码: 1, 9s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/__init__.py", line 23, in <module>
+          from . import multiarray
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/multiarray.py", line 10, in <module>
+          from . import overrides
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/overrides.py", line 7, in <module>
+          from numpy._core._multiarray_umath import (
+      ModuleNotFoundError: No module named 'numpy._core._multiarray_umath'
+      
+      During handling of the above exception, another exception occurred:
+      
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/__init__.py", line 114, in <module>
+          from numpy.__config__ import show_config
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/__config__.py", line 4, in <module>
+          from numpy._core._multiarray_umath import (
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/_core/__init__.py", line 49, in <module>
+          raise ImportError(msg)
+      ImportError: 
+      
+      IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+      
+      Importing the numpy C-extensions failed. This error can happen for
+      many reasons, often due to issues with your setup or how NumPy was
+      installed.
+      
+      We have compiled some common reasons and troubleshooting tips at:
+      
+          https://numpy.org/devdocs/user/troubleshooting-importerror.html
+      
+      Please note and check the following:
+      
+        * The Python version is: Python3.10 from "/home/Master/YangKY/.mamba/envs/tracklab/bin/python"
+        * The NumPy version is: "2.2.6"
+      
+      and make sure that they are the versions you expect.
+      Please carefully study the documentation linked above for further help.
+      
+      Original error was: No module named 'numpy._core._multiarray_umath'
+      
+      
+      The above exception was the direct cause of the following exception:
+      
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/19-2-log-image-sequence-attach.py", line 4, in <module>
+          import numpy as np
+        File "/home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/numpy/__init__.py", line 119, in <module>
+          raise ImportError(msg) from e
+      ImportError: Error importing numpy: you should not try to import numpy from
+              its source directory; please exit the numpy source tree, and relaunch
+              your python interpreter from there.
+
+[84] ❌ landfill/functional_tests/mp/20-1-process-pool-executor.py (退出码: 1, 14s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/20-1-process-pool-executor.py", line 11, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[85] ❌ landfill/functional_tests/mp/20-2-thread-pool-executor.py (退出码: 1, 13s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/20-2-thread-pool-executor.py", line 12, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[86] ❌ landfill/functional_tests/mp/21-1-joblib-parallel.py (退出码: 1, 7s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/21-1-joblib-parallel.py", line 6, in <module>
+          from joblib import Parallel, delayed
+      ModuleNotFoundError: No module named 'joblib'
+
+[87] ❌ landfill/functional_tests/mp/21-2-joblib-parallel-share-run.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/21-2-joblib-parallel-share-run.py", line 6, in <module>
+          from joblib import Parallel, delayed
+      ModuleNotFoundError: No module named 'joblib'
+
+[88] ❌ landfill/functional_tests/mp/22-1-multiple-finish-single-proc.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/mp/22-1-multiple-finish-single-proc.py", line 1, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[89] ❌ landfill/functional_tests/offline/t1_no_network.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/offline/t1_no_network.py", line 17, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[90] ❌ landfill/functional_tests/offline/t2_multiprocess.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/offline/t2_multiprocess.py", line 21, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[91] ❌ landfill/functional_tests/openai/t1_openai_edit.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t1_openai_edit.py", line 1, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[92] ❌ landfill/functional_tests/openai/t2_openai_completion.py (退出码: 1, 7s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t2_openai_completion.py", line 1, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[93] ❌ landfill/functional_tests/openai/t3_openai_chat_completion.py (退出码: 1, 6s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t3_openai_chat_completion.py", line 1, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[94] ❌ landfill/functional_tests/openai/t4_openai_edit_weird_autolog_api_usage.py (退出码: 1, 7s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t4_openai_edit_weird_autolog_api_usage.py", line 1, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[95] ❌ landfill/functional_tests/openai/t5_openai_edit_weird_autolog_api_usage_2.py (退出码: 1, 5s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t5_openai_edit_weird_autolog_api_usage_2.py", line 1, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[96] ❌ landfill/functional_tests/openai/t6_openai_edit_async.py (退出码: 1, 11s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t6_openai_edit_async.py", line 3, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[97] ❌ landfill/functional_tests/openai/t7_openai_completion_async.py (退出码: 1, 9s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t7_openai_completion_async.py", line 3, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[98] ❌ landfill/functional_tests/openai/t8_openai_chat_completion_async.py (退出码: 1, 10s)
+    错误输出:
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/openai/t8_openai_chat_completion_async.py", line 3, in <module>
+          import openai
+      ModuleNotFoundError: No module named 'openai'
+
+[99] ❌ landfill/functional_tests/perf/console_output.py (退出码: 1, 14s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/perf/console_output.py", line 7, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[100] ❌ landfill/functional_tests/perf/log_data.py (退出码: 1, 15s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/perf/log_data.py", line 6, in <module>
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+
+[101] ❌ landfill/functional_tests/perf/t1_basic.py (退出码: 1, 15s)
+    错误输出:
+      /home/Master/YangKY/.mamba/envs/tracklab/lib/jvm/languages/python/lib/python3.10/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'GraalVM JSSE'. See: https://github.com/urllib3/urllib3/issues/3020
+        warnings.warn(
+      Traceback (most recent call last):
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/perf/t1_basic.py", line 17, in <module>
+          main()
+        File "/home/Master/YangKY/.code/work/tracklab/landfill/functional_tests/perf/t1_basic.py", line 7, in main
+          import tracklab
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/__init__.py", line 22, in <module>
+          from tracklab.sdk.lib import wb_logging as _wb_logging
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/__init__.py", line 24, in <module>
+          from . import wandb_helper as helper
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/wandb_helper.py", line 6, in <module>
+          from .lib import config_util
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/__init__.py", line 2, in <module>
+          from .disabled import RunDisabled, SummaryDisabled
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/disabled.py", line 4, in <module>
+          from tracklab.sdk.lib import deprecate
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/deprecate.py", line 7, in <module>
+          from tracklab.sdk.lib import telemetry
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/sdk/lib/telemetry.py", line 7, in <module>
+          from tracklab.proto.wandb_telemetry_pb2 import Imports as TelemetryImports
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/wandb_telemetry_pb2.py", line 12, in <module>
+          from tracklab.proto.v6.wandb_telemetry_pb2 import *
+        File "/home/Master/YangKY/.code/work/tracklab/tracklab/proto/v6/wandb_telemetry_pb2.py", line 25, in <module>
+          from tracklab.proto import tracklab_base_pb2 as wandb_dot_proto_dot_wandb__base__pb2
+      ImportError: cannot import name 'tracklab_base_pb2' from 'tracklab.proto' (/home/Master/YangKY/.code/work/tracklab/tracklab/proto/__init__.py)
+

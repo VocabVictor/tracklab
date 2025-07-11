@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch.runner.sagemaker_runner import launch_sagemaker_job
+from tracklab.sdk.launch.runner.sagemaker_runner import launch_sagemaker_job
 
 
 @pytest.fixture

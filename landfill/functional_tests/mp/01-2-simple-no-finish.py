@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import torch
 
-import wandb
+import tracklab
 
-run = wandb.init()
+run = tracklab.init()
 print("somedata")
 
 run.log(dict(m1=torch.tensor(1.0)))

@@ -3,7 +3,7 @@
 import io
 import sys
 
-from wandb.sdk.lib import console_capture
+from tracklab.sdk.lib import console_capture
 
 received_by_hooks = io.StringIO()
 

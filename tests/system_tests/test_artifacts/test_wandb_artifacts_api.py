@@ -4,18 +4,18 @@ import os
 import re
 
 import pytest
-import wandb
+import tracklab
 from wandb import Api
-from wandb.errors import CommError
-from wandb.sdk.artifacts.artifact import Artifact
-from wandb.sdk.lib.hashutil import md5_file_hex
+from tracklab.errors import CommError
+from tracklab.sdk.artifacts.artifact import Artifact
+from tracklab.sdk.lib.hashutil import md5_file_hex
 
 
 def test_fetching_artifact_files(user):
     project = "test"
 
-    with wandb.init(entity=user, project=project) as run:
-        artifact = wandb.Artifact("test-artifact", "test-type")
+    with tracklab.init(entity=user, project=project) as run:
+        artifact = tracklab.Artifact("test-artifact", "test-type")
         with open("boom.txt", "w") as f:
             f.write("testing")
         artifact.add_file("boom.txt", "test-name")
@@ -35,8 +35,8 @@ def test_fetching_artifact_files(user):
 
 def test_save_aliases_after_logging_artifact(user):
     project = "test"
-    run = wandb.init(entity=user, project=project)
-    artifact = wandb.Artifact("test-artifact", "test-type")
+    run = tracklab.init(entity=user, project=project)
+    artifact = tracklab.Artifact("test-artifact", "test-type")
     with open("boom.txt", "w") as f:
         f.write("testing")
     artifact.add_file("boom.txt", "test-name")
@@ -57,7 +57,7 @@ def test_save_aliases_after_logging_artifact(user):
 @pytest.fixture
 def server_supports_artifact_tags() -> bool:
     """Identifies if we're testing against an older server version that doesn't support artifact tags (e.g. in CI)."""
-    from wandb.sdk.internal import internal_api
+    from tracklab.sdk.internal import internal_api
 
     return "tags" in internal_api.Api().server_artifact_introspection()
 
@@ -114,8 +114,8 @@ def test_save_tags_after_logging_artifact(
     tags_to_delete = ["other-tag"]  # Tags to delete later on
     tags_to_add = ["added-tag"]  # Tags to add later on
 
-    with wandb.init(entity=user, project=project) as run:
-        artifact = wandb.Artifact(name=artifact_name, type=artifact_type)
+    with tracklab.init(entity=user, project=project) as run:
+        artifact = tracklab.Artifact(name=artifact_name, type=artifact_type)
         artifact.add_file(str(artifact_filepath), "test-name")
 
         # Assign tags when logging
@@ -196,8 +196,8 @@ def test_save_invalid_tags_after_logging_artifact(
 
     orig_tags = ["orig-tag", "other-tag"]  # Initial tags on the logged artifact
 
-    with wandb.init(entity=user, project=project) as run:
-        artifact = wandb.Artifact(name=artifact_name, type=artifact_type)
+    with tracklab.init(entity=user, project=project) as run:
+        artifact = tracklab.Artifact(name=artifact_name, type=artifact_type)
         artifact.add_file(str(artifact_filepath), "test-name")
 
         # Assign tags when logging
@@ -236,8 +236,8 @@ def test_log_artifact_with_invalid_tags(tmp_path, user, api, invalid_tags):
     artifact_filepath = tmp_path / "boom.txt"
     artifact_filepath.write_text("testing")
 
-    with wandb.init(entity=user, project=project) as run:
-        artifact = wandb.Artifact(name=artifact_name, type=artifact_type)
+    with tracklab.init(entity=user, project=project) as run:
+        artifact = tracklab.Artifact(name=artifact_name, type=artifact_type)
         artifact.add_file(str(artifact_filepath), "test-name")
 
         # Logging an artifact with invalid tags should fail
@@ -250,9 +250,9 @@ def test_retrieve_artifacts_by_tags(user, server_supports_artifact_tags):
     artifact_name = "test-artifact"
     artifact_type = "test-type"
 
-    with wandb.init(entity=user, project=project) as run:
+    with tracklab.init(entity=user, project=project) as run:
         for i in range(10):
-            artifact = wandb.Artifact(name=artifact_name, type=artifact_type)
+            artifact = tracklab.Artifact(name=artifact_name, type=artifact_type)
             with artifact.new_file(f"{i}.txt", "w") as f:
                 f.write("testing")
             run.log_artifact(artifact)
@@ -291,8 +291,8 @@ def test_retrieve_artifacts_by_tags(user, server_supports_artifact_tags):
 
 def test_update_aliases_on_artifact(user):
     project = "test"
-    run = wandb.init(entity=user, project=project)
-    artifact = wandb.Artifact("test-artifact", "test-type")
+    run = tracklab.init(entity=user, project=project)
+    artifact = tracklab.Artifact("test-artifact", "test-type")
     with open("boom.txt", "w") as f:
         f.write("testing")
     artifact.add_file("boom.txt", "test-name")
@@ -330,7 +330,7 @@ def test_update_aliases_on_artifact(user):
 
 def test_artifact_version(user):
     def create_test_artifact(content: str):
-        art = wandb.Artifact("test-artifact", "test-type")
+        art = tracklab.Artifact("test-artifact", "test-type")
         with open("boom.txt", "w") as f:
             f.write(content)
         art.add_file("boom.txt", "test-name")
@@ -338,7 +338,7 @@ def test_artifact_version(user):
 
     # Create an artifact sequence + portfolio (auto-created if it doesn't exist)
     project = "test"
-    run = wandb.init(project=project)
+    run = tracklab.init(project=project)
 
     art = create_test_artifact("aaaaa")
     run.log_artifact(art, aliases=["a"])
@@ -360,8 +360,8 @@ def test_artifact_version(user):
 
 
 def test_delete_collection(user):
-    with wandb.init(project="test") as run:
-        art = wandb.Artifact("test-artifact", "test-type")
+    with tracklab.init(project="test") as run:
+        art = tracklab.Artifact("test-artifact", "test-type")
         with art.new_file("test.txt", "w") as f:
             f.write("testing")
         run.log_artifact(art)
@@ -371,7 +371,7 @@ def test_delete_collection(user):
     portfolio = project.collection("test-portfolio")
     portfolio.delete()
 
-    with pytest.raises(wandb.errors.CommError):
+    with pytest.raises(tracklab.errors.CommError):
         Api().artifact(
             name=f"{project.entity}/test/test-portfolio:latest",
             type="test-type",
@@ -387,7 +387,7 @@ def test_delete_collection(user):
     sequence.delete()
 
     # Until now.
-    with pytest.raises(wandb.errors.CommError):
+    with pytest.raises(tracklab.errors.CommError):
         Api().artifact(
             name=f"{project.entity}/test/test-artifact:latest",
             type="test-type",
@@ -401,38 +401,38 @@ def test_log_with_wrong_type_entity_project(user, logged_artifact):
     draft = logged_artifact.new_draft()
     draft._type = "futz"
     with pytest.raises(ValueError, match="already exists with type 'dataset'"):
-        with wandb.init(entity=entity, project=project) as run:
+        with tracklab.init(entity=entity, project=project) as run:
             run.log_artifact(draft)
 
     draft = logged_artifact.new_draft()
     draft._source_entity = "mistaken"
     with pytest.raises(ValueError, match="owned by entity 'mistaken'"):
-        with wandb.init(entity=entity, project=project) as run:
+        with tracklab.init(entity=entity, project=project) as run:
             run.log_artifact(draft)
 
     draft = logged_artifact.new_draft()
     draft._source_project = "wrong"
     with pytest.raises(ValueError, match="exists in project 'wrong'"):
-        with wandb.init(entity=entity, project=project) as run:
+        with tracklab.init(entity=entity, project=project) as run:
             run.log_artifact(draft)
 
 
 def test_log_artifact_with_above_max_metadata_keys(user):
-    artifact = wandb.Artifact("my_artifact", type="test")
+    artifact = tracklab.Artifact("my_artifact", type="test")
     for i in range(101):
         artifact.metadata[f"key_{i}"] = f"value_{i}"
-    with wandb.init(entity=user, project="test") as run:
+    with tracklab.init(entity=user, project="test") as run:
         with pytest.raises(ValueError):
             run.log_artifact(artifact)
 
 
 def test_run_log_artifact(user):
     # Prepare data.
-    with wandb.init() as run:
+    with tracklab.init() as run:
         pass
-    run = wandb.Api().run(run.path)
+    run = tracklab.Api().run(run.path)
 
-    artifact = wandb.Artifact("my_artifact", type="test")
+    artifact = tracklab.Artifact("my_artifact", type="test")
     artifact.save()
     artifact.wait()
 
@@ -452,8 +452,8 @@ def test_artifact_enable_tracking_flag(user, api, mocker):
     artifact_name = "test-artifact"
     artifact_type = "test-type"
 
-    with wandb.init(entity=entity, project=project) as run:
-        art = wandb.Artifact(artifact_name, artifact_type)
+    with tracklab.init(entity=entity, project=project) as run:
+        art = tracklab.Artifact(artifact_name, artifact_type)
         with art.new_file("test.txt", "w") as f:
             f.write("testing")
         run.log_artifact(art)
@@ -493,13 +493,13 @@ def test_artifact_history_step(user, api):
     artifact_name = "test-artifact"
     artifact_type = "test-type"
 
-    with wandb.init(entity=entity, project=project) as run:
+    with tracklab.init(entity=entity, project=project) as run:
         for i in range(2):
-            art = wandb.Artifact(artifact_name, artifact_type)
+            art = tracklab.Artifact(artifact_name, artifact_type)
             with art.new_file("test.txt", "w") as f:
                 f.write(f"testing {i}")
             run.log_artifact(art)
-            wandb.log({"metric": 5})
+            tracklab.log({"metric": 5})
 
     artifact = api.artifact(
         name=f"{entity}/{project}/{artifact_name}:v0",
@@ -529,8 +529,8 @@ def test_artifact_multipart_download(user, api):
     artifact_name = "test-large-artifact"
     artifact_type = "test-type"
 
-    with wandb.init(entity=entity, project=project) as run:
-        art = wandb.Artifact(artifact_name, artifact_type)
+    with tracklab.init(entity=entity, project=project) as run:
+        art = tracklab.Artifact(artifact_name, artifact_type)
         art.add_file(file_path)
         run.log_artifact(art)
 

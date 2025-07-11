@@ -8,15 +8,15 @@ from typing import Any, Callable, Iterable, MutableSequence, Optional
 from unittest.mock import DEFAULT, Mock
 
 import pytest
-from wandb.filesync import stats
-from wandb.filesync.step_upload import (
+from tracklab.filesync import stats
+from tracklab.filesync.step_upload import (
     Event,
     RequestCommitArtifact,
     RequestFinish,
     RequestUpload,
     StepUpload,
 )
-from wandb.sdk.internal import file_stream, internal_api
+from tracklab.sdk.internal import file_stream, internal_api
 
 
 def mock_upload_urls(

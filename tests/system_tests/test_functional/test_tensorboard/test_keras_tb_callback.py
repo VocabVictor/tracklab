@@ -5,7 +5,7 @@ Test that the Keras TensorBoard callback works with W&B.
 import keras
 import numpy as np
 import tensorflow as tf
-import wandb
+import tracklab
 
 
 class MyModel(keras.Model):
@@ -21,7 +21,7 @@ class MyModel(keras.Model):
 def test_tb_callback(wandb_backend_spy):
     np.random.seed(42)
 
-    with wandb.init(sync_tensorboard=True) as run:
+    with tracklab.init(sync_tensorboard=True) as run:
         model = MyModel()
         model.compile("sgd", "mse")
 
@@ -66,4 +66,4 @@ def test_tb_callback(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()

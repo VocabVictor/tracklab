@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 
 import pytest
 import yaml
-from wandb.sdk.launch._launch import create_and_run_agent, resolve_agent_config
-from wandb.sdk.launch.agent.config import validate_registry_uri
-from wandb.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch._launch import create_and_run_agent, resolve_agent_config
+from tracklab.sdk.launch.agent.config import validate_registry_uri
+from tracklab.sdk.launch.errors import LaunchError
 
 
 class MockAgent:
@@ -20,7 +20,7 @@ class MockAgent:
 @pytest.fixture
 def mock_agent(monkeypatch):
     monkeypatch.setattr(
-        "wandb.sdk.launch._launch.LaunchAgent", lambda *args, **kwargs: MockAgent
+        "tracklab.sdk.launch._launch.LaunchAgent", lambda *args, **kwargs: MockAgent
     )
 
 
@@ -118,7 +118,7 @@ def test_validate_registry_uri(registry_uri, valid):
 
 def test_resolve_agent_config(monkeypatch, runner):
     monkeypatch.setattr(
-        "wandb.sdk.launch._launch.LAUNCH_CONFIG_FILE",
+        "tracklab.sdk.launch._launch.LAUNCH_CONFIG_FILE",
         "./config/wandb/launch-config.yaml",
     )
     monkeypatch.setenv("WANDB_ENTITY", "diffentity")

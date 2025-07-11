@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """Simple offline run."""
 
-import wandb
+import tracklab
 
-wandb.init(mode="offline")
-wandb.log(dict(m1=1))
-wandb.log(dict(m2=2))
-wandb.finish()
+tracklab.init(mode="offline")
+tracklab.log(dict(m1=1))
+tracklab.log(dict(m2=2))
+tracklab.finish()

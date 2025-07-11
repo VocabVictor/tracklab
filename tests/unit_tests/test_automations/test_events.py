@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from hypothesis import given
 from pytest import mark
-from wandb.apis.public import Project
-from wandb.automations import (
+from tracklab.apis.public import Project
+from tracklab.automations import (
     ArtifactEvent,
     EventType,
     MetricChangeFilter,
@@ -17,7 +17,7 @@ from wandb.automations import (
     RunEvent,
     ScopeType,
 )
-from wandb.automations._generated import EventTriggeringConditionType
+from tracklab.automations._generated import EventTriggeringConditionType
 
 from ._strategies import metric_change_filters, metric_threshold_filters
 

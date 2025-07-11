@@ -4,7 +4,7 @@ import inspect
 import sys
 
 import pytest
-import wandb
+import tracklab
 
 
 @pytest.fixture()
@@ -17,7 +17,7 @@ def doc_inject(user):
         # clean up leading whitespace
         if new_doc is not None:
             m.__doc__ = inspect.cleandoc(new_doc)
-        with wandb.init(**init_kwargs) as run:
+        with tracklab.init(**init_kwargs) as run:
             if labels:
                 run._label(**labels)
 

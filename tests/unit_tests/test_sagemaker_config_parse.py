@@ -3,7 +3,7 @@ import json
 import os
 from unittest import mock
 
-from wandb.integration.sagemaker.config import parse_sm_config
+from tracklab.integration.sagemaker.config import parse_sm_config
 
 
 @mock.patch("os.path.exists")

@@ -1,8 +1,8 @@
 import cohere
 import openai
 
-from wandb.integration.cohere import autolog as cohere_autolog
-from wandb.integration.openai import autolog as openai_autolog
+from tracklab.integration.cohere import autolog as cohere_autolog
+from tracklab.integration.openai import autolog as openai_autolog
 
 cohere_autolog()
 openai_autolog()

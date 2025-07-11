@@ -18,12 +18,12 @@ assert:
     - 24  # init_return_run
 """
 
-import wandb
+import tracklab
 
-run = wandb.init()
-wandb.log(dict(m1=1))
-wandb.log(dict(m2=2))
+run = tracklab.init()
+tracklab.log(dict(m1=1))
+tracklab.log(dict(m2=2))
 
 # this is the same run
-run2 = wandb.init()
-wandb.log(dict(m3=3))
+run2 = tracklab.init()
+tracklab.log(dict(m3=3))

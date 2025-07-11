@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """Simple example of using ProcessPoolExecutor with service.
 
-This example is based on issue https://wandb.atlassian.net/browse/WB-8733.
+This example is based on issue https://tracklab.atlassian.net/browse/WB-8733.
 """
 
 from concurrent.futures import ProcessPoolExecutor
 
 import yea
 
-import wandb
+import tracklab
 
 
 def worker(run, info):
@@ -18,7 +18,7 @@ def worker(run, info):
 
 def main():
     futures = []
-    with wandb.init() as run:
+    with tracklab.init() as run:
         with ProcessPoolExecutor() as executor:
             # log handler
             for i in range(3):

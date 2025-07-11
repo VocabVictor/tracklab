@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch._project_spec import EntryPoint
-from wandb.sdk.launch.runner.local_process import LocalProcessRunner
+from tracklab.sdk.launch._project_spec import EntryPoint
+from tracklab.sdk.launch.runner.local_process import LocalProcessRunner
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def mock_run_entry_point(mocker):
     mock_run_entry_point = MagicMock(return_value=mock_run)
 
     mocker.patch(
-        "wandb.sdk.launch.runner.local_process._run_entry_point",
+        "tracklab.sdk.launch.runner.local_process._run_entry_point",
         mock_run_entry_point,
     )
     return mock_run_entry_point

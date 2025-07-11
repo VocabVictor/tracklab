@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch.errors import LaunchError
-from wandb.sdk.launch.registry.azure_container_registry import (
+from tracklab.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.registry.azure_container_registry import (
     AzureContainerRegistry,
     ResourceNotFoundError,
 )
@@ -12,7 +12,7 @@ from wandb.sdk.launch.registry.azure_container_registry import (
 def mock_default_azure_credential(monkeypatch):
     mock = MagicMock()
     monkeypatch.setattr(
-        "wandb.sdk.launch.environment.azure_environment.DefaultAzureCredential", mock
+        "tracklab.sdk.launch.environment.azure_environment.DefaultAzureCredential", mock
     )
     return mock
 
@@ -22,7 +22,7 @@ def mock_container_registry_client(monkeypatch):
     mock = MagicMock()
     (
         monkeypatch.setattr(
-            "wandb.sdk.launch.registry.azure_container_registry.ContainerRegistryClient",
+            "tracklab.sdk.launch.registry.azure_container_registry.ContainerRegistryClient",
             MagicMock(return_value=mock),
         ),
     )

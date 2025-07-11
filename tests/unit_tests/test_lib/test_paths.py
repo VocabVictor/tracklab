@@ -4,8 +4,8 @@ import re
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 
 import pytest
-from wandb.sdk.lib.paths import LogicalPath
-from wandb.util import to_forward_slash_path
+from tracklab.sdk.lib.paths import LogicalPath
+from tracklab.util import to_forward_slash_path
 
 
 # Once upon a time I used hypothesis and fspaths to generate test cases. This was a good

@@ -5,8 +5,8 @@ import lightgbm as lgb
 import pandas as pd
 import requests
 
-import wandb
-from wandb.integration.lightgbm import log_summary, wandb_callback
+import tracklab
+from tracklab.integration.lightgbm import log_summary, wandb_callback
 
 print(lgb.__version__)
 
@@ -47,7 +47,7 @@ params = {
 }
 
 # initialize a new wandb project
-wandb.init(project="lightgbm-reg")
+tracklab.init(project="lightgbm-reg")
 
 # train
 # add lightgbm callback

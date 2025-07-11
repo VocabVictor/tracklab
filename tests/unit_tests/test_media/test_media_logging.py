@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-import wandb
+import tracklab
 from bokeh.plotting import figure
 from rdkit import Chem
 from wandb import data_types
@@ -14,30 +14,30 @@ data = np.random.randint(255, size=(1000))
 
 
 @pytest.fixture
-def audio_media() -> wandb.Audio:
+def audio_media() -> tracklab.Audio:
     audio_data = np.random.uniform(-1, 1, 44100)
-    return wandb.Audio(audio_data, sample_rate=44100)
+    return tracklab.Audio(audio_data, sample_rate=44100)
 
 
 @pytest.fixture
-def video_media() -> wandb.Video:
+def video_media() -> tracklab.Video:
     frames = np.random.randint(low=0, high=256, size=(10, 3, 100, 100), dtype=np.uint8)
-    return wandb.Video(frames)
+    return tracklab.Video(frames)
 
 
 @pytest.fixture
-def image_media() -> wandb.Image:
-    return wandb.Image(np.ones(shape=(32, 32)))
+def image_media() -> tracklab.Image:
+    return tracklab.Image(np.ones(shape=(32, 32)))
 
 
 @pytest.fixture
-def table_media() -> wandb.Table:
-    return wandb.Table(data=[[1]], columns=["A"])
+def table_media() -> tracklab.Table:
+    return tracklab.Table(data=[[1]], columns=["A"])
 
 
 @pytest.fixture
-def graph_media() -> wandb.Graph:
-    graph = wandb.Graph()
+def graph_media() -> tracklab.Graph:
+    graph = tracklab.Graph()
     node_a = data_types.Node("a", "Node A", size=(4,))
     node_b = data_types.Node("b", "Node B", size=(16,))
     graph.add_node(node_a)
@@ -56,29 +56,29 @@ def bokeh_media() -> data_types.Bokeh:
 
 
 @pytest.fixture
-def html_media() -> wandb.Html:
-    return wandb.Html("<html><body><h1>Hello, World!</h1></body></html>")
+def html_media() -> tracklab.Html:
+    return tracklab.Html("<html><body><h1>Hello, World!</h1></body></html>")
 
 
 @pytest.fixture
-def molecule_media() -> wandb.Molecule:
+def molecule_media() -> tracklab.Molecule:
     m = Chem.MolFromSmiles("Cc1ccccc1")
-    return wandb.Molecule.from_rdkit(m)
+    return tracklab.Molecule.from_rdkit(m)
 
 
 @pytest.fixture
-def object3d_media() -> wandb.Object3D:
+def object3d_media() -> tracklab.Object3D:
     point_cloud = np.random.rand(100, 3)
-    return wandb.Object3D(point_cloud)
+    return tracklab.Object3D(point_cloud)
 
 
 @pytest.fixture
-def plotly_media() -> wandb.Plotly:
+def plotly_media() -> tracklab.Plotly:
     fig, ax = plt.subplots(2)
     ax[0].plot([1, 2, 3])
     ax[1].plot([1, 2, 3])
-    wandb.Plotly.make_plot_media(plt)
-    return wandb.Plotly(fig)
+    tracklab.Plotly.make_plot_media(plt)
+    return tracklab.Plotly(fig)
 
 
 @pytest.mark.parametrize(

@@ -1,15 +1,15 @@
 import numpy as np
 import pytest
-import wandb
-import wandb.data_types
-from wandb.sdk.integration_utils.data_logging import (
+import tracklab
+import tracklab.data_types
+from tracklab.sdk.integration_utils.data_logging import (
     CAN_INFER_IMAGE_AND_VIDEO,
     ValidationDataLogger,
 )
 
 
 def test_data_logger_val_data_lists(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
         targets=np.array([[i] for i in range(10)]),
@@ -37,7 +37,7 @@ def test_data_logger_val_data_lists(user):
 
 
 def test_data_logger_val_data_dicts(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs={
             "ia": np.array([[i, i, i] for i in range(10)]),
@@ -75,8 +75,8 @@ def test_data_logger_val_data_dicts(user):
 
 
 def test_data_logger_val_indexes(user):
-    run = wandb.init()
-    table = wandb.Table(columns=["label"], data=[["cat"]])
+    run = tracklab.init()
+    table = tracklab.Table(columns=["label"], data=[["cat"]])
     _ = ValidationDataLogger(
         inputs={
             "ia": np.array([[i, i, i] for i in range(10)]),
@@ -93,7 +93,7 @@ def test_data_logger_val_indexes(user):
 
 
 def test_data_logger_val_invalid(user):
-    run = wandb.init()
+    run = tracklab.init()
     with pytest.raises(AssertionError):
         _ = ValidationDataLogger(
             inputs={
@@ -111,7 +111,7 @@ def test_data_logger_val_invalid(user):
 
 
 def test_data_logger_val_user_proc(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
         targets=np.array([[i] for i in range(10)]),
@@ -152,7 +152,7 @@ def test_data_logger_val_user_proc(user):
 
 @pytest.mark.skip
 def test_data_logger_val_inferred_proc(user):
-    run = wandb.init()
+    run = tracklab.init()
     np.random.seed(42)
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
@@ -214,9 +214,9 @@ def test_data_logger_val_inferred_proc(user):
     assert isinstance(row[tcols.index("input:node")], list)
     assert isinstance(row[tcols.index("input:argmax")].tolist(), int)
     assert isinstance(row[tcols.index("input:argmin")].tolist(), int)
-    assert isinstance(row[tcols.index("wrapped:class")], wandb.data_types._TableIndex)
+    assert isinstance(row[tcols.index("wrapped:class")], tracklab.data_types._TableIndex)
     assert isinstance(
-        row[tcols.index("logits:max_class")], wandb.data_types._TableIndex
+        row[tcols.index("logits:max_class")], tracklab.data_types._TableIndex
     )
     assert isinstance(row[tcols.index("logits:score")], dict)
     # assert isinstance(row[tcols.index("nodes:node")], dict)
@@ -225,15 +225,15 @@ def test_data_logger_val_inferred_proc(user):
     assert isinstance(row[tcols.index("nodes:argmin")].tolist(), int)
 
     if CAN_INFER_IMAGE_AND_VIDEO:
-        assert isinstance(row[tcols.index("2dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("3dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("video:video")], wandb.data_types.Video)
+        assert isinstance(row[tcols.index("2dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("3dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("video:video")], tracklab.data_types.Video)
     run.finish()
 
 
 @pytest.mark.skip
 def test_data_logger_val_inferred_proc_no_class(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
         targets={
@@ -306,14 +306,14 @@ def test_data_logger_val_inferred_proc_no_class(user):
     assert isinstance(row[tcols.index("nodes:argmin")].tolist(), int)
 
     if CAN_INFER_IMAGE_AND_VIDEO:
-        assert isinstance(row[tcols.index("2dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("3dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("video:video")], wandb.data_types.Video)
+        assert isinstance(row[tcols.index("2dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("3dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("video:video")], tracklab.data_types.Video)
     run.finish()
 
 
 def test_data_logger_pred(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
         targets=np.array([[i] for i in range(10)]),
@@ -334,7 +334,7 @@ def test_data_logger_pred(user):
 
 
 def test_data_logger_pred_user_proc(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
         targets=np.array([[i] for i in range(10)]),
@@ -356,7 +356,7 @@ def test_data_logger_pred_user_proc(user):
 
 @pytest.mark.skip
 def test_data_logger_pred_inferred_proc(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
         targets=np.array([[i] for i in range(10)]),
@@ -407,7 +407,7 @@ def test_data_logger_pred_inferred_proc(user):
     row = t.data[0]
 
     assert set(tcols) == set(cols)
-    assert isinstance(row[tcols.index("val_row")], wandb.data_types._TableIndex)
+    assert isinstance(row[tcols.index("val_row")], tracklab.data_types._TableIndex)
     assert isinstance(row[tcols.index("simple")].tolist(), int)
     assert len(row[tcols.index("wrapped")]) == 1
     assert len(row[tcols.index("logits")]) == 5
@@ -415,9 +415,9 @@ def test_data_logger_pred_inferred_proc(user):
     assert row[tcols.index("2dimages")].shape == (5, 5)
     assert row[tcols.index("3dimages")].shape == (5, 5, 3)
     assert row[tcols.index("video")].shape == (5, 5, 3, 10)
-    assert isinstance(row[tcols.index("wrapped:class")], wandb.data_types._TableIndex)
+    assert isinstance(row[tcols.index("wrapped:class")], tracklab.data_types._TableIndex)
     assert isinstance(
-        row[tcols.index("logits:max_class")], wandb.data_types._TableIndex
+        row[tcols.index("logits:max_class")], tracklab.data_types._TableIndex
     )
     assert isinstance(row[tcols.index("logits:score")], dict)
     # assert isinstance(row[tcols.index("nodes:node")], dict)
@@ -426,15 +426,15 @@ def test_data_logger_pred_inferred_proc(user):
     assert isinstance(row[tcols.index("nodes:argmin")].tolist(), int)
 
     if CAN_INFER_IMAGE_AND_VIDEO:
-        assert isinstance(row[tcols.index("2dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("3dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("video:video")], wandb.data_types.Video)
+        assert isinstance(row[tcols.index("2dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("3dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("video:video")], tracklab.data_types.Video)
     run.finish()
 
 
 @pytest.mark.skip
 def test_data_logger_pred_inferred_proc_no_classes(user):
-    run = wandb.init()
+    run = tracklab.init()
     vd = ValidationDataLogger(
         inputs=np.array([[i, i, i] for i in range(10)]),
         targets=np.array([[i] for i in range(10)]),
@@ -487,7 +487,7 @@ def test_data_logger_pred_inferred_proc_no_classes(user):
     row = t.data[0]
 
     assert set(tcols) == set(cols)
-    assert isinstance(row[tcols.index("val_row")], wandb.data_types._TableIndex)
+    assert isinstance(row[tcols.index("val_row")], tracklab.data_types._TableIndex)
     assert isinstance(row[tcols.index("simple")].tolist(), int)
     assert len(row[tcols.index("wrapped")]) == 1
     assert len(row[tcols.index("logits")]) == 5
@@ -506,7 +506,7 @@ def test_data_logger_pred_inferred_proc_no_classes(user):
     assert isinstance(row[tcols.index("nodes:argmin")].tolist(), int)
 
     if CAN_INFER_IMAGE_AND_VIDEO:
-        assert isinstance(row[tcols.index("2dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("3dimages:image")], wandb.data_types.Image)
-        assert isinstance(row[tcols.index("video:video")], wandb.data_types.Video)
+        assert isinstance(row[tcols.index("2dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("3dimages:image")], tracklab.data_types.Image)
+        assert isinstance(row[tcols.index("video:video")], tracklab.data_types.Video)
     run.finish()

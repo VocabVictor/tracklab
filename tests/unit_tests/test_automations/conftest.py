@@ -10,8 +10,8 @@ from hypothesis import settings
 from pytest import FixtureRequest, fixture, skip
 from pytest_mock import MockerFixture
 from typing_extensions import TypeAlias
-from wandb.apis.public import ArtifactCollection, Project
-from wandb.automations import (
+from tracklab.apis.public import ArtifactCollection, Project
+from tracklab.automations import (
     ActionType,
     ArtifactEvent,
     DoNothing,
@@ -25,9 +25,9 @@ from wandb.automations import (
     SendNotification,
     SendWebhook,
 )
-from wandb.automations._utils import EXCLUDED_INPUT_ACTIONS, EXCLUDED_INPUT_EVENTS
-from wandb.automations.actions import InputAction, SavedAction, SavedNoOpAction
-from wandb.automations.events import InputEvent, SavedEvent
+from tracklab.automations._utils import EXCLUDED_INPUT_ACTIONS, EXCLUDED_INPUT_EVENTS
+from tracklab.automations.actions import InputAction, SavedAction, SavedNoOpAction
+from tracklab.automations.events import InputEvent, SavedEvent
 
 # default Hypothesis settings
 settings.register_profile("default", max_examples=100)
@@ -72,20 +72,20 @@ def automation_id() -> str:
 @fixture(scope="session")
 def mock_client(session_mocker: MockerFixture) -> Mock:
     """A mocked wandb client to prevent real API calls."""
-    from wandb.apis.public import RetryingClient
+    from tracklab.apis.public import RetryingClient
 
     return session_mocker.Mock(spec=RetryingClient)
 
 
 @fixture(scope="session")
 def artifact_collection(mock_client: Mock) -> ArtifactCollection:
-    """A simulated `ArtifactCollection` that could be returned by `wandb.Api`.
+    """A simulated `ArtifactCollection` that could be returned by `tracklab.Api`.
 
     This might be typically fetched via `Api.artifact_collection()`,
     `Api.artifact().collection`, etc.
 
     For unit-testing purposes, this has been heavily mocked.
-    Tests relying on real `wandb.Api` calls should live in system tests.
+    Tests relying on real `tracklab.Api` calls should live in system tests.
     """
     collection = ArtifactCollection(
         client=mock_client,
@@ -109,12 +109,12 @@ def artifact_collection(mock_client: Mock) -> ArtifactCollection:
 
 @fixture(scope="session")
 def project(mock_client: Mock) -> Project:
-    """A simulated `Project` that could be returned by `wandb.Api`.
+    """A simulated `Project` that could be returned by `tracklab.Api`.
 
     This might be typically fetched via `Api.project()`, `Api.projects()`, etc.
 
     For unit-testing purposes, this has been heavily mocked.
-    Tests relying on real `wandb.Api` calls should live in system tests.
+    Tests relying on real `tracklab.Api` calls should live in system tests.
     """
     return Project(
         client=mock_client,

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from wandb.sdk.lib.filenames import exclude_wandb_fn, filtered_dir
+from tracklab.sdk.lib.filenames import exclude_wandb_fn, filtered_dir
 
 
 def test_filtered_dir_one_parameter(tmp_path: Path):

@@ -5,18 +5,18 @@ import multiprocessing as mp
 
 import yea
 
-import wandb
+import tracklab
 
 
 def do_run(num):
-    run = wandb.init()
+    run = tracklab.init()
     run.config.id = num
     run.log(dict(s=num))
     return num
 
 
 def main():
-    wandb.setup()
+    tracklab.setup()
     num_proc = 4
     pool = mp.Pool(processes=num_proc)
     result = pool.map_async(do_run, range(num_proc))

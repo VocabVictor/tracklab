@@ -2,7 +2,7 @@ import json
 import os
 from unittest import mock
 
-import wandb
+import tracklab
 
 
 def test_service_logging_level_debug():
@@ -12,7 +12,7 @@ def test_service_logging_level_debug():
     `WANDB_DEBUG` environment variable is set.
     """
     with mock.patch.dict(os.environ, {"WANDB_DEBUG": "true"}):
-        with wandb.init(mode="offline") as run:
+        with tracklab.init(mode="offline") as run:
             run.log({"foo": "bar"})
 
         # load the debug logs of the service process
@@ -30,7 +30,7 @@ def test_service_logging_level_info():
     `WANDB_DEBUG` environment variable is not set.
     """
     with mock.patch.dict(os.environ, {"WANDB_DEBUG": "false"}):
-        with wandb.init(mode="offline") as run:
+        with tracklab.init(mode="offline") as run:
             run.log({"foo": "bar"})
 
         # load the debug logs of the service process
@@ -42,8 +42,8 @@ def test_service_logging_level_info():
 
 
 def test_remove_active_run_twice():
-    run = wandb.init(mode="offline")
-    wl = wandb.setup()
+    run = tracklab.init(mode="offline")
+    wl = tracklab.setup()
 
     assert run is wl.most_recent_active_run
     wl.remove_active_run(run)
@@ -55,5 +55,5 @@ def test_remove_active_run_twice():
 def test_setup_uses_config_dir_env_var(tmp_path, monkeypatch):
     monkeypatch.setenv("WANDB_CONFIG_DIR", str(tmp_path))
     with mock.patch.dict(os.environ, {"WANDB_CONFIG_DIR": str(tmp_path)}):
-        setup = wandb.setup()
+        setup = tracklab.setup()
         assert setup.settings.settings_system == str(tmp_path / "settings")

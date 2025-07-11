@@ -6,7 +6,7 @@ import kfp
 import kfp.dsl as dsl
 from kfp import components
 from kubernetes.client.models import V1EnvVar
-from wandb_probe import wandb_probe_package
+from wandb_probe import tracklab_probe_package
 
 
 def add_wandb_env_variables(op):
@@ -36,18 +36,18 @@ def preprocess_data(
     from sklearn import datasets
     from sklearn.model_selection import train_test_split
 
-    import wandb
+    import tracklab
 
     def add_wandb_visualization(run, mlpipeline_ui_metadata_path):
-        """NOTE: To use this, you must modify your component to have an output called `mlpipeline_ui_metadata_path` AND call `wandb.init` yourself inside that component.
+        """NOTE: To use this, you must modify your component to have an output called `mlpipeline_ui_metadata_path` AND call `tracklab.init` yourself inside that component.
 
         Example usage:
 
         def my_component(..., mlpipeline_ui_metadata_path: OutputPath()):
-            import wandb
-            from wandb.integration.kfp.helpers import add_wandb_visualization
+            import tracklab
+            from tracklab.integration.kfp.helpers import add_wandb_visualization
 
-            with wandb.init() as run:
+            with tracklab.init() as run:
                 add_wandb_visualization(run, mlpipeline_ui_metadata_path)
 
                 ... # the rest of your code here
@@ -66,7 +66,7 @@ def preprocess_data(
         with open(mlpipeline_ui_metadata_path, "w") as metadata_file:
             json.dump(metadata, metadata_file)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         add_wandb_visualization(run, mlpipeline_ui_metadata_path)
 
         X, y = datasets.load_iris(return_X_y=True)  # noqa: N806
@@ -99,18 +99,18 @@ def train_model(
     import numpy as np
     from sklearn.ensemble import RandomForestClassifier
 
-    import wandb
+    import tracklab
 
     def add_wandb_visualization(run, mlpipeline_ui_metadata_path):
-        """NOTE: To use this, you must modify your component to have an output called `mlpipeline_ui_metadata_path` AND call `wandb.init` yourself inside that component.
+        """NOTE: To use this, you must modify your component to have an output called `mlpipeline_ui_metadata_path` AND call `tracklab.init` yourself inside that component.
 
         Example usage:
 
         def my_component(..., mlpipeline_ui_metadata_path: OutputPath()):
-            import wandb
-            from wandb.integration.kfp.helpers import add_wandb_visualization
+            import tracklab
+            from tracklab.integration.kfp.helpers import add_wandb_visualization
 
-            with wandb.init() as run:
+            with tracklab.init() as run:
                 add_wandb_visualization(run, mlpipeline_ui_metadata_path)
 
                 ... # the rest of your code here
@@ -129,7 +129,7 @@ def train_model(
         with open(mlpipeline_ui_metadata_path, "w") as metadata_file:
             json.dump(metadata, metadata_file)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         add_wandb_visualization(run, mlpipeline_ui_metadata_path)
 
         with open(X_train_path, "rb") as f:
@@ -160,18 +160,18 @@ def test_model(
     from sklearn.ensemble import RandomForestClassifier  # noqa: F401
     from sklearn.metrics import accuracy_score, precision_score, recall_score
 
-    import wandb
+    import tracklab
 
     def add_wandb_visualization(run, mlpipeline_ui_metadata_path):
-        """NOTE: To use this, you must modify your component to have an output called `mlpipeline_ui_metadata_path` AND call `wandb.init` yourself inside that component.
+        """NOTE: To use this, you must modify your component to have an output called `mlpipeline_ui_metadata_path` AND call `tracklab.init` yourself inside that component.
 
         Example usage:
 
         def my_component(..., mlpipeline_ui_metadata_path: OutputPath()):
-            import wandb
-            from wandb.integration.kfp.helpers import add_wandb_visualization
+            import tracklab
+            from tracklab.integration.kfp.helpers import add_wandb_visualization
 
-            with wandb.init() as run:
+            with tracklab.init() as run:
                 add_wandb_visualization(run, mlpipeline_ui_metadata_path)
 
                 ... # the rest of your code here
@@ -190,7 +190,7 @@ def test_model(
         with open(mlpipeline_ui_metadata_path, "w") as metadata_file:
             json.dump(metadata, metadata_file)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         add_wandb_visualization(run, mlpipeline_ui_metadata_path)
 
     with open(X_test_path, "rb") as f:

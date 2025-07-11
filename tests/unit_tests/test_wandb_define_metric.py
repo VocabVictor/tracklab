@@ -1,8 +1,8 @@
 """metric user tests."""
 
 import pytest
-import wandb
-from wandb.proto import wandb_internal_pb2 as pb
+import tracklab
+from tracklab.proto import tracklab_internal_pb2 as pb
 
 
 def test_metric_none(mock_run, parse_records, record_q):
@@ -62,7 +62,7 @@ def test_metric_goal(mock_run, parse_records, record_q):
     )
     assert metric_2.goal == "minimize"
 
-    with pytest.raises(wandb.Error):
+    with pytest.raises(tracklab.Error):
         run.define_metric(
             "m2",
             goal="nothing",
@@ -190,7 +190,7 @@ def test_metric_summary(mock_run, parse_records, record_q):
 )
 def test_metric_invalid_args(args, kwargs, mock_run, parse_records, record_q):
     run = mock_run()
-    with pytest.raises(wandb.Error):
+    with pytest.raises(tracklab.Error):
         run.define_metric(args, **kwargs)
 
     parsed = parse_records(record_q)

@@ -1,7 +1,7 @@
 import torch
 from diffusers import AnimateDiffPipeline, DDIMScheduler, MotionAdapter
 
-from wandb.integration.diffusers import autolog
+from tracklab.integration.diffusers import autolog
 
 autolog(init=dict(project="diffusers_logging", job_type="animatediff"))
 

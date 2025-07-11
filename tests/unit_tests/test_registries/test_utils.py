@@ -1,9 +1,9 @@
 import pytest
-from wandb.apis.public.registries._utils import (
+from tracklab.apis.public.registries._utils import (
     ensure_registry_prefix_on_names,
     format_gql_artifact_types_input,
 )
-from wandb.sdk.artifacts._validators import REGISTRY_PREFIX
+from tracklab.sdk.artifacts._validators import REGISTRY_PREFIX
 
 
 @pytest.mark.parametrize(

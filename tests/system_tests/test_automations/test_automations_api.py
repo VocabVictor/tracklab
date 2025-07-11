@@ -4,10 +4,10 @@ import math
 from collections import deque
 from typing import Any, Callable
 
-import wandb
+import tracklab
 from pytest import FixtureRequest, fixture, mark, raises, skip
-from wandb.apis.public import ArtifactCollection, Project
-from wandb.automations import (
+from tracklab.apis.public import ArtifactCollection, Project
+from tracklab.automations import (
     ActionType,
     Automation,
     DoNothing,
@@ -21,10 +21,10 @@ from wandb.automations import (
     SendWebhook,
     WebhookIntegration,
 )
-from wandb.automations.actions import SavedNoOpAction, SavedWebhookAction
-from wandb.automations.events import RunMetricFilter
-from wandb.automations.scopes import ArtifactCollectionScopeTypes
-from wandb.errors.errors import CommError
+from tracklab.automations.actions import SavedNoOpAction, SavedWebhookAction
+from tracklab.automations.events import RunMetricFilter
+from tracklab.automations.scopes import ArtifactCollectionScopeTypes
+from tracklab.errors.errors import CommError
 
 
 @fixture
@@ -33,7 +33,7 @@ def automation_name(make_name: Callable[[str], str]) -> str:
 
 
 @fixture
-def reset_automations(api: wandb.Api):
+def reset_automations(api: tracklab.Api):
     """Request this fixture to remove any saved automations both before and after the test."""
     # There has to be a better way to do this
     for automation in api.automations():
@@ -44,12 +44,12 @@ def reset_automations(api: wandb.Api):
 
 
 # ------------------------------------------------------------------------------
-def test_no_initial_automations(api: wandb.Api, reset_automations):
+def test_no_initial_automations(api: tracklab.Api, reset_automations):
     """No automations should be fetched by the API prior to creating any."""
     assert list(api.automations()) == []
 
 
-def test_no_initial_integrations(user, api: wandb.Api):
+def test_no_initial_integrations(user, api: tracklab.Api):
     """No automations should be fetched by the API prior to creating any."""
     assert list(api.integrations()) == []
     assert list(api.slack_integrations()) == []
@@ -57,7 +57,7 @@ def test_no_initial_integrations(user, api: wandb.Api):
 
 
 def test_fetch_webhook_integrations(
-    user, api: wandb.Api, make_name, make_webhook_integration
+    user, api: tracklab.Api, make_name, make_webhook_integration
 ):
     """Test fetching webhook integrations."""
     # Create multiple webhook integrations
@@ -84,7 +84,7 @@ def test_fetch_webhook_integrations(
 
 
 def test_fetch_slack_integrations(
-    user, api: wandb.Api, make_name, make_webhook_integration
+    user, api: tracklab.Api, make_name, make_webhook_integration
 ):
     """Test fetching slack integrations."""
     # We don't currently have an easy way of creating real Slack integrations in the backend
@@ -105,7 +105,7 @@ def test_fetch_slack_integrations(
 @mark.usefixtures(reset_automations.__name__)
 def test_create_automation(
     user: str,
-    api: wandb.Api,
+    api: tracklab.Api,
     event,
     action,
     automation_name: str,
@@ -136,7 +136,7 @@ def test_create_automation(
 
 @mark.usefixtures(reset_automations.__name__)
 def test_create_existing_automation_raises_by_default_if_existing(
-    api: wandb.Api,
+    api: tracklab.Api,
     event,
     action,
     automation_name: str,
@@ -163,7 +163,7 @@ def test_create_existing_automation_raises_by_default_if_existing(
 
 @mark.usefixtures(reset_automations.__name__)
 def test_create_existing_automation_fetches_existing_if_requested(
-    api: wandb.Api,
+    api: tracklab.Api,
     event,
     action,
     automation_name: str,
@@ -203,7 +203,7 @@ def test_create_existing_automation_fetches_existing_if_requested(
 def test_create_automation_for_run_metric_threshold_event(
     project,
     webhook,
-    api: wandb.Api,
+    api: tracklab.Api,
     automation_name: str,
 ):
     """Check that creating an automation for the `RUN_METRIC_THRESHOLD` event works, and the automation is saved with the expected filter."""
@@ -260,7 +260,7 @@ def test_create_automation_for_run_metric_threshold_event(
 def test_create_automation_for_run_metric_change_event(
     project,
     webhook,
-    api: wandb.Api,
+    api: tracklab.Api,
     automation_name: str,
 ):
     """Check that creating an automation for the `RUN_METRIC_CHANGE` event works, and the automation is saved with the expected filter."""
@@ -316,7 +316,7 @@ def test_create_automation_for_run_metric_change_event(
 
 @fixture
 def created_automation(
-    api: wandb.Api, reset_automations, event, action, automation_name: str
+    api: tracklab.Api, reset_automations, event, action, automation_name: str
 ) -> Automation:
     """An already-created automation that we can use for testing."""
     created = api.create_automation((event >> action), name=automation_name)
@@ -329,7 +329,7 @@ def created_automation(
 
 
 def test_delete_automation(
-    api: wandb.Api, automation_name: str, created_automation: Automation
+    api: tracklab.Api, automation_name: str, created_automation: Automation
 ):
     assert api.automation(name=automation_name) == created_automation
 
@@ -341,7 +341,7 @@ def test_delete_automation(
 
 
 def test_delete_automation_by_id(
-    api: wandb.Api, automation_name: str, created_automation: Automation
+    api: tracklab.Api, automation_name: str, created_automation: Automation
 ):
     assert api.automation(name=automation_name) == created_automation
 
@@ -353,7 +353,7 @@ def test_delete_automation_by_id(
 
 
 def test_automation_cannot_be_deleted_again(
-    api: wandb.Api, automation_name: str, created_automation: Automation
+    api: tracklab.Api, automation_name: str, created_automation: Automation
 ):
     assert api.automation(name=automation_name) == created_automation
 
@@ -371,13 +371,13 @@ def test_automation_cannot_be_deleted_again(
 
 
 @mark.usefixtures(reset_automations.__name__)
-def test_delete_automation_raises_on_invalid_id(api: wandb.Api):
+def test_delete_automation_raises_on_invalid_id(api: tracklab.Api):
     with raises(CommError):
         api.delete_automation("invalid-automation-id")
 
 
 @fixture
-def skip_if_edit_automations_not_supported_on_server(api: wandb.Api):
+def skip_if_edit_automations_not_supported_on_server(api: tracklab.Api):
     # HACK: Use NO_OP as a proxy for whether the server is "new enough"
     #
     # FIXME: We need a better way to check this in the absence of
@@ -392,7 +392,7 @@ class TestUpdateAutomation:
     @fixture
     def old_automation(
         self,
-        api: wandb.Api,
+        api: tracklab.Api,
         event,
         action,
         automation_name: str,
@@ -408,7 +408,7 @@ class TestUpdateAutomation:
         api.delete_automation(automation)
         assert len(list(api.automations(name=automation_name))) == 0
 
-    def test_update_name(self, api: wandb.Api, old_automation: Automation):
+    def test_update_name(self, api: tracklab.Api, old_automation: Automation):
         updated_value = "new-name"
 
         old_automation.name = updated_value
@@ -416,7 +416,7 @@ class TestUpdateAutomation:
 
         assert new_automation.name == updated_value
 
-    def test_update_description(self, api: wandb.Api, old_automation: Automation):
+    def test_update_description(self, api: tracklab.Api, old_automation: Automation):
         new_value = "new description"
 
         old_automation.description = new_value
@@ -424,7 +424,7 @@ class TestUpdateAutomation:
 
         assert new_automation.description == new_value
 
-    def test_update_enabled(self, api: wandb.Api, old_automation: Automation):
+    def test_update_enabled(self, api: tracklab.Api, old_automation: Automation):
         new_value = False
 
         old_automation.enabled = new_value
@@ -433,7 +433,7 @@ class TestUpdateAutomation:
         assert new_automation.enabled == new_value
 
     def test_update_action_to_webhook(
-        self, api: wandb.Api, old_automation: Automation, webhook: WebhookIntegration
+        self, api: tracklab.Api, old_automation: Automation, webhook: WebhookIntegration
     ):
         # This is deliberately an "input" action, even though saved automations
         # will have a "saved" action on them.  We want to check that this is still
@@ -454,7 +454,7 @@ class TestUpdateAutomation:
         assert new_action.integration.id == webhook_id
         assert new_action.request_payload == new_payload
 
-    def test_update_action_to_no_op(self, api: wandb.Api, old_automation: Automation):
+    def test_update_action_to_no_op(self, api: tracklab.Api, old_automation: Automation):
         # This is deliberately an "input" action, even though saved automations
         # will have a "saved" action on them.  We want to check that this is still
         # handled correctly and reliably.
@@ -469,7 +469,7 @@ class TestUpdateAutomation:
 
     # This is only meaningful if the original automation has a webhook action
     @mark.parametrize("action_type", [ActionType.GENERIC_WEBHOOK], indirect=True)
-    def test_update_webhook_payload(self, api: wandb.Api, old_automation: Automation):
+    def test_update_webhook_payload(self, api: tracklab.Api, old_automation: Automation):
         new_payload = {"new-key": "new-value"}
 
         old_automation.action.request_payload = new_payload
@@ -480,7 +480,7 @@ class TestUpdateAutomation:
     # This is only meaningful if the original automation has a notification action
     @mark.parametrize("action_type", [ActionType.NOTIFICATION], indirect=True)
     def test_update_notification_message(
-        self, api: wandb.Api, old_automation: Automation
+        self, api: tracklab.Api, old_automation: Automation
     ):
         new_message = "new message"
 
@@ -490,7 +490,7 @@ class TestUpdateAutomation:
         assert new_automation.action.message == new_message
 
     def test_update_scope_to_project(
-        self, api: wandb.Api, old_automation: Automation, project: Project
+        self, api: tracklab.Api, old_automation: Automation, project: Project
     ):
         old_automation.scope = project
 
@@ -512,7 +512,7 @@ class TestUpdateAutomation:
     )
     def test_update_scope_to_artifact_collection(
         self,
-        api: wandb.Api,
+        api: tracklab.Api,
         old_automation: Automation,
         event_type: EventType,
         artifact_collection: ArtifactCollection,
@@ -535,7 +535,7 @@ class TestUpdateAutomation:
     )
     def test_update_scope_to_artifact_collection_fails_for_incompatible_event(
         self,
-        api: wandb.Api,
+        api: tracklab.Api,
         old_automation: Automation,
         event_type: EventType,
         artifact_collection: ArtifactCollection,
@@ -560,7 +560,7 @@ class TestUpdateAutomation:
     )
     def test_update_via_kwargs(
         self,
-        api: wandb.Api,
+        api: tracklab.Api,
         old_automation: Automation,
         updates: dict[str, Any],
     ):
@@ -589,7 +589,7 @@ class TestPaginatedAutomations:
     def setup_paginated_automations(
         self,
         user: str,
-        api: wandb.Api,
+        api: tracklab.Api,
         webhook: WebhookIntegration,
         num_projects: int,
         make_name: Callable[[str], str],
@@ -633,7 +633,7 @@ class TestPaginatedAutomations:
         self,
         mocker,
         user,
-        api: wandb.Api,
+        api: tracklab.Api,
         num_projects,
         page_size,
     ):

@@ -3,7 +3,7 @@ import pathlib
 import pytest
 
 # ----------------------------------
-# wandb.save
+# tracklab.save
 # ----------------------------------
 
 

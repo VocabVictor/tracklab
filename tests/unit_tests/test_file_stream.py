@@ -5,8 +5,8 @@ import string
 from dataclasses import dataclass
 
 from wandb import util
-from wandb.sdk.internal.file_stream import CRDedupeFilePolicy
-from wandb.sdk.lib.file_stream_utils import split_files
+from tracklab.sdk.internal.file_stream import CRDedupeFilePolicy
+from tracklab.sdk.lib.file_stream_utils import split_files
 
 
 @dataclass

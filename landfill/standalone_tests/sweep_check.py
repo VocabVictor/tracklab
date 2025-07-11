@@ -7,7 +7,7 @@ import time
 
 import requests
 
-import wandb
+import tracklab
 
 L = 10
 PROJECT = "standalone-sweep-check"
@@ -30,7 +30,7 @@ def train(**kwargs):
         except Exception as e:
             print(e)
         os.chdir("./test_chdir")
-    run = wandb.init()
+    run = tracklab.init()
     with run:
         c = dict(run.config)
         run.name = "{}-{}-{}".format(c.get("param0"), c.get("param1"), c.get("param2"))
@@ -42,7 +42,7 @@ def train(**kwargs):
         for e in range(epochs):
             n = float(length) * (float(e + 1) / epochs)
             val = run.config.param0 + run.config.param1 * n + run.config.param2 * n * n
-            wandb.log(dict(val_acc=val))
+            tracklab.log(dict(val_acc=val))
             if delay:
                 time.sleep(delay)
             if POKE_LOCAL:
@@ -58,7 +58,7 @@ def train_and_check_chdir(**kwargs):
         except Exception as e:
             print(e)
         os.chdir("./test_chdir")
-    run = wandb.init()
+    run = tracklab.init()
     with run:
         c = dict(run.config)
         run.name = "{}-{}-{}".format(c.get("param0"), c.get("param1"), c.get("param2"))
@@ -68,7 +68,7 @@ def train_and_check_chdir(**kwargs):
         for e in range(epochs):
             n = float(length) * (float(e + 1) / epochs)
             val = run.config.param0 + run.config.param1 * n + run.config.param2 * n * n
-            wandb.log(dict(val_acc=val))
+            tracklab.log(dict(val_acc=val))
         files = os.listdir(run.dir)
         # TODO: Add a check to restoring from another run in this case, WB-3715. Should restore to run.dir
         # check files were saved to the right place
@@ -86,8 +86,8 @@ def train_and_check_chdir(**kwargs):
 
 
 def check(sweep_id, num=None, result=None, stopped=None):
-    settings = wandb.InternalApi().settings()
-    api = wandb.Api(overrides=settings)
+    settings = tracklab.InternalApi().settings()
+    api = tracklab.Api(overrides=settings)
     sweep = api.sweep(f"{PROJECT}/{sweep_id}")
     runs = sorted(
         sweep.runs, key=lambda run: run.summary.get("val_acc", 0), reverse=True
@@ -123,9 +123,9 @@ def sweep_quick(args):
             epochs=dict(value=4),
         ),
     )
-    sweep_id = wandb.sweep(config, project=PROJECT)
+    sweep_id = tracklab.sweep(config, project=PROJECT)
     print("sweep:", sweep_id)
-    wandb.agent(sweep_id, function=train, count=1)
+    tracklab.agent(sweep_id, function=train, count=1)
     check(sweep_id, num=1)
 
 
@@ -139,9 +139,9 @@ def sweep_grid(args):
             epochs=dict(value=4),
         ),
     )
-    sweep_id = wandb.sweep(config, project=PROJECT)
+    sweep_id = tracklab.sweep(config, project=PROJECT)
     print("sweep:", sweep_id)
-    wandb.agent(sweep_id, function=train)
+    tracklab.agent(sweep_id, function=train)
     check(sweep_id, num=9, result=2 + 4 * L + 1.5 * L * L)
 
 
@@ -155,9 +155,9 @@ def sweep_bayes(args):
             param2=dict(values=[0, 0.5, 1.5]),
         ),
     )
-    sweep_id = wandb.sweep(config, project=PROJECT)
+    sweep_id = tracklab.sweep(config, project=PROJECT)
     print("sweep:", sweep_id)
-    wandb.agent(sweep_id, function=train, count=9)
+    tracklab.agent(sweep_id, function=train, count=9)
     check(sweep_id, num=9, result=2 + 4 * L + 1.5 * L * L)
 
 
@@ -171,9 +171,9 @@ def sweep_bayes_nested(args):
             param2=dict(values=[0, 0.5, 1.5]),
         ),
     )
-    sweep_id = wandb.sweep(config, project=PROJECT)
+    sweep_id = tracklab.sweep(config, project=PROJECT)
     print("sweep:", sweep_id)
-    wandb.agent(sweep_id, function=train, count=9)
+    tracklab.agent(sweep_id, function=train, count=9)
     check(sweep_id, num=9, result=2 + 4 * L + 1.5 * L * L)
 
 
@@ -190,9 +190,9 @@ def sweep_grid_hyperband(args):
         ),
         early_terminate=dict(type="hyperband", max_iter=27, s=2, eta=3),
     )
-    sweep_id = wandb.sweep(config, project=PROJECT)
+    sweep_id = tracklab.sweep(config, project=PROJECT)
     print("sweep:", sweep_id)
-    wandb.agent(sweep_id, function=train, count=9)
+    tracklab.agent(sweep_id, function=train, count=9)
     # TODO(check stopped)
     check(sweep_id, num=9, result=2 + 4 * L + 1.5 * L * L, stopped=3)
 
@@ -210,8 +210,8 @@ def sweep_chdir(args):
         root=os.getcwd(),
     )
 
-    sweep_id = wandb.sweep(config, project=PROJECT)
-    wandb.agent(sweep_id, function=train_and_check_chdir, count=2)
+    sweep_id = tracklab.sweep(config, project=PROJECT)
+    tracklab.agent(sweep_id, function=train_and_check_chdir, count=2)
     # clean up
     os.chdir("../")
     os.removedirs("./test_chdir")

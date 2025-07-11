@@ -13,32 +13,32 @@ import numpy as np
 import pytest
 import requests
 import responses
-import wandb
-import wandb.data_types as data_types
-import wandb.sdk.artifacts.artifact_file_cache as artifact_file_cache
+import tracklab
+import tracklab.data_types as data_types
+import tracklab.sdk.artifacts.artifact_file_cache as artifact_file_cache
 from wandb import Artifact, util
-from wandb.errors.errors import CommError
-from wandb.sdk.artifacts._internal_artifact import InternalArtifact
-from wandb.sdk.artifacts._validators import (
+from tracklab.errors.errors import CommError
+from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
+from tracklab.sdk.artifacts._validators import (
     ARTIFACT_NAME_MAXLEN,
     RESERVED_ARTIFACT_TYPE_PREFIX,
 )
-from wandb.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
-from wandb.sdk.artifacts.artifact_state import ArtifactState
-from wandb.sdk.artifacts.artifact_ttl import ArtifactTTL
-from wandb.sdk.artifacts.exceptions import (
+from tracklab.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
+from tracklab.sdk.artifacts.artifact_state import ArtifactState
+from tracklab.sdk.artifacts.artifact_ttl import ArtifactTTL
+from tracklab.sdk.artifacts.exceptions import (
     ArtifactFinalizedError,
     ArtifactNotLoggedError,
 )
-from wandb.sdk.artifacts.storage_handlers.gcs_handler import (
+from tracklab.sdk.artifacts.storage_handlers.gcs_handler import (
     GCSHandler,
     _GCSIsADirectoryError,
 )
-from wandb.sdk.artifacts.storage_handlers.http_handler import HTTPHandler
-from wandb.sdk.artifacts.storage_handlers.s3_handler import S3Handler
-from wandb.sdk.artifacts.storage_handlers.tracking_handler import TrackingHandler
-from wandb.sdk.lib.hashutil import md5_string
-from wandb.sdk.wandb_run import Run
+from tracklab.sdk.artifacts.storage_handlers.http_handler import HTTPHandler
+from tracklab.sdk.artifacts.storage_handlers.s3_handler import S3Handler
+from tracklab.sdk.artifacts.storage_handlers.tracking_handler import TrackingHandler
+from tracklab.sdk.lib.hashutil import md5_string
+from tracklab.sdk.wandb_run import Run
 
 
 def mock_boto(artifact, path=False, content_type=None, version_id="1"):
@@ -257,7 +257,7 @@ def mock_azure_handler():  # noqa: C901
         raise NotImplementedError
 
     with unittest.mock.patch(
-        "wandb.sdk.artifacts.storage_handlers.azure_handler.AzureHandler._get_module",
+        "tracklab.sdk.artifacts.storage_handlers.azure_handler.AzureHandler._get_module",
         new=_get_module,
     ):
         yield
@@ -494,7 +494,7 @@ def test_add_reference_local_file_no_checksum(tmp_path, artifact):
 class TestAddReferenceLocalFileNoChecksumTwice:
     @pytest.fixture
     def run(self, user) -> Iterator[Run]:
-        with wandb.init() as run:
+        with tracklab.init() as run:
             yield run
 
     @pytest.fixture
@@ -537,7 +537,7 @@ class TestAddReferenceLocalFileNoChecksumTwice:
     @pytest.fixture
     def new_artifact(self, orig_artifact) -> Artifact:
         """A new artifact with the same name and type, but not yet logged."""
-        return wandb.Artifact(orig_artifact.name.split(":")[0], type=orig_artifact.type)
+        return tracklab.Artifact(orig_artifact.name.split(":")[0], type=orig_artifact.type)
 
     def test_adding_ref_with_same_uri_and_same_data_creates_no_new_version(
         self, run, orig_fpath, orig_data, orig_artifact, new_artifact
@@ -1089,7 +1089,7 @@ def test_add_azure_reference_directory(mock_azure_handler):
 
 
 def test_add_azure_reference_max_objects(mock_azure_handler):
-    artifact = wandb.Artifact("my_artifact", type="my_type")
+    artifact = tracklab.Artifact("my_artifact", type="my_type")
     entries = artifact.add_reference(
         "https://myaccount.blob.core.windows.net/my-container/my-dir",
         max_objects=1,
@@ -1279,7 +1279,7 @@ def test_artifact_table_deserialize_timestamp_column():
     for art in (artifact_json, artifact_json_non_null):
         artifact = Artifact(name="test", type="test")
         timestamp_idx = art["columns"].index("Date Time")
-        table = wandb.Table.from_json(art, artifact)
+        table = tracklab.Table.from_json(art, artifact)
         assert [row[timestamp_idx] for row in table.data] == [
             datetime.fromtimestamp(row[timestamp_idx] / 1000.0, tz=timezone.utc)
             if row[timestamp_idx] is not None
@@ -1291,7 +1291,7 @@ def test_artifact_table_deserialize_timestamp_column():
 def test_add_obj_wbimage_no_classes(assets_path, artifact):
     im_path = str(assets_path("2x2.png"))
 
-    wb_image = wandb.Image(
+    wb_image = tracklab.Image(
         im_path,
         masks={
             "ground_truth": {
@@ -1306,7 +1306,7 @@ def test_add_obj_wbimage_no_classes(assets_path, artifact):
 def test_add_obj_wbimage(assets_path, artifact):
     im_path = str(assets_path("2x2.png"))
 
-    wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
+    wb_image = tracklab.Image(im_path, classes=[{"id": 0, "name": "person"}])
     artifact.add(wb_image, "my-image")
 
     manifest = artifact.manifest.to_manifest_json()
@@ -1343,7 +1343,7 @@ def test_add_obj_wbimage_again_after_edit(
 
     image_name = "my-image"
 
-    wb_image = wandb.Image(str(im_path))
+    wb_image = tracklab.Image(str(im_path))
     artifact.add(wb_image, image_name, overwrite=overwrite)
 
     manifest1 = artifact.manifest.to_manifest_json()
@@ -1357,7 +1357,7 @@ def test_add_obj_wbimage_again_after_edit(
     assert im_path == copied_path  # Consistency check
     assert filecmp.cmp(orig_path2, im_path) is True  # Consistency check
 
-    wb_image = wandb.Image(str(im_path))
+    wb_image = tracklab.Image(str(im_path))
     artifact.add(wb_image, image_name, overwrite=overwrite)
 
     manifest2 = artifact.manifest.to_manifest_json()
@@ -1374,7 +1374,7 @@ def test_add_obj_wbimage_again_after_edit(
 def test_add_obj_using_brackets(assets_path, artifact):
     im_path = str(assets_path("2x2.png"))
 
-    wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
+    wb_image = tracklab.Image(im_path, classes=[{"id": 0, "name": "person"}])
     artifact["my-image"] = wb_image
 
     manifest = artifact.manifest.to_manifest_json()
@@ -1403,8 +1403,8 @@ def test_duplicate_wbimage_from_file(assets_path, artifact, add_duplicate):
     im_path_1 = str(assets_path("test.png"))
     im_path_2 = str(assets_path("test2.png"))
 
-    wb_image_1 = wandb.Image(im_path_1)
-    wb_image_2 = wandb.Image(im_path_1) if add_duplicate else wandb.Image(im_path_2)
+    wb_image_1 = tracklab.Image(im_path_1)
+    wb_image_2 = tracklab.Image(im_path_1) if add_duplicate else tracklab.Image(im_path_2)
 
     artifact.add(wb_image_1, "my-image_1")
     artifact.add(wb_image_2, "my-image_2")
@@ -1420,16 +1420,16 @@ def test_deduplicate_wbimage_from_array():
     im_data_2 = np.random.rand(300, 300, 3)
 
     artifact = Artifact(type="dataset", name="artifact")
-    wb_image_1 = wandb.Image(im_data_1)
-    wb_image_2 = wandb.Image(im_data_2)
+    wb_image_1 = tracklab.Image(im_data_1)
+    wb_image_2 = tracklab.Image(im_data_2)
     artifact.add(wb_image_1, "my-image_1")
     artifact.add(wb_image_2, "my-image_2")
     assert len(artifact.manifest.entries) == 4
 
     artifact = Artifact(type="dataset", name="artifact")
-    wb_image_1 = wandb.Image(im_data_1)
-    wb_image_2 = wandb.Image(im_data_2)
-    wb_image_3 = wandb.Image(im_data_1)  # yes, should be 1
+    wb_image_1 = tracklab.Image(im_data_1)
+    wb_image_2 = tracklab.Image(im_data_2)
+    wb_image_3 = tracklab.Image(im_data_1)  # yes, should be 1
     artifact.add(wb_image_1, "my-image_1")
     artifact.add(wb_image_2, "my-image_2")
     artifact.add(wb_image_3, "my-image_3")
@@ -1458,8 +1458,8 @@ def test_deduplicate_wbimagemask_from_array(artifact, add_duplicate):
 def test_add_obj_wbimage_classes_obj(assets_path, artifact):
     im_path = str(assets_path("2x2.png"))
 
-    classes = wandb.Classes([{"id": 0, "name": "person"}])
-    wb_image = wandb.Image(im_path, classes=classes)
+    classes = tracklab.Classes([{"id": 0, "name": "person"}])
+    wb_image = tracklab.Image(im_path, classes=classes)
     artifact.add(wb_image, "my-image")
 
     manifest = artifact.manifest.to_manifest_json()
@@ -1482,9 +1482,9 @@ def test_add_obj_wbimage_classes_obj(assets_path, artifact):
 def test_add_obj_wbimage_classes_obj_already_added(assets_path, artifact):
     im_path = str(assets_path("2x2.png"))
 
-    classes = wandb.Classes([{"id": 0, "name": "person"}])
+    classes = tracklab.Classes([{"id": 0, "name": "person"}])
     artifact.add(classes, "my-classes")
-    wb_image = wandb.Image(im_path, classes=classes)
+    wb_image = tracklab.Image(im_path, classes=classes)
     artifact.add(wb_image, "my-image")
 
     manifest = artifact.manifest.to_manifest_json()
@@ -1512,7 +1512,7 @@ def test_add_obj_wbimage_image_already_added(assets_path, artifact):
     im_path = str(assets_path("2x2.png"))
 
     artifact.add_file(im_path)
-    wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
+    wb_image = tracklab.Image(im_path, classes=[{"id": 0, "name": "person"}])
     artifact.add(wb_image, "my-image")
 
     manifest = artifact.manifest.to_manifest_json()
@@ -1532,8 +1532,8 @@ def test_add_obj_wbimage_image_already_added(assets_path, artifact):
 def test_add_obj_wbtable_images(assets_path, artifact):
     im_path = str(assets_path("2x2.png"))
 
-    wb_image = wandb.Image(im_path, classes=[{"id": 0, "name": "person"}])
-    wb_table = wandb.Table(["examples"])
+    wb_image = tracklab.Image(im_path, classes=[{"id": 0, "name": "person"}])
+    wb_table = tracklab.Table(["examples"])
     wb_table.add_data(wb_image)
     wb_table.add_data(wb_image)
     artifact.add(wb_table, "my-table")
@@ -1562,9 +1562,9 @@ def test_add_obj_wbtable_images_duplicate_name(assets_path, artifact):
     os.mkdir("dir2")
     shutil.copy(img_2, "dir2/img.png")
 
-    wb_image_1 = wandb.Image(os.path.join("dir1", "img.png"))
-    wb_image_2 = wandb.Image(os.path.join("dir2", "img.png"))
-    wb_table = wandb.Table(["examples"])
+    wb_image_1 = tracklab.Image(os.path.join("dir1", "img.png"))
+    wb_image_2 = tracklab.Image(os.path.join("dir2", "img.png"))
+    wb_table = tracklab.Table(["examples"])
     wb_table.add_data(wb_image_1)
     wb_table.add_data(wb_image_2)
     artifact.add(wb_table, "my-table")
@@ -1587,7 +1587,7 @@ def test_add_partition_folder(artifact):
     table_name = "dataset"
     table_parts_dir = "dataset_parts"
 
-    partition_table = wandb.data_types.PartitionedTable(parts_path=table_parts_dir)
+    partition_table = tracklab.data_types.PartitionedTable(parts_path=table_parts_dir)
     artifact.add(partition_table, table_name)
     manifest = artifact.manifest.to_manifest_json()
     assert artifact.digest == "c6a4d80ed84fd68df380425ded894b19"
@@ -1633,7 +1633,7 @@ def test_s3_storage_handler_load_path_missing_reference(monkeypatch, user, artif
     mock_boto(artifact, version_id="")
     artifact.add_reference("s3://my-bucket/my_object.pb")
 
-    with wandb.init(project="test") as run:
+    with tracklab.init(project="test") as run:
         run.log_artifact(artifact)
     artifact.wait()
 
@@ -1646,33 +1646,33 @@ def test_s3_storage_handler_load_path_missing_reference(monkeypatch, user, artif
 
     monkeypatch.setattr(S3Handler, "_etag_from_obj", bad_request)
 
-    with wandb.init(project="test") as run:
+    with tracklab.init(project="test") as run:
         with pytest.raises(FileNotFoundError, match="Unable to find"):
             artifact.download()
 
 
 def test_change_artifact_collection_type(user):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = Artifact("image_data", "data")
         run.log_artifact(artifact)
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = run.use_artifact("image_data:latest")
         artifact.collection.change_type("lucas_type")
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = run.use_artifact("image_data:latest")
         assert artifact.type == "lucas_type"
 
 
 def test_change_artifact_collection_type_to_internal_type(user):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = Artifact("image_data", "data")
         run.log_artifact(artifact).wait()
 
     internal_type = RESERVED_ARTIFACT_TYPE_PREFIX + "invalid"
     collection = artifact.collection
-    with wandb.init() as run:
+    with tracklab.init() as run:
         # test deprecated change_type errors for changing to internal type
         with pytest.raises(CommError, match="is reserved for internal use"):
             collection.change_type(internal_type)
@@ -1685,12 +1685,12 @@ def test_change_artifact_collection_type_to_internal_type(user):
 
 def test_change_type_of_internal_artifact_collection(user):
     internal_type = RESERVED_ARTIFACT_TYPE_PREFIX + "invalid"
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = InternalArtifact("test-internal", internal_type)
         run.log_artifact(artifact).wait()
 
     collection = artifact.collection
-    with wandb.init() as run:
+    with tracklab.init() as run:
         # test deprecated change_type
         with pytest.raises(
             CommError, match="is an internal type and cannot be changed"
@@ -1716,7 +1716,7 @@ def test_setting_invalid_artifact_collection_name(user, api, invalid_name):
     """Setting an invalid name on an existing ArtifactCollection should fail and raise an error."""
     orig_name = "valid-name"
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = Artifact(orig_name, "data")
         run.log_artifact(artifact)
 
@@ -1729,7 +1729,7 @@ def test_setting_invalid_artifact_collection_name(user, api, invalid_name):
 
 
 def test_save_artifact_sequence(monkeypatch, user, api):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = Artifact("sequence_name", "data")
         run.log_artifact(artifact)
         artifact.wait()
@@ -1759,7 +1759,7 @@ def test_save_artifact_sequence(monkeypatch, user, api):
 
 
 def test_artifact_standard_url(user, api):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = Artifact("sequence_name", "data")
         run.log_artifact(artifact)
         artifact.wait()
@@ -1771,8 +1771,8 @@ def test_artifact_standard_url(user, api):
 
 
 def test_artifact_model_registry_url(user, api):
-    with wandb.init() as run:
-        artifact = wandb.Artifact("sequence_name", "model")
+    with tracklab.init() as run:
+        artifact = tracklab.Artifact("sequence_name", "model")
         run.log_artifact(artifact)
         artifact.wait()
         run.link_artifact(artifact=artifact, target_path="test_model_portfolio")
@@ -1794,7 +1794,7 @@ def test_artifact_model_registry_url(user, api):
 
 
 def test_save_artifact_portfolio(user, api):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         artifact = Artifact("image_data", "data")
         run.log_artifact(artifact)
         artifact.link("portfolio_name")
@@ -1829,7 +1829,7 @@ def test_s3_storage_handler_load_path_missing_reference_allowed(
     mock_boto(artifact, version_id="")
     artifact.add_reference("s3://my-bucket/my_object.pb")
 
-    with wandb.init(project="test") as run:
+    with tracklab.init(project="test") as run:
         run.log_artifact(artifact)
     artifact.wait()
 
@@ -1842,7 +1842,7 @@ def test_s3_storage_handler_load_path_missing_reference_allowed(
 
     monkeypatch.setattr(S3Handler, "_etag_from_obj", bad_request)
 
-    with wandb.init(project="test") as run:
+    with tracklab.init(project="test") as run:
         artifact.download(allow_missing_references=True)
 
     # It should still log a warning about skipping the missing reference.
@@ -1893,25 +1893,25 @@ def test_tracking_storage_handler(artifact):
 
 
 def test_manifest_json_version():
-    pd_manifest = wandb.proto.wandb_internal_pb2.ArtifactManifest()
+    pd_manifest = tracklab.proto.wandb_internal_pb2.ArtifactManifest()
     pd_manifest.version = 1
-    manifest = wandb.sdk.internal.sender._manifest_json_from_proto(pd_manifest)
+    manifest = tracklab.sdk.internal.sender._manifest_json_from_proto(pd_manifest)
     assert manifest["version"] == 1
 
 
 @pytest.mark.parametrize("version", ["1", 1.0])
 def test_manifest_version_is_integer(version):
-    pd_manifest = wandb.proto.wandb_internal_pb2.ArtifactManifest()
+    pd_manifest = tracklab.proto.wandb_internal_pb2.ArtifactManifest()
     with pytest.raises(TypeError):
         pd_manifest.version = version
 
 
 @pytest.mark.parametrize("version", [0, 2])
 def test_manifest_json_invalid_version(version):
-    pd_manifest = wandb.proto.wandb_internal_pb2.ArtifactManifest()
+    pd_manifest = tracklab.proto.wandb_internal_pb2.ArtifactManifest()
     pd_manifest.version = version
     with pytest.raises(Exception) as e:
-        wandb.sdk.internal.sender._manifest_json_from_proto(pd_manifest)
+        tracklab.sdk.internal.sender._manifest_json_from_proto(pd_manifest)
     assert "manifest version" in str(e.value)
 
 
@@ -1933,7 +1933,7 @@ def test_cache_cleanup_allows_upload(user, tmp_path, monkeypatch, artifact):
     os.remove("test-file")
 
     # We're still able to upload the artifact.
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log_artifact(artifact)
         artifact.wait()
 

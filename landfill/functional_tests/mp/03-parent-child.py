@@ -6,11 +6,11 @@ import os
 
 import yea
 
-import wandb
+import tracklab
 
 
 def process_child():
-    run_child = wandb.init()
+    run_child = tracklab.init()
     run_child.config.id = "child"
     run_child.name = "child-name"
 
@@ -30,7 +30,7 @@ def main():
     except FileExistsError:
         pass
 
-    run_parent = wandb.init()
+    run_parent = tracklab.init()
     run_parent.config.id = "parent"
     run_parent.log({"p1": 11})
     run_parent.name = "parent-name"

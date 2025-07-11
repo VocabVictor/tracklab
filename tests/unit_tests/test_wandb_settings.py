@@ -9,12 +9,12 @@ import tempfile
 from unittest import mock
 
 import pytest
-import wandb
+import tracklab
 from pydantic.version import VERSION as PYDANTIC_VERSION
 from wandb import Settings
-from wandb.errors import UsageError
-from wandb.sdk.lib.credentials import DEFAULT_WANDB_CREDENTIALS_FILE
-from wandb.sdk.lib.run_moment import RunMoment
+from tracklab.errors import UsageError
+from tracklab.sdk.lib.credentials import DEFAULT_WANDB_CREDENTIALS_FILE
+from tracklab.sdk.lib.run_moment import RunMoment
 
 is_pydantic_v1 = int(PYDANTIC_VERSION[0]) == 1
 
@@ -32,7 +32,7 @@ def test_mapping_interface():
 
 
 def test_is_local():
-    s = Settings(base_url="https://api.wandb.ai")
+    s = Settings(base_url="https://api.tracklab.ai")
     assert s.is_local is False
 
 
@@ -48,9 +48,9 @@ def test_program_python_m():
         os.mkdir(path_module)
         with open(os.path.join(path_module, "lib.py"), "w") as f:
             f.write(
-                "import wandb\n\n\n"
+                "import tracklab\n\n\n"
                 "if __name__ == '__main__':\n"
-                "    run = wandb.init(mode='offline')\n"
+                "    run = tracklab.init(mode='offline')\n"
                 "    print(run.settings.program)\n"
             )
         output = subprocess.check_output(
@@ -62,9 +62,9 @@ def test_program_python_m():
 @pytest.mark.skip(reason="Unskip once api_key validation is restored")
 def test_local_api_key_validation():
     with pytest.raises(UsageError):
-        wandb.Settings(
+        tracklab.Settings(
             api_key="local-87eLxjoRhY6u2ofg63NAJo7rVYHZo4NGACOvpSsF",
-            base_url="https://api.wandb.ai",
+            base_url="https://api.tracklab.ai",
         )
 
 
@@ -106,12 +106,12 @@ def test_noop():
 
 def test_get_base_url():
     s = Settings()
-    assert s.base_url == "https://api.wandb.ai"
+    assert s.base_url == "https://api.tracklab.ai"
 
 
 def test_base_url_validation():
     s = Settings()
-    s.base_url = "https://api.wandb.space"
+    s.base_url = "https://api.tracklab.space"
     with pytest.raises(ValueError):
         s.base_url = "new"
 
@@ -248,8 +248,8 @@ def test_validate_mode():
 @pytest.mark.parametrize(
     "url",
     [
-        "https://api.wandb.ai",
-        "https://wandb.ai.other.crazy.domain.com",
+        "https://api.tracklab.ai",
+        "https://tracklab.ai.other.crazy.domain.com",
         "https://127.0.0.1",
         "https://localhost",
         "https://192.168.31.1:8080",
@@ -264,12 +264,12 @@ def test_validate_base_url(url):
 @pytest.mark.parametrize(
     "url",
     [
-        # wandb.ai-specific errors, should be https://api.wandb.ai
-        "https://wandb.ai",
-        "https://app.wandb.ai",
-        "http://api.wandb.ai",  # insecure
+        # tracklab.ai-specific errors, should be https://api.tracklab.ai
+        "https://tracklab.ai",
+        "https://app.tracklab.ai",
+        "http://api.tracklab.ai",  # insecure
         # only http(s) schemes are allowed
-        "ftp://wandb.ai",
+        "ftp://tracklab.ai",
         # unsafe characters
         "http://host\t.ai",
         "http://host\n.ai",
@@ -391,11 +391,11 @@ def test_log_internal():
 
 
 def test_settings_static():
-    from wandb.sdk.internal.settings_static import SettingsStatic
+    from tracklab.sdk.internal.settings_static import SettingsStatic
 
     static_settings = SettingsStatic(Settings().to_proto())
     assert "base_url" in static_settings
-    assert static_settings.base_url == "https://api.wandb.ai"
+    assert static_settings.base_url == "https://api.tracklab.ai"
 
 
 # --------------------------
@@ -492,7 +492,7 @@ def test_code_saving_disable_code(mock_run):
 def test_setup_offline():
     login_settings = Settings()
     login_settings.mode = "offline"
-    assert wandb.setup(settings=login_settings)._get_entity() is None
+    assert tracklab.setup(settings=login_settings)._get_entity() is None
 
 
 def test_mutual_exclusion_of_branching_args():

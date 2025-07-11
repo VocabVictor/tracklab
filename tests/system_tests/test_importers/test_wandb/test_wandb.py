@@ -1,8 +1,8 @@
 import unittest
 
 import pytest
-from wandb.apis.importers import Namespace
-from wandb.apis.importers.wandb import WandbImporter
+from tracklab.apis.importers import Namespace
+from tracklab.apis.importers.wandb import WandbImporter
 
 
 @pytest.mark.xfail(reason="TODO: Breaks on server > 0.57.4")
@@ -70,7 +70,7 @@ def test_import_artifact_sequences(
 
         # Mock only required because there is no great way to download files
         # in the test like there is for artifacts
-        with unittest.mock.patch("wandb.apis.public.files.File.download"):
+        with unittest.mock.patch("tracklab.apis.public.files.File.download"):
             importer.import_artifact_sequences(
                 namespaces=[Namespace(user, project_name)],
                 remapping={
@@ -129,7 +129,7 @@ def test_import_reports(
             dst_api_key=user2,
         )
 
-        with unittest.mock.patch("wandb.sdk.lib.apikey.write_key"):
+        with unittest.mock.patch("tracklab.sdk.lib.apikey.write_key"):
             importer.import_reports(
                 namespaces=[Namespace(user, project_name)],
                 remapping={

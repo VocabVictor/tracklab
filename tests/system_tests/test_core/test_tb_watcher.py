@@ -1,4 +1,4 @@
-from wandb.sdk.internal import tb_watcher
+from tracklab.sdk.internal import tb_watcher
 
 
 class TestIsTfEventsFileCreatedBy:

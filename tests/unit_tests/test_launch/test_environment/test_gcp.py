@@ -4,19 +4,19 @@ from unittest.mock import MagicMock
 import pytest
 from google.api_core.exceptions import Forbidden, GoogleAPICallError, NotFound
 from google.auth.exceptions import DefaultCredentialsError, RefreshError
-from wandb.sdk.launch.environment.gcp_environment import (
+from tracklab.sdk.launch.environment.gcp_environment import (
     GCP_REGION_ENV_VAR,
     GcpEnvironment,
     get_gcloud_config_value,
 )
-from wandb.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.errors import LaunchError
 
 
 @pytest.mark.asyncio
 async def test_environment_no_default_creds(mocker):
     """Test that the environment raises an error if there are no default credentials."""
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.auth.default",
+        "tracklab.sdk.launch.environment.gcp_environment.google.auth.default",
         side_effect=DefaultCredentialsError,
     )
     with pytest.raises(LaunchError):
@@ -31,7 +31,7 @@ async def test_environment_verify_invalid_creds(mocker):
     credentials.refresh = MagicMock()
     credentials.valid = False
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.auth.default",
+        "tracklab.sdk.launch.environment.gcp_environment.google.auth.default",
         return_value=(credentials, "project"),
     )
     with pytest.raises(LaunchError):
@@ -48,12 +48,12 @@ async def test_upload_file(mocker):
     credentials = MagicMock()
     credentials.valid = True
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.auth.default",
+        "tracklab.sdk.launch.environment.gcp_environment.google.auth.default",
         return_value=(credentials, "project"),
     )
     mock_storage_client = MagicMock()
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.cloud.storage.Client",
+        "tracklab.sdk.launch.environment.gcp_environment.google.cloud.storage.Client",
         mock_storage_client,
     )
     mock_bucket = MagicMock()
@@ -62,7 +62,7 @@ async def test_upload_file(mocker):
     mock_bucket.blob.return_value = mock_blob
     environment = GcpEnvironment("region")
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.os.path.isfile",
+        "tracklab.sdk.launch.environment.gcp_environment.os.path.isfile",
         return_value=True,
     )
     await environment.upload_file("source", "gs://bucket/key")
@@ -83,12 +83,12 @@ async def test_upload_dir(mocker):
     credentials = MagicMock()
     credentials.valid = True
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.auth.default",
+        "tracklab.sdk.launch.environment.gcp_environment.google.auth.default",
         return_value=(credentials, "project"),
     )
     mock_storage_client = MagicMock()
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.cloud.storage.Client",
+        "tracklab.sdk.launch.environment.gcp_environment.google.cloud.storage.Client",
         mock_storage_client,
     )
     mock_bucket = MagicMock()
@@ -97,15 +97,15 @@ async def test_upload_dir(mocker):
     mock_bucket.blob.return_value = mock_blob
     environment = GcpEnvironment("region")
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.os.path.isfile",
+        "tracklab.sdk.launch.environment.gcp_environment.os.path.isfile",
         return_value=True,
     )
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.os.path.isdir",
+        "tracklab.sdk.launch.environment.gcp_environment.os.path.isdir",
         return_value=True,
     )
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.os.walk",
+        "tracklab.sdk.launch.environment.gcp_environment.os.walk",
         return_value=[
             ("source", ["subdir"], ["file1", "file2"]),
             (os.path.join("source", "subdir"), [], ["file3"]),
@@ -140,13 +140,13 @@ async def test_verify_storage_uri(mocker):
     credentials = MagicMock()
     credentials.valid = True
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.auth.default",
+        "tracklab.sdk.launch.environment.gcp_environment.google.auth.default",
         return_value=(credentials, "project"),
     )
     mock_storage_client = MagicMock()
     mock_storage_client.thing = "haha"
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.google.cloud.storage.Client",
+        "tracklab.sdk.launch.environment.gcp_environment.google.cloud.storage.Client",
         MagicMock(return_value=mock_storage_client),
     )
     mock_bucket = MagicMock()
@@ -184,7 +184,7 @@ def test_get_gcloud_config_value(mocker, region, value):
     """Test that we correctly handle gcloud outputs."""
     # Mock subprocess.check_output
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.subprocess.check_output",
+        "tracklab.sdk.launch.environment.gcp_environment.subprocess.check_output",
         return_value=region,
     )
     # environment = GcpEnvironment.from_default()
@@ -195,7 +195,7 @@ def test_from_default_gcloud(mocker):
     """Test constructing gcp environment in a region read by the gcloud CLI."""
     #  First test that we construct from gcloud output
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.subprocess.check_output",
+        "tracklab.sdk.launch.environment.gcp_environment.subprocess.check_output",
         return_value=b"us-central1",
     )
     environment = GcpEnvironment.from_default()
@@ -206,7 +206,7 @@ def test_from_default_env(mocker):
     """Test that we can construct default reading region from env var."""
     # Patch gcloud output
     mocker.patch(
-        "wandb.sdk.launch.environment.gcp_environment.subprocess.check_output",
+        "tracklab.sdk.launch.environment.gcp_environment.subprocess.check_output",
         return_value=b"unset",
     )
     # Patch env vars

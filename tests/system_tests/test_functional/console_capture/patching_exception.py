@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # This will attempt to overwrite `sys.stdout.write` on import,
     # which will raise an error that must not be propagated.
-    from wandb.sdk.lib import console_capture
+    from tracklab.sdk.lib import console_capture
 
     try:
         console_capture.capture_stdout(lambda *unused: None)

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Iterable, Mapping, Tuple
 from unittest.mock import Mock, call
 
 import pytest
-from wandb.filesync.step_prepare import (
+from tracklab.filesync.step_prepare import (
     Request,
     RequestFinish,
     RequestPrepare,
@@ -16,7 +16,7 @@ from wandb.filesync.step_prepare import (
 )
 
 if TYPE_CHECKING:
-    from wandb.sdk.internal.internal_api import (
+    from tracklab.sdk.internal.internal_api import (
         CreateArtifactFileSpecInput,
         CreateArtifactFilesResponseFile,
     )

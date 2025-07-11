@@ -5,11 +5,11 @@ import multiprocessing as mp
 
 import yea
 
-import wandb
+import tracklab
 
 
 def process_child(attach_id):
-    run_child = wandb.attach(attach_id=attach_id)
+    run_child = tracklab.attach(attach_id=attach_id)
     run_child.config.c2 = 22
     run_child.log({"s1": 21})
     run_child.log({"s2": 22})
@@ -18,7 +18,7 @@ def process_child(attach_id):
 
 
 def main():
-    run = wandb.init()
+    run = tracklab.init()
     print("parent output")
     run.config.c1 = 11
     run.log(dict(s2=12, s4=14))

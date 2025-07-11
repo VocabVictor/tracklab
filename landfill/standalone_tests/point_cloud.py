@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Numpy Clouds
-# http://app.wandb.ai/nbaryd/client-standalone_tests/runs/ly8g46vm?workspace=user-nbaryd
+# http://app.tracklab.ai/nbaryd/client-standalone_tests/runs/ly8g46vm?workspace=user-nbaryd
 
 # 3D models
 # http://app.test/nbaryd/client-standalone_tests/runs/0rb3xwke?workspace=user-nbaryd
@@ -11,7 +11,7 @@ from math import cos, pi, sin
 
 import numpy as np
 
-import wandb
+import tracklab
 
 DIR = os.path.dirname(__file__)
 
@@ -48,28 +48,28 @@ def wave_pattern(i):
 
 
 def main():
-    run = wandb.init()
+    run = tracklab.init()
 
     # Tests 3d OBJ
 
-    # wandb.log({"gltf": wandb.Object3D(open(os.path.join(DIR, "assets", "Duck.gltf"))),
-    #           "obj": wandb.Object3D(open(os.path.join(DIR, "assets", "cube.obj")))})
+    # tracklab.log({"gltf": tracklab.Object3D(open(os.path.join(DIR, "assets", "Duck.gltf"))),
+    #           "obj": tracklab.Object3D(open(os.path.join(DIR, "assets", "cube.obj")))})
 
-    artifact = wandb.Artifact("pointcloud_test_2", "dataset")
-    table = wandb.Table(
+    artifact = tracklab.Artifact("pointcloud_test_2", "dataset")
+    table = tracklab.Table(
         ["ID", "Model"],
     )
 
     # Tests numpy clouds
     for i in range(0, 20, 10):
-        table.add_data("Cloud " + str(i), wandb.Object3D(wave_pattern(i)))
-        wandb.log(
+        table.add_data("Cloud " + str(i), tracklab.Object3D(wave_pattern(i)))
+        tracklab.log(
             {
                 "Clouds": [
-                    wandb.Object3D(point_cloud_1),
-                    wandb.Object3D(point_cloud_2),
+                    tracklab.Object3D(point_cloud_1),
+                    tracklab.Object3D(point_cloud_2),
                 ],
-                "Colored_Cloud": wandb.Object3D(wave_pattern(i)),
+                "Colored_Cloud": tracklab.Object3D(wave_pattern(i)),
             }
         )
 

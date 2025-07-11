@@ -1,85 +1,75 @@
-"""Line plot utilities."""
+from __future__ import annotations
 
-from typing import List, Dict, Any, Optional, Union
-import json
+from typing import TYPE_CHECKING
 
-from ..data_types.plotly import Plotly
+from tracklab.plot.custom_chart import plot_table
+
+if TYPE_CHECKING:
+    import tracklab
+    from tracklab.plot.custom_chart import CustomChart
 
 
-def line(table: Any, 
-         x: str, 
-         y: str, 
-         color: Optional[str] = None,
-         title: Optional[str] = None,
-         x_title: Optional[str] = None,
-         y_title: Optional[str] = None) -> Plotly:
-    """Create a line plot.
-    
+def line(
+    table: wandb.Table,
+    x: str,
+    y: str,
+    stroke: str | None = None,
+    title: str = "",
+    split_table: bool = False,
+) -> CustomChart:
+    """Constructs a customizable line chart.
+
     Args:
-        table: Data table or pandas DataFrame
-        x: Column name for x-axis
-        y: Column name for y-axis  
-        color: Column name for color grouping
-        title: Plot title
-        x_title: X-axis title
-        y_title: Y-axis title
-        
+        table:  The table containing data for the chart.
+        x: Column name for the x-axis values.
+        y: Column name for the y-axis values.
+        stroke: Column name to differentiate line strokes (e.g., for
+            grouping lines).
+        title: Title of the chart.
+        split_table: Whether the table should be split into a separate section
+            in the W&B UI. If `True`, the table will be displayed in a section named
+            "Custom Chart Tables". Default is `False`.
+
     Returns:
-        Plotly object containing the line plot
+       CustomChart: A custom chart object that can be logged to W&B. To log the
+            chart, pass it to `wandb.log()`.
+
+    Example:
+
+    ```python
+    import math
+    import random
+    import tracklab
+
+    # Create multiple series of data with different patterns
+    data = []
+    for i in range(100):
+        # Series 1: Sinusoidal pattern with random noise
+        data.append([i, math.sin(i / 10) + random.uniform(-0.1, 0.1), "series_1"])
+        # Series 2: Cosine pattern with random noise
+        data.append([i, math.cos(i / 10) + random.uniform(-0.1, 0.1), "series_2"])
+        # Series 3: Linear increase with random noise
+        data.append([i, i / 10 + random.uniform(-0.5, 0.5), "series_3"])
+
+    # Define the columns for the table
+    table = wandb.Table(data=data, columns=["step", "value", "series"])
+
+    # Initialize wandb run and log the line chart
+    with wandb.init(project="line_chart_example") as run:
+        line_chart = wandb.plot.line(
+            table=table,
+            x="step",
+            y="value",
+            stroke="series",  # Group by the "series" column
+            title="Multi-Series Line Plot",
+        )
+        run.log({"line-chart": line_chart})
+    ```
     """
-    # Convert table to list of dicts if needed
-    if hasattr(table, 'to_dict'):
-        # pandas DataFrame
-        data = table.to_dict('records')
-    elif hasattr(table, 'data'):
-        # wandb Table
-        data = table.data
-    else:
-        data = table
-        
-    # Build plotly configuration
-    traces = []
-    
-    if color is None:
-        # Single line
-        trace = {
-            'type': 'scatter',
-            'mode': 'lines+markers',
-            'x': [row[x] for row in data],
-            'y': [row[y] for row in data],
-            'name': y
-        }
-        traces.append(trace)
-    else:
-        # Multiple lines by color
-        groups = {}
-        for row in data:
-            group_key = row[color]
-            if group_key not in groups:
-                groups[group_key] = {'x': [], 'y': []}
-            groups[group_key]['x'].append(row[x])
-            groups[group_key]['y'].append(row[y])
-            
-        for group_name, group_data in groups.items():
-            trace = {
-                'type': 'scatter',
-                'mode': 'lines+markers',
-                'x': group_data['x'],
-                'y': group_data['y'],
-                'name': str(group_name)
-            }
-            traces.append(trace)
-    
-    layout = {
-        'title': title or f'{y} vs {x}',
-        'xaxis': {'title': x_title or x},
-        'yaxis': {'title': y_title or y},
-        'showlegend': color is not None
-    }
-    
-    plotly_config = {
-        'data': traces,
-        'layout': layout
-    }
-    
-    return Plotly(plotly_config)
+    return plot_table(
+        data_table=table,
+        vega_spec_name="wandb/line/v0",
+        fields={"x": x, "y": y, "stroke": stroke},
+        string_fields={"title": title},
+        split_table=split_table,
+    )

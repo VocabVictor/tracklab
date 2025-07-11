@@ -13,8 +13,8 @@ import shutil
 from unittest import mock
 
 import pytest
-import wandb
-import wandb.env as env
+import tracklab
+import tracklab.env as env
 
 reload_fn = importlib.reload
 
@@ -26,7 +26,7 @@ reload_fn = importlib.reload
 
 
 def test_resume_auto_success(user):
-    run = wandb.init(resume=True)
+    run = tracklab.init(resume=True)
     run.finish()
     assert not os.path.exists(run.settings.resume_fname)
 
@@ -38,7 +38,7 @@ def test_include_exclude_config_keys(user):
         "baz": 3,
     }
 
-    with wandb.init(
+    with tracklab.init(
         resume=True,
         config=config,
         config_exclude_keys=("bar",),
@@ -47,7 +47,7 @@ def test_include_exclude_config_keys(user):
         assert run.config["baz"] == 3
         assert "bar" not in run.config
 
-    with wandb.init(
+    with tracklab.init(
         resume=True,
         config=config,
         config_include_keys=("bar",),
@@ -57,10 +57,10 @@ def test_include_exclude_config_keys(user):
         assert "baz" not in run.config
 
     with pytest.raises(
-        wandb.errors.UsageError,
+        tracklab.errors.UsageError,
         match="Expected at most only one of exclude or include",
     ):
-        wandb.init(
+        tracklab.init(
             resume=True,
             config=config,
             config_include_keys=("bar",),
@@ -75,7 +75,7 @@ def _remove_dir_if_exists(path):
 
 
 def test_dir_on_import():
-    """Ensure that `import wandb` does not create a local storage directory."""
+    """Ensure that `import tracklab` does not create a local storage directory."""
     default_path = os.path.join(os.getcwd(), "wandb")
     custom_env_path = os.path.join(os.getcwd(), "env_custom")
 
@@ -97,7 +97,7 @@ def test_dir_on_import():
 
 
 def test_dir_on_init(user):
-    """Ensure that `wandb.init()` creates the proper directory and nothing else."""
+    """Ensure that `tracklab.init()` creates the proper directory and nothing else."""
     default_path = os.path.join(os.getcwd(), "wandb")
 
     # Clear env if set
@@ -107,13 +107,13 @@ def test_dir_on_init(user):
         # Test for the base case
         reload_fn(wandb)
         _remove_dir_if_exists(default_path)
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert os.path.isdir(default_path), f"Expected directory at {default_path}"
 
 
 def test_dir_on_init_env(user):
-    """Ensure that `wandb.init()` w/ env variable set creates the proper directory and nothing else."""
+    """Ensure that `tracklab.init()` w/ env variable set creates the proper directory and nothing else."""
     default_path = os.path.join(os.getcwd(), "wandb")
     custom_env_path = os.path.join(os.getcwd(), "env_custom")
 
@@ -123,7 +123,7 @@ def test_dir_on_init_env(user):
             os.makedirs(custom_env_path)
         reload_fn(wandb)
         _remove_dir_if_exists(default_path)
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert not os.path.isdir(default_path), (
             f"Unexpected directory at {default_path}"
@@ -133,7 +133,7 @@ def test_dir_on_init_env(user):
         )
         # And for the duplicate-run case
         _remove_dir_if_exists(default_path)
-        run = wandb.init()
+        run = tracklab.init()
         run.finish()
         assert not os.path.isdir(default_path), (
             f"Unexpected directory at {default_path}"
@@ -144,7 +144,7 @@ def test_dir_on_init_env(user):
 
 
 def test_dir_on_init_dir(user):
-    """Ensure that `wandb.init(dir=DIR)` creates the proper directory and nothing else."""
+    """Ensure that `tracklab.init(dir=DIR)` creates the proper directory and nothing else."""
     default_path = os.path.join(os.getcwd(), "wandb")
     dir_name = "dir_custom"
     custom_dir_path = os.path.join(os.getcwd(), dir_name)
@@ -154,20 +154,20 @@ def test_dir_on_init_dir(user):
     _remove_dir_if_exists(default_path)
     if not os.path.isdir(custom_dir_path):
         os.makedirs(custom_dir_path)
-    run = wandb.init(dir="./" + dir_name)
+    run = tracklab.init(dir="./" + dir_name)
     run.finish()
     assert not os.path.isdir(default_path), f"Unexpected directory at {default_path}"
     assert os.path.isdir(custom_dir_path), f"Expected directory at {custom_dir_path}"
     # And for the duplicate-run case
     _remove_dir_if_exists(default_path)
-    run = wandb.init(dir="./" + dir_name)
+    run = tracklab.init(dir="./" + dir_name)
     run.finish()
     assert not os.path.isdir(default_path), f"Unexpected directory at {default_path}"
     assert os.path.isdir(custom_dir_path), f"Expected directory at {custom_dir_path}"
 
 
 def test_mark_preempting(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.mark_preempting()
 
     # `mark_preempting` is expected to update the run ASAP, but to avoid

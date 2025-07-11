@@ -20,7 +20,7 @@ def simple_fake_test(handler):
 
 
 def main():
-    from wandb.integration.langchain import WandbTracer
+    from tracklab.integration.langchain import WandbTracer
 
     handler = WandbTracer()
     simple_fake_test(handler)

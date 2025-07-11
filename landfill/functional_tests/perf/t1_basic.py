@@ -4,11 +4,11 @@ import yea
 
 def main():
     # import here so we can profile how long it takes
-    import wandb
+    import tracklab
 
-    run = wandb.init()
+    run = tracklab.init()
     for _ in range(1000):
-        wandb.log(dict(this=2))
+        tracklab.log(dict(this=2))
     run.finish()
 
 

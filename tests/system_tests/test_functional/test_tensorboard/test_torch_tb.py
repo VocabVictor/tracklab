@@ -6,7 +6,7 @@ This test is to check if the tensorboard data is being processed correctly and s
 import numpy as np
 import pytest
 import torch
-import wandb
+import tracklab
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -14,7 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 def test_add_scalar(wandb_backend_spy):
     """Test adding a scalar to TensorBoard and syncing it to W&B."""
 
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         for i in range(100):
             writer.add_scalar("y=2x", i * 2, i)
 
@@ -31,12 +31,12 @@ def test_add_scalar(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_scalars(wandb_backend_spy):
     """Test adding multiple scalars to TensorBoard and syncing it to W&B."""
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         for i in range(10):
             writer.add_scalars(
                 "value",
@@ -59,12 +59,12 @@ def test_add_scalars(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_image(wandb_backend_spy):
     """Test adding an image to TensorBoard and syncing it to W&B."""
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         for i in range(10):
             writer.add_image(
                 "example",
@@ -86,11 +86,11 @@ def test_add_image(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_gif(wandb_backend_spy):
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         for i in range(10):
             writer.add_video(
                 "example",
@@ -110,12 +110,12 @@ def test_add_gif(wandb_backend_spy):
         assert summary["example"]["height"] == 1
         assert summary["example"]["format"] == "gif"
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_images(wandb_backend_spy):
     """Test adding multiple images to TensorBoard and syncing it to W&B."""
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         img_batch = np.zeros((16, 3, 100, 100))
         for i in range(16):
             img_batch[i, 0] = np.arange(0, 10000).reshape(100, 100) / 10000 / 16 * i
@@ -138,12 +138,12 @@ def test_add_images(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_histogram(wandb_backend_spy):
     """Test adding a histogram to TensorBoard and syncing it to W&B."""
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         writer.add_histogram(
             "distribution centers",
             1 + np.random.random(1000),
@@ -162,13 +162,13 @@ def test_add_histogram(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 @pytest.mark.skip(reason="old style TensorBoard not implemented")
 def test_add_pr_curve(wandb_backend_spy):
     """Test adding a precision-recall curve to TensorBoard and syncing it to W&B."""
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         labels = np.random.randint(2, size=100)  # binary label
         predictions = np.random.rand(100)
         writer.add_pr_curve("pr_curve", labels, predictions, 0)
@@ -183,12 +183,12 @@ def test_add_pr_curve(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()
 
 
 def test_add_pr_curve_wandb_core(wandb_backend_spy):
     """Test adding a precision-recall curve to TensorBoard and syncing it to W&B."""
-    with wandb.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
+    with tracklab.init(sync_tensorboard=True) as run, SummaryWriter() as writer:
         labels = np.random.randint(2, size=100)  # binary label
         predictions = np.random.rand(100)
         writer.add_pr_curve("pr_curve", labels, predictions, 0)
@@ -203,4 +203,4 @@ def test_add_pr_curve_wandb_core(wandb_backend_spy):
         telemetry = snapshot.telemetry(run_id=run.id)
         assert 35 in telemetry["3"]  # tensorboard_sync
 
-    wandb.tensorboard.unpatch()
+    tracklab.tensorboard.unpatch()

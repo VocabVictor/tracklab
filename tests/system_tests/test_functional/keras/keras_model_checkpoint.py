@@ -1,9 +1,9 @@
 import numpy as np
 import tensorflow as tf
-import wandb
-from wandb.integration.keras import WandbModelCheckpoint
+import tracklab
+from tracklab.integration.keras import WandbModelCheckpoint
 
-run = wandb.init(project="keras")
+run = tracklab.init(project="keras")
 
 x = np.random.randint(255, size=(100, 28, 28, 1))
 y = np.random.randint(10, size=(100,))

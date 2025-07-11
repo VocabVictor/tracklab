@@ -4,7 +4,7 @@ import pathlib
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch.builder.context_manager import BuildContextManager
+from tracklab.sdk.launch.builder.context_manager import BuildContextManager
 
 
 @pytest.fixture
@@ -21,11 +21,11 @@ def mock_git_project(mocker, tmp_path):
     mock_project.accelerator_base_image = None
     mock_project.get_job_entry_point.return_value = mock_project.override_entrypoint
     mocker.patch(
-        "wandb.sdk.launch.builder.context_manager.get_docker_user",
+        "tracklab.sdk.launch.builder.context_manager.get_docker_user",
         return_value=("docker_user", 1000),
     )
     mocker.patch(
-        "wandb.sdk.launch.builder.build.docker.is_buildx_installed",
+        "tracklab.sdk.launch.builder.build.docker.is_buildx_installed",
         return_value=False,
     )
     return mock_project
@@ -38,7 +38,7 @@ def test_create_build_context_wandb_dockerfile(mock_git_project):
     requirements, and the entrypoint.
     """
     (mock_git_project.project_dir / "requirements.txt").write_text("wandb")
-    (mock_git_project.project_dir / "entrypoint.py").write_text("import wandb")
+    (mock_git_project.project_dir / "entrypoint.py").write_text("import tracklab")
 
     build_context_manager = BuildContextManager(mock_git_project)
     path, image_tag = build_context_manager.create_build_context("docker")
@@ -77,7 +77,7 @@ def test_create_build_context_dockerfile_dot_wandb(mock_git_project):
     subdir = mock_git_project.project_dir / "subdir"
     subdir.mkdir()
     (subdir / "Dockerfile.wandb").write_text("FROM custom:3.8 # dockerfile.wandb")
-    (subdir / "entrypoint.py").write_text("import wandb")
+    (subdir / "entrypoint.py").write_text("import tracklab")
 
     build_context_manager = BuildContextManager(mock_git_project)
     path, image_tag = build_context_manager.create_build_context("docker")
@@ -128,9 +128,9 @@ def test_create_build_context_job_build_context(mock_git_project):
 def test_create_build_context_buildx_enabled(mocker, mock_git_project):
     """Test that a Dockerfile is generated when buildx is enabled."""
     (mock_git_project.project_dir / "requirements.txt").write_text("wandb")
-    (mock_git_project.project_dir / "entrypoint.py").write_text("import wandb")
+    (mock_git_project.project_dir / "entrypoint.py").write_text("import tracklab")
     mocker.patch(
-        "wandb.sdk.launch.builder.build.docker.is_buildx_installed",
+        "tracklab.sdk.launch.builder.build.docker.is_buildx_installed",
         return_value=True,
     )
 

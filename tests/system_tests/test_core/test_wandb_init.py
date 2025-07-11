@@ -3,9 +3,9 @@ import os
 from unittest import mock
 
 import pytest
-import wandb
-from wandb.errors import CommError
-from wandb.sdk.lib import runid
+import tracklab
+from tracklab.errors import CommError
+from tracklab.sdk.lib import runid
 
 
 def test_upsert_bucket_409(wandb_backend_spy):
@@ -17,7 +17,7 @@ def test_upsert_bucket_409(wandb_backend_spy):
         responder,
     )
 
-    with wandb.init():
+    with tracklab.init():
         pass
 
     assert responder.total_calls >= 2
@@ -32,7 +32,7 @@ def test_upsert_bucket_410(wandb_backend_spy):
     )
 
     with pytest.raises(CommError):
-        wandb.init()
+        tracklab.init()
 
 
 def test_gql_409(wandb_backend_spy):
@@ -44,7 +44,7 @@ def test_gql_409(wandb_backend_spy):
         responder,
     )
 
-    with wandb.init():
+    with tracklab.init():
         pass
 
     assert responder.total_calls >= 2
@@ -59,14 +59,14 @@ def test_gql_410(wandb_backend_spy):
         responder,
     )
 
-    with wandb.init():
+    with tracklab.init():
         pass
 
     assert responder.total_calls >= 2
 
 
 def test_send_wandb_config_start_time_on_init(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         pass
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -83,19 +83,19 @@ def test_resume_auto_failure(user, tmp_path):
     # test_settings.wandb_dir != run_settings.wandb_dir
     # and this test will fail
     with mock.patch.dict(os.environ, {"WANDB_DIR": str(tmp_path.absolute())}):
-        run = wandb.init(project="project", id="resume-me")
+        run = tracklab.init(project="project", id="resume-me")
         run.finish()
         resume_fname = run._settings.resume_fname
         with open(resume_fname, "w") as f:
             f.write(json.dumps({"run_id": "resume-me"}))
-        run = wandb.init(resume="auto", project="project")
+        run = tracklab.init(resume="auto", project="project")
         assert run.id == "resume-me"
         run.finish(exit_code=3)
         assert os.path.exists(resume_fname)
 
 
 def test_init_param_telemetry(wandb_backend_spy):
-    with wandb.init(
+    with tracklab.init(
         name="my-test-run",
         id=runid.generate_id(),
         config={"a": 123},
@@ -112,7 +112,7 @@ def test_init_param_telemetry(wandb_backend_spy):
 
 
 def test_init_param_not_set_telemetry(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         pass
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -126,18 +126,18 @@ def test_init_param_not_set_telemetry(wandb_backend_spy):
 def test_shared_mode_x_label(user):
     _ = user  # Create a fake user on the backend server.
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         assert run.settings.x_label is None
 
-    with wandb.init(
-        settings=wandb.Settings(
+    with tracklab.init(
+        settings=tracklab.Settings(
             mode="shared",
         )
     ) as run:
         assert run.settings.x_label is not None
 
-    with wandb.init(
-        settings=wandb.Settings(
+    with tracklab.init(
+        settings=tracklab.Settings(
             mode="shared",
             x_label="node-rank",
         )
@@ -152,7 +152,7 @@ def test_skip_transaction_log(user, skip_transaction_log):
     If skip_transaction_log is True, the transaction log file should not be created.
     If skip_transaction_log is False, the transaction log file should be created.
     """
-    with wandb.init(
+    with tracklab.init(
         settings={
             "x_skip_transaction_log": skip_transaction_log,
             "mode": "online",
@@ -165,4 +165,4 @@ def test_skip_transaction_log(user, skip_transaction_log):
 def test_skip_transaction_log_offline(user):
     """Test that skip transaction log is not allowed in offline mode."""
     with pytest.raises(ValueError):
-        wandb.init(settings={"mode": "offline", "x_skip_transaction_log": True})
+        tracklab.init(settings={"mode": "offline", "x_skip_transaction_log": True})

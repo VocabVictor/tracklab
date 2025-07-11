@@ -2,12 +2,12 @@ import os
 from unittest import mock
 
 import pytest
-import wandb
-from wandb.apis.public import Api as PublicApi
-from wandb.sdk.internal.internal_api import Api as InternalApi
-from wandb.sdk.internal.internal_api import UnsupportedError
-from wandb.sdk.launch._launch_add import launch_add
-from wandb.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT, LaunchError
+import tracklab
+from tracklab.apis.public import Api as PublicApi
+from tracklab.sdk.internal.internal_api import Api as InternalApi
+from tracklab.sdk.internal.internal_api import UnsupportedError
+from tracklab.sdk.launch._launch_add import launch_add
+from tracklab.sdk.launch.utils import LAUNCH_DEFAULT_PROJECT, LaunchError
 
 
 class MockBranch:
@@ -109,7 +109,7 @@ def test_launch_add_delete_queued_run(
 
     api = InternalApi()
 
-    with wandb.init(settings=settings):
+    with tracklab.init(settings=settings):
         api.create_run_queue(
             entity=user,
             project=LAUNCH_DEFAULT_PROJECT,
@@ -150,7 +150,7 @@ def test_launch_add_default_specify(
         "resource": "local-container",
     }
 
-    with wandb.init(settings=wandb.Settings(project=LAUNCH_DEFAULT_PROJECT)):
+    with tracklab.init(settings=tracklab.Settings(project=LAUNCH_DEFAULT_PROJECT)):
         queued_run = launch_add(**args)
 
     assert queued_run.id
@@ -185,7 +185,7 @@ def test_launch_add_default_specify_project_queue(
         "project_queue": proj,
     }
 
-    with wandb.init(settings=wandb.Settings(project=proj)):
+    with tracklab.init(settings=tracklab.Settings(project=proj)):
         queued_run = launch_add(**args)
 
     assert queued_run.id
@@ -220,8 +220,8 @@ def test_push_to_runqueue_exists(
         "resource": "local-process",
     }
 
-    with wandb.init(settings=wandb.Settings(project=LAUNCH_DEFAULT_PROJECT)):
-        api = wandb.sdk.internal.internal_api.Api()
+    with tracklab.init(settings=tracklab.Settings(project=LAUNCH_DEFAULT_PROJECT)):
+        api = tracklab.sdk.internal.internal_api.Api()
         api.create_run_queue(
             entity=user, project=LAUNCH_DEFAULT_PROJECT, queue_name=queue, access="USER"
         )
@@ -240,7 +240,7 @@ def test_push_to_default_runqueue_notexist(
     mocked_fetchable_git_repo,
 ):
     _ = use_local_wandb_backend
-    api = wandb.sdk.internal.internal_api.Api()
+    api = tracklab.sdk.internal.internal_api.Api()
     proj = "test_project54"
     uri = "https://github.com/FooBar/examples.git"
     entry_point = ["python", "train.py"]
@@ -253,7 +253,7 @@ def test_push_to_default_runqueue_notexist(
         "resource": "local-process",
     }
 
-    with wandb.init(settings=wandb.Settings(project=LAUNCH_DEFAULT_PROJECT)):
+    with tracklab.init(settings=tracklab.Settings(project=LAUNCH_DEFAULT_PROJECT)):
         res = api.push_to_run_queue(
             "nonexistent-queue",
             launch_spec,
@@ -287,12 +287,12 @@ def test_push_to_runqueue_old_server(
     settings = test_settings({"project": LAUNCH_DEFAULT_PROJECT})
 
     monkeypatch.setattr(
-        "wandb.sdk.internal.internal_api.Api.push_to_run_queue_by_name",
+        "tracklab.sdk.internal.internal_api.Api.push_to_run_queue_by_name",
         lambda *args: None,
     )
 
-    with wandb.init(settings=settings):
-        api = wandb.sdk.internal.internal_api.Api()
+    with tracklab.init(settings=settings):
+        api = tracklab.sdk.internal.internal_api.Api()
 
         api.create_run_queue(
             entity=user, project=LAUNCH_DEFAULT_PROJECT, queue_name=queue, access="USER"
@@ -316,7 +316,7 @@ def test_launch_add_with_priority(
         return (True, True)
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_introspection",
         patched_push_to_run_queue_introspection,
     )
@@ -327,7 +327,7 @@ def test_launch_add_with_priority(
         return (True, True, True)
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "create_run_queue_introspection",
         patched_create_run_queue_introspection,
     )
@@ -373,7 +373,7 @@ def test_launch_add_with_priority_to_no_prio_queue_raises(
         return (True, True)
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_introspection",
         patched_push_to_run_queue_introspection,
     )
@@ -384,7 +384,7 @@ def test_launch_add_with_priority_to_no_prio_queue_raises(
         return None
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_by_name",
         patched_push_to_run_queue_by_name,
     )
@@ -466,7 +466,7 @@ def test_launch_add_template_variables_legacy_push(
     }
     template_variables = {"var1": "a"}
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_by_name",
         lambda *args, **kwargs: None,
     )
@@ -502,7 +502,7 @@ def test_launch_add_template_variables_not_supported(user, monkeypatch):
         return (False, False)
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_introspection",
         patched_push_to_run_queue_introspection,
     )
@@ -536,12 +536,12 @@ def test_launch_add_template_variables_not_supported_legacy_push(
         return (False, False)
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_introspection",
         patched_push_to_run_queue_introspection,
     )
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_by_name",
         lambda *args, **kwargs: None,
     )
@@ -588,12 +588,12 @@ def test_display_updated_runspec(
         return res
 
     monkeypatch.setattr(
-        wandb.sdk.launch._launch_add,
+        tracklab.sdk.launch._launch_add,
         "push_to_queue",
         lambda *args, **kwargs: push_with_drc(*args, **kwargs),
     )
 
-    with wandb.init(settings=settings):
+    with tracklab.init(settings=settings):
         api.create_run_queue(
             entity=user,
             project=proj,
@@ -617,12 +617,12 @@ def test_container_queued_run(monkeypatch, user):
         return {"runQueueItemId": "1"}
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_by_name",
         lambda *arg, **kwargs: patched_push_to_run_queue_by_name(*arg, **kwargs),
     )
     monkeypatch.setattr(
-        wandb.PublicApi,
+        tracklab.PublicApi,
         "_artifact",
         lambda *arg, **kwargs: "artifact",
     )
@@ -636,7 +636,7 @@ def test_job_dne(monkeypatch, user):
         return {"runQueueItemId": "1"}
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_by_name",
         lambda *arg, **kwargs: patched_push_to_run_queue_by_name(*arg, **kwargs),
     )

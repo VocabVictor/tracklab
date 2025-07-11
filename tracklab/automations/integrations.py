@@ -1,15 +1,45 @@
-"""Automation integrations."""
+from typing import Union
 
-from typing import Dict, Any
+from pydantic import Field
+from typing_extensions import Annotated
+
+from tracklab._pydantic import GQLBase
+from tracklab.automations._generated import (
+    GenericWebhookIntegrationFields,
+    SlackIntegrationFields,
+)
 
 
-class Integration:
-    """Base integration class."""
-    
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        
-    def notify(self, message: str, **kwargs):
-        """Send notification through this integration."""
-        # Basic implementation
-        print(f"Integration notification: {message}")
+class SlackIntegration(SlackIntegrationFields):
+    team_name: str
+    """The name of the Slack workspace (not the W&B team) that this integration is associated with."""
+
+    channel_name: str
+    """The name of the Slack channel that this integration will post messages to."""
+
+
+class WebhookIntegration(GenericWebhookIntegrationFields):
+    name: str
+    """The name of this webhook integration."""
+
+    url_endpoint: str
+    """The URL that this webhook will POST events to."""
+
+
+Integration = Annotated[
+    Union[SlackIntegration, WebhookIntegration],
+    Field(discriminator="typename__"),
+]
+
+
+# For parsing integration instances from paginated responses
+class _IntegrationEdge(GQLBase):
+    cursor: str
+    node: Integration
+
+
+__all__ = [
+    "Integration",
+    "SlackIntegration",
+    "WebhookIntegration",
+]

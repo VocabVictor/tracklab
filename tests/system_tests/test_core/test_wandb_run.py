@@ -5,12 +5,12 @@ import sys
 
 import numpy as np
 import pytest
-import wandb
-from wandb.errors import UsageError
+import tracklab
+from tracklab.errors import UsageError
 
 
 def test_log_nan_inf(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log(
             {
                 "nan": float("nan"),
@@ -30,7 +30,7 @@ def test_log_nan_inf(wandb_backend_spy):
 
 
 def test_log_code(user, wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         with open("test.py", "w") as f:
             f.write('print("test")')
         with open("big_file.h5", "w") as f:
@@ -45,7 +45,7 @@ def test_log_code(user, wandb_backend_spy):
 
 
 def test_log_code_include(user):
-    with wandb.init(mode="offline") as run:
+    with tracklab.init(mode="offline") as run:
         with open("test.py", "w") as f:
             f.write('print("test")')
         with open("test.cc", "w") as f:
@@ -56,7 +56,7 @@ def test_log_code_include(user):
 
 
 def test_log_code_custom_root(user):
-    with wandb.init(mode="offline") as run:
+    with tracklab.init(mode="offline") as run:
         with open("test.py", "w") as f:
             f.write('print("test")')
         os.mkdir("custom")
@@ -70,13 +70,13 @@ def test_log_code_custom_root(user):
 @pytest.mark.parametrize("project_name", ["test:?", "test" * 33])
 def test_invalid_project_name(user, project_name):
     with pytest.raises(UsageError) as e:
-        wandb.init(project=project_name)
+        tracklab.init(project=project_name)
         assert f'Invalid project name "{project_name}"' in str(e.value)
 
 
 def test_unlogged_artifact_in_config(user, test_settings):
-    with wandb.init(settings=test_settings()) as run:
-        artifact = wandb.Artifact("my-arti", type="dataset")
+    with tracklab.init(settings=test_settings()) as run:
+        artifact = tracklab.Artifact("my-arti", type="dataset")
         with pytest.raises(Exception) as e_info:
             run.config.dataset = artifact
             assert (
@@ -87,34 +87,34 @@ def test_unlogged_artifact_in_config(user, test_settings):
 
 def test_media_in_config(user, test_settings):
     pytest.importorskip("pillow")
-    with wandb.init(settings=test_settings()) as run:
+    with tracklab.init(settings=test_settings()) as run:
         with pytest.raises(ValueError):
-            run.config["image"] = wandb.Image(np.random.randint(0, 255, (100, 100, 3)))
+            run.config["image"] = tracklab.Image(np.random.randint(0, 255, (100, 100, 3)))
 
 
 def test_init_with_settings(user, test_settings):
-    with wandb.init(settings=wandb.Settings(x_disable_stats=True)) as run:
+    with tracklab.init(settings=tracklab.Settings(x_disable_stats=True)) as run:
         assert run.settings.x_disable_stats
 
 
 def test_attach_same_process(user, test_settings):
     with pytest.raises(RuntimeError) as excinfo:
-        with wandb.init(settings=test_settings()) as run:
+        with tracklab.init(settings=test_settings()) as run:
             new_run = pickle.loads(pickle.dumps(run))
             new_run.log({"a": 2})
     assert "attach in the same process is not supported" in str(excinfo.value)
 
 
 def test_deprecated_feature_telemetry(wandb_backend_spy):
-    with wandb.init(config_include_keys=["lol"]) as run:
+    with tracklab.init(config_include_keys=["lol"]) as run:
         pass
 
     with wandb_backend_spy.freeze() as snapshot:
         telemetry = snapshot.telemetry(run_id=run.id)
 
         # TelemetryRecord field 10 is Deprecated,
-        # whose fields 2-4 correspond to deprecated wandb.run features
-        # fields 7 & 8 are deprecated wandb.init kwargs
+        # whose fields 2-4 correspond to deprecated tracklab.run features
+        # fields 7 & 8 are deprecated tracklab.init kwargs
         telemetry_deprecated = telemetry.get("10", [])
         assert 7 in telemetry_deprecated
 
@@ -132,25 +132,25 @@ def test_except_hook(user, test_settings):
     def raise_(exc):
         return sys.excepthook(type(exc), exc, None)
 
-    raise_(Exception("Before wandb.init()"))
+    raise_(Exception("Before tracklab.init()"))
 
-    with wandb.init(mode="offline", settings=test_settings()):
+    with tracklab.init(mode="offline", settings=test_settings()):
         old_stderr_write = sys.stderr.write
         stderr = []
         sys.stderr.write = stderr.append
 
-        raise_(Exception("After wandb.init()"))
+        raise_(Exception("After tracklab.init()"))
 
-        assert errs == ["Before wandb.init()", "After wandb.init()"]
+        assert errs == ["Before tracklab.init()", "After tracklab.init()"]
 
         # make sure wandb prints the traceback
-        assert "".join(stderr) == "Exception: After wandb.init()\n"
+        assert "".join(stderr) == "Exception: After tracklab.init()\n"
 
         sys.stderr.write = old_stderr_write
 
 
 def test_ignore_globs_wandb_files(wandb_backend_spy):
-    with wandb.init(settings=dict(ignore_globs=["requirements.txt"])) as run:
+    with tracklab.init(settings=dict(ignore_globs=["requirements.txt"])) as run:
         pass
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -172,7 +172,7 @@ def test_network_fault_graphql(wandb_backend_spy):
         ),
     )
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         pass
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -185,7 +185,7 @@ def test_network_fault_graphql(wandb_backend_spy):
 
 
 def test_summary_update(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.summary.update({"a": 1})
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -194,7 +194,7 @@ def test_summary_update(wandb_backend_spy):
 
 
 def test_summary_from_history(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.summary.update({"a": 1})
         run.log({"a": 2})
 
@@ -204,7 +204,7 @@ def test_summary_from_history(wandb_backend_spy):
 
 
 def test_summary_remove(wandb_backend_spy):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log({"a": 2})
         del run.summary["a"]
 
@@ -214,7 +214,7 @@ def test_summary_remove(wandb_backend_spy):
 
 
 def test_summary_remove_nested(wandb_backend_spy):
-    with wandb.init(allow_val_change=True) as run:
+    with tracklab.init(allow_val_change=True) as run:
         run.log({"a": {"b": 2}})
         run.summary["a"]["c"] = 3
         del run.summary["a"]["b"]
@@ -234,7 +234,7 @@ def test_summary_remove_nested(wandb_backend_spy):
         ("mark_preempting", []),
         ("save", []),
         ("status", []),
-        ("link_artifact", [wandb.Artifact("test", type="dataset"), "input"]),
+        ("link_artifact", [tracklab.Artifact("test", type="dataset"), "input"]),
         ("use_artifact", ["test"]),
         ("log_artifact", ["test"]),
         ("upsert_artifact", ["test"]),
@@ -242,10 +242,10 @@ def test_summary_remove_nested(wandb_backend_spy):
     ],
 )
 def test_error_when_using_methods_of_finished_run(user, method, args):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
 
-    with pytest.raises(wandb.errors.UsageError):
+    with pytest.raises(tracklab.errors.UsageError):
         getattr(run, method)(*args)
 
 
@@ -260,10 +260,10 @@ def test_error_when_using_methods_of_finished_run(user, method, args):
     ],
 )
 def test_error_when_using_attributes_of_finished_run(user, attribute, value):
-    run = wandb.init()
+    run = tracklab.init()
     run.finish()
 
-    with pytest.raises(wandb.errors.UsageError):
+    with pytest.raises(tracklab.errors.UsageError):
         if isinstance(value, list):
             setattr(getattr(run, attribute), *value)
         else:
@@ -275,8 +275,8 @@ def test_error_when_using_attributes_of_finished_run(user, attribute, value):
     [True, False],
 )
 def test_update_finish_state(wandb_backend_spy, update_finish_state):
-    with wandb.init(
-        settings=wandb.Settings(x_update_finish_state=update_finish_state)
+    with tracklab.init(
+        settings=tracklab.Settings(x_update_finish_state=update_finish_state)
     ) as run:
         pass
 

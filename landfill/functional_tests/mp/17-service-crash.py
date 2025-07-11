@@ -1,9 +1,9 @@
 import shutil
 
-import wandb
+import tracklab
 
 # Triggers a FileNotFoundError from the internal process
 # because the internal process reads/writes to the current run directory.
-run = wandb.init()
+run = tracklab.init()
 shutil.rmtree(run.dir)
 run.log({"data": 5})

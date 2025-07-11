@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import wandb
+import tracklab
 
-wandb.setup()
-run = wandb.init()
+tracklab.setup()
+run = tracklab.init()
 run.log(dict(m1=1))
 run.log(dict(m2=2))
-wandb.teardown()
+tracklab.teardown()

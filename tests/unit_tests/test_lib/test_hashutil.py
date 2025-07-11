@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from _pytest.fixtures import SubRequest
 from pyfakefs.fake_filesystem import FakeFilesystem
-from wandb.sdk.lib import hashutil
+from tracklab.sdk.lib import hashutil
 
 BYTE_STRS: tuple[bytes] = (
     b"",

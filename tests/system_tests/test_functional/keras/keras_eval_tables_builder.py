@@ -1,11 +1,11 @@
 import numpy as np
 import tensorflow as tf
-import wandb
-from wandb.integration.keras import WandbEvalCallback
+import tracklab
+from tracklab.integration.keras import WandbEvalCallback
 
 tf.keras.utils.set_random_seed(1234)
 
-run = wandb.init(project="keras")
+run = tracklab.init(project="keras")
 
 x = np.random.randint(255, size=(100, 28, 28, 1))
 y = np.random.randint(10, size=(100,))
@@ -38,7 +38,7 @@ class WandbClfEvalCallback(WandbEvalCallback):
 
     def add_ground_truth(self, logs=None):
         for idx, (image, label) in enumerate(zip(self.x, self.y)):
-            self.data_table.add_data(idx, wandb.Image(image), label)
+            self.data_table.add_data(idx, tracklab.Image(image), label)
 
     def add_model_predictions(self, epoch, logs=None):
         preds = self.model.predict(self.x, verbose=0)

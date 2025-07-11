@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-import wandb
+import tracklab
 
 
 @pytest.mark.parametrize("status_code", [429, 500])
@@ -11,8 +11,8 @@ def test_retries_retryable_codes(status_code, wandb_backend_spy):
         n_times=2,  # Should keep retrying until success.
     )
 
-    with wandb.init(
-        settings=wandb.Settings(_file_stream_retry_wait_min_seconds=1)
+    with tracklab.init(
+        settings=tracklab.Settings(_file_stream_retry_wait_min_seconds=1)
     ) as run:
         run.log({"acc": 1})
 
@@ -26,7 +26,7 @@ def test_ignores_malformed_response(wandb_backend_spy):
         status=200,
     )
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log({"acc": 1})
 
     with wandb_backend_spy.freeze() as snapshot:
@@ -47,7 +47,7 @@ def test_fails_on_non_retryable_codes(status_code, wandb_backend_spy):
         n_times=1,  # The first error should cause a failure.
     )
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.log({"acc": 1})
 
     # No history should be uploaded.
@@ -60,8 +60,8 @@ def test_file_stream_forward_slashes(wandb_backend_spy):
     Tests that the uploaded files have forward slashes.
     As expected by the backend API.
     """
-    image = wandb.Image(np.ones((2, 2, 3)))
-    with wandb.init() as run:
+    image = tracklab.Image(np.ones((2, 2, 3)))
+    with tracklab.init() as run:
         run.log({"image": image})
 
     with wandb_backend_spy.freeze() as snapshot:

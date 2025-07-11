@@ -2,15 +2,15 @@
 import argparse
 from typing import Optional
 
-import wandb
+import tracklab
 
 
 def run_first() -> str:
-    with wandb.init() as run:
+    with tracklab.init() as run:
         assert not run.resumed
-        wandb.log(dict(m1=1))
-        wandb.log(dict(m2=2))
-        wandb.log(dict(m3=3))
+        tracklab.log(dict(m1=1))
+        tracklab.log(dict(m2=2))
+        tracklab.log(dict(m3=3))
         run_id = run.id
         run_path = run.path
     return run_id, run_path
@@ -20,18 +20,18 @@ def run_again(run_id: str, resume: Optional[str]) -> None:
     kwargs = dict(id=run_id)
     if resume:
         kwargs["resume"] = resume
-    with wandb.init(**kwargs) as run:
+    with tracklab.init(**kwargs) as run:
         if run.resumed:
             print("RUN_STATE: run resumed")
         else:
             print("RUN_STATE: run not resumed")
-        wandb.log(dict(m1=11))
-        wandb.log(dict(m2=22))
-        wandb.log(dict(m4=44))
+        tracklab.log(dict(m1=11))
+        tracklab.log(dict(m2=22))
+        tracklab.log(dict(m4=44))
 
 
 def delete_run(run_path: str) -> None:
-    api = wandb.Api()
+    api = tracklab.Api()
     run = api.run(run_path)
     print(f"Deleting: {run_path}...")
     run.delete()

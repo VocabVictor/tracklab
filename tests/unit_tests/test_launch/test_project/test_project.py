@@ -2,7 +2,7 @@ import os
 from unittest.mock import MagicMock
 
 import pytest
-from wandb.sdk.launch._project_spec import LaunchProject, LaunchSource
+from tracklab.sdk.launch._project_spec import LaunchProject, LaunchSource
 
 
 def test_project_build_required():
@@ -146,7 +146,7 @@ def test_project_fetch_and_validate_project_docker_image():
 
 def test_project_parse_existing_requirements(mocker, tmp_path):
     mocker.termwarn = MagicMock()
-    mocker.patch("wandb.termwarn", mocker.termwarn)
+    mocker.patch("tracklab.termwarn", mocker.termwarn)
     mock_args = {
         "job": None,
         "api": MagicMock(),
@@ -226,7 +226,7 @@ def test_get_env_vars_dict(mock_project_args, test_api):
     assert env_vars == {
         "WANDB_API_KEY": None,
         "WANDB_ARTIFACTS": "{}",
-        "WANDB_BASE_URL": "https://api.wandb.ai",
+        "WANDB_BASE_URL": "https://api.tracklab.ai",
         "WANDB_CONFIG": "{}",
         "WANDB_DOCKER": "mock-test-image:v0",
         "WANDB_ENTITY": "mock-test-entity",
@@ -254,7 +254,7 @@ def test_get_env_vars_dict_with_low_max_length(mock_project_args, test_api):
     assert env_vars == {
         "WANDB_API_KEY": None,
         "WANDB_ARTIFACTS": "{}",
-        "WANDB_BASE_URL": "https://api.wandb.ai",
+        "WANDB_BASE_URL": "https://api.tracklab.ai",
         "WANDB_CONFIG_0": '{"learning_r',
         "WANDB_CONFIG_1": 'ate": 0.01, ',
         "WANDB_CONFIG_2": '"batch_size"',

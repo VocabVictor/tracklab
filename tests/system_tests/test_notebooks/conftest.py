@@ -13,12 +13,12 @@ import IPython
 import IPython.display
 import nbformat
 import pytest
-import wandb
-import wandb.util
+import tracklab
+import tracklab.util
 from nbclient import NotebookClient
 from nbclient.client import CellExecutionError
 from typing_extensions import Any, Generator, override
-from wandb.sdk.lib import ipython
+from tracklab.sdk.lib import ipython
 
 _NOTEBOOK_LOCKFILE = os.path.join(
     os.path.dirname(__file__),
@@ -28,10 +28,10 @@ _NOTEBOOK_LOCKFILE = os.path.join(
 
 @pytest.fixture
 def mocked_module(monkeypatch):
-    """This allows us to mock modules loaded via wandb.util.get_module."""
+    """This allows us to mock modules loaded via tracklab.util.get_module."""
 
     def mock_get_module(module):
-        orig_get_module = wandb.util.get_module
+        orig_get_module = tracklab.util.get_module
         mocked_module = MagicMock()
 
         def get_module(mod):
@@ -40,7 +40,7 @@ def mocked_module(monkeypatch):
             else:
                 return orig_get_module(mod)
 
-        monkeypatch.setattr(wandb.util, "get_module", get_module)
+        monkeypatch.setattr(tracklab.util, "get_module", get_module)
         return mocked_module
 
     return mock_get_module
@@ -209,7 +209,7 @@ def notebook(user, run_id, assets_path):
 
         # Make wandb think we're in a specific type of notebook.
         setup_cell.write(
-            "from wandb.sdk.lib import ipython\n"
+            "from tracklab.sdk.lib import ipython\n"
             f"ipython._get_python_type = lambda: '{notebook_type}'\n",
         )
 

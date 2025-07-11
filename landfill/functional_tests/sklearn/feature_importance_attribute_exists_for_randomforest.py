@@ -23,9 +23,9 @@ from sklearn import datasets
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-import wandb
+import tracklab
 
-wandb.init("my-scikit-integration")
+tracklab.init("my-scikit-integration")
 
 wbcd = wisconsin_breast_cancer_data = datasets.load_breast_cancer()
 
@@ -37,4 +37,4 @@ labels = wbcd.target_names
 model = RandomForestClassifier()
 model.fit(X_train, y_train)
 
-wandb.sklearn.plot_feature_importances(model)
+tracklab.sklearn.plot_feature_importances(model)

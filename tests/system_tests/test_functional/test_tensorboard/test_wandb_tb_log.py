@@ -1,15 +1,15 @@
-"""Tests for wandb.tensorboard.log and wandb.tensorboard.WandbHook."""
+"""Tests for tracklab.tensorboard.log and tracklab.tensorboard.WandbHook."""
 
 import pytest
 import tensorflow as tf
-import wandb
+import tracklab
 from tensorboard.compat.proto import summary_pb2
 
 
 def test_wandb_tf_log(wandb_backend_spy, assets_path):
-    with wandb.init(sync_tensorboard=True) as run:
+    with tracklab.init(sync_tensorboard=True) as run:
         summary_pb = open(assets_path("wandb_tensorflow_summary.pb"), "rb").read()
-        wandb.tensorboard.log(summary_pb)
+        tracklab.tensorboard.log(summary_pb)
 
     with wandb_backend_spy.freeze() as snapshot:
         assert len(snapshot.run_ids()) == 1
@@ -54,16 +54,16 @@ def test_wandb_tf_log(wandb_backend_spy, assets_path):
         assert summary["input_reshape_input_image"]["count"] == 10
 
         telemetry = snapshot.telemetry(run_id=run.id)
-        assert 29 in telemetry["3"]  # wandb.tensorflow.log
+        assert 29 in telemetry["3"]  # tracklab.tensorflow.log
 
 
 def test_no_init_error(assets_path):
     with pytest.raises(
-        wandb.Error,
-        match=r"You must call `wandb.init\(\)` before calling `wandb.tensorflow.log`",
+        tracklab.Error,
+        match=r"You must call `tracklab.init\(\)` before calling `tracklab.tensorflow.log`",
     ):
         summary_pb = open(assets_path("wandb_tensorflow_summary.pb"), "rb").read()
-        wandb.tensorboard.log(summary_pb)
+        tracklab.tensorboard.log(summary_pb)
 
 
 @pytest.mark.skipif(tf.__version__ >= "2.16.0", reason="tf.estimator is not supported")
@@ -77,7 +77,7 @@ def test_tensorflow_hook():
         summary_op = tf.compat.v1.summary.merge_all()
 
         with tf.compat.v1.train.MonitoredTrainingSession()(
-            hooks=[wandb.tensorflow.WandbHook(summary_op, steps_per_log=1)]
+            hooks=[tracklab.tensorflow.WandbHook(summary_op, steps_per_log=1)]
         ) as sess:
             summary1, _ = sess.run([summary_op, const_1])
 
@@ -88,20 +88,20 @@ def test_tensorflow_hook():
         summary_op = tf.compat.v1.summary.merge_all()
 
         with tf.compat.v1.train.MonitoredTrainingSession()(
-            hooks=[wandb.tensorflow.WandbHook(summary_op, steps_per_log=1)]
+            hooks=[tracklab.tensorflow.WandbHook(summary_op, steps_per_log=1)]
         ) as sess:
             summary2, _ = sess.run([summary_op, const_2])
 
     # test digesting encoded summary
-    assert wandb.tensorboard.tf_summary_to_dict(summary1) == {"const_1": 42.0}
+    assert tracklab.tensorboard.tf_summary_to_dict(summary1) == {"const_1": 42.0}
 
     # test digesting a list of encoded summaries
-    assert wandb.tensorboard.tf_summary_to_dict(
+    assert tracklab.tensorboard.tf_summary_to_dict(
         summary_pb2.Summary().ParseFromString(summary1)
     ) == {"const_1": 42.0}
 
     # test digesting a list of encoded summaries
-    assert wandb.tensorboard.tf_summary_to_dict([summary1, summary2]) == {
+    assert tracklab.tensorboard.tf_summary_to_dict([summary1, summary2]) == {
         "const_1": 42.0,
         "const_2": 23.0,
     }

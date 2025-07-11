@@ -1,8 +1,8 @@
 import json
 
 import pytest
-from wandb.sdk.launch.errors import LaunchError
-from wandb.sdk.launch.inputs.files import (
+from tracklab.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.inputs.files import (
     FileOverrides,
     config_path_is_valid,
     override_file,

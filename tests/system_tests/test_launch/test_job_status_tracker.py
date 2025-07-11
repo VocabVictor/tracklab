@@ -3,8 +3,8 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
-import wandb
-from wandb.sdk.launch.agent.job_status_tracker import JobAndRunStatusTracker
+import tracklab
+from tracklab.sdk.launch.agent.job_status_tracker import JobAndRunStatusTracker
 
 
 @pytest.mark.asyncio
@@ -12,8 +12,8 @@ async def test_check_stop_run_not_exist(user):
     job_tracker = JobAndRunStatusTracker(
         "run_queue_item_id", "test-queue", MagicMock(), MagicMock()
     )
-    run = wandb.init(id="testrun")
-    api = wandb.InternalApi()
+    run = tracklab.init(id="testrun")
+    api = tracklab.InternalApi()
     mock_launch_project = MagicMock()
     mock_launch_project.target_entity = run.entity
     mock_launch_project.target_project = run.project
@@ -27,12 +27,12 @@ async def test_check_stop_run_not_exist(user):
 
 @pytest.mark.asyncio
 async def test_check_stop_run_exist_stopped(user):
-    mock.patch("wandb.sdk.wandb_run.thread.interrupt_main", lambda x: None)
+    mock.patch("tracklab.sdk.wandb_run.thread.interrupt_main", lambda x: None)
     job_tracker = JobAndRunStatusTracker(
         "run_queue_item_id", "test-queue", MagicMock(), MagicMock()
     )
-    run = wandb.init(id="testrun", entity=user)
-    api = wandb.InternalApi()
+    run = tracklab.init(id="testrun", entity=user)
+    api = tracklab.InternalApi()
     encoded_run_id = base64.standard_b64encode(
         f"Run:v1:testrun:{run.project}:{run.entity}".encode()
     ).decode("utf-8")

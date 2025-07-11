@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import pytest
-import wandb
+import tracklab
 
 
 def test_no_root_dir_access__uses_temp_dir(tmp_path, monkeypatch):
@@ -18,7 +18,7 @@ def test_no_root_dir_access__uses_temp_dir(tmp_path, monkeypatch):
         ),
     )
 
-    with wandb.init(dir=root_dir, mode="offline") as run:
+    with tracklab.init(dir=root_dir, mode="offline") as run:
         run.log({"test": 1})
 
     assert run.settings.root_dir == temp_dir
@@ -37,7 +37,7 @@ def test_no_temp_dir_access__throws_error(monkeypatch):
     )
 
     with pytest.raises(ValueError):
-        with wandb.init(dir=temp_dir, mode="offline") as run:
+        with tracklab.init(dir=temp_dir, mode="offline") as run:
             run.log({"test": 1})
 
 
@@ -45,7 +45,7 @@ def test_makedirs_raises_oserror__uses_temp_dir(tmp_path, monkeypatch):
     tmp_file = tmp_path / "test.txt"
     tmp_file.touch()
 
-    with wandb.init(dir=str(tmp_file / "dir2"), mode="offline") as run:
+    with tracklab.init(dir=str(tmp_file / "dir2"), mode="offline") as run:
         run.log({"test": 1})
 
     assert run.settings.root_dir == tempfile.gettempdir()

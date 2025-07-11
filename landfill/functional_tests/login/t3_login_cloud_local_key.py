@@ -3,20 +3,20 @@
 
 import pytest
 
-import wandb
-import wandb.errors
+import tracklab
+import tracklab.errors
 
 if __name__ == "__main__":
     # api_key starts with "local", but base_url points to cloud
-    with pytest.raises(wandb.errors.UsageError) as e:
-        wandb.login(key="local-87eLxjoRhY6u2ofg63NAJo7rVYHZo4NGACOvpSsF}")
+    with pytest.raises(tracklab.errors.UsageError) as e:
+        tracklab.login(key="local-87eLxjoRhY6u2ofg63NAJo7rVYHZo4NGACOvpSsF}")
         assert (
-            "Attempting to use a local API key to connect to https://api.wandb.ai"
+            "Attempting to use a local API key to connect to https://api.tracklab.ai"
             in str(e.value)
         )
 
     # check that this logic does not apply if base_url is not cloud
-    assert wandb.login(
+    assert tracklab.login(
         key="local-87eLxjoRhY6u2ofg63NAJo7rVYHZo4NGACOvpSsF",
-        host="https://api.wandb.test",
+        host="https://api.tracklab.test",
     )

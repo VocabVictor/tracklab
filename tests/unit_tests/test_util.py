@@ -14,8 +14,8 @@ import numpy as np
 import plotly
 import pytest
 import requests
-import wandb
-import wandb.errors as errors
+import tracklab
+import tracklab.errors as errors
 from wandb import util
 
 ###############################################################################
@@ -272,10 +272,10 @@ def test_image_from_docker_args_sha():
 def test_app_url():
     with mock.patch.dict("os.environ", {"WANDB_APP_URL": "https://foo.com/bar/"}):
         assert util.app_url("https://api.foo.com") == "https://foo.com/bar"
-    assert util.app_url("http://api.wandb.test") == "http://app.wandb.test"
-    assert util.app_url("https://api.wandb.ai") == "https://wandb.ai"
+    assert util.app_url("http://api.tracklab.test") == "http://app.tracklab.test"
+    assert util.app_url("https://api.tracklab.ai") == "https://tracklab.ai"
     assert util.app_url("https://api.foo/bar") == "https://app.foo/bar"
-    assert util.app_url("https://wandb.foo") == "https://wandb.foo"
+    assert util.app_url("https://tracklab.foo") == "https://tracklab.foo"
 
 
 ###############################################################################
@@ -388,7 +388,7 @@ def test_matplotlib_contains_images():
 
 
 def test_matplotlib_to_plotly():
-    """Test transforming a pyplot object to a plotly object (not the wandb.* versions)."""
+    """Test transforming a pyplot object to a plotly object (not the tracklab.* versions)."""
     fig = matplotlib_without_image()
     assert type(util.matplotlib_to_plotly(fig)) is plotly.graph_objs._figure.Figure
     plt.close()
@@ -531,8 +531,8 @@ def test_no_retry_auth():
         util.no_retry_auth(e)
     e.response.status_code = 403
     e.response.reason = "Forbidden"
-    with mock.patch("wandb.run", mock.MagicMock()):
-        with pytest.raises(wandb.CommError):
+    with mock.patch("tracklab.run", mock.MagicMock()):
+        with pytest.raises(tracklab.CommError):
             util.no_retry_auth(e)
     e.response.status_code = 404
     with pytest.raises(LookupError):
@@ -661,7 +661,7 @@ def test_make_check_reply_fn_true():
 
 
 def test_downsample():
-    with pytest.raises(wandb.UsageError):
+    with pytest.raises(tracklab.UsageError):
         util.downsample([1, 2, 3], 1)
     assert util.downsample([1, 2, 3, 4], 2) == [1, 4]
 

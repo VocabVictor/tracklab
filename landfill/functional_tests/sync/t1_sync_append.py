@@ -4,9 +4,9 @@
 import subprocess
 import sys
 
-import wandb
+import tracklab
 
-run = wandb.init(mode="offline")
+run = tracklab.init(mode="offline")
 sync_dir_1 = run.settings.sync_dir
 run_id = run.id
 run.log(dict(m1=1), step=1)
@@ -14,7 +14,7 @@ run.log(dict(m1=2), step=2)
 run.log(dict(m2=2), step=3)
 run.finish()
 
-run = wandb.init(mode="offline", id=run_id)
+run = tracklab.init(mode="offline", id=run_id)
 sync_dir_2 = run.settings.sync_dir
 run.log(dict(m1=11), step=11)
 run.log(dict(m1=12), step=12)

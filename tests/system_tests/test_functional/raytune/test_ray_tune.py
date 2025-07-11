@@ -1,8 +1,8 @@
 """Basic ray-tune integration tests.
 
 Based on:
-    https://docs.wandb.ai/guides/integrations/ray-tune
-    https://docs.ray.io/en/latest/tune/examples/tune-wandb.html
+    https://docs.tracklab.ai/guides/integrations/ray-tune
+    https://docs.ray.io/en/latest/tune/examples/tune-tracklab.html
 """
 
 import pathlib

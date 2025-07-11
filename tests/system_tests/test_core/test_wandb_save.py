@@ -1,4 +1,4 @@
-import wandb
+import tracklab
 
 
 def test_uploads_at_end(wandb_backend_spy, tmp_path):
@@ -6,7 +6,7 @@ def test_uploads_at_end(wandb_backend_spy, tmp_path):
     file.parent.mkdir()
     file.write_text("testing testing")
 
-    with wandb.init() as run:
+    with tracklab.init() as run:
         run.save(file, policy="end")
 
     with wandb_backend_spy.freeze() as snapshot:

@@ -19,10 +19,10 @@ assert:
   - :yea:exit: 0
 """
 
-import wandb
+import tracklab
 
 try:
-    wandb.init()
+    tracklab.init()
 except:  # noqa
     # We want to test that the atexit handler doesn't hang,
     # that's why we use a try/except here.

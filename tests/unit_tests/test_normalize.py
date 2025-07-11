@@ -5,8 +5,8 @@ from typing import NoReturn
 
 import pytest
 import requests
-from wandb.apis.normalize import normalize_exceptions
-from wandb.errors import CommError
+from tracklab.apis.normalize import normalize_exceptions
+from tracklab.errors import CommError
 
 
 def _http_response(

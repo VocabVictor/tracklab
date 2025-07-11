@@ -8,12 +8,12 @@ from typing import TYPE_CHECKING, Callable
 from unittest.mock import Mock, patch
 
 import pytest
-import wandb.filesync.dir_watcher
-from wandb.filesync.dir_watcher import DirWatcher, PolicyEnd, PolicyLive, PolicyNow
-from wandb.sdk.internal.file_pusher import FilePusher
+import tracklab.filesync.dir_watcher
+from tracklab.filesync.dir_watcher import DirWatcher, PolicyEnd, PolicyLive, PolicyNow
+from tracklab.sdk.internal.file_pusher import FilePusher
 
 if TYPE_CHECKING:
-    from wandb.sdk.interface.interface import PolicyName
+    from tracklab.sdk.interface.interface import PolicyName
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def tempdir():
 
 @pytest.fixture
 def dir_watcher(settings, file_pusher, tempdir: Path) -> DirWatcher:
-    with patch.object(wandb.filesync.dir_watcher, "wd_polling", Mock()):
+    with patch.object(tracklab.filesync.dir_watcher, "wd_polling", Mock()):
         yield DirWatcher(
             settings=settings,
             file_pusher=file_pusher,

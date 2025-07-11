@@ -1,8 +1,8 @@
 import os
 from unittest.mock import MagicMock
 
-from wandb.sdk.launch.agent.run_queue_item_file_saver import RunQueueItemFileSaver
-from wandb.sdk.wandb_run import Run
+from tracklab.sdk.launch.agent.run_queue_item_file_saver import RunQueueItemFileSaver
+from tracklab.sdk.wandb_run import Run
 
 
 def test_no_run():

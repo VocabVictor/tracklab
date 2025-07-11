@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
 import yaml
-from wandb.sdk.internal.sender import SendManager
-from wandb.sdk.internal.settings_static import SettingsStatic
+from tracklab.sdk.internal.sender import SendManager
+from tracklab.sdk.internal.settings_static import SettingsStatic
 
 
 def test_config_save_preserve_order(tmp_path, test_settings):

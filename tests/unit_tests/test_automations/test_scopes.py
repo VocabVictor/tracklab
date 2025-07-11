@@ -1,8 +1,8 @@
-from wandb._pydantic import CompatBaseModel
-from wandb.apis.public import ArtifactCollection, Project
-from wandb.automations import ArtifactCollectionScope, ProjectScope, ScopeType
-from wandb.automations._generated import TriggerScopeType
-from wandb.automations.scopes import ArtifactCollectionScopeTypes, AutomationScope
+from tracklab._pydantic import CompatBaseModel
+from tracklab.apis.public import ArtifactCollection, Project
+from tracklab.automations import ArtifactCollectionScope, ProjectScope, ScopeType
+from tracklab.automations._generated import TriggerScopeType
+from tracklab.automations.scopes import ArtifactCollectionScopeTypes, AutomationScope
 
 
 class HasScope(CompatBaseModel):

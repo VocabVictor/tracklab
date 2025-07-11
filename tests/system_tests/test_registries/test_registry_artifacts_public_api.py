@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from urllib.parse import quote
 
-import wandb
+import tracklab
 from wandb import Api, Artifact, util
-from wandb.apis.public.registries.registry import Registry
-from wandb.proto.wandb_internal_pb2 import ServerFeature
-from wandb.sdk.internal.internal_api import Api as InternalApi
+from tracklab.apis.public.registries.registry import Registry
+from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.sdk.internal.internal_api import Api as InternalApi
 
 
 def test_fetch_migrated_registry_artifact(
@@ -16,7 +16,7 @@ def test_fetch_migrated_registry_artifact(
     capsys,
 ):
     mocker.patch(
-        "wandb.sdk.artifacts.artifact.Artifact._from_attrs",
+        "tracklab.sdk.artifacts.artifact.Artifact._from_attrs",
     )
     mock_fetch_artifact_by_name = mocker.patch.object(api.client, "execute")
 
@@ -65,7 +65,7 @@ def test_registry_artifact_url(
     source_artifact: Artifact,
     target_collection_name: str,
 ):
-    with wandb.init() as run:
+    with tracklab.init() as run:
         base_url = util.app_url(run.settings.base_url)
         linked_artifact = run.link_artifact(
             source_artifact, f"{registry.full_name}/{target_collection_name}"

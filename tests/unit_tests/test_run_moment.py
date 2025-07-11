@@ -1,5 +1,5 @@
 import pytest
-from wandb.sdk.lib.run_moment import RunMoment
+from tracklab.sdk.lib.run_moment import RunMoment
 
 
 def test_run_moment_from_uri_valid():

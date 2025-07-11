@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Simple example of using ThreadPoolExecutor with service.
 
-This example is base on issue https://wandb.atlassian.net/browse/WB-8733.
+This example is base on issue https://tracklab.atlassian.net/browse/WB-8733.
 """
 
 import multiprocessing as mp
@@ -9,11 +9,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 import yea
 
-import wandb
+import tracklab
 
 
 def worker(initial: int):
-    with wandb.init(project="tester222", config={"init": initial}) as run:
+    with tracklab.init(project="tester222", config={"init": initial}) as run:
         for i in range(3):
             run.log({"i": initial + i})
 

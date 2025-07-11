@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 import botocore.exceptions
 import pytest
-from wandb.sdk.launch.errors import LaunchError
-from wandb.sdk.launch.registry.elastic_container_registry import (
+from tracklab.sdk.launch.errors import LaunchError
+from tracklab.sdk.launch.registry.elastic_container_registry import (
     ElasticContainerRegistry,
 )
 

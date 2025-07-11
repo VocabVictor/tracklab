@@ -4,11 +4,11 @@ import os
 from unittest import mock
 
 import pytest
-from wandb.sdk.launch.sweeps.utils import (
+from tracklab.sdk.launch.sweeps.utils import (
     create_sweep_command,
     create_sweep_command_args,
 )
-from wandb.wandb_agent import Agent
+from tracklab.wandb_agent import Agent
 
 
 def test_agent_create_command_args():

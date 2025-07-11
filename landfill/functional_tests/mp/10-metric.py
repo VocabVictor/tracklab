@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import wandb
+import tracklab
 
-run = wandb.init()
+run = tracklab.init()
 print("somedata")
 run.define_metric("m2", summary="max")
 run.log(dict(m1=1))

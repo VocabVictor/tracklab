@@ -1,6 +1,6 @@
 import tensorflow as tf
-import wandb
-from wandb.integration.keras import WandbCallback
+import tracklab
+from tracklab.integration.keras import WandbCallback
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
         loss="sparse_categorical_crossentropy", optimizer="sgd", metrics=["accuracy"]
     )
 
-    with wandb.init(
+    with tracklab.init(
         project="keras",
     ):
         model.fit(

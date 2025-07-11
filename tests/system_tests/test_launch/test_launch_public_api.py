@@ -1,11 +1,11 @@
 import json
 
 import pytest
-import wandb
-import wandb.apis.public
-import wandb.util
+import tracklab
+import tracklab.apis.public
+import tracklab.util
 from wandb import Api
-from wandb.sdk.internal.internal_api import UnsupportedError
+from tracklab.sdk.internal.internal_api import UnsupportedError
 
 SWEEP_CONFIGURATION = {
     "method": "random",
@@ -31,7 +31,7 @@ def test_create_run_queue_template_variables_not_supported(runner, user, monkeyp
         return False, False
 
     monkeypatch.setattr(
-        wandb.sdk.internal.internal_api.Api,
+        tracklab.sdk.internal.internal_api.Api,
         "push_to_run_queue_introspection",
         patched_push_to_run_queue_introspection,
     )
@@ -147,17 +147,17 @@ def test_from_path(user):
     api = Api()
 
     project = "my-first-sweep"
-    sweep_id = wandb.sweep(sweep=SWEEP_CONFIGURATION, project=project)
+    sweep_id = tracklab.sweep(sweep=SWEEP_CONFIGURATION, project=project)
 
     sweep = api.from_path(f"{user}/{project}/sweeps/{sweep_id}")
-    assert isinstance(sweep, wandb.apis.public.Sweep)
+    assert isinstance(sweep, tracklab.apis.public.Sweep)
 
 
 def test_sweep(user):
     api = Api()
 
     project = "my-first-sweep"
-    sweep_id = wandb.sweep(sweep=SWEEP_CONFIGURATION, project=project)
+    sweep_id = tracklab.sweep(sweep=SWEEP_CONFIGURATION, project=project)
 
     sweep = api.sweep(f"{user}/{project}/{sweep_id}")
 
@@ -169,7 +169,7 @@ def test_sweep(user):
 
 def test_to_html(user):
     project = "my-first-sweep"
-    sweep_id = wandb.sweep(sweep=SWEEP_CONFIGURATION, project=project)
+    sweep_id = tracklab.sweep(sweep=SWEEP_CONFIGURATION, project=project)
 
     api = Api()
     sweep = api.from_path(f"{user}/{project}/sweeps/{sweep_id}")
