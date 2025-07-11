@@ -1,7 +1,3 @@
-"""TrackLab 测试配置文件
-
-基于 wandb 的测试结构，提供全局 fixtures 和测试配置。
-"""
 from __future__ import annotations
 
 import logging
@@ -17,67 +13,98 @@ from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, Generator, Iterable, Iterator
 
-import pytest
+import pyte
+import pyte.modes
 from pytest_mock import MockerFixture
+from wandb.errors import term
 
-# 禁用 TrackLab 的错误报告
-os.environ["TRACKLAB_ERROR_REPORTING"] = "false"
+# Don't write to Sentry in wandb.
+os.environ["WANDB_ERROR_REPORTING"] = "false"
 
-# 导入 TrackLab 模块
-import tracklab
-from tracklab.errors import TrackLabError
-from tracklab.sdk.lib import filesystem, module, runid
-
+import git
+import pytest
+import wandb
+import wandb.old.settings
+import wandb.sdk.lib.apikey
+import wandb.util
+from click.testing import CliRunner
+from wandb import Api
+from wandb.sdk.interface.interface_queue import InterfaceQueue
+from wandb.sdk.lib import filesystem, module, runid
+from wandb.sdk.lib.gitlib import GitRepo
+from wandb.sdk.lib.paths import StrPath
 
 # --------------------------------
-# 全局 pytest 配置
+# Global pytest configuration
 # --------------------------------
+
+
+@pytest.fixture
+def disable_memray(pytestconfig):
+    """Disables the memray plugin for the duration of the test."""
+    if platform.system() == "Windows":
+        # noop on Windows
+        yield
+    else:
+        memray_plugin = pytestconfig.pluginmanager.get_plugin("memray_manager")
+        pytestconfig.pluginmanager.unregister(memray_plugin)
+        yield
+        pytestconfig.pluginmanager.register(memray_plugin, "memray_manager")
+
 
 @pytest.fixture(autouse=True)
-def setup_tracklab_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
-    """配置 TrackLab 环境变量为适合测试的默认值"""
-    # 设置网络缓冲区大小
-    monkeypatch.setenv("TRACKLAB_X_NETWORK_BUFFER", "1000")
-    # 设置为测试模式
-    monkeypatch.setenv("TRACKLAB_MODE", "test")
+def setup_wandb_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Configures wandb env variables to suitable defaults for tests."""
+    # Set the _network_buffer setting to 1000 to increase the likelihood
+    # of triggering flow control logic.
+    monkeypatch.setenv("WANDB_X_NETWORK_BUFFER", "1000")
 
 
 # --------------------------------
-# 资源管理 Fixtures
+# Misc Fixtures utilities
 # --------------------------------
+
 
 @pytest.fixture(scope="session")
-def assets_path() -> Generator[Callable[[str], Path], None, None]:
-    """返回测试资源文件路径的函数"""
+def assets_path() -> Generator[Callable[[StrPath], Path], None, None]:
     assets_dir = Path(__file__).resolve().parent / "assets"
-    
-    def assets_path_fn(path: str) -> Path:
+
+    def assets_path_fn(path: StrPath) -> Path:
         return assets_dir / path
-    
+
     yield assets_path_fn
 
 
 @pytest.fixture
-def copy_asset(assets_path) -> Generator[Callable[[str, str | None], Path], None, None]:
-    """复制测试资源文件的函数"""
-    def copy_asset_fn(path: str, dst: str | None = None) -> Path:
+def copy_asset(
+    assets_path,
+) -> Generator[Callable[[StrPath, StrPath | None], Path], None, None]:
+    def copy_asset_fn(path: StrPath, dst: StrPath | None = None) -> Path:
         src = assets_path(path)
         if src.is_file():
             return shutil.copy(src, dst or path)
         return shutil.copytree(src, dst or path)
-    
+
     yield copy_asset_fn
 
 
 # --------------------------------
-# 日志和输出 Fixtures
+# Misc Fixtures
 # --------------------------------
 
+
 @pytest.fixture()
-def tracklab_caplog(caplog: pytest.LogCaptureFixture) -> Iterator[pytest.LogCaptureFixture]:
-    """修改的 caplog fixture，用于捕获 TrackLab 日志消息"""
-    logger = logging.getLogger("tracklab")
-    
+def wandb_caplog(
+    caplog: pytest.LogCaptureFixture,
+) -> Iterator[pytest.LogCaptureFixture]:
+    """Modified caplog fixture that detect wandb log messages.
+
+    The wandb logger is configured to not propagate messages to the root logger,
+    so caplog does not work out of the box.
+    """
+
+    logger = logging.getLogger("wandb")
+
     logger.addHandler(caplog.handler)
     try:
         yield caplog
@@ -87,15 +114,17 @@ def tracklab_caplog(caplog: pytest.LogCaptureFixture) -> Iterator[pytest.LogCapt
 
 @pytest.fixture(autouse=True)
 def reset_logger():
-    """重置日志记录器"""
-    # 重置 TrackLab 日志设置
-    logging.getLogger("tracklab").handlers.clear()
-    logging.getLogger("tracklab").setLevel(logging.INFO)
+    """Resets the `wandb.errors.term` module before each test."""
+    wandb.termsetup(wandb.Settings(silent=False), None)
+    term._dynamic_blocks = []
 
 
-class MockTrackLabTerm:
-    """用于测试 TrackLab 终端输出的辅助类"""
-    
+class MockWandbTerm:
+    """Helper to test wandb.term*() calls.
+
+    See the `mock_wandb_log` fixture.
+    """
+
     def __init__(
         self,
         termlog: unittest.mock.MagicMock,
@@ -105,23 +134,26 @@ class MockTrackLabTerm:
         self._termlog = termlog
         self._termwarn = termwarn
         self._termerror = termerror
-    
+
     def logged(self, msg: str) -> bool:
-        """返回消息是否被记录到日志"""
+        """Returns whether the message was included in a termlog()."""
         return self._logged(self._termlog, msg)
-    
+
     def warned(self, msg: str) -> bool:
-        """返回消息是否被记录为警告"""
+        """Returns whether the message was included in a termwarn()."""
         return self._logged(self._termwarn, msg)
-    
+
     def errored(self, msg: str) -> bool:
-        """返回消息是否被记录为错误"""
+        """Returns whether the message was included in a termerror()."""
         return self._logged(self._termerror, msg)
-    
+
     def _logged(self, termfunc: unittest.mock.MagicMock, msg: str) -> bool:
         return any(msg in logged for logged in self._logs(termfunc))
-    
+
     def _logs(self, termfunc: unittest.mock.MagicMock) -> Iterable[str]:
+        # All the term*() functions have a similar API: the message is the
+        # first argument, which may also be passed as a keyword argument called
+        # "string".
         for call in termfunc.call_args_list:
             if "string" in call.kwargs:
                 yield call.kwargs["string"]
@@ -130,129 +162,287 @@ class MockTrackLabTerm:
 
 
 @pytest.fixture()
-def mock_tracklab_term() -> Generator[MockTrackLabTerm, None, None]:
-    """Mock TrackLab 终端方法用于测试"""
+def mock_wandb_log() -> Generator[MockWandbTerm, None, None]:
+    """Mocks the wandb.term*() methods for a test.
+
+    This patches the termlog() / termwarn() / termerror() methods and returns
+    a `MockWandbTerm` object that can be used to assert on their usage.
+
+    The logging functions mutate global state (for repeat=False), making
+    them unsuitable for tests. Use this fixture to assert that a message
+    was logged.
+    """
+    # NOTE: This only stubs out calls like "wandb.termlog()", NOT
+    # "from wandb.errors.term import termlog; termlog()".
     with unittest.mock.patch.multiple(
-        "tracklab",
+        "wandb",
         termlog=unittest.mock.DEFAULT,
         termwarn=unittest.mock.DEFAULT,
         termerror=unittest.mock.DEFAULT,
     ) as patched:
-        yield MockTrackLabTerm(
+        yield MockWandbTerm(
             patched["termlog"],
             patched["termwarn"],
             patched["termerror"],
         )
 
 
-# --------------------------------
-# 文件系统隔离 Fixtures
-# --------------------------------
+class EmulatedTerminal:
+    """The return value of the emulated_terminal fixture."""
+
+    def __init__(self, capsys: pytest.CaptureFixture[str]):
+        self._capsys = capsys
+        self._screen = pyte.Screen(80, 24)
+        self._screen.set_mode(pyte.modes.LNM)  # \n implies \r
+        self._stream = pyte.Stream(self._screen)
+
+    def reset_capsys(self) -> None:
+        """Resets pytest's captured stderr and stdout buffers."""
+        self._capsys.readouterr()
+
+    def read_stderr(self) -> list[str]:
+        """Returns the text in the emulated terminal.
+
+        This processes the stderr text captured by pytest since the last
+        invocation and returns the updated state of the screen. Empty lines
+        at the top and bottom of the screen and empty text at the end of
+        any line are trimmed.
+
+        NOTE: This resets pytest's stderr and stdout buffers. You should not
+        use this with anything else that uses capsys.
+        """
+        self._stream.feed(self._capsys.readouterr().err)
+
+        lines = [line.rstrip() for line in self._screen.display]
+
+        # Trim empty lines from the start and end of the screen.
+        n_empty_at_start = sum(1 for _ in takewhile(lambda line: not line, lines))
+        n_empty_at_end = sum(1 for _ in takewhile(lambda line: not line, lines[::-1]))
+        return lines[n_empty_at_start:-n_empty_at_end]
+
+
+@pytest.fixture()
+def emulated_terminal(monkeypatch, capsys) -> EmulatedTerminal:
+    """Emulates a terminal for the duration of a test.
+
+    This makes functions in the `wandb.errors.term` module act as if
+    stderr is a terminal.
+
+    NOTE: This resets pytest's stderr and stdout buffers. You should not
+    use this with anything else that uses capsys.
+    """
+
+    monkeypatch.setenv("TERM", "xterm")
+
+    monkeypatch.setattr(term, "_sys_stderr_isatty", lambda: True)
+
+    # Make click pretend we're a TTY, so it doesn't strip ANSI sequences.
+    # This is fragile and could break when click is updated.
+    monkeypatch.setattr("click._compat.isatty", lambda *args, **kwargs: True)
+
+    # Reset the captured stderr and stdout buffers, since in the test
+    # environment, memray may prepend lines to stderr that look like:
+    #   '⚠ Memray support for Greenlet is experimental ⚠',
+    #   'Please report any issues at https://github.com/bloomberg/memray/issues',
+    #   ...
+    terminal = EmulatedTerminal(capsys)
+    terminal.reset_capsys()
+    return terminal
+
 
 @pytest.fixture(scope="function", autouse=True)
 def filesystem_isolate(tmp_path, monkeypatch):
-    """隔离的文件系统环境"""
-    # 设置覆盖率文件路径
+    # isolated_filesystem() changes the current working directory, which is
+    # where coverage.py stores coverage by default. This causes Python
+    # subprocesses to place their coverage into a temporary directory that is
+    # discarded after each test.
+    #
+    # Setting COVERAGE_FILE to an absolute path fixes this.
     if covfile := os.getenv("COVERAGE_FILE"):
         new_covfile = str(pathlib.Path(covfile).absolute())
     else:
         new_covfile = str(pathlib.Path(os.getcwd()) / ".coverage")
-    
+
+    print(f"Setting COVERAGE_FILE to {new_covfile}", file=sys.stderr)
     monkeypatch.setenv("COVERAGE_FILE", new_covfile)
-    
-    # 创建临时目录并切换到该目录
-    original_cwd = os.getcwd()
-    os.chdir(tmp_path)
-    try:
+
+    with CliRunner().isolated_filesystem(temp_dir=tmp_path):
         yield
-    finally:
-        os.chdir(original_cwd)
 
 
+# todo: this fixture should probably be autouse=True
 @pytest.fixture(scope="function", autouse=False)
 def local_settings(filesystem_isolate):
-    """将全局设置放在隔离目录中"""
-    config_path = os.path.join(os.getcwd(), ".config", "tracklab", "settings")
-    filesystem.mkdir_exists_ok(os.path.join(".config", "tracklab"))
-    
+    """Place global settings in an isolated dir."""
+    config_path = os.path.join(os.getcwd(), ".config", "wandb", "settings")
+    filesystem.mkdir_exists_ok(os.path.join(".config", "wandb"))
+
+    # todo: this breaks things in unexpected places
+    # todo: get rid of wandb.old
     with unittest.mock.patch.object(
-        tracklab.Settings,
+        wandb.old.settings.Settings,
         "_global_path",
         return_value=config_path,
     ):
         yield
 
 
-# --------------------------------
-# TrackLab 核心 Fixtures
-# --------------------------------
-
-@pytest.fixture(scope="function")
-def test_settings():
-    """创建测试用的设置对象"""
-    def update_test_settings(
-        extra_settings: dict | tracklab.Settings | None = None,
+@pytest.fixture(scope="function", autouse=True)
+def local_netrc(filesystem_isolate):
+    """Never use our real credentials, put them in their own isolated dir."""
+    # patch os.environ NETRC
+    with unittest.mock.patch.dict(
+        "os.environ",
+        {"NETRC": os.path.realpath("netrc")},
     ):
-        if not extra_settings:
-            extra_settings = dict()
-        
-        settings = tracklab.Settings(
-            console="off",
-            save_code=False,
-            mode="test",
-        )
-        if isinstance(extra_settings, dict):
-            settings.update_from_dict(extra_settings)
-        elif isinstance(extra_settings, tracklab.Settings):
-            settings.update_from_settings(extra_settings)
-        settings.x_start_time = time.time()
-        return settings
-    
-    yield update_test_settings
+        yield
+
+
+@pytest.fixture
+def dummy_api_key() -> str:
+    return "1824812581259009ca9981580f8f8a9012409eee"
+
+
+@pytest.fixture
+def patch_apikey(mocker: MockerFixture, dummy_api_key: str):
+    mocker.patch.object(wandb.sdk.lib.apikey, "isatty", return_value=True)
+    mocker.patch.object(wandb.sdk.lib.apikey, "input", return_value=1)
+    mocker.patch.object(wandb.sdk.lib.apikey, "getpass", return_value=dummy_api_key)
+    yield
+
+
+@pytest.fixture
+def patch_prompt(monkeypatch):
+    monkeypatch.setattr(
+        wandb.util, "prompt_choices", lambda x, input_timeout=None, jupyter=False: x[0]
+    )
+    monkeypatch.setattr(
+        wandb.wandb_lib.apikey,
+        "prompt_choices",
+        lambda x, input_timeout=None, jupyter=False: x[0],
+    )
+
+
+@pytest.fixture
+def runner(patch_apikey, patch_prompt):
+    return CliRunner()
+
+
+@pytest.fixture
+def git_repo(runner):
+    with runner.isolated_filesystem(), git.Repo.init(".") as repo:
+        filesystem.mkdir_exists_ok("wandb")
+        # Because the forked process doesn't use my monkey patch above
+        with open(os.path.join("wandb", "settings"), "w") as f:
+            f.write("[default]\nproject: test")
+        open("README", "wb").close()
+        repo.index.add(["README"])
+        repo.index.commit("Initial commit")
+        yield GitRepo(lazy=False)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def unset_global_objects():
+    from wandb.sdk.lib.module import unset_globals
+
+    yield
+    unset_globals()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def env_teardown():
+    wandb.teardown()
+    yield
+    wandb.teardown()
+    if not os.environ.get("CI") == "true":
+        # TODO: uncomment this for prod? better make controllable with an env var
+        # subprocess.run(["wandb", "server", "stop"])
+        pass
+
+
+@pytest.fixture(scope="function", autouse=True)
+def clean_up():
+    yield
+    wandb.teardown()
+
+
+@pytest.fixture
+def api() -> wandb.PublicApi:
+    return Api()
+
+
+# --------------------------------
+# Fixtures for user test point
+# --------------------------------
 
 
 @pytest.fixture()
 def record_q() -> Queue:
-    """消息队列用于测试"""
     return Queue()
 
 
 @pytest.fixture()
-def local_backend(record_q: Queue):
-    """本地化的后端接口"""
-    class MockedLocalBackend:
+def mocked_interface(record_q: Queue) -> InterfaceQueue:
+    return InterfaceQueue(record_q=record_q)
+
+
+@pytest.fixture
+def mocked_backend(mocked_interface: InterfaceQueue) -> Generator[object, None, None]:
+    class MockedBackend:
         def __init__(self) -> None:
-            self.record_q = record_q
-        
-        def log(self, data: dict) -> None:
-            self.record_q.put(data)
-        
-        def save(self, filename: str) -> None:
-            self.record_q.put({"type": "save", "filename": filename})
-        
-        def finish(self) -> None:
-            self.record_q.put({"type": "finish"})
-    
-    yield MockedLocalBackend()
+            self.interface = mocked_interface
+
+    yield MockedBackend()
 
 
 @pytest.fixture(scope="function")
-def mock_run(test_settings, local_backend) -> Generator[Callable, None, None]:
-    """创建带有 mocked backend 的 Run 对象"""
-    
-    def mock_run_fn(use_magic_mock=False, **kwargs: Any):
+def test_settings():
+    def update_test_settings(
+        extra_settings: dict | wandb.Settings | None = None,
+    ):
+        if not extra_settings:
+            extra_settings = dict()
+
+        settings = wandb.Settings(
+            console="off",
+            save_code=False,
+        )
+        if isinstance(extra_settings, dict):
+            settings.update_from_dict(extra_settings)
+        elif isinstance(extra_settings, wandb.Settings):
+            settings.update_from_settings(extra_settings)
+        settings.x_start_time = time.time()
+        return settings
+
+    yield update_test_settings
+
+
+@pytest.fixture(scope="function")
+def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
+    """Create a Run object with a stubbed out 'backend'.
+
+    This is similar to using `wandb.init(mode="offline")`, but much faster
+    as it does not start up a service process.
+
+    This is intended for tests that need to exercise surface-level Python logic
+    in the Run class. Note that it's better to factor out such logic into its
+    own unit-tested module instead.
+    """
+
+    def mock_run_fn(use_magic_mock=False, **kwargs: Any) -> wandb.sdk.wandb_run.Run:
         kwargs_settings = kwargs.pop("settings", dict())
         kwargs_settings = {
             "run_id": runid.generate_id(),
             **dict(kwargs_settings),
         }
-        
-        # 创建 Run 对象（暂时使用 mock，后续实现真实的 Run 类）
-        run = unittest.mock.MagicMock()
-        run.settings = test_settings(kwargs_settings)
-        run.backend = unittest.mock.MagicMock() if use_magic_mock else local_backend
-        
-        # 设置全局变量
+        run = wandb.wandb_sdk.wandb_run.Run(
+            settings=test_settings(kwargs_settings), **kwargs
+        )
+        run._set_backend(
+            unittest.mock.MagicMock() if use_magic_mock else mocked_backend
+        )
+        run._set_library(unittest.mock.MagicMock())
+
         module.set_global(
             run=run,
             config=run.config,
@@ -266,20 +456,15 @@ def mock_run(test_settings, local_backend) -> Generator[Callable, None, None]:
             watch=run.watch,
             unwatch=run.unwatch,
         )
-        
+
         return run
-    
+
     yield mock_run_fn
     module.unset_globals()
 
 
-# --------------------------------
-# 测试数据 Fixtures
-# --------------------------------
-
 @pytest.fixture
 def example_file(tmp_path: Path) -> Path:
-    """创建示例文件"""
     new_file = tmp_path / "test.txt"
     new_file.write_text("hello")
     return new_file
@@ -287,37 +472,8 @@ def example_file(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def example_files(tmp_path: Path) -> Path:
-    """创建示例文件目录"""
-    files_dir = tmp_path / "files"
-    files_dir.mkdir(parents=True, exist_ok=True)
+    artifact_dir = tmp_path / "artifacts"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
     for i in range(3):
-        (files_dir / f"file_{i}.txt").write_text(f"content-{i}")
-    return files_dir
-
-
-@pytest.fixture
-def dummy_api_key() -> str:
-    """虚拟的 API 密钥"""
-    return "test_api_key_1234567890abcdef"
-
-
-# --------------------------------
-# 清理 Fixtures
-# --------------------------------
-
-@pytest.fixture(scope="function", autouse=True)
-def unset_global_objects():
-    """清理全局对象"""
-    from tracklab.sdk.lib.module import unset_globals
-    
-    yield
-    unset_globals()
-
-
-@pytest.fixture(scope="function", autouse=True)
-def clean_up():
-    """清理测试环境"""
-    yield
-    # 清理 TrackLab 相关的全局状态
-    if hasattr(tracklab, "teardown"):
-        tracklab.teardown()
+        (artifact_dir / f"artifact_{i}.txt").write_text(f"file-{i}")
+    return artifact_dir
