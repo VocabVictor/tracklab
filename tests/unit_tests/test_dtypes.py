@@ -441,7 +441,7 @@ def test_classes_type():
     )
 
     wb_class_type = (
-        tracklab.wandb_sdk.data_types.helper_types.classes._ClassesIdType.from_obj(
+        tracklab.sdk.data_types.helper_types.classes._ClassesIdType.from_obj(
             wb_classes
         )
     )

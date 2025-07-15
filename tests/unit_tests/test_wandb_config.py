@@ -27,7 +27,7 @@ def callback(consolidated):
 
 @pytest.fixture()
 def config(callback):
-    s = wandb_sdk.Config()
+    s = tracklab_sdk.Config()
     s._set_callback(callback)
     return s
 
@@ -101,7 +101,7 @@ def test_load_config_default():
     yaml_dict = {"epochs": {"value": 32}, "size_batch": {"value": 32}}
     with open(test_path, "w") as f:
         yaml.dump(yaml_dict, f, default_flow_style=False)
-    config = wandb_sdk.Config()
+    config = tracklab_sdk.Config()
     assert dict(config) == dict(epochs=32, size_batch=32)
 
 
@@ -109,7 +109,7 @@ def test_load_empty_config_default(capsys):
     test_path = "config-defaults.yaml"
     with open(test_path, "w"):
         pass
-    _ = wandb_sdk.Config()
+    _ = tracklab_sdk.Config()
     err_log = capsys.readouterr().err
     warn_msg = "wandb: WARNING Found an empty default config file (config-defaults.yaml). Proceeding with no defaults."
     assert warn_msg in err_log

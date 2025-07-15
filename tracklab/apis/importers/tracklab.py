@@ -618,7 +618,7 @@ class WandbImporter:
                 return {"Bad upload": f"File not found: {fname}"}
             return {"http problem": f"{fname}: ({e})"}
 
-        dst_meta = tracklab.wandb_sdk.lib.json_util.loads(contents)
+        dst_meta = tracklab.sdk.lib.json_util.loads(contents)
 
         non_matching = {}
         if src_run.metadata:

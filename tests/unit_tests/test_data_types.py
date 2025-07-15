@@ -275,7 +275,7 @@ def test_max_images(mock_run):
     large_list = [tracklab.Image(large_image)] * 200
     large_list[0].bind_to_run(run, "test2", 0, 0)
     meta = tracklab.Image.seq_to_json(
-        tracklab.wandb_sdk.data_types.utils._prune_max_seq(large_list),
+        tracklab.sdk.data_types.utils._prune_max_seq(large_list),
         run,
         "test2",
         0,

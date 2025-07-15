@@ -1,6 +1,6 @@
 from tracklab import tracklab_lib
 
-sparkline = wandb_lib.sparkline
+sparkline = tracklab_lib.sparkline
 
 
 def test_sparkline():

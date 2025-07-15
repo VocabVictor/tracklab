@@ -103,7 +103,7 @@ def wandb_caplog(
     so caplog does not work out of the box.
     """
 
-    logger = logging.getLogger("wandb")
+    logger = logging.getLogger("tracklab")
 
     logger.addHandler(caplog.handler)
     try:
@@ -175,7 +175,7 @@ def mock_wandb_log() -> Generator[MockWandbTerm, None, None]:
     # NOTE: This only stubs out calls like "tracklab.termlog()", NOT
     # "from tracklab.errors.term import termlog; termlog()".
     with unittest.mock.patch.multiple(
-        "wandb",
+        "tracklab",
         termlog=unittest.mock.DEFAULT,
         termwarn=unittest.mock.DEFAULT,
         termerror=unittest.mock.DEFAULT,
@@ -317,7 +317,7 @@ def patch_prompt(monkeypatch):
         tracklab.util, "prompt_choices", lambda x, input_timeout=None, jupyter=False: x[0]
     )
     monkeypatch.setattr(
-        tracklab.wandb_lib.apikey,
+        tracklab.tracklab_lib.apikey,
         "prompt_choices",
         lambda x, input_timeout=None, jupyter=False: x[0],
     )
@@ -435,7 +435,7 @@ def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
             "run_id": runid.generate_id(),
             **dict(kwargs_settings),
         }
-        run = tracklab.wandb_sdk.wandb_run.Run(
+        run = tracklab.sdk.wandb_run.Run(
             settings=test_settings(kwargs_settings), **kwargs
         )
         run._set_backend(

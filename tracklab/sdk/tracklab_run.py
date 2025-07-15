@@ -2466,7 +2466,7 @@ class Run:
             self._on_finish()
 
         except KeyboardInterrupt:
-            if not tracklab.wandb_agent._is_running():  # type: ignore
+            if not tracklab.tracklab_agent._is_running():  # type: ignore
                 tracklab.termerror("Control-C detected -- Run data was not synced")
             raise
 

@@ -3,15 +3,15 @@ import stat
 from unittest import mock
 
 import pytest
-from tracklab import tracklab, wandb_lib
+from tracklab import tracklab, tracklab_lib
 from tracklab.sdk.lib.apikey import _api_key_prompt_str
 
 
 def test_write_netrc(mock_wandb_log):
     api_key = "X" * 40
-    wandb_lib.apikey.write_netrc("http://localhost", "vanpelt", api_key)
+    tracklab_lib.apikey.write_netrc("http://localhost", "vanpelt", api_key)
     assert mock_wandb_log.logged("No netrc file found, creating one.")
-    with open(wandb_lib.apikey.get_netrc_file_path()) as f:
+    with open(tracklab_lib.apikey.get_netrc_file_path()) as f:
         assert f.read() == (
             f"machine localhost\n  login vanpelt\n  password {api_key}\n"
         )
@@ -30,11 +30,11 @@ def test_write_netrc_update_existing(tmp_path):
             ]
         )
     os.chmod(netrc_path, stat.S_IRUSR | stat.S_IWUSR)
-    assert wandb_lib.apikey.api_key(settings) == old_api_key
+    assert tracklab_lib.apikey.api_key(settings) == old_api_key
 
     new_api_key = "Y" * 40
-    wandb_lib.apikey.write_netrc("http://localhost", "random-user", new_api_key)
-    assert wandb_lib.apikey.api_key(settings) == new_api_key
+    tracklab_lib.apikey.write_netrc("http://localhost", "random-user", new_api_key)
+    assert tracklab_lib.apikey.api_key(settings) == new_api_key
     with open(netrc_path) as f:
         assert f.read() == (
             "machine otherhost\n  login other-user\n  password password123\n"
@@ -62,14 +62,14 @@ def test_netrc_permission_errors(
     api_key = "X" * 40
     with mock.patch(
         "tracklab.sdk.lib.apikey.check_netrc_access",
-        return_value=wandb_lib.apikey._NetrcPermissions(
+        return_value=tracklab_lib.apikey._NetrcPermissions(
             exists=True,
             read_access=read_permission,
             write_access=write_permission,
         ),
     ):
-        with pytest.raises(wandb_lib.apikey.WriteNetrcError) as expected_error:
-            wandb_lib.apikey.write_netrc("http://localhost", "random-user", api_key)
+        with pytest.raises(tracklab_lib.apikey.WriteNetrcError) as expected_error:
+            tracklab_lib.apikey.write_netrc("http://localhost", "random-user", api_key)
         assert str(expected_error.value) == (
             f"Cannot access {netrc_path}. In order to persist your API key, "
             "grant read and write permissions for your user to the file "
@@ -89,8 +89,8 @@ def test_stat_netrc_permission_oserror(tmp_path, mock_wandb_log):
         "os.stat",
         side_effect=OSError,
     ):
-        with pytest.raises(wandb_lib.apikey.WriteNetrcError) as expected_error:
-            wandb_lib.apikey.write_netrc("http://localhost", "random-user", api_key)
+        with pytest.raises(tracklab_lib.apikey.WriteNetrcError) as expected_error:
+            tracklab_lib.apikey.write_netrc("http://localhost", "random-user", api_key)
             assert (
                 str(expected_error.value)
                 == f"Unable to read permissions for {netrc_path}"
@@ -110,8 +110,8 @@ def test_write_netrc_permission_oserror(tmp_path, mock_wandb_log):
         mock.mock_open(),
     ) as mock_file:
         mock_file.side_effect = [mock_file.return_value, OSError()]
-        with pytest.raises(wandb_lib.apikey.WriteNetrcError) as expected_error:
-            wandb_lib.apikey.write_netrc("http://localhost", "random-user", api_key)
+        with pytest.raises(tracklab_lib.apikey.WriteNetrcError) as expected_error:
+            tracklab_lib.apikey.write_netrc("http://localhost", "random-user", api_key)
         assert str(expected_error.value) == f"Unable to write {netrc_path}"
 
 
@@ -123,7 +123,7 @@ def test_read_apikey(tmp_path, monkeypatch):
         f.write("machine localhost\n  login random-user\n  password " + "X" * 40)
     os.chmod(netrc_path, stat.S_IRUSR | stat.S_IWUSR)
 
-    api_key = wandb_lib.apikey.api_key(settings)
+    api_key = tracklab_lib.apikey.api_key(settings)
     assert api_key == "X" * 40
 
 
@@ -134,13 +134,13 @@ def test_read_apikey_no_netrc_access(tmp_path, monkeypatch, mock_wandb_log):
 
     with mock.patch(
         "tracklab.sdk.lib.apikey.check_netrc_access",
-        return_value=wandb_lib.apikey._NetrcPermissions(
+        return_value=tracklab_lib.apikey._NetrcPermissions(
             exists=True,
             read_access=False,
             write_access=False,
         ),
     ):
-        api_key = wandb_lib.apikey.api_key(settings)
+        api_key = tracklab_lib.apikey.api_key(settings)
         assert api_key is None
         assert mock_wandb_log.warned(f"Cannot access {netrc_path}.")
 

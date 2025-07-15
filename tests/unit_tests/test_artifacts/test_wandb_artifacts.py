@@ -21,7 +21,7 @@ from tracklab.sdk.artifacts.artifact_instance_cache import artifact_instance_cac
 from tracklab.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
 from tracklab.sdk.artifacts.artifact_state import ArtifactState
 from tracklab.sdk.artifacts.exceptions import ArtifactNotLoggedError
-from tracklab.sdk.artifacts.storage_policies.wandb_storage_policy import WandbStoragePolicy
+from tracklab.sdk.artifacts.storage_policies.tracklab_storage_policy import WandbStoragePolicy
 
 if TYPE_CHECKING:
     from typing import Protocol
@@ -302,7 +302,7 @@ class TestStoreFile:
         ],
     )
     @mock.patch(
-        "tracklab.sdk.artifacts.storage_policies.wandb_storage_policy.WandbStoragePolicy."
+        "tracklab.sdk.artifacts.storage_policies.tracklab_storage_policy.WandbStoragePolicy."
         "s3_multipart_file_upload"
     )
     def test_multipart_upload_handle_response(
@@ -327,7 +327,7 @@ class TestStoreFile:
         policy = WandbStoragePolicy(api=api)
         # Mock minimum size for multipart so that we can test multipart
         with mock.patch(
-            "tracklab.sdk.artifacts.storage_policies.wandb_storage_policy."
+            "tracklab.sdk.artifacts.storage_policies.tracklab_storage_policy."
             "S3_MIN_MULTI_UPLOAD_SIZE",
             example_file.stat().st_size,
         ):

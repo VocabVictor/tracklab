@@ -251,7 +251,7 @@ class Settings(BaseModel, validate_assignment=True):
     """Whether to produce multipart console log files."""
 
     credentials_file: str = Field(
-        default_factory=lambda: str(credentials.DEFAULT_WANDB_CREDENTIALS_FILE)
+        default_factory=lambda: str(credentials.DEFAULT_TRACKLAB_CREDENTIALS_FILE)
     )
     """Path to file for writing temporary access tokens."""
 

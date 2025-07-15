@@ -2,7 +2,7 @@
 
 import tracklab
 
-telem_lib = tracklab.wandb_lib.telemetry
+telem_lib = tracklab.tracklab_lib.telemetry
 
 
 def test_telemetry_parse():

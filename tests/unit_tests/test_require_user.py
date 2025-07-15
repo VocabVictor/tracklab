@@ -11,7 +11,7 @@ def mock_require(mocker):
     def fn(require, func):
         cleanup.append(require)
         mocker.patch.object(
-            tracklab.wandb_sdk.wandb_require._Requires,
+            tracklab.sdk.wandb_require._Requires,
             "require_" + require,
             func,
             create=True,

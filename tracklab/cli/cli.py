@@ -24,7 +24,7 @@ import tracklab
 import tracklab.env
 import tracklab.errors
 import tracklab.sdk.verify.verify as wandb_verify
-from tracklab import Config, Error, env, util, wandb_agent, wandb_sdk
+from tracklab import Config, Error, env, util, tracklab_agent, tracklab_sdk
 from tracklab.apis import InternalApi, PublicApi
 from tracklab.apis.public import RunQueue
 from tracklab.errors.links import url_registry
@@ -232,7 +232,7 @@ def login(key, host, cloud, relogin, anonymously, verify, no_offline=False):
     # TODO: handle no_offline
     anon_mode = "must" if anonymously else "never"
 
-    wandb_sdk.tracklab_login._handle_host_wandb_setting(host, cloud)
+    tracklab_sdk.tracklab_login._handle_host_wandb_setting(host, cloud)
     # A change in click or the test harness means key can be none...
     key = key[0] if key is not None and len(key) > 0 else None
     relogin = True if key or relogin else False
@@ -833,13 +833,13 @@ def sweep(
     env = os.environ
     entity = (
         entity
-        or env.get("WANDB_ENTITY")
+        or env.get("TRACKLAB_ENTITY")
         or config.get("entity")
         or api.settings("entity")
     )
     project = (
         project
-        or env.get("WANDB_PROJECT")
+        or env.get("TRACKLAB_PROJECT")
         or config.get("project")
         or api.settings("project")
         or util.auto_project_name(config.get("program"))
@@ -858,14 +858,14 @@ def sweep(
     styled_id = click.style(sweep_id, fg="yellow")
     tracklab.termlog(f"{action} sweep with ID: {styled_id}")
 
-    sweep_url = wandb_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
+    sweep_url = tracklab_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
     if sweep_url:
         styled_url = click.style(sweep_url, underline=True, fg="blue")
         tracklab.termlog(f"View sweep at: {styled_url}")
 
     # re-probe entity and project if it was auto-detected by upsert_sweep
-    entity = entity or env.get("WANDB_ENTITY")
-    project = project or env.get("WANDB_PROJECT")
+    entity = entity or env.get("TRACKLAB_ENTITY")
+    project = project or env.get("TRACKLAB_PROJECT")
 
     if entity and project:
         sweep_path = f"{entity}/{project}/{sweep_id}"
@@ -944,12 +944,12 @@ def launch_sweep(
         ctx.invoke(login, no_offline=True)
         api = _get_cling_api(reset=True)
 
-    entity = entity or env.get("WANDB_ENTITY") or api.settings("entity")
+    entity = entity or env.get("TRACKLAB_ENTITY") or api.settings("entity")
     if entity is None:
         tracklab.termerror("Must specify entity when using launch")
         return
 
-    project = project or env.get("WANDB_PROJECT") or api.settings("project")
+    project = project or env.get("TRACKLAB_PROJECT") or api.settings("project")
     if project is None:
         tracklab.termerror("A project must be configured when using launch")
         return
@@ -1091,7 +1091,7 @@ def launch_sweep(
     launch_scheduler_spec = launch_utils.construct_launch_spec(
         uri=Scheduler.PLACEHOLDER_URI,
         api=api,
-        name="Scheduler.WANDB_SWEEP_ID",
+        name="Scheduler.TRACKLAB_SWEEP_ID",
         project=project,
         entity=entity,
         docker_image=scheduler_args.get("docker_image"),
@@ -1102,7 +1102,7 @@ def launch_sweep(
         job=scheduler_job,
         version=None,
         launch_config={"overrides": overrides},
-        run_id="WANDB_SWEEP_ID",  # scheduler inits run with sweep_id=run_id
+        run_id="TRACKLAB_SWEEP_ID",  # scheduler inits run with sweep_id=run_id
         author=None,  # author gets passed into scheduler override args
     )
     launch_scheduler_with_queue = json.dumps(
@@ -1127,7 +1127,7 @@ def launch_sweep(
     # Log nicely formatted sweep information
     styled_id = click.style(sweep_id, fg="yellow")
     tracklab.termlog(f"{'Resumed' if resume_id else 'Created'} sweep with ID: {styled_id}")
-    sweep_url = wandb_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
+    sweep_url = tracklab_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
     if sweep_url:
         styled_url = click.style(sweep_url, underline=True, fg="blue")
         tracklab.termlog(f"View sweep at: {styled_url}")
@@ -1183,7 +1183,7 @@ def launch_sweep(
 )
 @click.option(
     "--name",
-    envvar="WANDB_NAME",
+    envvar="TRACKLAB_NAME",
     help="""Name of the run under which to launch the run. If not
     specified, a random run name will be used to launch run. If passed in, will override the name passed in using a config file.""",
 )
@@ -1543,7 +1543,7 @@ def launch(
     help=(
         "Destination for internal agent logs. Use - for stdout. "
         "By default all agents logs will go to debug.log in your wandb/ "
-        "subdirectory or WANDB_DIR if set."
+        "subdirectory or TRACKLAB_DIR if set."
     ),
 )
 @click.option(
@@ -1635,7 +1635,7 @@ def agent(ctx, project, entity, count, sweep_id):
         api = _get_cling_api(reset=True)
 
     tracklab.termlog("Starting wandb agent 🕵️")
-    wandb_agent.agent(sweep_id, entity=entity, project=project, count=count)
+    tracklab_agent.agent(sweep_id, entity=entity, project=project, count=count)
 
     # you can send local commands like so:
     # agent_api.command({'type': 'run', 'program': 'train.py',
@@ -1858,14 +1858,14 @@ def create(
     api = _get_cling_api()
     tracklab._sentry.configure_scope(process_context="job_create")
 
-    entity = entity or os.getenv("WANDB_ENTITY") or api.default_entity
+    entity = entity or os.getenv("TRACKLAB_ENTITY") or api.default_entity
     if not entity:
-        tracklab.termerror("No entity provided, use --entity or set WANDB_ENTITY")
+        tracklab.termerror("No entity provided, use --entity or set TRACKLAB_ENTITY")
         return
 
-    project = project or os.getenv("WANDB_PROJECT")
+    project = project or os.getenv("TRACKLAB_PROJECT")
     if not project:
-        tracklab.termerror("No project provided, use --project or set WANDB_PROJECT")
+        tracklab.termerror("No project provided, use --project or set TRACKLAB_PROJECT")
         return
 
     if entrypoint is None and job_type in ["git", "code"]:
@@ -1929,7 +1929,7 @@ def controller(verbose, sweep_id):
 @click.pass_context
 @click.argument("docker_run_args", nargs=-1)
 def docker_run(ctx, docker_run_args):
-    """Wrap `docker run` and adds WANDB_API_KEY and WANDB_DOCKER environment variables.
+    """Wrap `docker run` and adds TRACKLAB_API_KEY and TRACKLAB_DOCKER environment variables.
 
     This will also set the runtime to nvidia if the nvidia-docker executable is present
     on the system and --runtime wasn't set.
@@ -1951,13 +1951,13 @@ def docker_run(ctx, docker_run_args):
     if image:
         resolved_image = tracklab.docker.image_id(image)
     if resolved_image:
-        args = ["-e", f"WANDB_DOCKER={resolved_image}"] + args
+        args = ["-e", f"TRACKLAB_DOCKER={resolved_image}"] + args
     else:
         tracklab.termlog(
-            "Couldn't detect image argument, running command without the WANDB_DOCKER env variable"
+            "Couldn't detect image argument, running command without the TRACKLAB_DOCKER env variable"
         )
     if api.api_key:
-        args = ["-e", f"WANDB_API_KEY={api.api_key}"] + args
+        args = ["-e", f"TRACKLAB_API_KEY={api.api_key}"] + args
     else:
         tracklab.termlog(
             "Not logged in, run `wandb login` from the host machine to enable result logging"
@@ -2010,7 +2010,7 @@ def docker(
     """Run your code in a docker container.
 
     W&B docker lets you run your code in a docker image ensuring wandb is configured. It
-    adds the WANDB_DOCKER and WANDB_API_KEY environment variables to your container and
+    adds the TRACKLAB_DOCKER and TRACKLAB_API_KEY environment variables to your container and
     mounts the current directory in /app by default.  You can pass additional args which
     will be added to `docker run` before the image name is declared, we'll choose a
     default image for you if one isn't passed:
@@ -2071,7 +2071,7 @@ def docker(
         "-e",
         "LANG=C.UTF-8",
         "-e",
-        f"WANDB_DOCKER={resolved_image}",
+        f"TRACKLAB_DOCKER={resolved_image}",
         "--ipc=host",
         "-v",
         tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
@@ -2084,13 +2084,13 @@ def docker(
         #  TODO: We should default to the working directory if defined
         command.extend(["-v", cwd + ":" + dir, "-w", dir])
     if api.api_key:
-        command.extend(["-e", f"WANDB_API_KEY={api.api_key}"])
+        command.extend(["-e", f"TRACKLAB_API_KEY={api.api_key}"])
     else:
         tracklab.termlog(
-            "Couldn't find WANDB_API_KEY, run `wandb login` to enable streaming metrics"
+            "Couldn't find TRACKLAB_API_KEY, run `wandb login` to enable streaming metrics"
         )
     if jupyter:
-        command.extend(["-e", "WANDB_ENSURE_JUPYTER=1", "-p", port + ":8888"])
+        command.extend(["-e", "TRACKLAB_ENSURE_JUPYTER=1", "-p", port + ":8888"])
         no_tty = True
         cmd = f"jupyter lab --no-browser --ip=0.0.0.0 --allow-root --NotebookApp.token= --notebook-dir {dir}"
     command.extend(args)
@@ -2098,7 +2098,7 @@ def docker(
         command.extend([image, shell, "-c", cmd])
     else:
         if cmd:
-            command.extend(["-e", f"WANDB_COMMAND={cmd}"])
+            command.extend(["-e", f"TRACKLAB_COMMAND={cmd}"])
         command.extend(["-it", image, shell])
         tracklab.termlog("Launching docker container \U0001f6a2")
     subprocess.call(command)
@@ -2630,7 +2630,7 @@ def offline():
         )
     except configparser.Error:
         click.echo(
-            "Unable to write config, copy and paste the following in your terminal to turn off W&B:\nexport WANDB_MODE=offline"
+            "Unable to write config, copy and paste the following in your terminal to turn off W&B:\nexport TRACKLAB_MODE=offline"
         )
 
 
@@ -2677,7 +2677,7 @@ def disabled(service):
         click.echo("W&B disabled.")
     except configparser.Error:
         click.echo(
-            "Unable to write config, copy and paste the following in your terminal to turn off W&B:\nexport WANDB_MODE=disabled"
+            "Unable to write config, copy and paste the following in your terminal to turn off W&B:\nexport TRACKLAB_MODE=disabled"
         )
 
 
@@ -2696,7 +2696,7 @@ def enabled(service):
         click.echo("W&B enabled.")
     except configparser.Error:
         click.echo(
-            "Unable to write config, copy and paste the following in your terminal to turn on W&B:\nexport WANDB_MODE=online"
+            "Unable to write config, copy and paste the following in your terminal to turn on W&B:\nexport TRACKLAB_MODE=online"
         )
 
 
@@ -2704,8 +2704,8 @@ def enabled(service):
 @click.option("--host", default=None, help="Test a specific instance of W&B")
 def verify(host):
     # TODO: (kdg) Build this all into a WandbVerify object, and clean this up.
-    os.environ["WANDB_SILENT"] = "true"
-    os.environ["WANDB_PROJECT"] = "verify"
+    os.environ["TRACKLAB_SILENT"] = "true"
+    os.environ["TRACKLAB_PROJECT"] = "verify"
     api = _get_cling_api()
     reinit = False
     if host is None:
@@ -2720,7 +2720,7 @@ def verify(host):
         "Find detailed logs for this test at: {}".format(os.path.join(tmp_dir, "wandb"))
     )
     os.chdir(tmp_dir)
-    os.environ["WANDB_BASE_URL"] = host
+    os.environ["TRACKLAB_BASE_URL"] = host
     tracklab.login(host=host)
     if reinit:
         api = _get_cling_api(reset=True)

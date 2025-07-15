@@ -46,9 +46,9 @@ class MockCallback:
 
 def create_summary_and_mock(
     current_dict: Dict,
-) -> Tuple["wandb_sdk.Summary", "MockCallback"]:
+) -> Tuple["tracklab_sdk.Summary", "MockCallback"]:
     m = MockCallback(current_dict)
-    s = wandb_sdk.Summary(
+    s = tracklab_sdk.Summary(
         m.get_current_summary_callback,
     )
     s._set_update_callback(

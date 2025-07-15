@@ -1,5 +1,5 @@
 import pytest
-from tracklab.sdk.wandb_require_helpers import RequiresMixin, requires
+from tracklab.sdk.tracklab_require_helpers import RequiresMixin, requires
 
 
 def test_requirements_mixin() -> None:
