@@ -185,7 +185,14 @@ class _WandbInit:
         # NOTE: _noop or _offline can become true after _login().
         #   _noop happens if _login hits a timeout.
         #   _offline can be selected by the user at the login prompt.
+        #   TrackLab modification: Default to local mode for better user experience
         if run_settings._noop or run_settings._offline:
+            return
+
+        # TrackLab: Skip login for local-first experience
+        # Only attempt login if explicitly requested via API key or force flag
+        if not run_settings.force and not os.getenv("TRACKLAB_API_KEY"):
+            # Default to offline mode for local-first experience
             return
 
         tracklab_login._login(
@@ -1534,6 +1541,14 @@ def init(  # noqa: C901
         init_settings.fork_from = fork_from  # type: ignore
     if resume_from is not None:
         init_settings.resume_from = resume_from  # type: ignore
+
+    # TrackLab: Default to disabled mode for local-first experience
+    # Only use online mode if explicitly requested via API key or force flag
+    if (init_settings.mode == "online" and 
+        mode is None and  # User didn't explicitly set mode
+        not force and 
+        not os.getenv("TRACKLAB_API_KEY")):
+        init_settings.mode = "disabled"
 
     if config is not None:
         init_telemetry.feature.set_init_config = True
