@@ -15,7 +15,8 @@ from typing import Any, Callable, Dict, List, Optional
 import yaml
 
 import tracklab
-from tracklab import util, tracklab_lib, wandb_sdk
+from tracklab import util, tracklab_lib
+from tracklab import sdk as tracklab_sdk
 from tracklab.agents.pyagent import pyagent
 from tracklab.apis import InternalApi
 from tracklab.sdk.launch.sweeps import utils as sweep_utils
@@ -558,7 +559,7 @@ def agent(
     _INSTANCES += 1
     try:
         # make sure we are logged in
-        wandb_sdk.tracklab_login._login(_silent=True)
+        tracklab_sdk.tracklab_login._login(_silent=True)
         if function:
             return pyagent(sweep_id, function, entity, project, count)
         return run_agent(

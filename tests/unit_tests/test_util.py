@@ -269,13 +269,8 @@ def test_image_from_docker_args_sha():
 ###############################################################################
 
 
-def test_app_url():
-    with mock.patch.dict("os.environ", {"TRACKLAB_APP_URL": "https://foo.com/bar/"}):
-        assert util.app_url("https://api.foo.com") == "https://foo.com/bar"
-    assert util.app_url("http://api.tracklab.test") == "http://app.tracklab.test"
-    assert util.app_url("https://api.tracklab.ai") == "https://tracklab.ai"
-    assert util.app_url("https://api.foo/bar") == "https://app.foo/bar"
-    assert util.app_url("https://tracklab.foo") == "https://tracklab.foo"
+# test_app_url removed: tracklab is designed for local recording and viewing like TensorBoard
+# Cloud service URL configuration is not needed for local-only functionality
 
 
 ###############################################################################
@@ -493,15 +488,8 @@ def test_is_pytorch_tensor():
 ###############################################################################
 
 
-def test_launch_browser():
-    with mock.patch("sys.platform", "linux"):
-        with mock.patch.dict("sys.modules", {"webbrowser": mock.MagicMock()}):
-            import webbrowser
-
-            webbrowser.get().name = mock.MagicMock(return_value="lynx")
-            assert not util.launch_browser()
-            webbrowser.get().name = mock.MagicMock(side_effect=webbrowser.Error)
-            assert not util.launch_browser()
+# test_launch_browser removed: tracklab is designed for local recording and viewing like TensorBoard
+# Browser launching functionality is not needed for local-only functionality
 
 
 def test_parse_tfjob_config():

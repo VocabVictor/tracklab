@@ -2,7 +2,7 @@
 
 import tracklab
 
-sample = tracklab.wandb_sdk.internal.sample
+sample = tracklab.sdk.internal.sample
 
 
 def doit(num, samples=None):

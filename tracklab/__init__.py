@@ -1,16 +1,25 @@
-"""Use wandb to track machine learning work.
+"""Use tracklab to track machine learning work.
 
 Train and fine-tune models, manage models from experimentation to production.
 
-For guides and examples, see https://docs.wandb.ai.
+For guides and examples, see https://docs.tracklab.ai.
 
-For scripts and interactive notebooks, see https://github.com/wandb/examples.
+For scripts and interactive notebooks, see https://github.com/tracklab/examples.
 
-For reference documentation, see https://docs.wandb.com/ref/python.
+For reference documentation, see https://docs.tracklab.com/ref/python.
 """
 from __future__ import annotations
 
 __version__ = "0.21.1.dev1"
+
+# Setup vendor module paths before any other imports
+import sys
+import os
+_vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
+for _vendor_path in ["gql-0.2.0", "graphql-core-1.1", "promise-2.3.0", "watchdog_0_9_0"]:
+    _full_path = os.path.join(_vendor_dir, _vendor_path)
+    if _full_path not in sys.path:
+        sys.path.insert(0, _full_path)
 
 
 from tracklab.errors import Error
@@ -20,29 +29,31 @@ from tracklab.errors.term import termsetup, termlog, termerror, termwarn
 
 # Configure the logger as early as possible for consistent behavior.
 from tracklab.sdk.lib import wb_logging as _wb_logging
-_wb_logging.configure_wandb_logger()
+_wb_logging.configure_wandb_logger()  # TODO: rename function to configure_tracklab_logger
 
-from tracklab import sdk as wandb_sdk
+from tracklab import sdk as tracklab_sdk
 
-# Note: tracklab replaces wandb functionality
-tracklab_lib = wandb_sdk.lib  # type: ignore
+# Note: tracklab SDK 
+tracklab_lib = tracklab_sdk.lib  # type: ignore
+# Legacy compatibility for tests that still reference wandb_lib
+wandb_lib = tracklab_sdk.lib  # type: ignore
 
-init = wandb_sdk.init
-setup = wandb_sdk.setup
-attach = _attach = wandb_sdk._attach
-_sync = wandb_sdk._sync
-teardown = _teardown = wandb_sdk.teardown
-finish = wandb_sdk.finish
+init = tracklab_sdk.init
+setup = tracklab_sdk.setup
+attach = _attach = tracklab_sdk._attach
+_sync = tracklab_sdk._sync
+teardown = _teardown = tracklab_sdk.teardown
+finish = tracklab_sdk.finish
 join = finish
-login = wandb_sdk.login
-helper = wandb_sdk.helper
-sweep = wandb_sdk.sweep
-controller = wandb_sdk.controller
-require = wandb_sdk.require
-Artifact = wandb_sdk.Artifact
-AlertLevel = wandb_sdk.AlertLevel
-Settings = wandb_sdk.Settings
-Config = wandb_sdk.Config
+login = tracklab_sdk.login
+helper = tracklab_sdk.helper
+sweep = tracklab_sdk.sweep
+controller = tracklab_sdk.controller
+require = tracklab_sdk.require
+Artifact = tracklab_sdk.Artifact
+AlertLevel = tracklab_sdk.AlertLevel
+Settings = tracklab_sdk.Settings
+Config = tracklab_sdk.Config
 
 from tracklab.apis import InternalApi, PublicApi
 from tracklab.errors import CommError, UsageError
@@ -111,62 +122,62 @@ def _assert_is_user_process():
 # globals
 Api = PublicApi
 api = InternalApi()
-run: wandb_sdk.tracklab_run.Run | None = None
-config = _preinit.PreInitObject("wandb.config", wandb_sdk.tracklab_config.Config)
-summary = _preinit.PreInitObject("wandb.summary", wandb_sdk.tracklab_summary.Summary)
-log = _preinit.PreInitCallable("wandb.log", wandb_sdk.tracklab_run.Run.log)  # type: ignore
-watch = _preinit.PreInitCallable("wandb.watch", wandb_sdk.tracklab_run.Run.watch)  # type: ignore
-unwatch = _preinit.PreInitCallable("wandb.unwatch", wandb_sdk.tracklab_run.Run.unwatch)  # type: ignore
-save = _preinit.PreInitCallable("wandb.save", wandb_sdk.tracklab_run.Run.save)  # type: ignore
-restore = wandb_sdk.tracklab_run.restore
+run: tracklab_sdk.tracklab_run.Run | None = None
+config = _preinit.PreInitObject("tracklab.config", tracklab_sdk.tracklab_config.Config)
+summary = _preinit.PreInitObject("tracklab.summary", tracklab_sdk.tracklab_summary.Summary)
+log = _preinit.PreInitCallable("tracklab.log", tracklab_sdk.tracklab_run.Run.log)  # type: ignore
+watch = _preinit.PreInitCallable("tracklab.watch", tracklab_sdk.tracklab_run.Run.watch)  # type: ignore
+unwatch = _preinit.PreInitCallable("tracklab.unwatch", tracklab_sdk.tracklab_run.Run.unwatch)  # type: ignore
+save = _preinit.PreInitCallable("tracklab.save", tracklab_sdk.tracklab_run.Run.save)  # type: ignore
+restore = tracklab_sdk.tracklab_run.restore
 use_artifact = _preinit.PreInitCallable(
-    "wandb.use_artifact", wandb_sdk.tracklab_run.Run.use_artifact  # type: ignore
+    "tracklab.use_artifact", tracklab_sdk.tracklab_run.Run.use_artifact  # type: ignore
 )
 log_artifact = _preinit.PreInitCallable(
-    "wandb.log_artifact", wandb_sdk.tracklab_run.Run.log_artifact  # type: ignore
+    "tracklab.log_artifact", tracklab_sdk.tracklab_run.Run.log_artifact  # type: ignore
 )
 log_model = _preinit.PreInitCallable(
-    "wandb.log_model", wandb_sdk.tracklab_run.Run.log_model  # type: ignore
+    "tracklab.log_model", tracklab_sdk.tracklab_run.Run.log_model  # type: ignore
 )
 use_model = _preinit.PreInitCallable(
-    "wandb.use_model", wandb_sdk.tracklab_run.Run.use_model  # type: ignore
+    "tracklab.use_model", tracklab_sdk.tracklab_run.Run.use_model  # type: ignore
 )
 link_model = _preinit.PreInitCallable(
-    "wandb.link_model", wandb_sdk.tracklab_run.Run.link_model  # type: ignore
+    "tracklab.link_model", tracklab_sdk.tracklab_run.Run.link_model  # type: ignore
 )
 define_metric = _preinit.PreInitCallable(
-    "wandb.define_metric", wandb_sdk.tracklab_run.Run.define_metric  # type: ignore
+    "tracklab.define_metric", tracklab_sdk.tracklab_run.Run.define_metric  # type: ignore
 )
 
 mark_preempting = _preinit.PreInitCallable(
-    "wandb.mark_preempting", wandb_sdk.tracklab_run.Run.mark_preempting  # type: ignore
+    "tracklab.mark_preempting", tracklab_sdk.tracklab_run.Run.mark_preempting  # type: ignore
 )
 
-alert = _preinit.PreInitCallable("wandb.alert", wandb_sdk.tracklab_run.Run.alert)  # type: ignore
+alert = _preinit.PreInitCallable("tracklab.alert", tracklab_sdk.tracklab_run.Run.alert)  # type: ignore
 
 # record of patched libraries
 patched = {"tensorboard": [], "keras": [], "gym": []}  # type: ignore
 
-keras = _lazyloader.LazyLoader("wandb.keras", globals(), "wandb.integration.keras")
-sklearn = _lazyloader.LazyLoader("wandb.sklearn", globals(), "wandb.sklearn")
+keras = _lazyloader.LazyLoader("tracklab.keras", globals(), "tracklab.integration.keras")
+sklearn = _lazyloader.LazyLoader("tracklab.sklearn", globals(), "tracklab.sklearn")
 tensorflow = _lazyloader.LazyLoader(
-    "wandb.tensorflow", globals(), "wandb.integration.tensorflow"
+    "tracklab.tensorflow", globals(), "tracklab.integration.tensorflow"
 )
 xgboost = _lazyloader.LazyLoader(
-    "wandb.xgboost", globals(), "wandb.integration.xgboost"
+    "tracklab.xgboost", globals(), "tracklab.integration.xgboost"
 )
 catboost = _lazyloader.LazyLoader(
-    "wandb.catboost", globals(), "wandb.integration.catboost"
+    "tracklab.catboost", globals(), "tracklab.integration.catboost"
 )
 tensorboard = _lazyloader.LazyLoader(
-    "wandb.tensorboard", globals(), "wandb.integration.tensorboard"
+    "tracklab.tensorboard", globals(), "tracklab.integration.tensorboard"
 )
-gym = _lazyloader.LazyLoader("wandb.gym", globals(), "wandb.integration.gym")
+gym = _lazyloader.LazyLoader("tracklab.gym", globals(), "tracklab.integration.gym")
 lightgbm = _lazyloader.LazyLoader(
-    "wandb.lightgbm", globals(), "wandb.integration.lightgbm"
+    "tracklab.lightgbm", globals(), "tracklab.integration.lightgbm"
 )
-jupyter = _lazyloader.LazyLoader("wandb.jupyter", globals(), "wandb.jupyter")
-sacred = _lazyloader.LazyLoader("wandb.sacred", globals(), "wandb.integration.sacred")
+jupyter = _lazyloader.LazyLoader("tracklab.jupyter", globals(), "tracklab.jupyter")
+sacred = _lazyloader.LazyLoader("tracklab.sacred", globals(), "tracklab.integration.sacred")
 
 
 def ensure_configured():
@@ -185,7 +196,7 @@ def load_ipython_extension(ipython):
     ipython.register_magics(tracklab.jupyter.WandBMagics)
 
 
-if wandb_sdk.lib.ipython.in_notebook():
+if tracklab_sdk.lib.ipython.in_notebook():
     from IPython import get_ipython  # type: ignore[import-not-found]
 
     load_ipython_extension(get_ipython())
