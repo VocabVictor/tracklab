@@ -327,7 +327,7 @@ def _make_settings(
     }
 
     combined_settings = {**default_settings, **_settings_override}
-    settings_message = wandb_settings_pb2.Settings()
+    settings_message = tracklab_settings_pb2.Settings()
     ParseDict(combined_settings, settings_message)
 
     return SettingsStatic(settings_message)

@@ -1,8 +1,8 @@
 from unittest.mock import patch
 
 import pytest
-from wandb import Api
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab import Api
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.artifacts._validators import REGISTRY_PREFIX
 from tracklab.sdk.internal.internal_api import Api as InternalApi
 

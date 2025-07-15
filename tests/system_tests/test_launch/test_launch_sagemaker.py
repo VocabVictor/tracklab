@@ -106,17 +106,17 @@ async def test_sagemaker_resolved_submitted_job(
     project.queue_entity = None
     project.run_queue_item_id = None
     project.get_env_vars_dict = lambda *args, **kwargs: {
-        "WANDB_API_KEY": user,
-        "WANDB_PROJECT": project_name,
-        "WANDB_ENTITY": entity_name,
-        "WANDB_LAUNCH": "True",
-        "WANDB_RUN_ID": "asdasd",
-        "WANDB_DOCKER": "testimage",
-        "WANDB_SWEEP_ID": "sweeeeep",
-        "WANDB_CONFIG": "{}",
-        "WANDB_LAUNCH_FILE_OVERRIDES": "{}",
-        "WANDB_ARTIFACTS": '{"_wandb_job": "testjob"}',
-        "WANDB_BASE_URL": "",
+        "TRACKLAB_API_KEY": user,
+        "TRACKLAB_PROJECT": project_name,
+        "TRACKLAB_ENTITY": entity_name,
+        "TRACKLAB_LAUNCH": "True",
+        "TRACKLAB_RUN_ID": "asdasd",
+        "TRACKLAB_DOCKER": "testimage",
+        "TRACKLAB_SWEEP_ID": "sweeeeep",
+        "TRACKLAB_CONFIG": "{}",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES": "{}",
+        "TRACKLAB_ARTIFACTS": '{"_wandb_job": "testjob"}',
+        "TRACKLAB_BASE_URL": "",
     }
     environment = loader.environment_from_config({})
     api = Api()
@@ -140,16 +140,16 @@ async def test_sagemaker_resolved_submitted_job(
     assert req["StoppingCondition"] == {"test": 1}
     assert req["TrainingJobName"] == f"{project_name}-{project.run_id}"
     env = req["Environment"]
-    env.pop("WANDB_BASE_URL")
+    env.pop("TRACKLAB_BASE_URL")
     assert env == {
-        "WANDB_API_KEY": user,
-        "WANDB_PROJECT": "test_project",
-        "WANDB_ENTITY": "test_entity",
-        "WANDB_LAUNCH": "True",
-        "WANDB_RUN_ID": "asdasd",
-        "WANDB_DOCKER": "testimage",
-        "WANDB_SWEEP_ID": "sweeeeep",
-        "WANDB_CONFIG": "{}",
-        "WANDB_LAUNCH_FILE_OVERRIDES": "{}",
-        "WANDB_ARTIFACTS": '{"_wandb_job": "testjob"}',
+        "TRACKLAB_API_KEY": user,
+        "TRACKLAB_PROJECT": "test_project",
+        "TRACKLAB_ENTITY": "test_entity",
+        "TRACKLAB_LAUNCH": "True",
+        "TRACKLAB_RUN_ID": "asdasd",
+        "TRACKLAB_DOCKER": "testimage",
+        "TRACKLAB_SWEEP_ID": "sweeeeep",
+        "TRACKLAB_CONFIG": "{}",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES": "{}",
+        "TRACKLAB_ARTIFACTS": '{"_wandb_job": "testjob"}',
     }

@@ -47,8 +47,8 @@ Config = wandb_sdk.Config
 from tracklab.apis import InternalApi, PublicApi
 from tracklab.errors import CommError, UsageError
 
-_preinit = wandb.wandb_lib.preinit  # type: ignore
-_lazyloader = wandb.wandb_lib.lazyloader  # type: ignore
+_preinit = tracklab_lib.preinit  # type: ignore
+_lazyloader = tracklab_lib.lazyloader  # type: ignore
 
 from tracklab.integration.torch import tracklab_torch
 
@@ -73,7 +73,7 @@ from tracklab.data_types import Histogram
 from tracklab.data_types import Classes
 from tracklab.data_types import JoinedTable
 
-from tracklab.wandb_agent import agent
+from tracklab.tracklab_agent import agent
 
 from tracklab.plot import visualize, plot_table
 from tracklab.integration.sagemaker import sagemaker_auth
@@ -111,38 +111,38 @@ def _assert_is_user_process():
 # globals
 Api = PublicApi
 api = InternalApi()
-run: wandb_sdk.wandb_run.Run | None = None
-config = _preinit.PreInitObject("wandb.config", wandb_sdk.wandb_config.Config)
-summary = _preinit.PreInitObject("wandb.summary", wandb_sdk.wandb_summary.Summary)
-log = _preinit.PreInitCallable("wandb.log", wandb_sdk.wandb_run.Run.log)  # type: ignore
-watch = _preinit.PreInitCallable("wandb.watch", wandb_sdk.wandb_run.Run.watch)  # type: ignore
-unwatch = _preinit.PreInitCallable("wandb.unwatch", wandb_sdk.wandb_run.Run.unwatch)  # type: ignore
-save = _preinit.PreInitCallable("wandb.save", wandb_sdk.wandb_run.Run.save)  # type: ignore
-restore = wandb_sdk.wandb_run.restore
+run: wandb_sdk.tracklab_run.Run | None = None
+config = _preinit.PreInitObject("wandb.config", wandb_sdk.tracklab_config.Config)
+summary = _preinit.PreInitObject("wandb.summary", wandb_sdk.tracklab_summary.Summary)
+log = _preinit.PreInitCallable("wandb.log", wandb_sdk.tracklab_run.Run.log)  # type: ignore
+watch = _preinit.PreInitCallable("wandb.watch", wandb_sdk.tracklab_run.Run.watch)  # type: ignore
+unwatch = _preinit.PreInitCallable("wandb.unwatch", wandb_sdk.tracklab_run.Run.unwatch)  # type: ignore
+save = _preinit.PreInitCallable("wandb.save", wandb_sdk.tracklab_run.Run.save)  # type: ignore
+restore = wandb_sdk.tracklab_run.restore
 use_artifact = _preinit.PreInitCallable(
-    "wandb.use_artifact", wandb_sdk.wandb_run.Run.use_artifact  # type: ignore
+    "wandb.use_artifact", wandb_sdk.tracklab_run.Run.use_artifact  # type: ignore
 )
 log_artifact = _preinit.PreInitCallable(
-    "wandb.log_artifact", wandb_sdk.wandb_run.Run.log_artifact  # type: ignore
+    "wandb.log_artifact", wandb_sdk.tracklab_run.Run.log_artifact  # type: ignore
 )
 log_model = _preinit.PreInitCallable(
-    "wandb.log_model", wandb_sdk.wandb_run.Run.log_model  # type: ignore
+    "wandb.log_model", wandb_sdk.tracklab_run.Run.log_model  # type: ignore
 )
 use_model = _preinit.PreInitCallable(
-    "wandb.use_model", wandb_sdk.wandb_run.Run.use_model  # type: ignore
+    "wandb.use_model", wandb_sdk.tracklab_run.Run.use_model  # type: ignore
 )
 link_model = _preinit.PreInitCallable(
-    "wandb.link_model", wandb_sdk.wandb_run.Run.link_model  # type: ignore
+    "wandb.link_model", wandb_sdk.tracklab_run.Run.link_model  # type: ignore
 )
 define_metric = _preinit.PreInitCallable(
-    "wandb.define_metric", wandb_sdk.wandb_run.Run.define_metric  # type: ignore
+    "wandb.define_metric", wandb_sdk.tracklab_run.Run.define_metric  # type: ignore
 )
 
 mark_preempting = _preinit.PreInitCallable(
-    "wandb.mark_preempting", wandb_sdk.wandb_run.Run.mark_preempting  # type: ignore
+    "wandb.mark_preempting", wandb_sdk.tracklab_run.Run.mark_preempting  # type: ignore
 )
 
-alert = _preinit.PreInitCallable("wandb.alert", wandb_sdk.wandb_run.Run.alert)  # type: ignore
+alert = _preinit.PreInitCallable("wandb.alert", wandb_sdk.tracklab_run.Run.alert)  # type: ignore
 
 # record of patched libraries
 patched = {"tensorboard": [], "keras": [], "gym": []}  # type: ignore
@@ -182,7 +182,7 @@ def set_trace():
 
 
 def load_ipython_extension(ipython):
-    ipython.register_magics(wandb.jupyter.WandBMagics)
+    ipython.register_magics(tracklab.jupyter.WandBMagics)
 
 
 if wandb_sdk.lib.ipython.in_notebook():
@@ -198,8 +198,8 @@ if "dev" in __version__:
     import os
 
     # Disable error reporting in dev versions.
-    os.environ[wandb.env.ERROR_REPORTING] = os.environ.get(
-        wandb.env.ERROR_REPORTING,
+    os.environ[tracklab.env.ERROR_REPORTING] = os.environ.get(
+        tracklab.env.ERROR_REPORTING,
         "false",
     )
 

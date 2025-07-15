@@ -1,8 +1,8 @@
 import pytest
 import tracklab
-from wandb import Api
+from tracklab import Api
 from tracklab.apis.public.sweeps import Sweep
-from wandb_gql import gql
+from tracklab_gql import gql
 
 from .test_wandb_sweep import (
     SWEEP_CONFIG_BAYES,

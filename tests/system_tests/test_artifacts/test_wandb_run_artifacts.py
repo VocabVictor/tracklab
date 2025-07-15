@@ -316,7 +316,7 @@ def test_log_code_settings(user):
 @pytest.mark.parametrize("save_code", [True, False])
 def test_log_code_env(wandb_backend_spy, save_code):
     # test for WB-7468
-    with mock.patch.dict("os.environ", WANDB_SAVE_CODE=str(save_code).lower()):
+    with mock.patch.dict("os.environ", TRACKLAB_SAVE_CODE=str(save_code).lower()):
         with open("test.py", "w") as f:
             f.write('print("test")')
 
@@ -348,9 +348,9 @@ def test_log_code_env(wandb_backend_spy, save_code):
 @pytest.mark.xfail(reason="Backend race condition")
 def test_anonymous_mode_artifact(user, capsys, local_settings):
     copied_env = os.environ.copy()
-    copied_env.pop("WANDB_API_KEY")
-    copied_env.pop("WANDB_USERNAME")
-    copied_env.pop("WANDB_ENTITY")
+    copied_env.pop("TRACKLAB_API_KEY")
+    copied_env.pop("TRACKLAB_USERNAME")
+    copied_env.pop("TRACKLAB_ENTITY")
     with mock.patch.dict("os.environ", copied_env, clear=True):
         run = tracklab.init(anonymous="must")
         run.log_artifact(tracklab.Artifact("my-arti", type="dataset"))

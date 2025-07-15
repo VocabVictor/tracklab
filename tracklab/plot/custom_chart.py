@@ -18,7 +18,7 @@ class CustomChartSpec:
     @property
     def table_key(self) -> str:
         if not self.key:
-            raise wandb.Error("Key for the custom chart spec is not set.")
+            raise tracklab.Error("Key for the custom chart spec is not set.")
         if self.split_table:
             return f"Custom Chart Tables/{self.key}_table"
         return f"{self.key}_table"
@@ -65,7 +65,7 @@ class CustomChartSpec:
 
 @dataclass
 class CustomChart:
-    table: wandb.Table
+    table: tracklab.Table
     spec: CustomChartSpec
 
     def set_key(self, key: str):
@@ -75,22 +75,22 @@ class CustomChart:
 
 def plot_table(
     vega_spec_name: str,
-    data_table: wandb.Table,
+    data_table: tracklab.Table,
     fields: dict[str, Any],
     string_fields: dict[str, Any] | None = None,
     split_table: bool = False,
 ) -> CustomChart:
-    """Creates a custom charts using a Vega-Lite specification and a `wandb.Table`.
+    """Creates a custom charts using a Vega-Lite specification and a `tracklab.Table`.
 
     This function creates a custom chart based on a Vega-Lite specification and
-    a data table represented by a `wandb.Table` object. The specification needs
+    a data table represented by a `tracklab.Table` object. The specification needs
     to be predefined and stored in the W&B backend. The function returns a custom
-    chart object that can be logged to W&B using `wandb.log()`.
+    chart object that can be logged to W&B using `tracklab.log()`.
 
     Args:
         vega_spec_name (str): The name or identifier of the Vega-Lite spec
             that defines the visualization structure.
-        data_table (wandb.Table): A `wandb.Table` object containing the data to be
+        data_table (tracklab.Table): A `tracklab.Table` object containing the data to be
             visualized.
         fields (dict[str, Any]): A mapping between the fields in the Vega-Lite spec and the
             corresponding columns in the data table to be visualized.
@@ -102,15 +102,15 @@ def plot_table(
 
     Returns:
         CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Raises:
-        wandb.Error: If `data_table` is not a `wandb.Table` object.
+        tracklab.Error: If `data_table` is not a `tracklab.Table` object.
     """
 
-    if not isinstance(data_table, wandb.Table):
-        raise wandb.Error(
-            f"Expected `data_table` to be `wandb.Table` type, instead got {type(data_table).__name__}"
+    if not isinstance(data_table, tracklab.Table):
+        raise tracklab.Error(
+            f"Expected `data_table` to be `tracklab.Table` type, instead got {type(data_table).__name__}"
         )
 
     return CustomChart(

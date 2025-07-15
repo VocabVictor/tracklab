@@ -22,7 +22,7 @@ from typing import (
 )
 
 from tracklab.errors.links import url_registry
-from tracklab.proto.wandb_internal_pb2 import (
+from tracklab.proto.tracklab_internal_pb2 import (
     HistoryRecord,
     InternalMessages,
     MetricRecord,
@@ -41,7 +41,7 @@ from . import context, sample, tb_watcher
 from .settings_static import SettingsStatic
 
 if TYPE_CHECKING:
-    from tracklab.proto.wandb_internal_pb2 import MetricSummary
+    from tracklab.proto.tracklab_internal_pb2 import MetricSummary
 
 
 SummaryDict = Dict[str, Any]
@@ -766,7 +766,7 @@ class HandleManager:
         Walkthrough of the life of a MetricRecord:
 
         Metric defined:
-        - run.define_metric() parses arguments create wandb_metric.Metric
+        - run.define_metric() parses arguments create tracklab_metric.Metric
         - build MetricRecord publish to interface
         - handler (this function) keeps list of metrics published:
           - self._metric_defines: Fully defined metrics

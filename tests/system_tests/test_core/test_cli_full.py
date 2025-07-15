@@ -206,7 +206,7 @@ def test_login_key_arg(runner):
 
 def test_login_key_prompt(monkeypatch):
     monkeypatch.setattr(tracklab.sdk.lib.apikey, "isatty", lambda _: True)
-    monkeypatch.delenv("WANDB_API_KEY", raising=False)
+    monkeypatch.delenv("TRACKLAB_API_KEY", raising=False)
     runner = CliRunner()
 
     with runner.isolated_filesystem():

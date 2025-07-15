@@ -2,7 +2,7 @@ from typing import AbstractSet
 from unittest import mock
 
 import tracklab
-from tracklab.proto.v3.wandb_telemetry_pb2 import Feature
+from tracklab.proto.v3.tracklab_telemetry_pb2 import Feature
 
 # TODO: implement the telemetry context resolver
 

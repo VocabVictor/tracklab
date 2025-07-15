@@ -12,7 +12,7 @@ from tracklab import env, util
 def _disable_ssl() -> Callable[[], None]:
     # Because third party libraries may also use requests, we monkey patch it globally
     # and turn off urllib3 warnings instead printing a global warning to the user.
-    wandb.termwarn(
+    tracklab.termwarn(
         "Disabling SSL verification.  Connections to this server are not verified and may be insecure!"
     )
 

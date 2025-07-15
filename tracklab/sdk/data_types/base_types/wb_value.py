@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
 from tracklab import util
-from tracklab.sdk import wandb_setup
+from tracklab.sdk import tracklab_setup
 
 if TYPE_CHECKING:  # pragma: no cover
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ...wandb_run import Run as LocalRun
+    from ...tracklab_run import Run as LocalRun
 
     TypeMappingType = Dict[str, Type["WBValue"]]
 
@@ -22,7 +22,7 @@ def _is_maybe_offline() -> bool:
     Returns:
         Whether the user likely configured wandb to be offline.
     """
-    singleton = wandb_setup.singleton()
+    singleton = tracklab_setup.singleton()
 
     # First check: if there's a run, check if it is offline.
     #
@@ -51,7 +51,7 @@ def _server_accepts_client_ids() -> bool:
     # client IDs.
 
     if _is_maybe_offline():
-        singleton = wandb_setup.singleton()
+        singleton = tracklab_setup.singleton()
 
         if run := singleton.most_recent_active_run:
             return run._settings.allow_offline_artifacts

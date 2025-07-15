@@ -76,7 +76,7 @@ class SyncThread(threading.Thread):
         atexit.register(self._tmp_dir.cleanup)
 
     def _parse_pb(self, data, exit_pb=None):
-        pb = wandb_internal_pb2.Record()
+        pb = tracklab_internal_pb2.Record()
         pb.ParseFromString(data)
         record_type = pb.WhichOneof("record_type")
         if self._view:
@@ -151,7 +151,7 @@ class SyncThread(threading.Thread):
         if self._entity is None:
             viewer, _ = send_manager._api.viewer_server_info()
             self._entity = viewer.get("entity")
-        proto_run = wandb_internal_pb2.RunRecord()
+        proto_run = tracklab_internal_pb2.RunRecord()
         proto_run.run_id = self._run_id or wandb.util.generate_id()
         proto_run.project = self._project or wandb.util.auto_project_name(None)
         proto_run.entity = self._entity

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from tensorboard.backend.event_processing.event_file_loader import EventFileLoader
     from tensorboard.compat.proto.event_pb2 import ProtoEvent
 
-    from tracklab.proto.wandb_internal_pb2 import RunRecord
+    from tracklab.proto.tracklab_internal_pb2 import RunRecord
     from tracklab.sdk.interface.interface import FilesDict
 
     from ..interface.interface_queue import InterfaceQueue

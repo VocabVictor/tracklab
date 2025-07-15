@@ -18,7 +18,7 @@ if TYPE_CHECKING:  # pragma: no cover
     import pandas as pd
     import plotly  # type: ignore
 
-    from ..wandb_run import Run as LocalRun
+    from ..tracklab_run import Run as LocalRun
 
     ValToJsonType = Union[
         dict,

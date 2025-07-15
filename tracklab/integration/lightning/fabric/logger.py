@@ -9,7 +9,7 @@ from typing_extensions import override
 import tracklab
 from tracklab import Artifact
 from tracklab.sdk.lib import telemetry
-from tracklab.sdk.wandb_run import Run
+from tracklab.sdk.tracklab_run import Run
 
 try:
     import lightning
@@ -325,7 +325,7 @@ class WandbLogger(Logger):
         project = project or os.environ.get("WANDB_PROJECT", "lightning_fabric_logs")
 
         # set wandb init arguments
-        self._wandb_init: Dict[str, Any] = {
+        self._tracklab_init: Dict[str, Any] = {
             "name": name,
             "project": project,
             "dir": save_dir or dir,
@@ -333,12 +333,12 @@ class WandbLogger(Logger):
             "resume": "allow",
             "anonymous": ("allow" if anonymous else None),
         }
-        self._wandb_init.update(**kwargs)
+        self._tracklab_init.update(**kwargs)
         # extract parameters
-        self._project = self._wandb_init.get("project")
-        self._save_dir = self._wandb_init.get("dir")
-        self._name = self._wandb_init.get("name")
-        self._id = self._wandb_init.get("id")
+        self._project = self._tracklab_init.get("project")
+        self._save_dir = self._tracklab_init.get("dir")
+        self._name = self._tracklab_init.get("name")
+        self._id = self._tracklab_init.get("id")
         self._checkpoint_name = checkpoint_name
         self._log_checkpoint_on = log_checkpoint_on
 
@@ -392,7 +392,7 @@ class WandbLogger(Logger):
                 self._experiment = wandb._attach(attach_id)
             else:
                 # create new wandb process
-                self._experiment = wandb.init(**self._wandb_init)
+                self._experiment = wandb.init(**self._tracklab_init)
 
                 # define default x-axis
                 if isinstance(self._experiment, Run) and getattr(

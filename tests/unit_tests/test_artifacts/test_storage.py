@@ -552,7 +552,7 @@ def test_unwritable_staging_dir(monkeypatch):
 
     monkeypatch.setattr(os, "makedirs", nope)
 
-    with pytest.raises(PermissionError, match="WANDB_DATA_DIR"):
+    with pytest.raises(PermissionError, match="TRACKLAB_DATA_DIR"):
         _ = get_staging_dir()
 
 

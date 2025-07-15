@@ -3,7 +3,7 @@ import stat
 from unittest import mock
 
 import pytest
-from wandb import tracklab, wandb_lib
+from tracklab import tracklab, wandb_lib
 from tracklab.sdk.lib.apikey import _api_key_prompt_str
 
 

@@ -10,7 +10,7 @@ from tracklab.sdk.lib.runid import generate_id
 @pytest.mark.flaky
 def test_sync_with_tensorboard(wandb_backend_spy, runner, copy_asset):
     run_id = generate_id()
-    with unittest.mock.patch.dict("os.environ", {"WANDB_MODE": "offline"}):
+    with unittest.mock.patch.dict("os.environ", {"TRACKLAB_MODE": "offline"}):
         tf_event = copy_asset("events.out.tfevents.1585769947.cvp")
         result = runner.invoke(cli.sync, [tf_event, f"--id={run_id}"])
     assert result.exit_code == 0

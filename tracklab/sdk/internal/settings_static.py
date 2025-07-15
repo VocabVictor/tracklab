@@ -4,7 +4,7 @@ from typing import Any, Iterable
 
 from tracklab.proto import tracklab_settings_pb2
 from tracklab.sdk.lib import RunMoment
-from tracklab.sdk.wandb_settings import Settings
+from tracklab.sdk.tracklab_settings import Settings
 
 
 class SettingsStatic(Settings):
@@ -14,11 +14,11 @@ class SettingsStatic(Settings):
     attributes or items.
     """
 
-    def __init__(self, proto: wandb_settings_pb2.Settings) -> None:
+    def __init__(self, proto: tracklab_settings_pb2.Settings) -> None:
         data = self._proto_to_dict(proto)
         super().__init__(**data)
 
-    def _proto_to_dict(self, proto: wandb_settings_pb2.Settings) -> dict:
+    def _proto_to_dict(self, proto: tracklab_settings_pb2.Settings) -> dict:
         data = {}
 
         exclude_fields = {

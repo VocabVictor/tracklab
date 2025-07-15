@@ -10,7 +10,7 @@ from typing_extensions import override
 from tracklab.sdk import tracklab_run
 
 
-class InternalRun(wandb_run.Run):
+class InternalRun(tracklab_run.Run):
     def __init__(self, run_obj, settings, datatypes_cb):
         super().__init__(settings=settings)
         self._run_obj = run_obj

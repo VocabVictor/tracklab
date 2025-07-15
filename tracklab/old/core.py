@@ -19,7 +19,7 @@ elif os.path.exists(os.path.join(env.get_dir(os.getcwd()), "wandb")):
 else:
     __stage_dir__ = None
 
-wandb.START_TIME = time.time()
+tracklab.START_TIME = time.time()
 
 
 def wandb_dir(root_dir=None):

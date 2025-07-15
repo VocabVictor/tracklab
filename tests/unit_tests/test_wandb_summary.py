@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Any, Dict, Tuple
 
-from wandb import tracklab_sdk
+from tracklab import tracklab_sdk
 
 if TYPE_CHECKING:
     from tracklab.sdk.interface.summary_record import SummaryRecord

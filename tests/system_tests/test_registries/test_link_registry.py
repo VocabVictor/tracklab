@@ -7,16 +7,16 @@ import tracklab
 from pytest import FixtureRequest, fixture, mark
 from pytest_mock import MockerFixture
 from typing_extensions import assert_never
-from wandb import Api, Artifact
+from tracklab import Api, Artifact
 from tracklab.apis.public.registries.registry import Registry
-from wandb_gql import gql
+from tracklab_gql import gql
 
 from tests.system_tests.test_registries.conftest import other_team, team
 
 
 @fixture(params=[team.__name__, other_team.__name__])
 def set_default_entity(request: FixtureRequest, mocker: MockerFixture) -> None:
-    """Sets the server-side defaultEntity and the local WANDB_ENTITY envvar for the test run."""
+    """Sets the server-side defaultEntity and the local TRACKLAB_ENTITY envvar for the test run."""
     default_entity = request.getfixturevalue(request.param)
 
     # Eh, this will have to do for now.
@@ -33,8 +33,8 @@ def set_default_entity(request: FixtureRequest, mocker: MockerFixture) -> None:
         ),
         variable_values={"entity": default_entity},
     )
-    # Set the local WANDB_ENTITY environment variable as well.
-    mocker.patch.dict(os.environ, {**os.environ, "WANDB_ENTITY": default_entity})
+    # Set the local TRACKLAB_ENTITY environment variable as well.
+    mocker.patch.dict(os.environ, {**os.environ, "TRACKLAB_ENTITY": default_entity})
 
     # consistency check
     test_api = tracklab.Api()

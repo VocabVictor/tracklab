@@ -12,7 +12,7 @@ from ..base_types.media import Media
 if TYPE_CHECKING:  # pragma: no cover
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ...wandb_run import Run as LocalRun
+    from ...tracklab_run import Run as LocalRun
 
 
 class ImageMask(Media):
@@ -209,7 +209,7 @@ class ImageMask(Media):
         )
 
     def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
-        from tracklab.sdk.wandb_run import Run
+        from tracklab.sdk.tracklab_run import Run
 
         json_dict = super().to_json(run_or_artifact)
 
@@ -220,7 +220,7 @@ class ImageMask(Media):
             # Nothing special to add (used to add "digest", but no longer used.)
             return json_dict
         else:
-            raise TypeError("to_json accepts wandb_run.Run or wandb.Artifact")
+            raise TypeError("to_json accepts tracklab_run.Run or wandb.Artifact")
 
     @classmethod
     def type_name(cls: Type["ImageMask"]) -> str:

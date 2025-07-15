@@ -189,20 +189,20 @@ def notebook(user, run_id, assets_path):
             nb_node: nbformat.NotebookNode = nbformat.read(f, as_version=4)
 
         wandb_env = {k: v for k, v in os.environ.items() if k.startswith("WANDB")}
-        wandb_env["WANDB_RUN_ID"] = run_id
+        wandb_env["TRACKLAB_RUN_ID"] = run_id
         if save_code:
-            wandb_env["WANDB_SAVE_CODE"] = "true"
-            wandb_env["WANDB_NOTEBOOK_NAME"] = nb_name
+            wandb_env["TRACKLAB_SAVE_CODE"] = "true"
+            wandb_env["TRACKLAB_NOTEBOOK_NAME"] = nb_name
         else:
-            wandb_env["WANDB_SAVE_CODE"] = "false"
-            wandb_env["WANDB_NOTEBOOK_NAME"] = ""
+            wandb_env["TRACKLAB_SAVE_CODE"] = "false"
+            wandb_env["TRACKLAB_NOTEBOOK_NAME"] = ""
 
         setup_cell = io.StringIO()
 
         # Forward any WANDB environment variables to the notebook.
         setup_cell.write("import os\n")
         for k, v in wandb_env.items():
-            if skip_api_key_env and k == "WANDB_API_KEY":
+            if skip_api_key_env and k == "TRACKLAB_API_KEY":
                 continue
 
             setup_cell.write(f"os.environ['{k}'] = '{v}'\n")

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 import responses
-from wandb import errors
+from tracklab import errors
 from tracklab.sdk.lib.credentials import _expires_at_fmt, access_token
 
 

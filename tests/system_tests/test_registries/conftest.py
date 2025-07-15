@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 
 import tracklab
 from pytest import fixture, skip
-from wandb import Api, Artifact
+from tracklab import Api, Artifact
 from tracklab.apis.public.registries._utils import fetch_org_entity_from_organization
 from tracklab.apis.public.registries.registry import Registry
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.internal.internal_api import Api as InternalApi
 from tracklab.util import random_string
 

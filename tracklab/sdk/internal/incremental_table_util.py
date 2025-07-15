@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from tracklab import Table
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ..wandb_run import Run as LocalRun
+    from ..tracklab_run import Run as LocalRun
 
 ART_TYPE = "wandb-run-incremental-table"
 

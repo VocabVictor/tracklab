@@ -126,7 +126,7 @@ def _get_cling_api(reset=None):
     if _api is None:
         # TODO(jhr): make a settings object that is better for non runs.
         # only override the necessary setting
-        wandb_setup.singleton().settings.x_cli_only_mode = True
+        tracklab_setup.singleton().settings.x_cli_only_mode = True
         _api = InternalApi()
     return _api
 
@@ -232,12 +232,12 @@ def login(key, host, cloud, relogin, anonymously, verify, no_offline=False):
     # TODO: handle no_offline
     anon_mode = "must" if anonymously else "never"
 
-    wandb_sdk.wandb_login._handle_host_wandb_setting(host, cloud)
+    wandb_sdk.tracklab_login._handle_host_wandb_setting(host, cloud)
     # A change in click or the test harness means key can be none...
     key = key[0] if key is not None and len(key) > 0 else None
     relogin = True if key or relogin else False
 
-    global_settings = wandb_setup.singleton().settings
+    global_settings = tracklab_setup.singleton().settings
     global_settings.x_cli_only_mode = True
     global_settings.x_disable_viewer = relogin and not verify
 
@@ -858,7 +858,7 @@ def sweep(
     styled_id = click.style(sweep_id, fg="yellow")
     wandb.termlog(f"{action} sweep with ID: {styled_id}")
 
-    sweep_url = wandb_sdk.wandb_sweep._get_sweep_url(api, sweep_id)
+    sweep_url = wandb_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
     if sweep_url:
         styled_url = click.style(sweep_url, underline=True, fg="blue")
         wandb.termlog(f"View sweep at: {styled_url}")
@@ -1127,7 +1127,7 @@ def launch_sweep(
     # Log nicely formatted sweep information
     styled_id = click.style(sweep_id, fg="yellow")
     wandb.termlog(f"{'Resumed' if resume_id else 'Created'} sweep with ID: {styled_id}")
-    sweep_url = wandb_sdk.wandb_sweep._get_sweep_url(api, sweep_id)
+    sweep_url = wandb_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
     if sweep_url:
         styled_url = click.style(sweep_url, underline=True, fg="blue")
         wandb.termlog(f"View sweep at: {styled_url}")

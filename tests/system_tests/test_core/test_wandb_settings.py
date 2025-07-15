@@ -7,7 +7,7 @@ from unittest import mock
 import git
 import pytest
 import tracklab
-from wandb import env
+from tracklab import env
 
 
 @pytest.mark.skipif(

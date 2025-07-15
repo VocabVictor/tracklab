@@ -12,7 +12,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K  # noqa: N812
 
 import tracklab
-from tracklab.proto.wandb_deprecated import Deprecated
+from tracklab.proto.tracklab_deprecated import Deprecated
 from tracklab.sdk.integration_utils.data_logging import ValidationDataLogger
 from tracklab.sdk.lib.deprecate import deprecate
 from tracklab.util import add_import_hook

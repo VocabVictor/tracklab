@@ -96,7 +96,7 @@ def test_create_job_artifact(runner, user):
     # Now use artifact as input, assert it gets upgraded
     artifact_env = json.dumps({"_wandb_job": artifact.name})
     with runner.isolated_filesystem(), mock.patch.dict(
-        "os.environ", WANDB_ARTIFACTS=artifact_env
+        "os.environ", TRACKLAB_ARTIFACTS=artifact_env
     ):
         settings.job_source = "artifact"
         settings.launch = True
@@ -176,7 +176,7 @@ def test_create_git_job(runner, user, monkeypatch):
     # Now use artifact as input, assert it gets upgraded
     artifact_env = json.dumps({"_wandb_job": artifact.name})
     with runner.isolated_filesystem(), mock.patch.dict(
-        "os.environ", WANDB_ARTIFACTS=artifact_env
+        "os.environ", TRACKLAB_ARTIFACTS=artifact_env
     ):
         settings.job_source = "repo"
         settings.launch = True

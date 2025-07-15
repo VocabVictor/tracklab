@@ -25,7 +25,7 @@ def test_override_file_basic(
     path = tmp_path / "config.json"
     path.write_text('{"key": "value"}')
     monkeypatch.setenv(
-        "WANDB_LAUNCH_FILE_OVERRIDES",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES",
         json.dumps({"config.json": {"key": "new_value"}}),
     )
 
@@ -44,7 +44,7 @@ def test_override_file_nested(
     path = tmp_path / "config.json"
     path.write_text('{"key": {"nested_key": "value"}}')
     monkeypatch.setenv(
-        "WANDB_LAUNCH_FILE_OVERRIDES",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES",
         json.dumps({"config.json": {"key": {"nested_key": "new_value"}}}),
     )
 
@@ -66,11 +66,11 @@ def test_override_file_split_env_var(
     path.write_text('{"key": "value"}')
     override_dict = json.dumps({"config.json": {"key": "new_value"}})
     monkeypatch.setenv(
-        "WANDB_LAUNCH_FILE_OVERRIDES_0",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES_0",
         override_dict[: len(override_dict) // 2],
     )
     monkeypatch.setenv(
-        "WANDB_LAUNCH_FILE_OVERRIDES_1",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES_1",
         override_dict[len(override_dict) // 2 :],
     )
 
@@ -89,7 +89,7 @@ def test_override_file_yaml(
     path = tmp_path / "config.yaml"
     path.write_text("key: value")
     monkeypatch.setenv(
-        "WANDB_LAUNCH_FILE_OVERRIDES",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES",
         json.dumps({"config.yaml": {"key": "new_value"}}),
     )
 
@@ -108,7 +108,7 @@ def test_override_file_unknown_extension(
     path = tmp_path / "config.unknown"
     path.write_text('{"key": "value"}')
     monkeypatch.setenv(
-        "WANDB_LAUNCH_FILE_OVERRIDES",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES",
         json.dumps({"config.unknown": {"key": "new_value"}}),
     )
 
@@ -126,7 +126,7 @@ def test_file_overrides_invalid_json(
     path = tmp_path / "config.json"
     path.write_text('{"key": "value"}')
     monkeypatch.setenv(
-        "WANDB_LAUNCH_FILE_OVERRIDES", '{"config.json": {"key": "new_value"}'
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES", '{"config.json": {"key": "new_value"}'
     )
 
     with pytest.raises(LaunchError):
@@ -142,7 +142,7 @@ def test_file_overrides_non_dict(
     monkeypatch.chdir(tmp_path)
     path = tmp_path / "config.json"
     path.write_text('{"key": "value"}')
-    monkeypatch.setenv("WANDB_LAUNCH_FILE_OVERRIDES", '["config.json"]')
+    monkeypatch.setenv("TRACKLAB_LAUNCH_FILE_OVERRIDES", '["config.json"]')
 
     with pytest.raises(LaunchError):
         override_file("config.json")

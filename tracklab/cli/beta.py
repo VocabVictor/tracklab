@@ -12,7 +12,7 @@ import click
 
 import tracklab
 from tracklab.errors import WandbCoreNotAvailableError
-from tracklab.sdk.wandb_sync import _sync
+from tracklab.sdk.tracklab_sync import _sync
 from tracklab.util import get_core_path
 
 
@@ -123,12 +123,12 @@ def sync_beta(  # noqa: C901
     if skip_synced:
         synced_paths = set()
         for path in paths:
-            wandb_synced_files = [p for p in path.glob("*.wandb.synced") if p.is_file()]
-            if len(wandb_synced_files) > 1:
+            tracklab_synced_files = [p for p in path.glob("*.wandb.synced") if p.is_file()]
+            if len(tracklab_synced_files) > 1:
                 wandb.termwarn(
                     f"Multiple wandb.synced files found in directory {path}, skipping"
                 )
-            elif len(wandb_synced_files) == 1:
+            elif len(tracklab_synced_files) == 1:
                 synced_paths.add(path)
         paths -= synced_paths
 

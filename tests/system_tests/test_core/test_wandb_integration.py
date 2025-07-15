@@ -85,7 +85,7 @@ def test_dir_on_import():
     assert not os.path.isdir(default_path), f"Unexpected directory at {default_path}"
 
     # test for the case that the env variable is set
-    with mock.patch.dict(os.environ, {"WANDB_DIR": custom_env_path}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_DIR": custom_env_path}):
         _remove_dir_if_exists(default_path)
         reload_fn(wandb)
         assert not os.path.isdir(default_path), (

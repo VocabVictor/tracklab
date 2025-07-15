@@ -19,8 +19,8 @@ if TYPE_CHECKING:
     from tracklab.sdk.internal.file_pusher import FilePusher
     from tracklab.sdk.internal.settings_static import SettingsStatic
 else:
-    wd_polling = util.vendor_import("wandb_watchdog.observers.polling")
-    wd_events = util.vendor_import("wandb_watchdog.events")
+    wd_polling = util.vendor_import("tracklab_watchdog.observers.polling")
+    wd_events = util.vendor_import("tracklab_watchdog.events")
 
 PathStr = str  # TODO(spencerpearson): would be nice to use Path here
 

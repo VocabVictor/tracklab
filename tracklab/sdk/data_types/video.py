@@ -20,7 +20,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ..wandb_run import Run as LocalRun
+    from ..tracklab_run import Run as LocalRun
 
 
 # This helper function is a workaround for the issue discussed here:

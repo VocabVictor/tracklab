@@ -10,7 +10,7 @@ from ..base_types.json_metadata import JSONMetadata
 if TYPE_CHECKING:  # pragma: no cover
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ...wandb_run import Run as LocalRun
+    from ...tracklab_run import Run as LocalRun
 
 
 def _convert_pytorch_tensor_to_list(box_data):
@@ -310,7 +310,7 @@ class BoundingBoxes2D(JSONMetadata):
         return True
 
     def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
-        from tracklab.sdk.wandb_run import Run
+        from tracklab.sdk.tracklab_run import Run
 
         if isinstance(run_or_artifact, Run):
             return super().to_json(run_or_artifact)
@@ -320,7 +320,7 @@ class BoundingBoxes2D(JSONMetadata):
             # an object with a _type key. Will need to push this change to the UI first to ensure backwards compat
             return self._val
         else:
-            raise TypeError("to_json accepts wandb_run.Run or wandb.Artifact")
+            raise TypeError("to_json accepts tracklab_run.Run or wandb.Artifact")
 
     @classmethod
     def from_json(

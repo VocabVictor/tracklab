@@ -17,10 +17,10 @@ from tracklab import util
 from tracklab.apis.internal import Api
 from tracklab.sdk.launch.errors import LaunchError
 from tracklab.sdk.launch.git_reference import GitReference
-from tracklab.sdk.launch.wandb_reference import WandbReference
-from tracklab.sdk.wandb_config import Config
+from tracklab.sdk.launch.tracklab_reference import WandbReference
+from tracklab.sdk.tracklab_config import Config
 
-from .builder.templates._wandb_bootstrap import (
+from .builder.templates._tracklab_bootstrap import (
     FAILED_PACKAGES_POSTFIX,
     FAILED_PACKAGES_PREFIX,
 )
@@ -90,7 +90,7 @@ MAX_ENV_LENGTHS["SageMakerRunner"] = 512
 CODE_MOUNT_DIR = "/mnt/wandb"
 
 
-def load_wandb_config() -> Config:
+def load_tracklab_config() -> Config:
     """Load wandb config from WANDB_CONFIG environment variable(s).
 
     The WANDB_CONFIG environment variable is a json string that can contain
@@ -116,14 +116,14 @@ def load_wandb_config() -> Config:
             raise LaunchError(
                 "No WANDB_CONFIG or WANDB_CONFIG_[0-9]+ environment variables found"
             )
-    wandb_config = Config()
+    tracklab_config = Config()
     try:
         env_config = json.loads(config_str)
     except json.JSONDecodeError as e:
         raise LaunchError(f"Failed to parse WANDB_CONFIG: {e}") from e
 
-    wandb_config.update(env_config)
-    return wandb_config
+    tracklab_config.update(env_config)
+    return tracklab_config
 
 
 def event_loop_thread_exec(func: Any) -> Any:

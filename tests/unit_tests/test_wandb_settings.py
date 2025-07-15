@@ -11,9 +11,9 @@ from unittest import mock
 import pytest
 import tracklab
 from pydantic.version import VERSION as PYDANTIC_VERSION
-from wandb import Settings
+from tracklab import Settings
 from tracklab.errors import UsageError
-from tracklab.sdk.lib.credentials import DEFAULT_WANDB_CREDENTIALS_FILE
+from tracklab.sdk.lib.credentials import DEFAULT_TRACKLAB_CREDENTIALS_FILE
 from tracklab.sdk.lib.run_moment import RunMoment
 
 is_pydantic_v1 = int(PYDANTIC_VERSION[0]) == 1
@@ -94,7 +94,7 @@ def test_offline():
 
 def test_silent():
     s = Settings()
-    s.update_from_env_vars({"WANDB_SILENT": "true"})
+    s.update_from_env_vars({"TRACKLAB_SILENT": "true"})
     assert s.silent is True
 
 
@@ -140,11 +140,11 @@ def test_ignore_globs_explicit():
 
 def test_ignore_globs_env():
     s = Settings()
-    s.update_from_env_vars({"WANDB_IGNORE_GLOBS": "foo"})
+    s.update_from_env_vars({"TRACKLAB_IGNORE_GLOBS": "foo"})
     assert s.ignore_globs == ("foo",)
 
     s = Settings()
-    s.update_from_env_vars({"WANDB_IGNORE_GLOBS": "foo,bar"})
+    s.update_from_env_vars({"TRACKLAB_IGNORE_GLOBS": "foo,bar"})
     assert s.ignore_globs == (
         "foo",
         "bar",
@@ -153,16 +153,16 @@ def test_ignore_globs_env():
 
 def test_token_file_env():
     s = Settings()
-    s.update_from_env_vars({"WANDB_IDENTITY_TOKEN_FILE": "jwt.txt"})
+    s.update_from_env_vars({"TRACKLAB_IDENTITY_TOKEN_FILE": "jwt.txt"})
     assert s.identity_token_file == ("jwt.txt")
 
 
 def test_credentials_file_env():
     s = Settings()
-    assert s.credentials_file == str(DEFAULT_WANDB_CREDENTIALS_FILE)
+    assert s.credentials_file == str(DEFAULT_TRACKLAB_CREDENTIALS_FILE)
 
     s = Settings()
-    s.update_from_env_vars({"WANDB_CREDENTIALS_FILE": "/tmp/credentials.json"})
+    s.update_from_env_vars({"TRACKLAB_CREDENTIALS_FILE": "/tmp/credentials.json"})
     assert s.credentials_file == "/tmp/credentials.json"
 
 
@@ -172,7 +172,7 @@ def test_quiet():
     s = Settings(quiet=True)
     assert s.quiet
     s = Settings()
-    s.update_from_env_vars({"WANDB_QUIET": "false"})
+    s.update_from_env_vars({"TRACKLAB_QUIET": "false"})
     assert not s.quiet
 
 
@@ -324,7 +324,7 @@ def test_preprocess_base_url(url, processed_url):
     ],
 )
 def test_preprocess_bool_settings(setting: str):
-    with mock.patch.dict(os.environ, {"WANDB_" + setting.upper(): "true"}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_" + setting.upper(): "true"}):
         s = Settings()
         s.update_from_env_vars(environ=os.environ)
         assert getattr(s, setting) is True
@@ -345,7 +345,7 @@ def test_preprocess_bool_settings(setting: str):
     ],
 )
 def test_preprocess_dict_settings(setting: str, value: str):
-    with mock.patch.dict(os.environ, {"WANDB_" + setting.upper(): value}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_" + setting.upper(): value}):
         s = Settings()
         s.update_from_env_vars(environ=os.environ)
         assert getattr(s, setting) == json.loads(value)
@@ -474,7 +474,7 @@ def test_console():
 def test_code_saving_save_code_env_false(mock_run):
     settings = Settings()
     settings.save_code = None
-    with mock.patch.dict("os.environ", WANDB_SAVE_CODE="false"):
+    with mock.patch.dict("os.environ", TRACKLAB_SAVE_CODE="false"):
         settings.update_from_system_environment()
         run = mock_run(settings=settings)
         assert run._settings.save_code is False
@@ -483,7 +483,7 @@ def test_code_saving_save_code_env_false(mock_run):
 def test_code_saving_disable_code(mock_run):
     settings = Settings()
     settings.save_code = None
-    with mock.patch.dict("os.environ", WANDB_DISABLE_CODE="true"):
+    with mock.patch.dict("os.environ", TRACKLAB_DISABLE_CODE="true"):
         settings.update_from_system_environment()
         run = mock_run(settings=settings)
         assert run.settings.save_code is False

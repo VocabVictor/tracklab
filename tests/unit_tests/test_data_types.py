@@ -13,7 +13,7 @@ import torch
 import tracklab
 from bokeh.plotting import figure
 from PIL import Image
-from wandb import data_types
+from tracklab import data_types
 from tracklab.sdk.data_types import _dtypes
 from tracklab.sdk.data_types.base_types.media import _numpy_arrays_to_lists
 

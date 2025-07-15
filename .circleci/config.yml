@@ -1,0 +1,179 @@
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@5.0.0
+
+parameters:
+  python_version:
+    type: string
+    default: "3.9"
+
+executors:
+  linux-python:
+    parameters:
+      python: { type: string }
+    docker:
+      - image: python:<<parameters.python>>
+    resource_class: medium
+
+commands:
+  save-test-results:
+    description: "Save test results"
+    steps:
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+      - store_artifacts:
+          path: coverage-results
+
+  install-dependencies:
+    description: "Install Python dependencies"
+    steps:
+      - run:
+          name: Upgrade pip
+          command: python -m pip install -U pip
+      - run:
+          name: Install project dependencies
+          command: |
+            if [ -f requirements.txt ]; then
+              pip install -r requirements.txt
+            fi
+            if [ -f requirements-dev.txt ]; then
+              pip install -r requirements-dev.txt
+            fi
+            if [ -f setup.py ]; then
+              pip install -e .
+            fi
+          no_output_timeout: 5m
+
+  run-tests:
+    description: "Run tests with pytest"
+    parameters:
+      test_type: { type: string }
+    steps:
+      - run:
+          name: Run <<parameters.test_type>> tests
+          command: |
+            mkdir -p test-results coverage-results
+            pytest \
+              --junitxml=test-results/junit-<<parameters.test_type>>.xml \
+              --cov=tracklab \
+              --cov-report=xml:coverage-results/coverage-<<parameters.test_type>>.xml \
+              --cov-report=html:coverage-results/htmlcov-<<parameters.test_type>> \
+              --cov-report=term \
+              tests/<<parameters.test_type>> || true
+          no_output_timeout: 10m
+      - codecov/upload:
+          file: coverage-results/coverage-<<parameters.test_type>>.xml
+          flags: <<parameters.test_type>>
+
+jobs:
+  lint-and-format:
+    executor:
+      name: linux-python
+      python: <<pipeline.parameters.python_version>>
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Run black formatter check
+          command: black --check .
+      - run:
+          name: Run flake8 linter
+          command: flake8 .
+      - run:
+          name: Run isort import order check
+          command: isort --check-only .
+      - run:
+          name: Run mypy type checker
+          command: mypy tracklab || true
+
+  unit-tests:
+    parameters:
+      python: { type: string }
+    executor:
+      name: linux-python
+      python: <<parameters.python>>
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Create test directories
+          command: mkdir -p tests/unit
+      - run-tests:
+          test_type: unit
+      - save-test-results
+
+  integration-tests:
+    parameters:
+      python: { type: string }
+    executor:
+      name: linux-python
+      python: <<parameters.python>>
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Create test directories
+          command: mkdir -p tests/integration
+      - run-tests:
+          test_type: integration
+      - save-test-results
+
+  build-and-publish:
+    executor:
+      name: linux-python
+      python: <<pipeline.parameters.python_version>>
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Build distribution packages
+          command: |
+            pip install build
+            python -m build
+      - store_artifacts:
+          path: dist
+      - run:
+          name: Publish to PyPI
+          command: |
+            pip install twine
+            twine upload dist/*
+          # Only run on tagged releases
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+workflows:
+  main:
+    jobs:
+      # Code quality checks
+      - lint-and-format
+
+      # Run tests on multiple Python versions
+      - unit-tests:
+          matrix:
+            parameters:
+              python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+      - integration-tests:
+          matrix:
+            parameters:
+              python: ["3.9", "3.11"]
+          requires:
+            - unit-tests
+
+      # Build and publish on tags
+      - build-and-publish:
+          requires:
+            - lint-and-format
+            - unit-tests
+            - integration-tests
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

@@ -5,7 +5,7 @@ import re
 
 import pytest
 import tracklab
-from wandb import Api
+from tracklab import Api
 from tracklab.errors import CommError
 from tracklab.sdk.artifacts.artifact import Artifact
 from tracklab.sdk.lib.hashutil import md5_file_hex

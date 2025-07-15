@@ -37,7 +37,7 @@ def line_series(
 
     Returns:
         CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Examples:
     Logging a single x array where all y series are plotted against the same x values:
@@ -46,7 +46,7 @@ def line_series(
     import tracklab
 
     # Initialize W&B run
-    with wandb.init(project="line_series_example") as run:
+    with tracklab.init(project="line_series_example") as run:
         # x values shared across all y series
         xs = list(range(10))
 
@@ -58,7 +58,7 @@ def line_series(
         ]
 
         # Generate and log the line series chart
-        line_series_chart = wandb.plot.line_series(
+        line_series_chart = tracklab.plot.line_series(
             xs,
             ys,
             title="title",
@@ -77,7 +77,7 @@ def line_series(
     import tracklab
 
     # Initialize W&B run
-    with wandb.init(project="line_series_example") as run:
+    with tracklab.init(project="line_series_example") as run:
         # Separate x values for each y series
         xs = [
             [i for i in range(10)],  # x for first series
@@ -93,7 +93,7 @@ def line_series(
         ]
 
         # Generate and log the line series chart
-        line_series_chart = wandb.plot.line_series(
+        line_series_chart = tracklab.plot.line_series(
             xs, ys, title="Multiple X Arrays Example", xname="Step"
         )
         run.log({"line-series-multiple-x": line_series_chart})
@@ -109,7 +109,7 @@ def line_series(
     import tracklab
 
     # Initialize W&B run
-    with wandb.init(project="line_series_example") as run:
+    with tracklab.init(project="line_series_example") as run:
         xs = list(range(10))  # Single x array
         ys = [
             [i for i in range(10)],  # y = x
@@ -121,7 +121,7 @@ def line_series(
         keys = ["Linear", "Quadratic", "Cubic"]
 
         # Generate and log the line series chart
-        line_series_chart = wandb.plot.line_series(
+        line_series_chart = tracklab.plot.line_series(
             xs,
             ys,
             keys=keys,  # Custom keys (line labels)
@@ -155,7 +155,7 @@ def line_series(
         for i, (xx, yy) in enumerate(zip(xs, ys))
         for x, y in zip(xx, yy)
     ]
-    table = wandb.Table(
+    table = tracklab.Table(
         data=data,
         columns=["step", "lineKey", "lineVal"],
     )

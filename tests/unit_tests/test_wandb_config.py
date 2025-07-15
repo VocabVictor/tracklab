@@ -2,7 +2,7 @@
 
 import pytest
 import yaml
-from wandb import tracklab_sdk
+from tracklab import tracklab_sdk
 
 
 def get_callback(d):

@@ -32,7 +32,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ..wandb_run import Run as LocalRun
+    from ..tracklab_run import Run as LocalRun
 
     numeric = Union[int, float, np.integer, np.float64]
     FileFormat3D = Literal[

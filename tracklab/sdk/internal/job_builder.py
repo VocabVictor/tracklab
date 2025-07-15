@@ -31,7 +31,7 @@ from .settings_static import SettingsStatic
 _logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from tracklab.proto.wandb_internal_pb2 import ArtifactRecord
+    from tracklab.proto.tracklab_internal_pb2 import ArtifactRecord
 
 FROZEN_REQUIREMENTS_FNAME = "requirements.frozen.txt"
 JOB_FNAME = "wandb-job.json"

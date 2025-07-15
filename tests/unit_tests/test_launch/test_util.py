@@ -19,23 +19,23 @@ from tracklab.sdk.launch.utils import (
     "env, desired",
     [
         # Case 1; single key in single env var
-        ({"WANDB_CONFIG": '{"foo": "bar"}'}, {"foo": "bar"}),
+        ({"TRACKLAB_CONFIG": '{"foo": "bar"}'}, {"foo": "bar"}),
         # Case 2: multiple keys in single env var
         (
-            {"WANDB_CONFIG": '{"foo": "bar", "baz": {"qux": "quux"}}'},
+            {"TRACKLAB_CONFIG": '{"foo": "bar", "baz": {"qux": "quux"}}'},
             {"foo": "bar", "baz": {"qux": "quux"}},
         ),
         # Case 3: multiple env vars, single key
         (
-            {"WANDB_CONFIG_0": '{"foo":', "WANDB_CONFIG_1": '"bar"}'},
+            {"TRACKLAB_CONFIG_0": '{"foo":', "TRACKLAB_CONFIG_1": '"bar"}'},
             {"foo": "bar"},
         ),
         # Case 4: nested, multiple config keys in multiple env vars
         (
             {
-                "WANDB_CONFIG_0": '{"foo":',
-                "WANDB_CONFIG_1": '"bar",',
-                "WANDB_CONFIG_2": '"baz": {"qux": "quux"}}',
+                "TRACKLAB_CONFIG_0": '{"foo":',
+                "TRACKLAB_CONFIG_1": '"bar",',
+                "TRACKLAB_CONFIG_2": '"baz": {"qux": "quux"}}',
             },
             {"foo": "bar", "baz": {"qux": "quux"}},
         ),
@@ -61,7 +61,7 @@ def test_macro_sub():
         "gpu": "${wandb_gpu_count}",
         "memory": "${MY_ENV_VAR}",
         "env": {
-            "WANDB_PROJECT": "${wandb_project}",
+            "TRACKLAB_PROJECT": "${wandb_project}",
         },
     }
     """
@@ -79,7 +79,7 @@ def test_macro_sub():
         "gpu": "1",
         "memory": "1GB",
         "env": {
-            "WANDB_PROJECT": "test-project",
+            "TRACKLAB_PROJECT": "test-project",
         },
     }
     """
@@ -93,7 +93,7 @@ def test_recursive_macro_sub():
         "gpu": "${wandb_gpu_count}",
         "memory": "${MY_ENV_VAR}",
         "env": [
-            {"WANDB_PROJECT": "${wandb_project}"},
+            {"TRACKLAB_PROJECT": "${wandb_project}"},
             {"MY_VAR": "${MY_ENV_VAR}"},
         ],
     }
@@ -109,7 +109,7 @@ def test_recursive_macro_sub():
         "gpu": "1",
         "memory": "1GB",
         "env": [
-            {"WANDB_PROJECT": "test-project"},
+            {"TRACKLAB_PROJECT": "test-project"},
             {"MY_VAR": "1GB"},
         ],
     }

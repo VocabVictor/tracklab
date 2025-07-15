@@ -7,8 +7,8 @@ from tracklab.apis.public.utils import (
     parse_org_from_registry_path,
 )
 from tracklab.sdk.internal.internal_api import _OrgNames
-from wandb_gql import gql
-from wandb_graphql import print_ast
+from tracklab_gql import gql
+from tracklab_graphql import print_ast
 
 
 @pytest.mark.parametrize(

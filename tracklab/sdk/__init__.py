@@ -21,17 +21,17 @@ __all__ = (
     "helper",
 )
 
-from . import wandb_helper as helper
+from . import tracklab_helper as helper
 from .artifacts.artifact import Artifact
-from .wandb_alerts import AlertLevel
-from .wandb_config import Config
-from .wandb_init import _attach, init
-from .wandb_login import login
-from .wandb_require import require
-from .wandb_run import finish
-from .wandb_settings import Settings
-from .wandb_setup import setup, teardown
-from .wandb_summary import Summary
-from .wandb_sweep import controller, sweep
-from .wandb_sync import _sync
-from .wandb_watch import _unwatch, _watch
+from .tracklab_alerts import AlertLevel
+from .tracklab_config import Config
+from .tracklab_init import _attach, init
+from .tracklab_login import login
+from .tracklab_require import require
+from .tracklab_run import finish
+from .tracklab_settings import Settings
+from .tracklab_setup import setup, teardown
+from .tracklab_summary import Summary
+from .tracklab_sweep import controller, sweep
+from .tracklab_sync import _sync
+from .tracklab_watch import _unwatch, _watch

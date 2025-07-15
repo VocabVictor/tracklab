@@ -82,7 +82,7 @@ def test_resume_auto_failure(user, tmp_path):
     # so that if that is set (e.g. by some other test/fixture),
     # test_settings.wandb_dir != run_settings.wandb_dir
     # and this test will fail
-    with mock.patch.dict(os.environ, {"WANDB_DIR": str(tmp_path.absolute())}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_DIR": str(tmp_path.absolute())}):
         run = tracklab.init(project="project", id="resume-me")
         run.finish()
         resume_fname = run._settings.resume_fname

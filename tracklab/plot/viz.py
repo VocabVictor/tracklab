@@ -36,6 +36,6 @@ class Visualize:
 def visualize(id: str, value: Table) -> Visualize:
     if not isinstance(value, Table):
         raise Error(
-            f"Expected `value` to be `wandb.Table` type, instead got {type(value).__name__}"
+            f"Expected `value` to be `tracklab.Table` type, instead got {type(value).__name__}"
         )
     return Visualize(table=value, spec=VisualizeSpec(name=id))

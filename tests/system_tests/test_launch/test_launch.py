@@ -75,7 +75,7 @@ async def test_launch_incorrect_backend(runner, user, monkeypatch):
 
 def test_launch_multi_run(runner, user):
     with runner.isolated_filesystem(), mock.patch.dict(
-        "os.environ", {"WANDB_RUN_ID": "test", "WANDB_LAUNCH": "true"}
+        "os.environ", {"TRACKLAB_RUN_ID": "test", "TRACKLAB_LAUNCH": "true"}
     ):
         with tracklab.init() as run1:
             pass
@@ -106,9 +106,9 @@ def test_launch_wandb_init_launch_envs(
     with runner.isolated_filesystem(), mock.patch.dict(
         "os.environ",
         {
-            "WANDB_LAUNCH_QUEUE_NAME": queue,
-            "WANDB_LAUNCH_QUEUE_ENTITY": user,
-            "WANDB_LAUNCH_TRACE_ID": "test123",
+            "TRACKLAB_LAUNCH_QUEUE_NAME": queue,
+            "TRACKLAB_LAUNCH_QUEUE_ENTITY": user,
+            "TRACKLAB_LAUNCH_TRACE_ID": "test123",
         },
     ):
         with tracklab.init() as run:

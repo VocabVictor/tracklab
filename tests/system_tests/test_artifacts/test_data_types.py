@@ -2,7 +2,7 @@ import matplotlib
 import numpy as np
 import pytest
 import tracklab
-from wandb import data_types
+from tracklab import data_types
 from tracklab.sdk.data_types import _dtypes
 from tracklab.sdk.internal import incremental_table_util
 

@@ -11,7 +11,7 @@ from .media import Media
 if TYPE_CHECKING:  # pragma: no cover
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ...wandb_run import Run as LocalRun
+    from ...tracklab_run import Run as LocalRun
 
 
 # Allows encoding of arbitrary JSON structures

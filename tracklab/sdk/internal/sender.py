@@ -59,7 +59,7 @@ from tracklab.sdk.lib import (
 from tracklab.sdk.lib.proto_util import message_to_dict
 
 if TYPE_CHECKING:
-    from tracklab.proto.wandb_internal_pb2 import (
+    from tracklab.proto.tracklab_internal_pb2 import (
         ArtifactManifest,
         ArtifactManifestEntry,
         ArtifactRecord,
@@ -148,7 +148,7 @@ class ResumeState:
     events: int
     output: int
     runtime: float
-    wandb_runtime: Optional[int]
+    tracklab_runtime: Optional[int]
     summary: Optional[Dict[str, Any]]
     config: Optional[Dict[str, Any]]
     tags: Optional[List[str]]
@@ -160,8 +160,8 @@ class ResumeState:
         self.events = 0
         self.output = 0
         self.runtime = 0
-        # wandb_runtime is the canonical runtime (stored in summary._wandb.runtime)
-        self.wandb_runtime = None
+        # tracklab_runtime is the canonical runtime (stored in summary._wandb.runtime)
+        self.tracklab_runtime = None
         self.summary = None
         self.config = None
         self.tags = None
@@ -270,12 +270,12 @@ class SendManager:
 
         self._start_time: int = 0
         self._telemetry_obj = telemetry.TelemetryRecord()
-        self._environment_obj = wandb_internal_pb2.EnvironmentRecord()
+        self._environment_obj = tracklab_internal_pb2.EnvironmentRecord()
         self._config_metric_pbdict_list: List[Dict[int, Any]] = []
         self._metadata_summary: Dict[str, Any] = defaultdict()
         self._cached_summary: Dict[str, Any] = dict()
         self._config_metric_index_dict: Dict[str, int] = {}
-        self._config_metric_dict: Dict[str, wandb_internal_pb2.MetricRecord] = {}
+        self._config_metric_dict: Dict[str, tracklab_internal_pb2.MetricRecord] = {}
         self._consolidated_summary: Dict[str, Any] = dict()
 
         self._cached_server_info = dict()
@@ -369,7 +369,7 @@ class SendManager:
         return False
 
     def retry_callback(self, status: int, response_text: str) -> None:
-        response = wandb_internal_pb2.HttpResponse()
+        response = tracklab_internal_pb2.HttpResponse()
         response.http_status_code = status
         response.http_response_text = response_text
         self._retry_q.put(response)
@@ -467,7 +467,7 @@ class SendManager:
             assert data
             current_end_offset = self._ds.get_offset()
 
-            send_record = wandb_internal_pb2.Record()
+            send_record = tracklab_internal_pb2.Record()
             send_record.ParseFromString(data)
             self._update_end_offset(current_end_offset)
             self.send(send_record)
@@ -511,7 +511,7 @@ class SendManager:
             return
         self._debounce_status_time = time_now
 
-        status_report = wandb_internal_pb2.StatusReportRequest(
+        status_report = tracklab_internal_pb2.StatusReportRequest(
             record_num=self._send_record_num,
             sent_offset=self._send_end_offset,
         )
@@ -648,7 +648,7 @@ class SendManager:
         if not done:
             return
 
-        exit_result = wandb_internal_pb2.RunExitResult()
+        exit_result = tracklab_internal_pb2.RunExitResult()
 
         # mark exit done in case we are polling on exit
         self._exit_result = exit_result
@@ -685,7 +685,7 @@ class SendManager:
 
     def _setup_resume(
         self, run: "RunRecord"
-    ) -> Optional["wandb_internal_pb2.ErrorInfo"]:
+    ) -> Optional["tracklab_internal_pb2.ErrorInfo"]:
         """Queries the backend for a run; fail if the settings are incompatible."""
         if not self._settings.resume:
             return None
@@ -706,8 +706,8 @@ class SendManager:
         # No resume status = run does not exist; No t key in wandbConfig = run exists but hasn't been inited
         if not resume_status or '"t":' not in resume_status.get("wandbConfig", ""):
             if self._settings.resume == "must":
-                error = wandb_internal_pb2.ErrorInfo()
-                error.code = wandb_internal_pb2.ErrorInfo.ErrorCode.USAGE
+                error = tracklab_internal_pb2.ErrorInfo()
+                error.code = tracklab_internal_pb2.ErrorInfo.ErrorCode.USAGE
                 error.message = (
                     "You provided an invalid value for the `resume` argument."
                     f" The value 'must' is not a valid option for resuming a run ({run.run_id}) that has not been initialized."
@@ -721,8 +721,8 @@ class SendManager:
         # handle cases where we have resume_status
         #
         if self._settings.resume == "never":
-            error = wandb_internal_pb2.ErrorInfo()
-            error.code = wandb_internal_pb2.ErrorInfo.ErrorCode.USAGE
+            error = tracklab_internal_pb2.ErrorInfo()
+            error.code = tracklab_internal_pb2.ErrorInfo.ErrorCode.USAGE
             error.message = (
                 "You provided an invalid value for the `resume` argument."
                 f" The value 'never' is not a valid option for resuming a run ({run.run_id}) that already exists."
@@ -749,14 +749,14 @@ class SendManager:
             summary = json.loads(resume_status["summaryMetrics"] or "{}")
             new_runtime = summary.get("_wandb", {}).get("runtime", None)
             if new_runtime is not None:
-                self._resume_state.wandb_runtime = new_runtime
+                self._resume_state.tracklab_runtime = new_runtime
             tags = resume_status.get("tags") or []
 
         except (IndexError, ValueError):
             logger.exception("unable to load resume tails")
             if self._settings.resume == "must":
-                error = wandb_internal_pb2.ErrorInfo()
-                error.code = wandb_internal_pb2.ErrorInfo.ErrorCode.USAGE
+                error = tracklab_internal_pb2.ErrorInfo()
+                error.code = tracklab_internal_pb2.ErrorInfo.ErrorCode.USAGE
                 error.message = f"resume='must' but could not resume ({run.run_id}) "
                 return error
 
@@ -868,7 +868,7 @@ class SendManager:
     def _handle_error(
         self,
         record: "Record",
-        error: "wandb_internal_pb2.ErrorInfo",
+        error: "tracklab_internal_pb2.ErrorInfo",
         run: "RunRecord",
     ) -> None:
         if record.control.req_resp or record.control.mailbox_slot:
@@ -882,7 +882,7 @@ class SendManager:
     def send_run(self, record: "Record", file_dir: Optional[str] = None) -> None:
         run = record.run
         error = None
-        is_wandb_init = self._run is None
+        is_tracklab_init = self._run is None
 
         # save start time of a run
         self._start_time = int(run.start_time.ToMicroseconds() // 1e6)
@@ -906,15 +906,15 @@ class SendManager:
 
         num_resume_options_set = sum([do_fork, do_rewind, do_resume])
         if num_resume_options_set > 1:
-            error = wandb_internal_pb2.ErrorInfo()
-            error.code = wandb_internal_pb2.ErrorInfo.ErrorCode.USAGE
+            error = tracklab_internal_pb2.ErrorInfo()
+            error.code = tracklab_internal_pb2.ErrorInfo.ErrorCode.USAGE
             error.message = (
                 "Multiple resume options specified. "
                 "Please specify only one of `fork_from`, `resume`, or `resume_from`."
             )
             self._handle_error(record, error, run)
 
-        if is_wandb_init:
+        if is_tracklab_init:
             # Ensure we have a project to query for status
             if run.project == "":
                 run.project = util.auto_project_name(self._settings.program)
@@ -972,7 +972,7 @@ class SendManager:
             self._respond_result(result)
 
         # Only spin up our threads on the first run message
-        if is_wandb_init:
+        if is_tracklab_init:
             self._start_run_threads(file_dir)
         else:
             logger.info("updated run: %s", self._run.run_id)
@@ -981,8 +981,8 @@ class SendManager:
         assert self._run
         if self._resume_state.resumed:
             self._run.resumed = True
-            if self._resume_state.wandb_runtime is not None:
-                self._run.runtime = self._resume_state.wandb_runtime
+            if self._resume_state.tracklab_runtime is not None:
+                self._run.runtime = self._resume_state.tracklab_runtime
         elif is_rewinding:
             # because is_rewinding is mutually exclusive with self._resume_state.resumed,
             # this block will always execute if is_rewinding is set
@@ -1172,7 +1172,7 @@ class SendManager:
 
     def send_stats(self, record: "Record") -> None:
         stats = record.stats
-        if stats.stats_type != wandb_internal_pb2.StatsRecord.StatsType.SYSTEM:
+        if stats.stats_type != tracklab_internal_pb2.StatsRecord.StatsType.SYSTEM:
             return
         if not self._fs:
             return
@@ -1271,7 +1271,7 @@ class SendManager:
             return
         out = record.output
         stream: StreamLiterals = "stdout"
-        if out.output_type == wandb_internal_pb2.OutputRecord.OutputType.STDERR:
+        if out.output_type == tracklab_internal_pb2.OutputRecord.OutputType.STDERR:
             stream = "stderr"
         line = out.line
         self._send_output_line(stream, line)
@@ -1281,7 +1281,7 @@ class SendManager:
             return
         out = record.output_raw
         stream: StreamLiterals = "stdout"
-        if out.output_type == wandb_internal_pb2.OutputRawRecord.OutputType.STDERR:
+        if out.output_type == tracklab_internal_pb2.OutputRawRecord.OutputType.STDERR:
             stream = "stderr"
         line = out.line
 
@@ -1353,7 +1353,7 @@ class SendManager:
 
         # merge or overwrite
         old_metric = self._config_metric_dict.get(
-            metric.name, wandb_internal_pb2.MetricRecord()
+            metric.name, tracklab_internal_pb2.MetricRecord()
         )
         if metric._control.overwrite:
             old_metric.CopyFrom(metric)
@@ -1367,7 +1367,7 @@ class SendManager:
             find_step_idx = self._config_metric_index_dict.get(metric.step_metric)
             if find_step_idx is not None:
                 # make a copy of this metric as we will be modifying it
-                rec = wandb_internal_pb2.Record()
+                rec = tracklab_internal_pb2.Record()
                 rec.metric.CopyFrom(metric)
                 metric = rec.metric
 
@@ -1639,7 +1639,7 @@ class SendManager:
         docker image is out-of-date. Otherwise, we use the returned values to deduce the
         state of the local server.
         """
-        local_info = wandb_internal_pb2.LocalInfo()
+        local_info = tracklab_internal_pb2.LocalInfo()
         if self._settings._offline:
             local_info.out_of_date = False
             return local_info

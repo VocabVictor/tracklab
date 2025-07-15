@@ -49,8 +49,8 @@ from tracklab.apis.public.utils import (
     gql_compat,
     parse_org_from_registry_path,
 )
-from tracklab.proto.wandb_deprecated import Deprecated
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.proto.tracklab_deprecated import Deprecated
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.artifacts._validators import is_artifact_registry_project
 from tracklab.sdk.internal.internal_api import Api as InternalApi
 from tracklab.sdk.internal.thread_local_settings import _thread_local_api_settings

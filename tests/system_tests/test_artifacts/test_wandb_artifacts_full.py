@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 import tracklab
-from wandb import Api, Artifact
+from tracklab import Api, Artifact
 from tracklab.errors import CommError
 from tracklab.sdk.artifacts import artifact_file_cache
 from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
@@ -265,7 +265,7 @@ def test_remove_after_log(user):
 )
 def test_download_respects_skip_cache(user, tmp_path, monkeypatch, skip_download_cache):
     # Setup cache dir
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path / "cache"))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     artifact = tracklab.Artifact(name="cache-test", type="dataset")
@@ -308,7 +308,7 @@ def test_download_respects_skip_cache(user, tmp_path, monkeypatch, skip_download
 
 def test_uploaded_artifacts_are_unstaged(user, tmp_path, monkeypatch):
     # Use a separate staging directory for the duration of this test.
-    monkeypatch.setenv("WANDB_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("TRACKLAB_DATA_DIR", str(tmp_path))
     staging_dir = Path(get_staging_dir())
 
     def dir_size():
@@ -368,10 +368,10 @@ def test_large_manifests_passed_by_file(user, monkeypatch, mocker):
 
 def test_mutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch, api):
     # Use a separate staging directory for the duration of this test.
-    monkeypatch.setenv("WANDB_DATA_DIR", str(tmp_path / "staging"))
+    monkeypatch.setenv("TRACKLAB_DATA_DIR", str(tmp_path / "staging"))
     staging_dir = Path(get_staging_dir())
 
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path / "cache"))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
@@ -399,10 +399,10 @@ def test_mutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch, api):
 
 def test_mutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
     # Use a separate staging directory for the duration of this test.
-    monkeypatch.setenv("WANDB_DATA_DIR", str(tmp_path / "staging"))
+    monkeypatch.setenv("TRACKLAB_DATA_DIR", str(tmp_path / "staging"))
     staging_dir = Path(get_staging_dir())
 
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path / "cache"))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
@@ -430,10 +430,10 @@ def test_mutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
 
 def test_immutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch):
     # Use a separate staging directory for the duration of this test.
-    monkeypatch.setenv("WANDB_DATA_DIR", str(tmp_path / "staging"))
+    monkeypatch.setenv("TRACKLAB_DATA_DIR", str(tmp_path / "staging"))
     staging_dir = Path(get_staging_dir())
 
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path / "cache"))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
@@ -456,10 +456,10 @@ def test_immutable_uploads_with_cache_enabled(user, tmp_path, monkeypatch):
 
 def test_immutable_uploads_with_cache_disabled(user, tmp_path, monkeypatch):
     # Use a separate staging directory for the duration of this test.
-    monkeypatch.setenv("WANDB_DATA_DIR", str(tmp_path / "staging"))
+    monkeypatch.setenv("TRACKLAB_DATA_DIR", str(tmp_path / "staging"))
     staging_dir = Path(get_staging_dir())
 
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path / "cache"))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_path = Path(tmp_path / "random.txt")
@@ -526,7 +526,7 @@ def test_artifact_wait_failure(user, timeout):
 def test_check_existing_artifact_before_download(user, tmp_path, monkeypatch):
     """Don't re-download an artifact if it's already in the desired location."""
     cache_dir = tmp_path / "cache"
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(cache_dir))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(cache_dir))
 
     original_file = tmp_path / "test.txt"
     original_file.write_text("hello")
@@ -622,7 +622,7 @@ def test_log_reference_directly(example_files, user):
 
 def test_artifact_download_root(logged_artifact, monkeypatch, tmp_path):
     art_dir = tmp_path / "an-unusual-path"
-    monkeypatch.setenv("WANDB_ARTIFACT_DIR", str(art_dir))
+    monkeypatch.setenv("TRACKLAB_ARTIFACT_DIR", str(art_dir))
     name_path = logged_artifact.name
     if platform.system() == "Windows":
         name_path = name_path.replace(":", "-")

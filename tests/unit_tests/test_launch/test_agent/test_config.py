@@ -121,7 +121,7 @@ def test_resolve_agent_config(monkeypatch, runner):
         "tracklab.sdk.launch._launch.LAUNCH_CONFIG_FILE",
         "./config/wandb/launch-config.yaml",
     )
-    monkeypatch.setenv("WANDB_ENTITY", "diffentity")
+    monkeypatch.setenv("TRACKLAB_ENTITY", "diffentity")
     with runner.isolated_filesystem():
         os.makedirs("./config/wandb")
         with open("./config/wandb/launch-config.yaml", "w") as f:

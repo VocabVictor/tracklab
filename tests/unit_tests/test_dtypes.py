@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import pytest
 import tracklab
-from wandb import data_types
+from tracklab import data_types
 from tracklab.sdk.data_types._dtypes import (
     AnyType,
     BooleanType,

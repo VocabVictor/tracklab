@@ -305,13 +305,13 @@ class LaunchAgent:
 
     def _init_agent_run(self) -> None:
         # TODO: has it been long enough that all backends support agents?
-        self._wandb_run = None
+        self._tracklab_run = None
 
         if self.gorilla_supports_agents:
             settings = wandb.Settings(
                 silent=True, disable_git=True, disable_job_creation=True
             )
-            self._wandb_run = wandb.init(
+            self._tracklab_run = wandb.init(
                 project=self._project,
                 entity=self._entity,
                 settings=settings,
@@ -599,7 +599,7 @@ class LaunchAgent:
                         queue = job_and_queue.queue
                         try:
                             file_saver = RunQueueItemFileSaver(
-                                self._wandb_run, job["runQueueItemId"]
+                                self._tracklab_run, job["runQueueItemId"]
                             )
                             if self._is_scheduler_job(job.get("runSpec", {})):
                                 # If job is a scheduler, and we are already at the cap, ignore,
@@ -770,7 +770,7 @@ class LaunchAgent:
                     )
             if await self._check_run_finished(job_tracker, launch_spec):
                 return
-            if await job_tracker.check_wandb_run_stopped(self._api):
+            if await job_tracker.check_tracklab_run_stopped(self._api):
                 if stopped_time is None:
                     stopped_time = time.time()
                 else:

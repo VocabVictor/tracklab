@@ -49,7 +49,7 @@ def test_agent_config_merge(user):
         "parameters": {"a": {"values": [1, 2, 3]}},
     }
 
-    with unittest.mock.patch.dict(os.environ, {"WANDB_CONSOLE": "off"}):
+    with unittest.mock.patch.dict(os.environ, {"TRACKLAB_CONSOLE": "off"}):
         sweep_id = tracklab.sweep(sweep_config)
         tracklab.agent(sweep_id, function=train, count=1)
 

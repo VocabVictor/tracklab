@@ -60,9 +60,9 @@ def ssl_server(ssl_creds: SSLCredPaths) -> Iterator[http.server.HTTPServer]:
     ["env", "expect_disabled"],
     [
         ({}, False),
-        ({"WANDB_INSECURE_DISABLE_SSL": ""}, False),
-        ({"WANDB_INSECURE_DISABLE_SSL": "false"}, False),
-        ({"WANDB_INSECURE_DISABLE_SSL": "true"}, True),
+        ({"TRACKLAB_INSECURE_DISABLE_SSL": ""}, False),
+        ({"TRACKLAB_INSECURE_DISABLE_SSL": "false"}, False),
+        ({"TRACKLAB_INSECURE_DISABLE_SSL": "true"}, True),
     ],
 )
 def test_check_ssl_disabled(

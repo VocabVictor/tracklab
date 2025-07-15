@@ -74,11 +74,11 @@ from typing import (
     Union,
 )
 
-import wandb.plot as plot
-from wandb.analytics import Sentry
-from wandb.apis import InternalApi
-from wandb.apis import PublicApi as Api
-from wandb.data_types import (
+import tracklab.plot as plot
+from tracklab.analytics import Sentry
+from tracklab.apis import InternalApi
+from tracklab.apis import PublicApi as Api
+from tracklab.data_types import (
     Audio,
     Graph,
     Histogram,
@@ -91,21 +91,21 @@ from wandb.data_types import (
     Video,
     box3d,
 )
-from wandb.errors import Error
-from wandb.errors.term import termerror, termlog, termsetup, termwarn
-from wandb.sdk import Artifact, Settings, wandb_config, wandb_metric, wandb_summary
-from wandb.sdk.artifacts.artifact_ttl import ArtifactTTL
-from wandb.sdk.interface.interface import PolicyName
-from wandb.sdk.lib.paths import FilePathStr, StrPath
-from wandb.sdk.wandb_run import Run
-from wandb.sdk.wandb_setup import _WandbSetup
-from wandb.wandb_controller import _WandbController
+from tracklab.errors import Error
+from tracklab.errors.term import termerror, termlog, termsetup, termwarn
+from tracklab.sdk import Artifact, Settings, wandb_config, wandb_metric, wandb_summary
+from tracklab.sdk.artifacts.artifact_ttl import ArtifactTTL
+from tracklab.sdk.interface.interface import PolicyName
+from tracklab.sdk.lib.paths import FilePathStr, StrPath
+from tracklab.sdk.wandb_run import Run
+from tracklab.sdk.wandb_setup import _WandbSetup
+from tracklab.wandb_controller import _WandbController
 
 if TYPE_CHECKING:
     import torch  # type: ignore [import-not-found]
 
-    import wandb
-    from wandb.plot import CustomChart
+    import tracklab
+    from tracklab.plot import CustomChart
 
 __version__: str = "0.21.1.dev1"
 

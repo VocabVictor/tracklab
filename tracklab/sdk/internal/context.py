@@ -4,7 +4,7 @@ import logging
 import threading
 from typing import Dict, Optional
 
-from tracklab.proto.wandb_internal_pb2 import Record, Result
+from tracklab.proto.tracklab_internal_pb2 import Record, Result
 
 logger = logging.getLogger(__name__)
 

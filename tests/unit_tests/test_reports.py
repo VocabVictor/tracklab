@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 import tracklab
-from wandb import Api
+from tracklab import Api
 from tracklab.apis.public.reports import BetaReport
 
 

@@ -14,7 +14,7 @@ def test_run_use_job_env_var(runner, wandb_backend_spy, user):
     artifact_name = f"{user}/uncategorized/{art_name}"
     artifact_env = json.dumps({"_wandb_job": f"{artifact_name}:latest"})
     with runner.isolated_filesystem(), mock.patch.dict(
-        "os.environ", WANDB_ARTIFACTS=artifact_env
+        "os.environ", TRACKLAB_ARTIFACTS=artifact_env
     ):
         artifact = InternalArtifact(name=art_name, type=job_builder.JOB_ARTIFACT_TYPE)
         filename = "file1.txt"
@@ -61,14 +61,14 @@ def test_run_in_launch_context_with_malformed_env_vars(
     runner, monkeypatch, capsys, user
 ):
     with runner.isolated_filesystem():
-        monkeypatch.setenv("WANDB_ARTIFACTS", '{"epochs: 6}')
-        monkeypatch.setenv("WANDB_CONFIG", '{"old_name": {"name": "test:v0"')
+        monkeypatch.setenv("TRACKLAB_ARTIFACTS", '{"epochs: 6}')
+        monkeypatch.setenv("TRACKLAB_CONFIG", '{"old_name": {"name": "test:v0"')
         settings = tracklab.Settings(launch=True)
         run = tracklab.init(settings=settings, config={"epochs": 2, "lr": 0.004})
         run.finish()
         _, err = capsys.readouterr()
-        assert "Malformed WANDB_CONFIG, using original config" in err
-        assert "Malformed WANDB_ARTIFACTS, using original artifacts" in err
+        assert "Malformed TRACKLAB_CONFIG, using original config" in err
+        assert "Malformed TRACKLAB_ARTIFACTS, using original artifacts" in err
 
 
 def test_repo_job_creation(user):
@@ -110,7 +110,7 @@ def test_artifact_job_creation(runner, user):
 
 def test_container_job_creation(user):
     settings = tracklab.Settings(disable_git=True, disable_job_creation=False)
-    with mock.patch.dict("os.environ", WANDB_DOCKER="dummy-container:docker-tag"):
+    with mock.patch.dict("os.environ", TRACKLAB_DOCKER="dummy-container:docker-tag"):
         run = tracklab.init(settings=settings)
         run.finish()
         api = public.Api()

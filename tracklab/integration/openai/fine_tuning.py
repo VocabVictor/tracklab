@@ -14,7 +14,7 @@ import tracklab
 from tracklab import util
 from tracklab.data_types import Table
 from tracklab.sdk.lib import telemetry
-from tracklab.sdk.wandb_run import Run
+from tracklab.sdk.tracklab_run import Run
 
 openai = util.get_module(
     name="openai",
@@ -69,7 +69,7 @@ class WandbLogger:
         log_datasets: bool = True,
         model_artifact_name: str = "model-metadata",
         model_artifact_type: str = "model",
-        **kwargs_wandb_init: Dict[str, Any],
+        **kwargs_tracklab_init: Dict[str, Any],
     ) -> str:
         """Sync fine-tunes to Weights & Biases.
 
@@ -118,13 +118,13 @@ class WandbLogger:
             run_path = f"{project}/{fine_tune_id}"
             if entity is not None:
                 run_path = f"{entity}/{run_path}"
-            wandb_run = cls._get_wandb_run(run_path)
-            if wandb_run:
-                wandb_status = wandb_run.summary.get("status")
+            tracklab_run = cls._get_tracklab_run(run_path)
+            if tracklab_run:
+                wandb_status = tracklab_run.summary.get("status")
                 if show_individual_warnings:
                     if wandb_status == "succeeded" and not overwrite:
                         wandb.termwarn(
-                            f"Fine-tune {fine_tune_id} has already been logged successfully at {wandb_run.url}. "
+                            f"Fine-tune {fine_tune_id} has already been logged successfully at {tracklab_run.url}. "
                             "Use `overwrite=True` if you want to overwrite previous run"
                         )
                     elif wandb_status != "succeeded" or overwrite:
@@ -147,7 +147,7 @@ class WandbLogger:
                     entity=entity,
                     name=fine_tune_id,
                     id=fine_tune_id,
-                    **kwargs_wandb_init,
+                    **kwargs_tracklab_init,
                 )
             else:
                 # if a run exits - created externally
@@ -165,7 +165,7 @@ class WandbLogger:
                 log_datasets,
                 model_artifact_name,
                 model_artifact_type,
-                **kwargs_wandb_init,
+                **kwargs_tracklab_init,
             )
 
         if not show_individual_warnings and not any(fine_tune_logged):
@@ -211,7 +211,7 @@ class WandbLogger:
         log_datasets: bool,
         model_artifact_name: str,
         model_artifact_type: str,
-        **kwargs_wandb_init: Dict[str, Any],
+        **kwargs_tracklab_init: Dict[str, Any],
     ):
         fine_tune_id = fine_tune.id
         status = fine_tune.status
@@ -290,7 +290,7 @@ class WandbLogger:
                 )
 
     @classmethod
-    def _get_wandb_run(cls, run_path: str):
+    def _get_tracklab_run(cls, run_path: str):
         cls._ensure_logged_in()
         try:
             if cls._wandb_api is None:

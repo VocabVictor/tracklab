@@ -8,7 +8,7 @@ import pytest
 import tracklab
 from bokeh.plotting import figure
 from rdkit import Chem
-from wandb import data_types
+from tracklab import data_types
 
 data = np.random.randint(255, size=(1000))
 

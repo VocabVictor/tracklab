@@ -167,7 +167,7 @@ def test_project_parse_existing_requirements(mocker, tmp_path):
     (tmp_path / "requirements.txt").write_text("mock-requirement")
     assert (
         # Trailing space in the expected string is intentional.
-        project.parse_existing_requirements() == "WANDB_ONLY_INCLUDE=mock-requirement "
+        project.parse_existing_requirements() == "TRACKLAB_ONLY_INCLUDE=mock-requirement "
     )
     warn_msg = mocker.termwarn.call_args.args[0]
     assert "wandb is not present in requirements.txt." in warn_msg
@@ -221,23 +221,23 @@ def test_get_env_vars_dict(mock_project_args, test_api):
     project._run_queue_item_id = "mock-queue-item-id"
 
     env_vars = project.get_env_vars_dict(test_api, 512)
-    run_id = env_vars.pop("WANDB_RUN_ID")
+    run_id = env_vars.pop("TRACKLAB_RUN_ID")
     assert len(run_id) == 8
     assert env_vars == {
-        "WANDB_API_KEY": None,
-        "WANDB_ARTIFACTS": "{}",
-        "WANDB_BASE_URL": "https://api.tracklab.ai",
-        "WANDB_CONFIG": "{}",
-        "WANDB_DOCKER": "mock-test-image:v0",
-        "WANDB_ENTITY": "mock-test-entity",
-        "WANDB_LAUNCH": "True",
-        "WANDB_LAUNCH_FILE_OVERRIDES": "{}",
-        "WANDB_LAUNCH_QUEUE_ENTITY": "mock-test-entity",
-        "WANDB_LAUNCH_QUEUE_NAME": "mock-queue",
-        "WANDB_LAUNCH_TRACE_ID": "mock-queue-item-id",
-        "WANDB_PROJECT": "mock-test-project",
-        "WANDB_SWEEP_ID": "mock-sweep-id",
-        "WANDB_USERNAME": "mock-author",
+        "TRACKLAB_API_KEY": None,
+        "TRACKLAB_ARTIFACTS": "{}",
+        "TRACKLAB_BASE_URL": "https://api.tracklab.ai",
+        "TRACKLAB_CONFIG": "{}",
+        "TRACKLAB_DOCKER": "mock-test-image:v0",
+        "TRACKLAB_ENTITY": "mock-test-entity",
+        "TRACKLAB_LAUNCH": "True",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES": "{}",
+        "TRACKLAB_LAUNCH_QUEUE_ENTITY": "mock-test-entity",
+        "TRACKLAB_LAUNCH_QUEUE_NAME": "mock-queue",
+        "TRACKLAB_LAUNCH_TRACE_ID": "mock-queue-item-id",
+        "TRACKLAB_PROJECT": "mock-test-project",
+        "TRACKLAB_SWEEP_ID": "mock-sweep-id",
+        "TRACKLAB_USERNAME": "mock-author",
     }
 
 
@@ -249,23 +249,23 @@ def test_get_env_vars_dict_with_low_max_length(mock_project_args, test_api):
         "batch_size": 32,
     }
     env_vars = project.get_env_vars_dict(test_api, 12)
-    run_id = env_vars.pop("WANDB_RUN_ID")
+    run_id = env_vars.pop("TRACKLAB_RUN_ID")
     assert len(run_id) == 8
     assert env_vars == {
-        "WANDB_API_KEY": None,
-        "WANDB_ARTIFACTS": "{}",
-        "WANDB_BASE_URL": "https://api.tracklab.ai",
-        "WANDB_CONFIG_0": '{"learning_r',
-        "WANDB_CONFIG_1": 'ate": 0.01, ',
-        "WANDB_CONFIG_2": '"batch_size"',
-        "WANDB_CONFIG_3": ": 32}",
-        "WANDB_DOCKER": "mock-test-image:v0",
-        "WANDB_ENTITY": "mock-test-entity",
-        "WANDB_LAUNCH": "True",
-        "WANDB_LAUNCH_FILE_OVERRIDES": "{}",
-        "WANDB_PROJECT": "mock-test-project",
-        "WANDB_SWEEP_ID": "mock-sweep-id",
-        "WANDB_USERNAME": "mock-author",
+        "TRACKLAB_API_KEY": None,
+        "TRACKLAB_ARTIFACTS": "{}",
+        "TRACKLAB_BASE_URL": "https://api.tracklab.ai",
+        "TRACKLAB_CONFIG_0": '{"learning_r',
+        "TRACKLAB_CONFIG_1": 'ate": 0.01, ',
+        "TRACKLAB_CONFIG_2": '"batch_size"',
+        "TRACKLAB_CONFIG_3": ": 32}",
+        "TRACKLAB_DOCKER": "mock-test-image:v0",
+        "TRACKLAB_ENTITY": "mock-test-entity",
+        "TRACKLAB_LAUNCH": "True",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES": "{}",
+        "TRACKLAB_PROJECT": "mock-test-project",
+        "TRACKLAB_SWEEP_ID": "mock-sweep-id",
+        "TRACKLAB_USERNAME": "mock-author",
     }
 
 

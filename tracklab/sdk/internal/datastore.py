@@ -29,7 +29,7 @@ import tracklab
 if TYPE_CHECKING:
     from typing import IO, Any
 
-    from tracklab.proto.wandb_internal_pb2 import Record
+    from tracklab.proto.tracklab_internal_pb2 import Record
 
 logger = logging.getLogger(__name__)
 

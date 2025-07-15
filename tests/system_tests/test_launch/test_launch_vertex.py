@@ -107,15 +107,15 @@ async def test_vertex_resolved_submitted_job(use_local_wandb_backend, monkeypatc
     project.run_queue_item_id = None
     project.launch_spec = {}
     project.get_env_vars_dict.return_value = {
-        "WANDB_PROJECT": project_name,
-        "WANDB_ENTITY": entity_name,
-        "WANDB_LAUNCH": "True",
-        "WANDB_RUN_ID": "asdasd",
-        "WANDB_DOCKER": "testimage",
-        "WANDB_SWEEP_ID": "sweeeeep",
-        "WANDB_CONFIG": "{}",
-        "WANDB_LAUNCH_FILE_OVERRIDES": "{}",
-        "WANDB_ARTIFACTS": '{"_wandb_job": "testjob"}',
+        "TRACKLAB_PROJECT": project_name,
+        "TRACKLAB_ENTITY": entity_name,
+        "TRACKLAB_LAUNCH": "True",
+        "TRACKLAB_RUN_ID": "asdasd",
+        "TRACKLAB_DOCKER": "testimage",
+        "TRACKLAB_SWEEP_ID": "sweeeeep",
+        "TRACKLAB_CONFIG": "{}",
+        "TRACKLAB_LAUNCH_FILE_OVERRIDES": "{}",
+        "TRACKLAB_ARTIFACTS": '{"_wandb_job": "testjob"}',
     }
     environment = loader.environment_from_config({})
     api = Api()
@@ -135,13 +135,13 @@ async def test_vertex_resolved_submitted_job(use_local_wandb_backend, monkeypatc
     # Pop api key and base url - these are hard to control because our
     # sdk will autopopulate them from a million places.
     assert env == [
-        {"name": "WANDB_PROJECT", "value": "test_project"},
-        {"name": "WANDB_ENTITY", "value": "test_entity"},
-        {"name": "WANDB_LAUNCH", "value": "True"},
-        {"name": "WANDB_RUN_ID", "value": "asdasd"},
-        {"name": "WANDB_DOCKER", "value": "testimage"},
-        {"name": "WANDB_SWEEP_ID", "value": "sweeeeep"},
-        {"name": "WANDB_CONFIG", "value": "{}"},
-        {"name": "WANDB_LAUNCH_FILE_OVERRIDES", "value": "{}"},
-        {"name": "WANDB_ARTIFACTS", "value": '{"_wandb_job": "testjob"}'},
+        {"name": "TRACKLAB_PROJECT", "value": "test_project"},
+        {"name": "TRACKLAB_ENTITY", "value": "test_entity"},
+        {"name": "TRACKLAB_LAUNCH", "value": "True"},
+        {"name": "TRACKLAB_RUN_ID", "value": "asdasd"},
+        {"name": "TRACKLAB_DOCKER", "value": "testimage"},
+        {"name": "TRACKLAB_SWEEP_ID", "value": "sweeeeep"},
+        {"name": "TRACKLAB_CONFIG", "value": "{}"},
+        {"name": "TRACKLAB_LAUNCH_FILE_OVERRIDES", "value": "{}"},
+        {"name": "TRACKLAB_ARTIFACTS", "value": '{"_wandb_job": "testjob"}'},
     ]

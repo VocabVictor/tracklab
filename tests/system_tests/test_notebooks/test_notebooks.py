@@ -65,7 +65,7 @@ def test_notebook_exits(user, assets_path):
 
 
 def test_notebook_metadata_jupyter(mocked_module, notebook):
-    base_url = os.getenv("WANDB_BASE_URL")
+    base_url = os.getenv("TRACKLAB_BASE_URL")
     assert base_url
 
     with mock.patch("ipykernel.connect.get_connection_file") as ipyconnect:
@@ -153,10 +153,10 @@ def test_notebook_metadata_kaggle(mocked_module):
 
 
 def test_notebook_not_exists(mocked_ipython, user, capsys):
-    with mock.patch.dict(os.environ, {"WANDB_NOTEBOOK_NAME": "fake.ipynb"}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_NOTEBOOK_NAME": "fake.ipynb"}):
         run = tracklab.init()
         _, err = capsys.readouterr()
-        assert "WANDB_NOTEBOOK_NAME should be a path" in err
+        assert "TRACKLAB_NOTEBOOK_NAME should be a path" in err
         run.finish()
 
 
@@ -214,7 +214,7 @@ def test_code_saving(notebook):
     with notebook("code_saving.ipynb") as nb:
         os.remove("code_saving.ipynb")
         nb.execute_all()
-        assert "WANDB_NOTEBOOK_NAME should be a path" in nb.all_output_text()
+        assert "TRACKLAB_NOTEBOOK_NAME should be a path" in nb.all_output_text()
 
 
 def test_notebook_creates_artifact_job(notebook):
@@ -226,7 +226,7 @@ def test_notebook_creates_artifact_job(notebook):
     run_id = re.search(regex_string, str(output)).group(1)
 
     api = tracklab.Api()
-    user = os.environ["WANDB_USERNAME"]
+    user = os.environ["TRACKLAB_USERNAME"]
     run = api.run(f"{user}/uncategorized/{run_id}")
     used_artifacts = run.used_artifacts()
     assert len(used_artifacts) == 1
@@ -245,7 +245,7 @@ def test_notebook_creates_repo_job(notebook):
     run_id = re.search(regex_string, str(output)).group(1)
 
     api = tracklab.Api()
-    user = os.environ["WANDB_USERNAME"]
+    user = os.environ["TRACKLAB_USERNAME"]
     run = api.run(f"{user}/uncategorized/{run_id}")
     used_artifacts = run.used_artifacts()
     assert len(used_artifacts) == 1

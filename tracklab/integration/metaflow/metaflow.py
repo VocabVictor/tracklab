@@ -307,7 +307,7 @@ def wandb_log(
         datasets: (`bool`). If `True`, log datasets.  Datasets can be a `pd.DataFrame` or `pathlib.Path`.  The default value is `False`, so datasets are not logged.
         models: (`bool`). If `True`, log models.  Models can be a `nn.Module` or `sklearn.base.BaseEstimator`.  The default value is `False`, so models are not logged.
         others: (`bool`). If `True`, log anything pickle-able.  The default value is `False`, so files are not logged.
-        settings: (`wandb.sdk.wandb_settings.Settings`). Custom settings passed to `wandb.init`.  The default value is `None`, and is the same as passing `wandb.Settings()`.  If `settings.run_group` is `None`, it will be set to `{flow_name}/{run_id}.  If `settings.run_job_type` is `None`, it will be set to `{run_job_type}/{step_name}`
+        settings: (`wandb.sdk.tracklab_settings.Settings`). Custom settings passed to `wandb.init`.  The default value is `None`, and is the same as passing `wandb.Settings()`.  If `settings.run_group` is `None`, it will be set to `{flow_name}/{run_id}.  If `settings.run_job_type` is `None`, it will be set to `{run_job_type}/{step_name}`
     """
 
     @wraps(func)
@@ -327,7 +327,7 @@ def wandb_log(
 
         @wraps(func)
         def wrapper(self, *args, settings=settings, **kwargs):
-            if not isinstance(settings, wandb.sdk.wandb_settings.Settings):
+            if not isinstance(settings, wandb.sdk.tracklab_settings.Settings):
                 settings = wandb.Settings()
 
             settings.update_from_dict(

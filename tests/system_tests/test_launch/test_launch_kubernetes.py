@@ -217,7 +217,7 @@ async def test_kubernetes_run_env_vars(
     project.queue_entity = None
     project.run_queue_item_id = None
     project.get_env_vars_dict = lambda _, __: {
-        "WANDB_API_KEY": "test-key",
+        "TRACKLAB_API_KEY": "test-key",
     }
     project.job_base_image = None
 
@@ -251,7 +251,7 @@ async def test_kubernetes_run_env_vars(
     )
 
     api_key_secret = {
-        "name": "WANDB_API_KEY",
+        "name": "TRACKLAB_API_KEY",
         "valueFrom": {
             "secretKeyRef": {
                 "name": f"wandb-api-key-{project.run_id}",

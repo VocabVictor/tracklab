@@ -28,7 +28,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ..wandb_run import Run as LocalRun
+    from ..tracklab_run import Run as LocalRun
 
     ImageDataType = Union[
         "matplotlib.artist.Artist", "PILImage", "TorchTensorType", "np.ndarray"
@@ -538,7 +538,7 @@ class Image(BatchableMedia):
 
         <!-- lazydoc-ignore: internal -->
         """
-        from tracklab.sdk.wandb_run import Run
+        from tracklab.sdk.tracklab_run import Run
 
         json_dict = super().to_json(run_or_artifact)
         json_dict["_type"] = Image._log_type
@@ -577,7 +577,7 @@ class Image(BatchableMedia):
                 }
 
         elif not isinstance(run_or_artifact, Run):
-            raise TypeError("to_json accepts wandb_run.Run or wandb_artifact.Artifact")
+            raise TypeError("to_json accepts tracklab_run.Run or wandb_artifact.Artifact")
 
         if self._boxes:
             json_dict["boxes"] = {

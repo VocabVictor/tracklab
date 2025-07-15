@@ -71,12 +71,12 @@ class UploadJob:
             except Exception as e:
                 self._stats.update_failed_file(self.save_path)
                 logger.exception("Failed to upload file: %s", self.save_path)
-                wandb._sentry.exception(e)
+                tracklab._sentry.exception(e)
                 message = str(e)
                 # TODO: this is usually XML, but could be JSON
                 if hasattr(e, "response"):
                     message = e.response.content
-                wandb.termerror(
+                tracklab.termerror(
                     f'Error uploading "{self.save_path}": {type(e).__name__}, {message}'
                 )
                 raise
@@ -131,9 +131,9 @@ class UploadJob:
             except Exception as e:
                 self._stats.update_failed_file(self.save_name)
                 logger.exception("Failed to upload file: %s", self.save_path)
-                wandb._sentry.exception(e)
+                tracklab._sentry.exception(e)
                 if not self.silent:
-                    wandb.termerror(
+                    tracklab.termerror(
                         f'Error uploading "{self.save_name}": {type(e).__name__}, {e}'
                     )
                 raise

@@ -62,7 +62,7 @@ def test_sweeps_on_launch(
                     Scheduler.PLACEHOLDER_URI,  # uri
                     None,  # job
                     api,
-                    "Scheduler.WANDB_SWEEP_ID",  # name,
+                    "Scheduler.TRACKLAB_SWEEP_ID",  # name,
                     proj,
                     user,
                     None,  # docker_image,
@@ -70,7 +70,7 @@ def test_sweeps_on_launch(
                     [
                         "wandb",
                         "scheduler",
-                        "WANDB_SWEEP_ID",
+                        "TRACKLAB_SWEEP_ID",
                         "--queue",
                         queue,
                         "--project",

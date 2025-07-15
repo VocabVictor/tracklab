@@ -37,10 +37,10 @@ def test_artifact(runner, user):
 
 def test_artifact_put_with_cache_enabled(runner, user, monkeypatch, tmp_path, api):
     # Use a separate staging directory for the duration of this test.
-    monkeypatch.setenv("WANDB_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("TRACKLAB_DATA_DIR", str(tmp_path))
     staging_dir = Path(get_staging_dir())
 
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_dir_path = Path(tmp_path / "data")
@@ -69,10 +69,10 @@ def test_artifact_put_with_cache_enabled(runner, user, monkeypatch, tmp_path, ap
 
 def test_artifact_put_with_cache_disabled(runner, user, monkeypatch, tmp_path, api):
     # Use a separate staging directory for the duration of this test.
-    monkeypatch.setenv("WANDB_DATA_DIR", str(tmp_path / "staging"))
+    monkeypatch.setenv("TRACKLAB_DATA_DIR", str(tmp_path / "staging"))
     staging_dir = Path(get_staging_dir())
 
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path / "cache"))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     data_dir_path = Path(tmp_path / "data")

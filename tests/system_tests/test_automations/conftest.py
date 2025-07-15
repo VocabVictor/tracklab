@@ -8,7 +8,7 @@ from typing import Callable, Iterator, Union
 import tracklab
 from pytest import FixtureRequest, MonkeyPatch, fixture, skip
 from typing_extensions import TypeAlias
-from wandb import Artifact
+from tracklab import Artifact
 from tracklab.apis.public import ArtifactCollection, Project
 from tracklab.automations import (
     ActionType,
@@ -31,7 +31,7 @@ from tracklab.automations._generated import (
 )
 from tracklab.automations._utils import EXCLUDED_INPUT_ACTIONS, EXCLUDED_INPUT_EVENTS
 from tracklab.automations.events import InputEvent
-from wandb_gql import gql
+from tracklab_gql import gql
 
 ScopableWandbType: TypeAlias = Union[ArtifactCollection, Project]
 
@@ -64,7 +64,7 @@ def user(backend_fixture_factory) -> Iterator[str]:
     # The `monkeypatch` fixture is strictly function-scoped, so we use a
     # context manager to patch for this module-scoped fixture
     envvars = dict.fromkeys(
-        ("WANDB_API_KEY", "WANDB_ENTITY", "WANDB_USERNAME"), username
+        ("TRACKLAB_API_KEY", "TRACKLAB_ENTITY", "TRACKLAB_USERNAME"), username
     )
     with MonkeyPatch.context() as mpatch:
         for k, v in envvars.items():

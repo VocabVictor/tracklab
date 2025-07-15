@@ -16,7 +16,7 @@ import responses
 import tracklab
 import tracklab.data_types as data_types
 import tracklab.sdk.artifacts.artifact_file_cache as artifact_file_cache
-from wandb import Artifact, util
+from tracklab import Artifact, util
 from tracklab.errors.errors import CommError
 from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
 from tracklab.sdk.artifacts._validators import (
@@ -1918,7 +1918,7 @@ def test_manifest_json_invalid_version(version):
 @pytest.mark.flaky
 @pytest.mark.xfail(reason="flaky")
 def test_cache_cleanup_allows_upload(user, tmp_path, monkeypatch, artifact):
-    monkeypatch.setenv("WANDB_CACHE_DIR", str(tmp_path))
+    monkeypatch.setenv("TRACKLAB_CACHE_DIR", str(tmp_path))
     cache = artifact_file_cache.get_artifact_file_cache()
 
     with open("test-file", "wb") as f:

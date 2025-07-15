@@ -128,7 +128,7 @@ def test_get_requirements_section_user_provided_requirements(
     assert get_requirements_section(
         mock_launch_project, tmp_path, "docker"
     ) == PIP_TEMPLATE.format(
-        buildx_optional_prefix="RUN WANDB_DISABLE_CACHE=true",
+        buildx_optional_prefix="RUN TRACKLAB_DISABLE_CACHE=true",
         requirements_files="src/requirements.txt",
         pip_install="pip install uv && uv pip install -r requirements.txt",
     )
@@ -160,7 +160,7 @@ def test_get_requirements_section_frozen_requirements(
     assert get_requirements_section(
         mock_launch_project, tmp_path, "docker"
     ) == PIP_TEMPLATE.format(
-        buildx_optional_prefix="RUN WANDB_DISABLE_CACHE=true",
+        buildx_optional_prefix="RUN TRACKLAB_DISABLE_CACHE=true",
         requirements_files="src/requirements.frozen.txt _wandb_bootstrap.py",
         pip_install="python _wandb_bootstrap.py",
     )
@@ -196,7 +196,7 @@ def test_get_requirements_section_pyproject(
     assert get_requirements_section(
         mock_launch_project, tmp_path, "docker"
     ) == PIP_TEMPLATE.format(
-        buildx_optional_prefix="RUN WANDB_DISABLE_CACHE=true",
+        buildx_optional_prefix="RUN TRACKLAB_DISABLE_CACHE=true",
         requirements_files="src/requirements.txt",  # We convert into this format.
         pip_install="pip install uv && uv pip install -r requirements.txt",
     )

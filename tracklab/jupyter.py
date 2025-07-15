@@ -19,13 +19,13 @@ from requests.compat import urljoin
 
 import tracklab
 import tracklab.util
-from tracklab.sdk import tracklab_run, wandb_setup
+from tracklab.sdk import tracklab_run, tracklab_setup
 from tracklab.sdk.lib import filesystem
 
 logger = logging.getLogger(__name__)
 
 
-def display_if_magic_is_used(run: wandb_run.Run) -> bool:
+def display_if_magic_is_used(run: tracklab_run.Run) -> bool:
     """Display a run's page if the cell has the %%wandb cell magic.
 
     Args:
@@ -53,7 +53,7 @@ class _WandbCellMagicState:
         self._height = height
         self._already_displayed = False
 
-    def display_if_allowed(self, run: wandb_run.Run) -> None:
+    def display_if_allowed(self, run: tracklab_run.Run) -> None:
         """Display a run's iframe if one is not already displayed.
 
         Args:
@@ -63,7 +63,7 @@ class _WandbCellMagicState:
             return
         self._already_displayed = True
 
-        _display_wandb_run(run, height=self._height)
+        _display_tracklab_run(run, height=self._height)
 
 
 _current_cell_wandb_magic: _WandbCellMagicState | None = None
@@ -76,7 +76,7 @@ def _display_by_wandb_path(path: str, *, height: int) -> None:
         path: A path to a run, sweep, project, report, etc.
         height: Height of the iframe in pixels.
     """
-    api = wandb.Api()
+    api = tracklab.Api()
 
     try:
         obj = api.from_path(path)
@@ -85,7 +85,7 @@ def _display_by_wandb_path(path: str, *, height: int) -> None:
             obj.to_html(height=height),
             raw=True,
         )
-    except wandb.Error:
+    except tracklab.Error:
         traceback.print_exc()
         IPython.display.display_html(
             f"Path {path!r} does not refer to a W&B object you can access.",
@@ -93,7 +93,7 @@ def _display_by_wandb_path(path: str, *, height: int) -> None:
         )
 
 
-def _display_wandb_run(run: wandb_run.Run, *, height: int) -> None:
+def _display_tracklab_run(run: tracklab_run.Run, *, height: int) -> None:
     """Display a run (usually in an iframe).
 
     Args:
@@ -136,7 +136,7 @@ class WandBMagics(Magics):
         Or as a cell magic:
 
             %%wandb -h 1024
-            with wandb.init() as run:
+            with tracklab.init() as run:
                 run.log({"loss": 1})
         """
         global _current_cell_wandb_magic
@@ -148,8 +148,8 @@ class WandBMagics(Magics):
         if path:
             _display_by_wandb_path(path, height=height)
             displayed = True
-        elif run := wandb_setup.singleton().most_recent_active_run:
-            _display_wandb_run(run, height=height)
+        elif run := tracklab_setup.singleton().most_recent_active_run:
+            _display_tracklab_run(run, height=height)
             displayed = True
         else:
             displayed = False
@@ -234,7 +234,7 @@ def notebook_metadata(silent: bool) -> dict[str, str]:
             }
 
         # Kaggle:
-        if wandb.util._is_kaggle():
+        if tracklab.util._is_kaggle():
             # request the most recent contents
             ipynb = attempt_kaggle_load_ipynb()
             if ipynb:
@@ -249,7 +249,7 @@ def notebook_metadata(silent: bool) -> dict[str, str]:
     except Exception:
         logger.exception(error_message)
 
-    wandb.termerror(error_message)
+    tracklab.termerror(error_message)
     return {}
 
 
@@ -265,8 +265,8 @@ def jupyter_servers_and_kernel_id():
             "kernel-(.*).json", ipykernel.connect.get_connection_file()
         ).group(1)
         # We're either in jupyterlab or a notebook, lets prefer the newer jupyter_server package
-        serverapp = wandb.util.get_module("jupyter_server.serverapp")
-        notebookapp = wandb.util.get_module("notebook.notebookapp")
+        serverapp = tracklab.util.get_module("jupyter_server.serverapp")
+        notebookapp = tracklab.util.get_module("notebook.notebookapp")
         servers = []
         if serverapp is not None:
             servers.extend(list(serverapp.list_running_servers()))
@@ -279,7 +279,7 @@ def jupyter_servers_and_kernel_id():
 
 
 def attempt_colab_load_ipynb():
-    colab = wandb.util.get_module("google.colab")
+    colab = tracklab.util.get_module("google.colab")
     if colab:
         # This isn't thread safe, never call in a thread
         response = colab._message.blocking_request("get_ipynb", timeout_sec=5)
@@ -288,7 +288,7 @@ def attempt_colab_load_ipynb():
 
 
 def attempt_kaggle_load_ipynb():
-    kaggle = wandb.util.get_module("kaggle_session")
+    kaggle = tracklab.util.get_module("kaggle_session")
     if not kaggle:
         return None
 
@@ -298,7 +298,7 @@ def attempt_kaggle_load_ipynb():
         # TODO: couldn't find a way to get the name of the notebook...
         parsed["metadata"]["name"] = "kaggle.ipynb"
     except Exception:
-        wandb.termerror("Unable to load kaggle notebook.")
+        tracklab.termerror("Unable to load kaggle notebook.")
         logger.exception("Unable to load kaggle notebook.")
         return None
 
@@ -357,7 +357,7 @@ def attempt_colab_login(
 
 
 class Notebook:
-    def __init__(self, settings: wandb.Settings) -> None:
+    def __init__(self, settings: tracklab.Settings) -> None:
         self.outputs: dict[int, Any] = {}
         self.settings = settings
         self.shell = IPython.get_ipython()
@@ -407,7 +407,7 @@ class Notebook:
         try:
             ret = self._save_ipynb()
         except Exception:
-            wandb.termerror("Failed to save notebook.")
+            tracklab.termerror("Failed to save notebook.")
             logger.exception("Problem saving notebook.")
         return ret
 
@@ -461,12 +461,12 @@ class Notebook:
 
         return False
 
-    def save_history(self, run: wandb_run.Run):
+    def save_history(self, run: tracklab_run.Run):
         """This saves all cell executions in the current session as a new notebook."""
         try:
             from nbformat import v4, validator, write  # type: ignore
         except ImportError:
-            wandb.termerror(
+            tracklab.termerror(
                 "The nbformat package was not found."
                 " It is required to save notebook history."
             )
@@ -534,5 +534,5 @@ class Notebook:
             ) as f:
                 write(nb, f, version=4)
         except (OSError, validator.NotebookValidationError):
-            wandb.termerror("Unable to save notebook session history.")
+            tracklab.termerror("Unable to save notebook session history.")
             logger.exception("Unable to save notebook session history.")

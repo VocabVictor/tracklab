@@ -8,8 +8,8 @@
 
 import fire
 import wandb
-from wandb.proto import wandb_internal_pb2
-from wandb.sdk.internal import datastore
+from tracklab.proto import tracklab_internal_pb2
+from tracklab.sdk.internal import datastore
 
 
 def inspect_wandb_transaction_log(wandb_file: str, pause: bool = False) -> None:
@@ -50,7 +50,7 @@ def inspect_wandb_transaction_log(wandb_file: str, pause: bool = False) -> None:
         data = _robust_scan(ds)
         if data is None:
             break
-        pb = wandb_internal_pb2.Record()
+        pb = tracklab_internal_pb2.Record()
         pb.ParseFromString(data)
         record_type = pb.WhichOneof("record_type")
         print(f"RECORD TYPE: {record_type}")

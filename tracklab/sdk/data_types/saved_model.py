@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from tracklab.sdk.artifacts.artifact import Artifact
-    from tracklab.sdk.wandb_run import Run as LocalRun
+    from tracklab.sdk.tracklab_run import Run as LocalRun
 
 
 DEBUG_MODE = False
@@ -142,7 +142,7 @@ class _SavedModel(WBValue, Generic[SavedModelObjType]):
         # bit of tech debt in the other data types which requires the input to `to_json`
         # to accept a Run or Artifact. However, Run additions should be deprecated in the future.
         # This check helps ensure we do not add to the debt.
-        from tracklab.sdk.wandb_run import Run
+        from tracklab.sdk.tracklab_run import Run
 
         if isinstance(run_or_artifact, Run):
             raise TypeError("SavedModel cannot be added to run - must use artifact")

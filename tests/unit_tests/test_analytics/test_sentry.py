@@ -34,7 +34,7 @@ def test_wandb_sentry_does_not_interfer_with_global_sentry_sdk(
         {
             tracklab.env.ERROR_REPORTING: "true",
             tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
-                key="WANDB_SENTRY_PUBLIC_KEY",
+                key="TRACKLAB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
@@ -69,7 +69,7 @@ def test_wandb_error_reporting_disabled(relay: MetricRelayServer):
         {
             tracklab.env.ERROR_REPORTING: "false",
             tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
-                key="WANDB_SENTRY_PUBLIC_KEY",
+                key="TRACKLAB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
@@ -102,7 +102,7 @@ def test_wandb_sentry_init_after_client_init(relay: MetricRelayServer):
     expected_wandb_sentry_response = SentryResponse(
         message="wandb sentry message",
         project_id="123456",
-        public_key="WANDB_SENTRY_PUBLIC_KEY",
+        public_key="TRACKLAB_SENTRY_PUBLIC_KEY",
         tags={
             "entity": "tag",
             "python_runtime": "python",
@@ -171,7 +171,7 @@ def test_wandb_sentry_init_after_client_write(relay: MetricRelayServer):
     expected_wandb_sentry_response = SentryResponse(
         message="wandb sentry message",
         project_id="123456",
-        public_key="WANDB_SENTRY_PUBLIC_KEY",
+        public_key="TRACKLAB_SENTRY_PUBLIC_KEY",
         tags={
             "entity": "tag",
             "python_runtime": "python",
@@ -241,7 +241,7 @@ def test_wandb_sentry_initialized_first(relay: MetricRelayServer):
     expected_wandb_sentry_response = SentryResponse(
         message="wandb sentry message",
         project_id="123456",
-        public_key="WANDB_SENTRY_PUBLIC_KEY",
+        public_key="TRACKLAB_SENTRY_PUBLIC_KEY",
         tags={
             "entity": "tag",
             "python_runtime": "python",
@@ -311,7 +311,7 @@ def test_wandb_sentry_write_first(relay: MetricRelayServer):
         SentryResponse(
             message="wandb sentry message",
             project_id="123456",
-            public_key="WANDB_SENTRY_PUBLIC_KEY",
+            public_key="TRACKLAB_SENTRY_PUBLIC_KEY",
             tags={
                 "entity": "tag",
                 "python_runtime": "python",
@@ -320,7 +320,7 @@ def test_wandb_sentry_write_first(relay: MetricRelayServer):
         SentryResponse(
             message="wandb sentry message",
             project_id="123456",
-            public_key="WANDB_SENTRY_PUBLIC_KEY",
+            public_key="TRACKLAB_SENTRY_PUBLIC_KEY",
             tags={
                 "entity": "tag",
                 "python_runtime": "python",
@@ -401,7 +401,7 @@ def test_wandb_sentry_exception(relay: MetricRelayServer):
     expected_wandb_sentry_response = SentryResponse(
         message="wandb sentry message",
         project_id="123456",
-        public_key="WANDB_SENTRY_PUBLIC_KEY",
+        public_key="TRACKLAB_SENTRY_PUBLIC_KEY",
         is_error=True,
         tags={
             "entity": "tag",
@@ -477,7 +477,7 @@ def test_repeated_messages_does_not_call_sentry(relay: MetricRelayServer):
     expected_wandb_sentry_response = SentryResponse(
         message="wandb sentry message",
         project_id="123456",
-        public_key="WANDB_SENTRY_PUBLIC_KEY",
+        public_key="TRACKLAB_SENTRY_PUBLIC_KEY",
         tags={
             "entity": "tag",
             "python_runtime": "python",
@@ -528,7 +528,7 @@ def test_wandb_configure_without_tags_does_not_create_session(relay: MetricRelay
         {
             tracklab.env.ERROR_REPORTING: "true",
             tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
-                key="WANDB_SENTRY_PUBLIC_KEY",
+                key="TRACKLAB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
@@ -553,7 +553,7 @@ def test_wandb_configure_with_tags_creates_session(relay: MetricRelayServer):
         {
             tracklab.env.ERROR_REPORTING: "true",
             tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
-                key="WANDB_SENTRY_PUBLIC_KEY",
+                key="TRACKLAB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),
@@ -584,7 +584,7 @@ def test_wandb_sentry_event_with_runtime_tags(relay: MetricRelayServer):
         {
             tracklab.env.ERROR_REPORTING: "true",
             tracklab.env.SENTRY_DSN: SENTRY_DSN_FORMAT.format(
-                key="WANDB_SENTRY_PUBLIC_KEY",
+                key="TRACKLAB_SENTRY_PUBLIC_KEY",
                 port=relay.port,
                 project="123456",
             ),

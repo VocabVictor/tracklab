@@ -30,7 +30,7 @@ class ConfigState:
 
     def update_from_proto(
         self,
-        config_record: wandb_internal_pb2.ConfigRecord,
+        config_record: tracklab_internal_pb2.ConfigRecord,
     ) -> None:
         """Applies update and remove commands."""
         for config_item in config_record.update:
@@ -79,7 +79,7 @@ class ConfigState:
         framework: Optional[str],
         start_time_millis: int,
         metric_pbdicts: Sequence[Dict[int, Any]],
-        environment_record: wandb_internal_pb2.EnvironmentRecord,
+        environment_record: tracklab_internal_pb2.EnvironmentRecord,
     ) -> BackendConfigDict:
         """Returns a dictionary representation expected by the backend.
 
@@ -169,7 +169,7 @@ class ConfigState:
             del subtree[key_path[-1]]
 
 
-def _key_path(config_item: wandb_internal_pb2.ConfigItem) -> Sequence[str]:
+def _key_path(config_item: tracklab_internal_pb2.ConfigItem) -> Sequence[str]:
     """Returns the key path referenced by the config item."""
     if config_item.nested_key:
         return config_item.nested_key

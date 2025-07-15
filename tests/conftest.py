@@ -19,7 +19,7 @@ from pytest_mock import MockerFixture
 from tracklab.errors import term
 
 # Don't write to Sentry in tracklab.
-os.environ["WANDB_ERROR_REPORTING"] = "false"
+os.environ["TRACKLAB_ERROR_REPORTING"] = "false"
 
 import git
 import pytest
@@ -28,7 +28,7 @@ import tracklab.old.settings
 import tracklab.sdk.lib.apikey
 import tracklab.util
 from click.testing import CliRunner
-from wandb import Api
+from tracklab import Api
 from tracklab.sdk.interface.interface_queue import InterfaceQueue
 from tracklab.sdk.lib import filesystem, module, runid
 from tracklab.sdk.lib.gitlib import GitRepo
@@ -57,7 +57,7 @@ def setup_wandb_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
     """Configures wandb env variables to suitable defaults for tests."""
     # Set the _network_buffer setting to 1000 to increase the likelihood
     # of triggering flow control logic.
-    monkeypatch.setenv("WANDB_X_NETWORK_BUFFER", "1000")
+    monkeypatch.setenv("TRACKLAB_X_NETWORK_BUFFER", "1000")
 
 
 # --------------------------------

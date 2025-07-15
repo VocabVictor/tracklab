@@ -39,7 +39,7 @@ class JobAndRunStatusTracker:
     def set_err_stage(self, stage: str) -> None:
         self.err_stage = stage
 
-    async def check_wandb_run_stopped(self, api: Api) -> bool:
+    async def check_tracklab_run_stopped(self, api: Api) -> bool:
         assert (
             self.run_id is not None
             and self.project is not None

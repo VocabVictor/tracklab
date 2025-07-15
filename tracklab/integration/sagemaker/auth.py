@@ -2,7 +2,7 @@ import os
 
 import tracklab
 from tracklab import env
-from tracklab.sdk import wandb_setup
+from tracklab.sdk import tracklab_setup
 
 
 def sagemaker_auth(overrides=None, path=".", api_key=None):
@@ -13,7 +13,7 @@ def sagemaker_auth(overrides=None, path=".", api_key=None):
                                     to secrets.env
         path (str, optional): The path to write the secrets file.
     """
-    settings = wandb_setup.singleton().settings
+    settings = tracklab_setup.singleton().settings
     current_api_key = tracklab.tracklab_lib.apikey.api_key(settings=settings)
 
     overrides = overrides or dict()

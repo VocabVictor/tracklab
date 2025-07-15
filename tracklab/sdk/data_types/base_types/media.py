@@ -18,7 +18,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from tracklab.sdk.artifacts.artifact import Artifact
 
-    from ...wandb_run import Run as LocalRun
+    from ...tracklab_run import Run as LocalRun
 
 
 SYS_PLATFORM = platform.system()
@@ -223,7 +223,7 @@ class Media(WBValue):
         # into Media itself we should get rid of them
         from tracklab import Image
         from tracklab.data_types import Audio
-        from tracklab.sdk.wandb_run import Run
+        from tracklab.sdk.tracklab_run import Run
 
         json_obj: Dict[str, Any] = {}
 

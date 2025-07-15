@@ -16,7 +16,7 @@ from pytest_mock import MockerFixture
 from responses import RequestsMock
 from tracklab.apis import internal
 from tracklab.errors import CommError
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.internal.internal_api import (
     _match_org_with_fetched_org_entities,
     _OrgNames,
@@ -96,7 +96,7 @@ def test_download_write_file_fetches_iff_file_checksum_mismatched(
 
 
 def test_internal_api_with_no_write_global_config_dir(tmp_path):
-    with patch.dict("os.environ", WANDB_CONFIG_DIR=str(tmp_path)):
+    with patch.dict("os.environ", TRACKLAB_CONFIG_DIR=str(tmp_path)):
         os.chmod(tmp_path, 0o444)
         internal.InternalApi()
         os.chmod(tmp_path, 0o777)  # Allow the test runner to clean up.

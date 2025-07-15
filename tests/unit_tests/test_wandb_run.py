@@ -4,7 +4,7 @@ import platform
 import numpy as np
 import pytest
 import tracklab
-from wandb import tracklab_sdk
+from tracklab import tracklab_sdk
 
 REFERENCE_ATTRIBUTES = set(
     [

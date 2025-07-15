@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional
 from tracklab_gql import gql
 
 import tracklab
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.artifacts._validators import REGISTRY_PREFIX, validate_project_name
 from tracklab.sdk.internal.internal_api import Api as InternalApi
 from tracklab.sdk.projects._generated import (

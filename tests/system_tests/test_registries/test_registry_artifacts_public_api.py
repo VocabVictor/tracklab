@@ -3,9 +3,9 @@ from __future__ import annotations
 from urllib.parse import quote
 
 import tracklab
-from wandb import Api, Artifact, util
+from tracklab import Api, Artifact, util
 from tracklab.apis.public.registries.registry import Registry
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.internal.internal_api import Api as InternalApi
 
 

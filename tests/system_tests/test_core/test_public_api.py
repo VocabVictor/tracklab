@@ -9,7 +9,7 @@ import requests
 import tracklab
 import tracklab.apis.public
 import tracklab.util
-from wandb import Api
+from tracklab import Api
 from tracklab.apis.public import File
 from tracklab.errors.errors import CommError
 from tracklab.old.summary import Summary
@@ -45,7 +45,7 @@ def test_from_path_report_type(user, path):
 
 
 def test_project_to_html(user):
-    with mock.patch.dict("os.environ", {"WANDB_ENTITY": "mock_entity"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_ENTITY": "mock_entity"}):
         project = Api().from_path("test")
         assert "mock_entity/test/workspace?jupyter=true" in project.to_html()
 

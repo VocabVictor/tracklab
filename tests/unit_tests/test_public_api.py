@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import tracklab
-from wandb import Api
+from tracklab import Api
 from tracklab.apis import internal
 from tracklab.sdk.artifacts.artifact_download_logger import ArtifactDownloadLogger
 from tracklab.sdk.internal.thread_local_settings import _thread_local_api_settings
@@ -70,7 +70,7 @@ def test_parse_project_path():
 
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
 def test_parse_project_path_proj():
-    with mock.patch.dict("os.environ", {"WANDB_ENTITY": "mock_entity"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_ENTITY": "mock_entity"}):
         entity, project = Api()._parse_project_path("proj")
         assert entity == "mock_entity"
         assert project == "proj"
@@ -78,7 +78,7 @@ def test_parse_project_path_proj():
 
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
 def test_parse_path_docker_proj():
-    with mock.patch.dict("os.environ", {"WANDB_ENTITY": "mock_entity"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_ENTITY": "mock_entity"}):
         user, project, run = Api()._parse_path("proj:run")
         assert user == "mock_entity"
         assert project == "proj"
@@ -87,7 +87,7 @@ def test_parse_path_docker_proj():
 
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
 def test_parse_path_user_proj():
-    with mock.patch.dict("os.environ", {"WANDB_ENTITY": "mock_entity"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_ENTITY": "mock_entity"}):
         user, project, run = Api()._parse_path("proj/run")
         assert user == "mock_entity"
         assert project == "proj"
@@ -96,7 +96,7 @@ def test_parse_path_user_proj():
 
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
 def test_parse_path_proj():
-    with mock.patch.dict("os.environ", {"WANDB_ENTITY": "mock_entity"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_ENTITY": "mock_entity"}):
         user, project, run = Api()._parse_path("proj")
         assert user == "mock_entity"
         assert project == "proj"
@@ -106,7 +106,7 @@ def test_parse_path_proj():
 @pytest.mark.usefixtures("patch_apikey", "patch_prompt")
 def test_parse_path_id():
     with mock.patch.dict(
-        "os.environ", {"WANDB_ENTITY": "mock_entity", "WANDB_PROJECT": "proj"}
+        "os.environ", {"TRACKLAB_ENTITY": "mock_entity", "TRACKLAB_PROJECT": "proj"}
     ):
         user, project, run = Api()._parse_path("run")
         assert user == "mock_entity"

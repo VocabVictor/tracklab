@@ -71,7 +71,7 @@ class PatchAPI:
             )
         return self._api
 
-    def patch(self, run: "wandb.sdk.wandb_run.Run") -> None:
+    def patch(self, run: "wandb.sdk.tracklab_run.Run") -> None:
         """Patches the API to log media or metrics to W&B."""
         for symbol in self.symbols:
             # split on dots, e.g. "Client.generate" -> ["Client", "generate"]
@@ -163,7 +163,7 @@ class AutologAPI:
             resolver=resolver,
         )
         self._name = self._patch_api.name
-        self._run: Optional[wandb.sdk.wandb_run.Run] = None
+        self._run: Optional[wandb.sdk.tracklab_run.Run] = None
         self.__run_created_by_autolog: bool = False
 
     @property
@@ -183,10 +183,10 @@ class AutologAPI:
         #    - todo: autolog(init: dict | run = run) would use the user-provided run
         # - autolog() uses the wandb.run if there is one, otherwise it calls wandb.init()
         if init:
-            _wandb_run = wandb.run
+            _tracklab_run = wandb.run
             # we delegate dealing with the init dict to wandb.init()
             self._run = wandb.init(**init)
-            if _wandb_run != self._run:
+            if _tracklab_run != self._run:
                 self.__run_created_by_autolog = True
         elif wandb.run is None:
             self._run = wandb.init()

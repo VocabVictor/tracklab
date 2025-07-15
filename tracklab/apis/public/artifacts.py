@@ -19,8 +19,8 @@ from tracklab.apis import public
 from tracklab.apis.normalize import normalize_exceptions
 from tracklab.apis.paginator import Paginator, SizedPaginator
 from tracklab.errors.term import termlog
-from tracklab.proto.wandb_deprecated import Deprecated
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.proto.tracklab_deprecated import Deprecated
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.artifacts._generated import (
     ARTIFACT_COLLECTION_MEMBERSHIP_FILES_GQL,
     ARTIFACT_VERSION_FILES_GQL,

@@ -472,7 +472,7 @@ class LaunchProject:
         if self.run_queue_item_id:
             env_vars[wandb.env.LAUNCH_TRACE_ID] = self.run_queue_item_id
 
-        _inject_wandb_config_env_vars(self.override_config, env_vars, max_env_length)
+        _inject_tracklab_config_env_vars(self.override_config, env_vars, max_env_length)
         _inject_file_overrides_env_vars(self.override_files, env_vars, max_env_length)
 
         artifacts = {}
@@ -531,7 +531,7 @@ class EntryPoint:
             self.command[1] = new_path
 
 
-def _inject_wandb_config_env_vars(
+def _inject_tracklab_config_env_vars(
     config: Dict[str, Any], env_dict: Dict[str, Any], maximum_env_length: int
 ) -> None:
     str_config = json.dumps(config)

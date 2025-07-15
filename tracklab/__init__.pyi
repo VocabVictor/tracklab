@@ -74,11 +74,11 @@ from typing import (
     Union,
 )
 
-import wandb.plot as plot
-from wandb.analytics import Sentry
-from wandb.apis import InternalApi
-from wandb.apis import PublicApi as Api
-from wandb.data_types import (
+import tracklab.plot as plot
+from tracklab.analytics import Sentry
+from tracklab.apis import InternalApi
+from tracklab.apis import PublicApi as Api
+from tracklab.data_types import (
     Audio,
     Graph,
     Histogram,
@@ -91,21 +91,21 @@ from wandb.data_types import (
     Video,
     box3d,
 )
-from wandb.errors import Error
-from wandb.errors.term import termerror, termlog, termsetup, termwarn
-from wandb.sdk import Artifact, Settings, wandb_config, wandb_metric, wandb_summary
-from wandb.sdk.artifacts.artifact_ttl import ArtifactTTL
-from wandb.sdk.interface.interface import PolicyName
-from wandb.sdk.lib.paths import FilePathStr, StrPath
-from wandb.sdk.wandb_run import Run
-from wandb.sdk.wandb_setup import _WandbSetup
-from wandb.wandb_controller import _WandbController
+from tracklab.errors import Error
+from tracklab.errors.term import termerror, termlog, termsetup, termwarn
+from tracklab.sdk import Artifact, Settings, wandb_config, wandb_metric, wandb_summary
+from tracklab.sdk.artifacts.artifact_ttl import ArtifactTTL
+from tracklab.sdk.interface.interface import PolicyName
+from tracklab.sdk.lib.paths import FilePathStr, StrPath
+from tracklab.sdk.wandb_run import Run
+from tracklab.sdk.wandb_setup import _WandbSetup
+from tracklab.wandb_controller import _WandbController
 
 if TYPE_CHECKING:
     import torch  # type: ignore [import-not-found]
 
-    import wandb
-    from wandb.plot import CustomChart
+    import tracklab
+    from tracklab.plot import CustomChart
 
 __version__: str = "0.21.1.dev1"
 
@@ -159,7 +159,7 @@ def setup(settings: Settings | None = None) -> _WandbSetup:
         ```python
         import multiprocessing
 
-        import wandb
+        import tracklab
 
         def run_experiment(params):
             with wandb.init(config=params):
@@ -263,7 +263,7 @@ def init(
         ### Explicitly set the entity and project and choose a name for the run:
 
         ```python
-        import wandb
+        import tracklab
 
         run = wandb.init(
             entity="geoff",
@@ -279,7 +279,7 @@ def init(
         ### Add metadata about the run using the `config` argument:
 
         ```python
-        import wandb
+        import tracklab
 
         config = {"lr": 0.01, "batch_size": 32}
         with wandb.init(config=config) as run:
@@ -523,7 +523,7 @@ def log(
     Basic usage:
 
     ```python
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         run.log({"train-loss": 0.5, "accuracy": 0.9})
@@ -624,7 +624,7 @@ def log(
     Basic usage
 
     ```python
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         run.log({"train-loss": 0.5, "accuracy": 0.9
@@ -633,7 +633,7 @@ def log(
     Incremental logging
 
     ```python
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         run.log({"loss": 0.2}, commit=False)
@@ -645,7 +645,7 @@ def log(
 
     ```python
     import numpy as np
-    import wandb
+    import tracklab
 
     # sample gradients at random from normal distribution
     gradients = np.random.randn(100, 100)
@@ -657,7 +657,7 @@ def log(
 
     ```python
     import numpy as np
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         examples = []
@@ -673,7 +673,7 @@ def log(
     ```python
     import numpy as np
     from PIL import Image as PILImage
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         examples = []
@@ -694,7 +694,7 @@ def log(
 
     ```python
     import numpy as np
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         # axes are (time, channel, height, width)
@@ -712,7 +712,7 @@ def log(
     ```python
     from matplotlib import pyplot as plt
     import numpy as np
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         fig, ax = plt.subplots()
@@ -725,7 +725,7 @@ def log(
     PR Curve
 
     ```python
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         run.log({"pr": wandb.plot.pr_curve(y_test, y_probas, labels)})
@@ -734,7 +734,7 @@ def log(
     3D Object
 
     ```python
-    import wandb
+    import tracklab
 
     with wandb.init() as run:
         run.log(
@@ -788,7 +788,7 @@ def save(
         For historical reasons, this may return a boolean in legacy code.
 
     ```python
-    import wandb
+    import tracklab
 
     run = wandb.init()
 
@@ -860,7 +860,7 @@ def controller(
 
     Usage:
         ```python
-        import wandb
+        import tracklab
 
         tuner = wandb.controller(...)
         print(tuner.sweep_config)
@@ -998,7 +998,7 @@ def use_artifact(
 
     Examples:
     ```python
-    import wandb
+    import tracklab
 
     run = wandb.init(project="<example>")
 

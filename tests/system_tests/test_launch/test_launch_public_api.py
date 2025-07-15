@@ -4,7 +4,7 @@ import pytest
 import tracklab
 import tracklab.apis.public
 import tracklab.util
-from wandb import Api
+from tracklab import Api
 from tracklab.sdk.internal.internal_api import UnsupportedError
 
 SWEEP_CONFIGURATION = {

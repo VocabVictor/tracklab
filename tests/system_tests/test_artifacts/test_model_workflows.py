@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 import tracklab
-from wandb import env
+from tracklab import env
 
 
 class FakeArtifact:

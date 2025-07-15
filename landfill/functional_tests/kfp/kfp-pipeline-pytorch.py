@@ -5,7 +5,7 @@ import kfp
 import kfp.dsl as dsl
 from kfp import components
 from kubernetes.client.models import V1EnvVar
-from wandb_probe import tracklab_probe_package
+from tracklab_probe import tracklab_probe_package
 
 import tracklab
 from tracklab.integration.kfp import tracklab_log

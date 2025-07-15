@@ -16,7 +16,7 @@ import pytest
 import requests
 import tracklab
 import tracklab.errors as errors
-from wandb import util
+from tracklab import util
 
 ###############################################################################
 # Test util.json_friendly
@@ -270,7 +270,7 @@ def test_image_from_docker_args_sha():
 
 
 def test_app_url():
-    with mock.patch.dict("os.environ", {"WANDB_APP_URL": "https://foo.com/bar/"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_APP_URL": "https://foo.com/bar/"}):
         assert util.app_url("https://api.foo.com") == "https://foo.com/bar"
     assert util.app_url("http://api.tracklab.test") == "http://app.tracklab.test"
     assert util.app_url("https://api.tracklab.ai") == "https://tracklab.ai"

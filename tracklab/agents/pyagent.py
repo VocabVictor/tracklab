@@ -91,12 +91,12 @@ class Agent:
         # files = (glob_config, loc_config)
         self._api = InternalApi()
         self._agent_id = None
-        self._max_initial_failures = wandb.env.get_agent_max_initial_failures(
+        self._max_initial_failures = tracklab.env.get_agent_max_initial_failures(
             self.MAX_INITIAL_FAILURES
         )
         # if the directory to log to is not set, set it
-        if os.environ.get(wandb.env.DIR) is None:
-            os.environ[wandb.env.DIR] = os.path.abspath(os.getcwd())
+        if os.environ.get(tracklab.env.DIR) is None:
+            os.environ[tracklab.env.DIR] = os.path.abspath(os.getcwd())
 
     def _init(self):
         # These are not in constructor so that Agent instance can be rerun
@@ -119,17 +119,17 @@ class Agent:
         parts = dict(entity=self._entity, project=self._project, name=self._sweep_path)
         err = sweep_utils.parse_sweep_id(parts)
         if err:
-            wandb.termerror(err)
+            tracklab.termerror(err)
             return
         entity = parts.get("entity") or self._entity
         project = parts.get("project") or self._project
         sweep_id = parts.get("name") or self._sweep_id
         if sweep_id:
-            os.environ[wandb.env.SWEEP_ID] = sweep_id
+            os.environ[tracklab.env.SWEEP_ID] = sweep_id
         if entity:
-            wandb.env.set_entity(entity)
+            tracklab.env.set_entity(entity)
         if project:
-            wandb.env.set_project(project)
+            tracklab.env.set_project(project)
         if sweep_id:
             self._sweep_id = sweep_id
         self._register()
@@ -190,22 +190,22 @@ class Agent:
                         job = self._queue.get(timeout=5)
                         if self._exit_flag:
                             logger.debug("Exiting main loop due to exit flag.")
-                            wandb.termlog("Sweep Agent: Exiting.")
+                            tracklab.termlog("Sweep Agent: Exiting.")
                             return
                     except queue.Empty:
                         if not waiting:
                             logger.debug("Paused.")
-                            wandb.termlog("Sweep Agent: Waiting for job.")
+                            tracklab.termlog("Sweep Agent: Waiting for job.")
                             waiting = True
                         time.sleep(5)
                         if self._exit_flag:
                             logger.debug("Exiting main loop due to exit flag.")
-                            wandb.termlog("Sweep Agent: Exiting.")
+                            tracklab.termlog("Sweep Agent: Exiting.")
                             return
                         continue
                     if waiting:
                         logger.debug("Resumed.")
-                        wandb.termlog("Job received.")
+                        tracklab.termlog("Job received.")
                         waiting = False
                     count += 1
                     run_id = job.run_id
@@ -232,8 +232,8 @@ class Agent:
                         )
                         exc_repr = "".join(exc_traceback_formatted)
                         logger.error(f"Run {run_id} errored:\n{exc_repr}")
-                        wandb.termerror(f"Run {run_id} errored:\n{exc_repr}")
-                        if os.getenv(wandb.env.AGENT_DISABLE_FLAPPING) == "true":
+                        tracklab.termerror(f"Run {run_id} errored:\n{exc_repr}")
+                        if os.getenv(tracklab.env.AGENT_DISABLE_FLAPPING) == "true":
                             self._exit_flag = True
                             return
                         elif (
@@ -241,8 +241,8 @@ class Agent:
                         ) and (len(self._exceptions) >= self.FLAPPING_MAX_FAILURES):
                             msg = f"Detected {self.FLAPPING_MAX_FAILURES} failed runs in the first {self.FLAPPING_MAX_SECONDS} seconds, killing sweep."
                             logger.error(msg)
-                            wandb.termerror(msg)
-                            wandb.termlog(
+                            tracklab.termerror(msg)
+                            tracklab.termlog(
                                 "To disable this check set WANDB_AGENT_DISABLE_FLAPPING=true"
                             )
                             self._exit_flag = True
@@ -253,8 +253,8 @@ class Agent:
                         ):
                             msg = f"Detected {self._max_initial_failures} failed runs in a row at start, killing sweep."
                             logger.error(msg)
-                            wandb.termerror(msg)
-                            wandb.termlog(
+                            tracklab.termerror(msg)
+                            tracklab.termlog(
                                 "To change this value set WANDB_AGENT_MAX_INITIAL_FAILURES=val"
                             )
                             self._exit_flag = True
@@ -265,13 +265,13 @@ class Agent:
                         return
                 except KeyboardInterrupt:
                     logger.debug("Ctrl + C detected. Stopping sweep.")
-                    wandb.termlog("Ctrl + C detected. Stopping sweep.")
+                    tracklab.termlog("Ctrl + C detected. Stopping sweep.")
                     self._exit()
                     return
                 except Exception:
                     if self._exit_flag:
                         logger.debug("Exiting main loop due to exit flag.")
-                        wandb.termlog("Sweep Agent: Killed.")
+                        tracklab.termlog("Sweep Agent: Killed.")
                         return
                     else:
                         raise
@@ -285,34 +285,34 @@ class Agent:
             config_file = os.path.join(
                 "wandb", "sweep-" + self._sweep_id, "config-" + run_id + ".yaml"
             )
-            os.environ[wandb.env.RUN_ID] = run_id
-            base_dir = os.environ.get(wandb.env.DIR, "")
+            os.environ[tracklab.env.RUN_ID] = run_id
+            base_dir = os.environ.get(tracklab.env.DIR, "")
             sweep_param_path = os.path.join(base_dir, config_file)
-            os.environ[wandb.env.SWEEP_PARAM_PATH] = sweep_param_path
-            wandb.wandb_lib.config_util.save_config_file_from_dict(
+            os.environ[tracklab.env.SWEEP_PARAM_PATH] = sweep_param_path
+            tracklab.tracklab_lib.config_util.save_config_file_from_dict(
                 sweep_param_path, job.config
             )
-            os.environ[wandb.env.SWEEP_ID] = self._sweep_id
-            wandb.teardown()
+            os.environ[tracklab.env.SWEEP_ID] = self._sweep_id
+            tracklab.teardown()
 
-            wandb.termlog(f"Agent Starting Run: {run_id} with config:")
+            tracklab.termlog(f"Agent Starting Run: {run_id} with config:")
             for k, v in job.config.items():
-                wandb.termlog("\t{}: {}".format(k, v["value"]))
+                tracklab.termlog("\t{}: {}".format(k, v["value"]))
 
             self._function()
-            wandb.finish()
+            tracklab.finish()
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            wandb.finish(exit_code=1)
+            tracklab.finish(exit_code=1)
             if self._run_status[run_id] == RunStatus.RUNNING:
                 self._run_status[run_id] = RunStatus.ERRORED
                 self._exceptions[run_id] = e
         finally:
             # clean up the environment changes made
-            os.environ.pop(wandb.env.RUN_ID, None)
-            os.environ.pop(wandb.env.SWEEP_ID, None)
-            os.environ.pop(wandb.env.SWEEP_PARAM_PATH, None)
+            os.environ.pop(tracklab.env.RUN_ID, None)
+            os.environ.pop(tracklab.env.SWEEP_ID, None)
+            os.environ.pop(tracklab.env.SWEEP_PARAM_PATH, None)
 
     def run(self):
         logger.info(

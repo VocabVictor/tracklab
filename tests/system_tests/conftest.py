@@ -18,7 +18,7 @@ from .wandb_backend_spy import WandbBackendProxy, WandbBackendSpy, spy_proxy
 def local_wandb_backend() -> LocalWandbBackendAddress:
     """Fixture that starts up or connects to the local-testcontainer.
 
-    This does not patch WANDB_BASE_URL! Use `use_local_wandb_backend` instead.
+    This does not patch TRACKLAB_BASE_URL! Use `use_local_wandb_backend` instead.
     """
     return connect_to_local_wandb_backend(name="wandb-local-testcontainer")
 
@@ -36,13 +36,13 @@ def local_wandb_backend_importers() -> LocalWandbBackendAddress:
 def use_local_wandb_backend(
     local_wandb_backend: LocalWandbBackendAddress,
 ) -> Generator[None, None, None]:
-    """Fixture that patches WANDB_BASE_URL to point to the local container.
+    """Fixture that patches TRACKLAB_BASE_URL to point to the local container.
 
     We use the `pytest.MonkeyPatch` context manager instead of the `monkeypatch` fixture,
     as `monkeypatch` is strictly function-scoped and we need this to be session-scoped.
     """
     with pytest.MonkeyPatch.context() as session_monkeypatch:
-        session_monkeypatch.setenv("WANDB_BASE_URL", local_wandb_backend.base_url)
+        session_monkeypatch.setenv("TRACKLAB_BASE_URL", local_wandb_backend.base_url)
         yield
 
 
@@ -91,9 +91,9 @@ def wandb_verbose(request):
 def user(mocker, backend_fixture_factory) -> Iterator[str]:
     username = backend_fixture_factory.make_user()
     envvars = {
-        "WANDB_API_KEY": username,
-        "WANDB_ENTITY": username,
-        "WANDB_USERNAME": username,
+        "TRACKLAB_API_KEY": username,
+        "TRACKLAB_ENTITY": username,
+        "TRACKLAB_USERNAME": username,
     }
     mocker.patch.dict(os.environ, envvars)
     yield username
@@ -121,9 +121,9 @@ def user_in_orgs_factory(
     """
     username = backend_fixture_factory.make_user()
     envvars = {
-        "WANDB_API_KEY": username,
-        "WANDB_ENTITY": username,
-        "WANDB_USERNAME": username,
+        "TRACKLAB_API_KEY": username,
+        "TRACKLAB_ENTITY": username,
+        "TRACKLAB_USERNAME": username,
     }
     mocker.patch.dict(os.environ, envvars)
 
@@ -168,7 +168,7 @@ def wandb_backend_spy(
 ) -> Generator[WandbBackendSpy, None, None]:
     """Fixture that allows spying on requests to the W&B backend.
 
-    This patches WANDB_BASE_URL and creates a fake user for the test
+    This patches TRACKLAB_BASE_URL and creates a fake user for the test
     setting auth-related environment variables.
 
     Usage:
@@ -187,7 +187,7 @@ def wandb_backend_spy(
 
     # Connect to the proxy to spy on requests:
     monkeypatch.setenv(
-        "WANDB_BASE_URL",
+        "TRACKLAB_BASE_URL",
         f"http://127.0.0.1:{wandb_backend_proxy_server.port}",
     )
 

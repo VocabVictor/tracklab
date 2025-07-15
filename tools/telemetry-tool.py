@@ -13,7 +13,7 @@ import csv
 import os
 from typing import Any, List
 
-from wandb.proto import wandb_telemetry_pb2 as tpb
+from tracklab.proto import tracklab_telemetry_pb2 as tpb
 
 DEFAULT_DIR: str = "analytics/dbt/seeds"
 parser = argparse.ArgumentParser()

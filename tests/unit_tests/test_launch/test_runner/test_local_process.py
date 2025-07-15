@@ -14,9 +14,9 @@ def mock_launch_project():
     project.project_dir = "/tmp/project_dir"
     project.get_env_vars_dict = MagicMock(
         return_value={
-            "WANDB_API_KEY": "test_api_key",
-            "WANDB_PROJECT": "test_project",
-            "WANDB_ENTITY": "test_entity",
+            "TRACKLAB_API_KEY": "test_api_key",
+            "TRACKLAB_PROJECT": "test_project",
+            "TRACKLAB_ENTITY": "test_entity",
         }
     )
     return project
@@ -60,7 +60,7 @@ async def test_local_process_runner(
     assert mock_run_entry_point.call_count == 1
     assert (
         mock_run_entry_point.call_args[0][0]
-        == "WANDB_API_KEY=test_api_key WANDB_PROJECT=test_project "
-        "WANDB_ENTITY=test_entity python train.py --epochs 10"
+        == "TRACKLAB_API_KEY=test_api_key TRACKLAB_PROJECT=test_project "
+        "TRACKLAB_ENTITY=test_entity python train.py --epochs 10"
     )
     assert mock_run_entry_point.call_args[0][1] == "/tmp/project_dir"

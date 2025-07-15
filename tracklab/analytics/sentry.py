@@ -53,10 +53,10 @@ class Sentry:
     _disabled: bool
 
     def __init__(self) -> None:
-        self._disabled = not wandb.env.error_reporting_enabled()
+        self._disabled = not tracklab.env.error_reporting_enabled()
         self._sent_messages: set = set()
 
-        self.dsn = os.environ.get(wandb.env.SENTRY_DSN, SENTRY_DEFAULT_DSN)
+        self.dsn = os.environ.get(tracklab.env.SENTRY_DSN, SENTRY_DEFAULT_DSN)
 
         self.scope: sentry_sdk.scope.Scope | None = None
 
@@ -84,7 +84,7 @@ class Sentry:
             dsn=self.dsn,
             default_integrations=False,
             environment=self.environment,
-            release=wandb.__version__,
+            release=tracklab.__version__,
         )
         self.scope = sentry_sdk.get_global_scope().fork()
         self.scope.clear()
@@ -244,7 +244,7 @@ class Sentry:
                 continue
 
             try:
-                app_url = wandb.util.app_url(tags["base_url"])  # type: ignore
+                app_url = tracklab.util.app_url(tags["base_url"])  # type: ignore
                 entity, project = (quote(tags[k]) for k in ("entity", "project"))  # type: ignore
                 self.scope.set_tag(
                     obj_url,

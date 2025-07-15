@@ -68,7 +68,7 @@ from tracklab.sdk.lib.paths import FilePathStr, StrPath
 
 if TYPE_CHECKING:
     import tracklab.sdk.internal.settings_static
-    import tracklab.sdk.wandb_settings
+    import tracklab.sdk.tracklab_settings
     from tracklab.sdk.artifacts.artifact import Artifact
 
 CheckRetryFnType = Callable[[Exception], Union[bool, timedelta]]
@@ -251,7 +251,7 @@ def get_module(
             if required:
                 logger.exception(msg)
     if required and name in _not_importable:
-        raise wandb.Error(required)
+        raise tracklab.Error(required)
 
 
 def get_optional_module(name) -> Optional["importlib.ModuleInterface"]:  # type: ignore
@@ -272,7 +272,7 @@ VALUE_BYTES_LIMIT = 100000
 def app_url(api_url: str) -> str:
     """Return the frontend app url without a trailing slash."""
     # TODO: move me to settings
-    app_url = wandb.env.get_app_url()
+    app_url = tracklab.env.get_app_url()
     if app_url is not None:
         return str(app_url.strip("/"))
     if "://api.wandb.test" in api_url:
@@ -492,7 +492,7 @@ def matplotlib_to_plotly(obj: Any) -> Any:
         "plotly.tools",
         required=(
             "plotly is required to log interactive plots, install with: "
-            "`pip install plotly` or convert the plot to an image with `wandb.Image(plt)`"
+            "`pip install plotly` or convert the plot to an image with `tracklab.Image(plt)`"
         ),
     )
     return tools.mpl_to_plotly(obj)
@@ -618,7 +618,7 @@ def json_friendly(  # noqa: C901
     else:
         converted = False
     if getsizeof(obj) > VALUE_BYTES_LIMIT:
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Serializing object of type {type(obj).__name__} that is {getsizeof(obj)} bytes"
         )
     return obj, converted
@@ -662,7 +662,7 @@ def convert_plots(obj: Any) -> Any:
             "plotly.tools",
             required=(
                 "plotly is required to log interactive plots, install with: "
-                "`pip install plotly` or convert the plot to an image with `wandb.Image(plt)`"
+                "`pip install plotly` or convert the plot to an image with `tracklab.Image(plt)`"
             ),
         )
         obj = tools.mpl_to_plotly(obj)
@@ -675,7 +675,7 @@ def convert_plots(obj: Any) -> Any:
 
 def maybe_compress_history(obj: Any) -> Tuple[Any, bool]:
     if np and isinstance(obj, np.ndarray) and obj.size > 32:
-        return wandb.Histogram(obj, num_bins=32).to_json(), True
+        return tracklab.Histogram(obj, num_bins=32).to_json(), True
     else:
         return obj, False
 
@@ -924,7 +924,7 @@ def no_retry_auth(e: Any) -> bool:
     if e.response.status_code == 401:
         raise AuthenticationError(
             "The API key you provided is either invalid or missing.  "
-            f"If the `{wandb.env.API_KEY}` environment variable is set, make sure it is correct. "
+            f"If the `{tracklab.env.API_KEY}` environment variable is set, make sure it is correct. "
             "Otherwise, to resolve this issue, you may try running the 'wandb login --relogin' command. "
             "If you are using a local server, make sure that you're using the correct hostname. "
             "If you're not sure, you can try logging in again using the 'wandb login --relogin --host [hostname]' command."
@@ -932,8 +932,8 @@ def no_retry_auth(e: Any) -> bool:
         )
     # ForbiddenError
     if e.response.status_code == 403:
-        if wandb.run:
-            raise CommError(f"Permission denied to access {wandb.run.path}")
+        if tracklab.run:
+            raise CommError(f"Permission denied to access {tracklab.run.path}")
         else:
             raise CommError(
                 "It appears that you do not have permission to access the requested resource. "
@@ -1157,7 +1157,7 @@ def image_id_from_k8s() -> Optional[str]:
             "Consider changing the securityContext to run the container as the current user."
         )
         logger.warning(warning)
-        wandb.termwarn(warning)
+        tracklab.termwarn(warning)
         return None
 
     if not token:
@@ -1291,7 +1291,7 @@ def prompt_choices(
 ) -> str:
     """Allow a user to choose from a list of options."""
     for i, choice in enumerate(choices):
-        wandb.termlog(f"({i + 1}) {choice}")
+        tracklab.termlog(f"({i + 1}) {choice}")
 
     idx = -1
     while idx < 0 or idx > len(choices) - 1:
@@ -1304,9 +1304,9 @@ def prompt_choices(
         except ValueError:
             pass
         if idx < 0 or idx > len(choices) - 1:
-            wandb.termwarn("Invalid choice")
+            tracklab.termwarn("Invalid choice")
     result = choices[idx]
-    wandb.termlog(f"You chose {result!r}")
+    tracklab.termlog(f"You chose {result!r}")
     return result
 
 
@@ -1462,8 +1462,8 @@ def to_native_slash_path(path: str) -> FilePathStr:
 
 def check_and_warn_old(files: List[str]) -> bool:
     if "wandb-metadata.json" in files:
-        wandb.termwarn("These runs were logged with a previous version of wandb.")
-        wandb.termwarn(
+        tracklab.termwarn("These runs were logged with a previous version of wandb.")
+        tracklab.termwarn(
             "Run pip install wandb<0.10.0 to get the old library and sync your runs."
         )
         return True
@@ -1557,7 +1557,7 @@ def _has_internet() -> bool:
 def rand_alphanumeric(
     length: int = 8, rand: Optional[Union[ModuleType, random.Random]] = None
 ) -> str:
-    wandb.termerror("rand_alphanumeric is deprecated, use 'secrets.token_hex'")
+    tracklab.termerror("rand_alphanumeric is deprecated, use 'secrets.token_hex'")
     rand = rand or random
     return "".join(rand.choice("0123456789ABCDEF") for _ in range(length))
 
@@ -1634,7 +1634,7 @@ def check_dict_contains_nested_artifact(d: dict, nested: bool = False) -> bool:
             contains_artifacts = check_dict_contains_nested_artifact(item, True)
             if contains_artifacts:
                 return True
-        elif (isinstance(item, wandb.Artifact) or _is_artifact_string(item)) and nested:
+        elif (isinstance(item, tracklab.Artifact) or _is_artifact_string(item)) and nested:
             return True
     return False
 
@@ -1713,8 +1713,8 @@ def _resolve_aliases(aliases: Optional[Union[str, Iterable[str]]]) -> List[str]:
         raise ValueError("`aliases` must be Iterable or None") from exc
 
 
-def _is_artifact_object(v: Any) -> "TypeGuard[wandb.Artifact]":
-    return isinstance(v, wandb.Artifact)
+def _is_artifact_object(v: Any) -> "TypeGuard[tracklab.Artifact]":
+    return isinstance(v, tracklab.Artifact)
 
 
 def _is_artifact_string(v: Any) -> "TypeGuard[str]":
@@ -1761,7 +1761,7 @@ def parse_artifact_string(v: str) -> Tuple[str, Optional[str], bool]:
 
 
 def _get_max_cli_version() -> Union[str, None]:
-    max_cli_version = wandb.api.max_cli_version()
+    max_cli_version = tracklab.api.max_cli_version()
     return str(max_cli_version) if max_cli_version is not None else None
 
 
@@ -1957,7 +1957,7 @@ def get_core_path() -> str:
     #       to assist in running the core service from a live development directory.
     path_from_env: str = os.environ.get("_WANDB_CORE_PATH", "")
     if path_from_env:
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Using wandb-core from path `_WANDB_CORE_PATH={path_from_env}`. "
             "This is a development feature and may not work as expected."
         )

@@ -60,7 +60,7 @@ class FilesDict(TypedDict):
 
 
 if TYPE_CHECKING:
-    from ..wandb_run import Run
+    from ..tracklab_run import Run
 
 
 logger = logging.getLogger("wandb")

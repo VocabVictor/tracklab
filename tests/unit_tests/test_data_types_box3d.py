@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from hypothesis import assume, given
 from hypothesis.strategies import floats, tuples
-from wandb import data_types
+from tracklab import data_types
 
 small_floats = floats(min_value=-1e5, max_value=1e5)
 quaternions = tuples(

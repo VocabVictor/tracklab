@@ -274,7 +274,7 @@ def test_library_config():
     assert symbol_unknown == set()
 
 
-SYMBOLS_WANDB_INIT = {
+SYMBOLS_TRACKLAB_INIT = {
     "force",
     "settings",
     "project",
@@ -305,4 +305,4 @@ SYMBOLS_WANDB_INIT = {
 
 def test_library_init():
     init_params = set(inspect.signature(tracklab.init).parameters)
-    assert init_params == SYMBOLS_WANDB_INIT
+    assert init_params == SYMBOLS_TRACKLAB_INIT

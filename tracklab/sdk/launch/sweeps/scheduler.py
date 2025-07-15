@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     import tracklab.apis.public as public
     from tracklab.apis.internal import Api
     from tracklab.apis.public import QueuedRun, Run
-    from tracklab.sdk.wandb_run import Run as SdkRun
+    from tracklab.sdk.tracklab_run import Run as SdkRun
 
 
 _logger = logging.getLogger(__name__)
@@ -169,14 +169,14 @@ class Scheduler(ABC):
         self._workers: Dict[int, _Worker] = {}
 
         # Init wandb scheduler run
-        self._wandb_run = self._init_wandb_run()
+        self._tracklab_run = self._init_tracklab_run()
 
         # Grab params from scheduler wandb run config
-        num_workers = num_workers or self._wandb_run.config.get("scheduler", {}).get(
+        num_workers = num_workers or self._tracklab_run.config.get("scheduler", {}).get(
             "num_workers"
         )
         self._num_workers = int(num_workers) if str(num_workers).isdigit() else 8
-        self._settings_config: Dict[str, Any] = self._wandb_run.config.get(
+        self._settings_config: Dict[str, Any] = self._tracklab_run.config.get(
             "settings", {}
         )
 
@@ -255,7 +255,7 @@ class Scheduler(ABC):
             _id: w for _id, w in self._workers.items() if _id not in self.busy_workers
         }
 
-    def _init_wandb_run(self) -> "SdkRun":
+    def _init_tracklab_run(self) -> "SdkRun":
         """Controls resume or init logic for a scheduler wandb run."""
         settings = wandb.Settings(disable_job_creation=True)
         run: SdkRun = wandb.init(  # type: ignore
@@ -389,7 +389,7 @@ class Scheduler(ABC):
             self._stop_runs()
 
         wandb.termlog(f"{LOG_PREFIX}Scheduler {status}")
-        self._wandb_run.finish()
+        self._tracklab_run.finish()
 
     def _get_num_runs_launched(self, runs: List[Dict[str, Any]]) -> int:
         """Returns the number of valid runs in the sweep."""
@@ -514,7 +514,7 @@ class Scheduler(ABC):
 
     def _update_scheduler_run_state(self) -> None:
         """Update the scheduler state from state of scheduler run and sweep state."""
-        state: RunState = self._get_run_state(self._wandb_run.id)
+        state: RunState = self._get_run_state(self._tracklab_run.id)
 
         # map scheduler run-state to scheduler-state
         if state == RunState.KILLED:
@@ -665,7 +665,7 @@ class Scheduler(ABC):
             pidx = entry_point.index("${program}")
             entry_point[pidx] = self._sweep_config["program"]
 
-        launch_config = copy.deepcopy(self._wandb_run.config.get("launch", {}))
+        launch_config = copy.deepcopy(self._tracklab_run.config.get("launch", {}))
         if "overrides" not in launch_config:
             launch_config["overrides"] = {"run_config": {}}
         if "run_config" not in launch_config["overrides"]:
@@ -703,7 +703,7 @@ class Scheduler(ABC):
             )
 
         # override resource and args of job
-        _job_launch_config = copy.deepcopy(self._wandb_run.config.get("launch")) or {}
+        _job_launch_config = copy.deepcopy(self._tracklab_run.config.get("launch")) or {}
 
         # default priority is "medium"
         _priority = int(launch_config.get("priority", 2))  # type: ignore

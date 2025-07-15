@@ -201,9 +201,9 @@ def test_launch_supplied_docker_image(
 
     print(result)
     assert result.exit_code == 0
-    assert "-e WANDB_DOCKER=test:tag" in result.output
-    assert " -e WANDB_CONFIG='{}'" in result.output
-    assert "-e WANDB_ARTIFACTS='{}'" in result.output
+    assert "-e TRACKLAB_DOCKER=test:tag" in result.output
+    assert " -e TRACKLAB_CONFIG='{}'" in result.output
+    assert "-e TRACKLAB_ARTIFACTS='{}'" in result.output
     assert "test:tag" in result.output
 
 

@@ -33,9 +33,9 @@ from typing import (
 import click
 import requests
 import yaml
-from wandb_gql import Client, gql
-from wandb_gql.client import RetryError
-from wandb_graphql.language.ast import Document
+from tracklab_gql import Client, gql
+from tracklab_gql.client import RetryError
+from tracklab_graphql.language.ast import Document
 
 import tracklab
 from tracklab import env, util
@@ -43,7 +43,7 @@ from tracklab.apis.normalize import normalize_exceptions, parse_backend_error_me
 from tracklab.errors import AuthenticationError, CommError, UnsupportedError, UsageError
 from tracklab.integration.sagemaker import parse_sm_secrets
 from tracklab.old.settings import Settings
-from tracklab.proto.wandb_internal_pb2 import ServerFeature
+from tracklab.proto.tracklab_internal_pb2 import ServerFeature
 from tracklab.sdk.artifacts._validators import is_artifact_registry_project
 from tracklab.sdk.internal._generated import SERVER_FEATURES_QUERY_GQL, ServerFeaturesQuery
 from tracklab.sdk.internal.thread_local_settings import _thread_local_api_settings
@@ -229,7 +229,7 @@ class Api:
         self,
         default_settings: Optional[
             Union[
-                "wandb.sdk.wandb_settings.Settings",
+                "wandb.sdk.tracklab_settings.Settings",
                 "wandb.sdk.internal.settings_static.SettingsStatic",
                 Settings,
                 dict,

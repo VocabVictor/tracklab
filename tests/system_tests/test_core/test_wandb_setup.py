@@ -9,9 +9,9 @@ def test_service_logging_level_debug():
     """Test the service logging is debug.
 
     Verifies that the service logging level is set to DEBUG when the
-    `WANDB_DEBUG` environment variable is set.
+    `TRACKLAB_DEBUG` environment variable is set.
     """
-    with mock.patch.dict(os.environ, {"WANDB_DEBUG": "true"}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_DEBUG": "true"}):
         with tracklab.init(mode="offline") as run:
             run.log({"foo": "bar"})
 
@@ -27,9 +27,9 @@ def test_service_logging_level_info():
     """Test the service logging is info.
 
     Verifies that the service logging level is set to INFO when the
-    `WANDB_DEBUG` environment variable is not set.
+    `TRACKLAB_DEBUG` environment variable is not set.
     """
-    with mock.patch.dict(os.environ, {"WANDB_DEBUG": "false"}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_DEBUG": "false"}):
         with tracklab.init(mode="offline") as run:
             run.log({"foo": "bar"})
 
@@ -53,7 +53,7 @@ def test_remove_active_run_twice():
 
 
 def test_setup_uses_config_dir_env_var(tmp_path, monkeypatch):
-    monkeypatch.setenv("WANDB_CONFIG_DIR", str(tmp_path))
-    with mock.patch.dict(os.environ, {"WANDB_CONFIG_DIR": str(tmp_path)}):
+    monkeypatch.setenv("TRACKLAB_CONFIG_DIR", str(tmp_path))
+    with mock.patch.dict(os.environ, {"TRACKLAB_CONFIG_DIR": str(tmp_path)}):
         setup = tracklab.setup()
         assert setup.settings.settings_system == str(tmp_path / "settings")

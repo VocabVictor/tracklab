@@ -41,7 +41,7 @@ def mock_sagemaker():
             elif path == resource_path:
                 return io.StringIO('{"hosts":["a", "b"]}')
             elif path == secrets_path:
-                return io.StringIO("WANDB_TEST_SECRET=TRUE")
+                return io.StringIO("TRACKLAB_TEST_SECRET=TRUE")
             else:
                 return original(path, *args, **kwargs)
 
@@ -66,7 +66,7 @@ def mock_sagemaker():
 
 def test_sagemaker_key():
     with open("secrets.env", "w") as f:
-        f.write("WANDB_API_KEY={}".format("S" * 40))
+        f.write("TRACKLAB_API_KEY={}".format("S" * 40))
     assert tracklab.api.api_key == "S" * 40
 
 
@@ -78,7 +78,7 @@ def test_sagemaker(user, git_repo, mock_sagemaker):
     assert run.id.endswith("-maker")
     assert run.group == "sage"
     # TODO: add test for secret, but for now there is no env or setting for it so its not added.
-    # assert os.getenv("WANDB_TEST_SECRET") == "TRUE"
+    # assert os.getenv("TRACKLAB_TEST_SECRET") == "TRUE"
 
 
 @pytest.mark.wandb_args(
@@ -148,7 +148,7 @@ def test_custom_dir(user):
 
 
 def test_custom_dir_env(user):
-    with mock.patch.dict("os.environ", {"WANDB_DIR": tempfile.gettempdir()}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_DIR": tempfile.gettempdir()}):
         run = tracklab.init(mode="offline")
         run.finish()
         assert (
@@ -160,9 +160,9 @@ def test_custom_dir_env(user):
 @pytest.mark.xfail(reason="Backend race condition")
 def test_anonymous_mode(user, capsys, local_settings):
     copied_env = os.environ.copy()
-    copied_env.pop("WANDB_API_KEY")
-    copied_env.pop("WANDB_USERNAME")
-    copied_env.pop("WANDB_ENTITY")
+    copied_env.pop("TRACKLAB_API_KEY")
+    copied_env.pop("TRACKLAB_USERNAME")
+    copied_env.pop("TRACKLAB_ENTITY")
     with mock.patch.dict("os.environ", copied_env, clear=True):
         with tracklab.init(anonymous="must") as run:
             run.log({"something": 1})
@@ -175,14 +175,14 @@ def test_anonymous_mode(user, capsys, local_settings):
 
 
 def test_run_id(user):
-    with mock.patch.dict("os.environ", {"WANDB_RUN_ID": "123456"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_RUN_ID": "123456"}):
         run = tracklab.init()
         run.finish()
         assert run.id == "123456"
 
 
 def test_run_name(user):
-    with mock.patch.dict("os.environ", {"WANDB_NAME": "coolio"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_NAME": "coolio"}):
         run = tracklab.init()
         run.finish()
         assert run.name == "coolio"
@@ -195,7 +195,7 @@ def test_run_setname(user):
 
 
 def test_run_notes(user):
-    with mock.patch.dict("os.environ", {"WANDB_NOTES": "these are my notes"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_NOTES": "these are my notes"}):
         run = tracklab.init()
         run.finish()
         assert run.notes == "these are my notes"
@@ -208,7 +208,7 @@ def test_run_setnotes(user):
 
 
 def test_run_tags(user):
-    with mock.patch.dict("os.environ", {"WANDB_TAGS": "tag1,tag2"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_TAGS": "tag1,tag2"}):
         run = tracklab.init()
         run.finish()
         assert run.tags == ("tag1", "tag2")
@@ -227,14 +227,14 @@ def test_run_offline(user):
 
 
 def test_run_entity(user):
-    with mock.patch.dict("os.environ", {"WANDB_ENTITY": "ent1"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_ENTITY": "ent1"}):
         run = tracklab.init(mode="offline")
         run.finish()
         assert run.entity == "ent1"
 
 
 def test_run_project(user):
-    with mock.patch.dict("os.environ", {"WANDB_PROJECT": "proj1"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_PROJECT": "proj1"}):
         run = tracklab.init()
         run.finish()
         assert run.project == "proj1"
@@ -242,14 +242,14 @@ def test_run_project(user):
 
 
 def test_run_group(user):
-    with mock.patch.dict("os.environ", {"WANDB_RUN_GROUP": "group1"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_RUN_GROUP": "group1"}):
         run = tracklab.init()
         run.finish()
         assert run.group == "group1"
 
 
 def test_run_jobtype(user):
-    with mock.patch.dict("os.environ", {"WANDB_JOB_TYPE": "job1"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_JOB_TYPE": "job1"}):
         run = tracklab.init()
         run.finish()
         assert run.job_type == "job1"
@@ -286,7 +286,7 @@ def test_run_configstatic(user):
 def test_run_path(user):
     with mock.patch.dict(
         "os.environ",
-        {"WANDB_ENTITY": "ent1", "WANDB_PROJECT": "proj1", "WANDB_RUN_ID": "run1"},
+        {"TRACKLAB_ENTITY": "ent1", "TRACKLAB_PROJECT": "proj1", "TRACKLAB_RUN_ID": "run1"},
     ):
         run = tracklab.init(mode="offline")
         run.finish()
@@ -380,7 +380,7 @@ def test_log_custom_chart(wandb_backend_spy):
 
 
 def test_log_silent(user, capsys):
-    with mock.patch.dict("os.environ", {"WANDB_SILENT": "true"}):
+    with mock.patch.dict("os.environ", {"TRACKLAB_SILENT": "true"}):
         run = tracklab.init()
         run.log({"acc": 1})
         run.finish()

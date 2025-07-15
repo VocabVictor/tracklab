@@ -4,7 +4,7 @@ import random
 import string
 from dataclasses import dataclass
 
-from wandb import util
+from tracklab import util
 from tracklab.sdk.internal.file_stream import CRDedupeFilePolicy
 from tracklab.sdk.lib.file_stream_utils import split_files
 

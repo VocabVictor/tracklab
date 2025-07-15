@@ -95,7 +95,7 @@ def test_login_timeout_choose(mock_tty):
 
 def test_login_timeout_env_blank(mock_tty):
     mock_tty("\n\n\n")
-    with mock.patch.dict(os.environ, {"WANDB_LOGIN_TIMEOUT": "4"}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_LOGIN_TIMEOUT": "4"}):
         ret = tracklab.login()
         assert ret is False
         assert tracklab.api.api_key is None
@@ -104,7 +104,7 @@ def test_login_timeout_env_blank(mock_tty):
 
 def test_login_timeout_env_invalid(mock_tty):
     mock_tty("")
-    with mock.patch.dict(os.environ, {"WANDB_LOGIN_TIMEOUT": "junk"}):
+    with mock.patch.dict(os.environ, {"TRACKLAB_LOGIN_TIMEOUT": "junk"}):
         with pytest.raises(ValueError):
             tracklab.login()
 
@@ -134,14 +134,14 @@ def test_login(test_settings):
 
 
 def test_login_anonymous():
-    with mock.patch.dict("os.environ", WANDB_API_KEY="ANONYMOOSE" * 4):
+    with mock.patch.dict("os.environ", TRACKLAB_API_KEY="ANONYMOOSE" * 4):
         tracklab.login(anonymous="must")
         assert tracklab.api.api_key == "ANONYMOOSE" * 4
         assert tracklab.setup().settings.anonymous == "must"
 
 
 def test_login_sets_api_base_url(local_settings):
-    with mock.patch.dict("os.environ", WANDB_API_KEY="ANONYMOOSE" * 4):
+    with mock.patch.dict("os.environ", TRACKLAB_API_KEY="ANONYMOOSE" * 4):
         base_url = "https://api.test.host.ai"
         tracklab.login(anonymous="must", host=base_url)
         api = tracklab.Api()
@@ -186,8 +186,8 @@ def test_login_with_token_file(tmp_path: Path):
 
     with mock.patch.dict(
         "os.environ",
-        WANDB_IDENTITY_TOKEN_FILE=token_file,
-        WANDB_CREDENTIALS_FILE=credentials_file,
+        TRACKLAB_IDENTITY_TOKEN_FILE=token_file,
+        TRACKLAB_CREDENTIALS_FILE=credentials_file,
     ):
         tracklab.login()
         assert tracklab.api.is_authenticated

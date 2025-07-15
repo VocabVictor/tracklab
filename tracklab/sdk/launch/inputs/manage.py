@@ -61,7 +61,7 @@ def manage_config_file(
     return handle_config_file_input(path, include, exclude, schema)
 
 
-def manage_wandb_config(
+def manage_tracklab_config(
     include: Optional[List[str]] = None,
     exclude: Optional[List[str]] = None,
     schema: Optional[Any] = None,
