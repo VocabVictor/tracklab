@@ -76,11 +76,11 @@ def get_boxes_and_masks(result: Results) -> Tuple[Dict, Dict, Dict]:
 
 
 def plot_mask_predictions(
-    result: Results, model_name: str, table: Optional[wandb.Table] = None
-) -> Tuple[wandb.Image, Dict, Dict, Dict]:
+    result: Results, model_name: str, table: Optional[tracklab.Table] = None
+) -> Tuple[tracklab.Image, Dict, Dict, Dict]:
     result = result.to("cpu")
     boxes, masks, mean_confidence_map = get_boxes_and_masks(result)
-    image = wandb.Image(result.orig_img[:, :, ::-1], boxes=boxes, masks=masks)
+    image = tracklab.Image(result.orig_img[:, :, ::-1], boxes=boxes, masks=masks)
     if table is not None:
         table.add_data(
             model_name,
@@ -123,12 +123,12 @@ def structure_prompts_and_image(image: np.array, prompt: Dict) -> Dict:
 
 
 def plot_sam_predictions(
-    result: Results, prompt: Dict, table: wandb.Table
-) -> wandb.Table:
+    result: Results, prompt: Dict, table: tracklab.Table
+) -> tracklab.Table:
     result = result.to("cpu")
     image = result.orig_img[:, :, ::-1]
     image, wb_box_data = structure_prompts_and_image(image, prompt)
-    image = wandb.Image(
+    image = tracklab.Image(
         image,
         boxes=wb_box_data,
         masks={
@@ -147,7 +147,7 @@ def plot_segmentation_validation_results(
     class_label_map,
     model_name: str,
     predictor: SegmentationPredictor,
-    table: wandb.Table,
+    table: tracklab.Table,
     max_validation_batches: int,
     epoch: Optional[int] = None,
 ):
@@ -173,7 +173,7 @@ def plot_segmentation_validation_results(
                 ground_truth_data = get_ground_truth_bbox_annotations(
                     img_idx, batch["im_file"][img_idx], batch, class_label_map
                 )
-                wandb_image = wandb.Image(
+                wandb_image = tracklab.Image(
                     batch["im_file"][img_idx],
                     boxes={
                         "ground-truth": {

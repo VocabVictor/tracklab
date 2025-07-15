@@ -49,7 +49,7 @@ class Histogram(WBValue):
         ```python
         import tracklab
 
-        wandb.Histogram([1, 2, 3])
+        tracklab.Histogram([1, 2, 3])
         ```
 
         Efficiently initialize from np.histogram.
@@ -59,7 +59,7 @@ class Histogram(WBValue):
         import tracklab
 
         hist = np.histogram(data)
-        wandb.Histogram(np_histogram=hist)
+        tracklab.Histogram(np_histogram=hist)
         ```
         """
         if np_histogram:

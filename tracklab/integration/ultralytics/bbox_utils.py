@@ -35,7 +35,7 @@ def scale_bounding_box_to_original_image_shape(
 def get_ground_truth_bbox_annotations(
     img_idx: int, image_path: str, batch: Dict, class_name_map: Dict = None
 ) -> List[Dict[str, Any]]:
-    """Get ground truth bounding box annotation data in the form required for `wandb.Image` overlay system."""
+    """Get ground truth bounding box annotation data in the form required for `tracklab.Image` overlay system."""
     indices = batch["batch_idx"] == img_idx
     bboxes = batch["bboxes"][indices]
     if len(batch["cls"][indices]):
@@ -46,7 +46,7 @@ def get_ground_truth_bbox_annotations(
     class_name_map_reverse = {v: k for k, v in class_name_map.items()}
 
     if len(bboxes) == 0:
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Image: {image_path} has no bounding boxes labels", repeat=False
         )
         return None
@@ -87,7 +87,7 @@ def get_ground_truth_bbox_annotations(
 def get_mean_confidence_map(
     classes: List, confidence: List, class_id_to_label: Dict
 ) -> Dict[str, float]:
-    """Get Mean-confidence map from the predictions to be logged into a `wandb.Table`."""
+    """Get Mean-confidence map from the predictions to be logged into a `tracklab.Table`."""
     confidence_map = {v: [] for _, v in class_id_to_label.items()}
     for class_idx, confidence_value in zip(classes, confidence):
         confidence_map[class_id_to_label[class_idx]].append(confidence_value)
@@ -101,7 +101,7 @@ def get_mean_confidence_map(
 
 
 def get_boxes(result: Results) -> Tuple[Dict, Dict]:
-    """Convert an ultralytics prediction result into metadata for the `wandb.Image` overlay system."""
+    """Convert an ultralytics prediction result into metadata for the `tracklab.Image` overlay system."""
     boxes = result.boxes.xywh.long().numpy()
     classes = result.boxes.cls.long().numpy()
     confidence = result.boxes.conf.numpy()
@@ -134,15 +134,15 @@ def get_boxes(result: Results) -> Tuple[Dict, Dict]:
 
 
 def plot_bbox_predictions(
-    result: Results, model_name: str, table: Optional[wandb.Table] = None
-) -> Union[wandb.Table, Tuple[wandb.Image, Dict, Dict]]:
+    result: Results, model_name: str, table: Optional[tracklab.Table] = None
+) -> Union[tracklab.Table, Tuple[tracklab.Image, Dict, Dict]]:
     """Plot the images with the W&B overlay system.
 
-    The `wandb.Image` is either added to a `wandb.Table` or returned.
+    The `tracklab.Image` is either added to a `tracklab.Table` or returned.
     """
     result = result.to("cpu")
     boxes, mean_confidence_map = get_boxes(result)
-    image = wandb.Image(result.orig_img[:, :, ::-1], boxes=boxes)
+    image = tracklab.Image(result.orig_img[:, :, ::-1], boxes=boxes)
     if table is not None:
         table.add_data(
             model_name,
@@ -160,10 +160,10 @@ def plot_detection_validation_results(
     class_label_map: Dict,
     model_name: str,
     predictor: DetectionPredictor,
-    table: wandb.Table,
+    table: tracklab.Table,
     max_validation_batches: int,
     epoch: Optional[int] = None,
-) -> wandb.Table:
+) -> tracklab.Table:
     """Plot validation results in a table."""
     data_idx = 0
     num_dataloader_batches = len(dataloader.dataset) // dataloader.batch_size
@@ -184,7 +184,7 @@ def plot_detection_validation_results(
                 ground_truth_data = get_ground_truth_bbox_annotations(
                     img_idx, batch["im_file"][img_idx], batch, class_label_map
                 )
-                wandb_image = wandb.Image(
+                wandb_image = tracklab.Image(
                     batch["im_file"][img_idx],
                     boxes={
                         "ground-truth": {

@@ -79,10 +79,10 @@ class Summary(SummaryDict):
 
     By default, a metric's summary is the last value of its History.
 
-    For example, `wandb.log({'accuracy': 0.9})` will add a new step to History and
+    For example, `tracklab.log({'accuracy': 0.9})` will add a new step to History and
     update Summary to the latest value. In some cases, it's more useful to have
     the maximum or minimum of a metric instead of the final value. You can set
-    history manually `(wandb.summary['accuracy'] = best_acc)`.
+    history manually `(tracklab.summary['accuracy'] = best_acc)`.
 
     In the UI, summary metrics appear in the table to compare across runs.
     Summary metrics are also used in visualizations like the scatter plot and
@@ -96,13 +96,13 @@ class Summary(SummaryDict):
 
     Examples:
         ```python
-        wandb.init(config=args)
+        tracklab.init(config=args)
 
         best_accuracy = 0
         for epoch in range(1, args.epochs + 1):
             test_loss, test_accuracy = test()
             if test_accuracy > best_accuracy:
-                wandb.run.summary["best_accuracy"] = test_accuracy
+                tracklab.run.summary["best_accuracy"] = test_accuracy
                 best_accuracy = test_accuracy
         ```
     """

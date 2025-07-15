@@ -11,18 +11,18 @@ import tracklab
 def plot_classification_predictions(
     result: Results,
     model_name: str,
-    table: Optional[wandb.Table] = None,
+    table: Optional[tracklab.Table] = None,
     original_image: Optional[np.array] = None,
 ):
-    """Plot classification prediction results to a `wandb.Table` if the table is passed otherwise return the data."""
+    """Plot classification prediction results to a `tracklab.Table` if the table is passed otherwise return the data."""
     result = result.to("cpu")
     probabilities = result.probs
     probabilities_list = probabilities.data.numpy().tolist()
     class_id_to_label = {int(k): str(v) for k, v in result.names.items()}
     original_image = (
-        wandb.Image(original_image)
+        tracklab.Image(original_image)
         if original_image is not None
-        else wandb.Image(result.orig_img)
+        else tracklab.Image(result.orig_img)
     )
     table_row = [
         model_name,
@@ -47,11 +47,11 @@ def plot_classification_validation_results(
     dataloader: Any,
     model_name: str,
     predictor: ClassificationPredictor,
-    table: wandb.Table,
+    table: tracklab.Table,
     max_validation_batches: int,
     epoch: Optional[int] = None,
-) -> wandb.Table:
-    """Plot classification results to a `wandb.Table`."""
+) -> tracklab.Table:
+    """Plot classification results to a `tracklab.Table`."""
     data_idx = 0
     num_dataloader_batches = len(dataloader.dataset) // dataloader.batch_size
     max_validation_batches = min(max_validation_batches, num_dataloader_batches)

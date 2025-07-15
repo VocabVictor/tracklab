@@ -41,7 +41,7 @@ def learning_curve(
     test_scores_mean = np.mean(test_scores, axis=1)
 
     table = make_table(train_scores_mean, test_scores_mean, train_sizes)
-    chart = wandb.visualize("wandb/learning_curve/v1", table)
+    chart = tracklab.visualize("wandb/learning_curve/v1", table)
 
     return chart
 
@@ -60,5 +60,5 @@ def make_table(train, test, train_sizes):
         data.append(train_set)
         data.append(test_set)
 
-    table = wandb.Table(columns=["dataset", "score", "train_size"], data=data)
+    table = tracklab.Table(columns=["dataset", "score", "train_size"], data=data)
     return table

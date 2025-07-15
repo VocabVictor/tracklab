@@ -249,9 +249,9 @@ class File(Attrs):
         try:
             path_uri = utils.parse_s3_url_to_s3_uri(self._attrs["directUrl"])
         except ValueError:
-            wandb.termwarn("path_uri is only available for files stored in S3")
+            tracklab.termwarn("path_uri is only available for files stored in S3")
         except LookupError:
-            wandb.termwarn("Unable to find direct_url of file")
+            tracklab.termwarn("Unable to find direct_url of file")
         return path_uri
 
     @normalize_exceptions
@@ -284,7 +284,7 @@ class File(Attrs):
             `exist_ok=False`.
         """
         if api is None:
-            api = wandb.Api()
+            api = tracklab.Api()
 
         path = os.path.join(root, self.name)
         if os.path.exists(path) and not replace:

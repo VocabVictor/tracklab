@@ -1,7 +1,7 @@
 """Calculates and formats metrics and charts for introspecting sklearn models.
 
 The functions in these modules are designed to be called by functions from the
-plot submodule that have been exported into the namespace of the wandb.sklearn
+plot submodule that have been exported into the namespace of the tracklab.sklearn
 submodule, rather than being called directly.
 """
 

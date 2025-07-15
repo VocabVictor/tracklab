@@ -29,7 +29,7 @@ _logger = logging.getLogger(__name__)
 def set_launch_logfile(logfile: str) -> None:
     """Set the logfile for the launch agent."""
     # Get logger of parent module
-    _launch_logger = logging.getLogger("wandb.sdk.launch")
+    _launch_logger = logging.getLogger("tracklab.sdk.launch")
     if logfile == "-":
         logfile_stream = sys.stdout
     else:
@@ -37,13 +37,13 @@ def set_launch_logfile(logfile: str) -> None:
             logfile_stream = open(logfile, "w")
         # check if file is writable
         except Exception as e:
-            wandb.termerror(
+            tracklab.termerror(
                 f"Could not open {logfile} for writing logs. Please check "
                 f"the path and permissions.\nError: {e}"
             )
             return
 
-    wandb.termlog(
+    tracklab.termlog(
         f"Internal agent logs printing to {'stdout' if logfile == '-' else logfile}. "
     )
     handler = logging.StreamHandler(logfile_stream)
@@ -161,7 +161,7 @@ def create_and_run_agent(
             if not isinstance(value, dict):
                 msg += f" (value: {value})"
             msg += f": {error['msg']}"
-            wandb.termerror(msg)
+            tracklab.termerror(msg)
         raise LaunchError("Invalid launch agent config")
     agent = LaunchAgent(api, config)
     try:
@@ -265,7 +265,7 @@ def launch(
     """Launch a W&B launch experiment.
 
     Arguments:
-        job: string reference to a wandb.Job eg: wandb/test/my-job:latest
+        job: string reference to a tracklab.Job eg: wandb/test/my-job:latest
         api: An instance of a wandb Api from tracklab.apis.internal.
         entry_point: Entry point to run within the project. Defaults to using the entry point used
             in the original run for wandb URIs, or main.py for git repository URIs.
@@ -296,17 +296,17 @@ def launch(
         params = {"epochs": 5}
         # Run W&B project and create a reproducible docker environment
         # on a local host
-        api = wandb.apis.internal.Api()
+        api = tracklab.apis.internal.Api()
         launch(api, job, parameters=params)
         ```
 
 
     Returns:
-        an instance of`wandb.launch.SubmittedRun` exposing information (e.g. run ID)
+        an instance of`tracklab.launch.SubmittedRun` exposing information (e.g. run ID)
         about the launched run.
 
     Raises:
-        `wandb.exceptions.ExecutionError` If a run launched in blocking mode
+        `tracklab.exceptions.ExecutionError` If a run launched in blocking mode
         is unsuccessful.
     """
     submitted_run_obj = asyncio.run(

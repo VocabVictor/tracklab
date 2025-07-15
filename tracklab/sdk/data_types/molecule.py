@@ -103,7 +103,7 @@ class Molecule(BatchableMedia):
         convert_to_3d_and_optimize: bool = True,
         mmff_optimize_molecule_max_iterations: int = 200,
     ) -> "Molecule":
-        """Convert RDKit-supported file/object types to wandb.Molecule.
+        """Convert RDKit-supported file/object types to tracklab.Molecule.
 
         Args:
             data_or_path: (string, rdkit.Chem.rdchem.Mol)
@@ -120,11 +120,11 @@ class Molecule(BatchableMedia):
         """
         rdkit_chem = util.get_module(
             "rdkit.Chem",
-            required='wandb.Molecule needs the rdkit-pypi package. To get it, run "pip install rdkit-pypi".',
+            required='tracklab.Molecule needs the rdkit-pypi package. To get it, run "pip install rdkit-pypi".',
         )
         rdkit_chem_all_chem = util.get_module(
             "rdkit.Chem.AllChem",
-            required='wandb.Molecule needs the rdkit-pypi package. To get it, run "pip install rdkit-pypi".',
+            required='tracklab.Molecule needs the rdkit-pypi package. To get it, run "pip install rdkit-pypi".',
         )
 
         if isinstance(data_or_path, str):
@@ -170,7 +170,7 @@ class Molecule(BatchableMedia):
         convert_to_3d_and_optimize: bool = True,
         mmff_optimize_molecule_max_iterations: int = 200,
     ) -> "Molecule":
-        """Convert SMILES string to wandb.Molecule.
+        """Convert SMILES string to tracklab.Molecule.
 
         Args:
             data: SMILES string.
@@ -187,7 +187,7 @@ class Molecule(BatchableMedia):
         """
         rdkit_chem = util.get_module(
             "rdkit.Chem",
-            required='wandb.Molecule needs the rdkit-pypi package. To get it, run "pip install rdkit-pypi".',
+            required='tracklab.Molecule needs the rdkit-pypi package. To get it, run "pip install rdkit-pypi".',
         )
         molecule = rdkit_chem.MolFromSmiles(data, sanitize=sanitize)
         if molecule is None:

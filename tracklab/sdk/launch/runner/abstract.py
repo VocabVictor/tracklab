@@ -95,7 +95,7 @@ class AbstractRun(ABC):
                     return popen.stdout.read()
             return popen
         except subprocess.CalledProcessError as e:
-            wandb.termerror(f"Command failed: {e}")
+            tracklab.termerror(f"Command failed: {e}")
             return None
 
     @abstractmethod
@@ -157,10 +157,10 @@ class AbstractRunner(ABC):
     def verify(self) -> bool:
         """This is called on first boot to verify the needed commands, and permissions are available.
 
-        For now just call `wandb.termerror` and `sys.exit(1)`
+        For now just call `tracklab.termerror` and `sys.exit(1)`
         """
         if self._api.api_key is None:
-            wandb.termerror(
+            tracklab.termerror(
                 "Couldn't find W&B api key, run wandb login or set WANDB_API_KEY"
             )
             sys.exit(1)
@@ -179,7 +179,7 @@ class AbstractRunner(ABC):
         launch_project: Object of _project_spec.LaunchProject class representing a wandb launch project
 
         Returns:
-            A :py:class:`wandb.sdk.launch.runners.SubmittedRun`. This function is expected to run
+            A :py:class:`tracklab.sdk.launch.runners.SubmittedRun`. This function is expected to run
             the project asynchronously, i.e. it should trigger project execution and then
             immediately return a `SubmittedRun` to track execution status.
         """

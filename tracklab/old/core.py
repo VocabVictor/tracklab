@@ -27,12 +27,12 @@ def wandb_dir(root_dir=None):
         try:
             cwd = os.getcwd()
         except OSError:
-            wandb.termwarn("os.getcwd() no longer exists, using system temp directory")
+            tracklab.termwarn("os.getcwd() no longer exists, using system temp directory")
             cwd = tempfile.gettempdir()
         root_dir = env.get_dir(cwd)
     path = os.path.join(root_dir, __stage_dir__ or ("wandb" + os.sep))
     if not os.access(root_dir, os.W_OK):
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Path {path} wasn't writable, using system temp directory", repeat=False
         )
         path = os.path.join(tempfile.gettempdir(), __stage_dir__ or ("wandb" + os.sep))

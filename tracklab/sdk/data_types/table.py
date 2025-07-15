@@ -53,7 +53,7 @@ class _TableIndex(int, _TableLinkMixin):
 
 class _PrimaryKeyType(_dtypes.Type):
     name = "primaryKey"
-    legacy_names = ["wandb.TablePrimaryKey"]
+    legacy_names = ["tracklab.TablePrimaryKey"]
 
     def assign_type(self, wb_type=None):
         if isinstance(wb_type, _dtypes.StringType) or isinstance(
@@ -65,14 +65,14 @@ class _PrimaryKeyType(_dtypes.Type):
     @classmethod
     def from_obj(cls, py_obj):
         if not isinstance(py_obj, _TableKey):
-            raise TypeError("py_obj must be a wandb.Table")
+            raise TypeError("py_obj must be a tracklab.Table")
         else:
             return cls()
 
 
 class _ForeignKeyType(_dtypes.Type):
     name = "foreignKey"
-    legacy_names = ["wandb.TableForeignKey"]
+    legacy_names = ["tracklab.TableForeignKey"]
     types = [_TableKey]
 
     def __init__(self, table, col_name):
@@ -136,7 +136,7 @@ class _ForeignKeyType(_dtypes.Type):
 
 class _ForeignIndexType(_dtypes.Type):
     name = "foreignIndex"
-    legacy_names = ["wandb.TableForeignIndex"]
+    legacy_names = ["tracklab.TableForeignIndex"]
     types = [_TableIndex]
 
     def __init__(self, table):
@@ -199,12 +199,12 @@ class Table(Media):
     """The Table class used to display and analyze tabular data.
 
     Unlike traditional spreadsheets, Tables support numerous types of data:
-    scalar values, strings, numpy arrays, and most subclasses of `wandb.data_types.Media`.
+    scalar values, strings, numpy arrays, and most subclasses of `tracklab.data_types.Media`.
     This means you can embed `Images`, `Video`, `Audio`, and other sorts of rich, annotated media
     directly in Tables, alongside other traditional scalar values.
 
     This class is the primary class used to generate W&B Tables
-    https://docs.wandb.ai/guides/models/tables/.
+    https://docs.tracklab.ai/guides/models/tables/.
     """
 
     MAX_ROWS = 10000
@@ -412,12 +412,12 @@ class Table(Media):
         """Casts a column to a specific data type.
 
         This can be one of the normal python classes, an internal W&B type,
-        or an example object, like an instance of wandb.Image or
-        wandb.Classes.
+        or an example object, like an instance of tracklab.Image or
+        tracklab.Classes.
 
         Args:
             col_name (str): The name of the column to cast.
-            dtype (class, wandb.wandb_sdk.interface._dtypes.Type, any): The
+            dtype (class, tracklab.wandb_sdk.interface._dtypes.Type, any): The
                 target dtype.
             optional (bool): If the column should allow Nones.
         """
@@ -512,7 +512,7 @@ class Table(Media):
         """Adds a new row of data to the table.
 
         The maximum amount ofrows in a table is determined by
-        `wandb.Table.MAX_ARTIFACT_ROWS`.
+        `tracklab.Table.MAX_ARTIFACT_ROWS`.
 
         The length of the data should match the length of the table column.
         """
@@ -572,17 +572,17 @@ class Table(Media):
             #   propagating the run. It cannot be fixed for to_json() calls
             #   that are given an artifact, other than by deferring to singleton
             #   settings.
-            if wandb.run and (
-                wandb.run.settings.table_raise_on_max_row_limit_exceeded
-                or wandb.run.settings.strict
+            if tracklab.run and (
+                tracklab.run.settings.table_raise_on_max_row_limit_exceeded
+                or tracklab.run.settings.strict
             ):
                 raise ValueError(
                     f"Table row limit exceeded: table has {n_rows} rows, limit is {max_rows}. "
-                    f"To increase the maximum number of allowed rows in a wandb.Table, override "
-                    f"the limit with `wandb.Table.MAX_ARTIFACT_ROWS = X` and try again. Note: "
+                    f"To increase the maximum number of allowed rows in a tracklab.Table, override "
+                    f"the limit with `tracklab.Table.MAX_ARTIFACT_ROWS = X` and try again. Note: "
                     f"this may cause slower queries in the W&B UI."
                 )
-            logging.warning(f"Truncating wandb.Table object to {max_rows} rows.")
+            logging.warning(f"Truncating tracklab.Table object to {max_rows} rows.")
 
         if self.log_mode == "INCREMENTAL" and self._last_logged_idx is not None:
             return {
@@ -727,7 +727,7 @@ class Table(Media):
                 }
             )
 
-        if isinstance(run_or_artifact, wandb.wandb_sdk.tracklab_run.Run):
+        if isinstance(run_or_artifact, tracklab.wandb_sdk.tracklab_run.Run):
             if self.log_mode == "INCREMENTAL":
                 wbvalue_type = "incremental-table-file"
             else:
@@ -742,7 +742,7 @@ class Table(Media):
                 }
             )
 
-        elif isinstance(run_or_artifact, wandb.Artifact):
+        elif isinstance(run_or_artifact, tracklab.Artifact):
             artifact = run_or_artifact
             mapped_data = []
             data = self._to_table_json(Table.MAX_ARTIFACT_ROWS)["data"]
@@ -1107,7 +1107,7 @@ class PartitionedTable(Media):
         json_obj = {
             "_type": PartitionedTable._log_type,
         }
-        if isinstance(artifact_or_run, wandb.wandb_sdk.tracklab_run.Run):
+        if isinstance(artifact_or_run, tracklab.wandb_sdk.tracklab_run.Run):
             artifact_entry_url = self._get_artifact_entry_ref_url()
             if artifact_entry_url is None:
                 raise ValueError(
@@ -1170,10 +1170,10 @@ class JoinedTable(Media):
     """Join two tables for visualization in the Artifact UI.
 
     Args:
-        table1 (str, wandb.Table, ArtifactManifestEntry):
-            the path to a wandb.Table in an artifact, the table object, or ArtifactManifestEntry
-        table2 (str, wandb.Table):
-            the path to a wandb.Table in an artifact, the table object, or ArtifactManifestEntry
+        table1 (str, tracklab.Table, ArtifactManifestEntry):
+            the path to a tracklab.Table in an artifact, the table object, or ArtifactManifestEntry
+        table2 (str, tracklab.Table):
+            the path to a tracklab.Table in an artifact, the table object, or ArtifactManifestEntry
         join_key (str, [str, str]):
             key or keys to perform the join
     """
@@ -1192,12 +1192,12 @@ class JoinedTable(Media):
 
         if not self._validate_table_input(table1):
             raise ValueError(
-                "JoinedTable table1 should be an artifact path to a table or wandb.Table object"
+                "JoinedTable table1 should be an artifact path to a table or tracklab.Table object"
             )
 
         if not self._validate_table_input(table2):
             raise ValueError(
-                "JoinedTable table2 should be an artifact path to a table or wandb.Table object"
+                "JoinedTable table2 should be an artifact path to a table or tracklab.Table object"
             )
 
         self._table1 = table1
@@ -1262,7 +1262,7 @@ class JoinedTable(Media):
         json_obj = {
             "_type": JoinedTable._log_type,
         }
-        if isinstance(artifact_or_run, wandb.wandb_sdk.tracklab_run.Run):
+        if isinstance(artifact_or_run, tracklab.wandb_sdk.tracklab_run.Run):
             artifact_entry_url = self._get_artifact_entry_ref_url()
             if artifact_entry_url is None:
                 raise ValueError(
@@ -1306,7 +1306,7 @@ class JoinedTable(Media):
 
 class _TableType(_dtypes.Type):
     name = "table"
-    legacy_names = ["wandb.Table"]
+    legacy_names = ["tracklab.Table"]
     types = [Table]
 
     def __init__(self, column_types=None):
@@ -1335,7 +1335,7 @@ class _TableType(_dtypes.Type):
     @classmethod
     def from_obj(cls, py_obj):
         if not isinstance(py_obj, Table):
-            raise TypeError("py_obj must be a wandb.Table")
+            raise TypeError("py_obj must be a tracklab.Table")
         else:
             return cls(py_obj._column_types)
 
@@ -1371,7 +1371,7 @@ def _get_data_from_increments(
         List of table rows from all increments.
     """
     if "latest" not in source_artifact.aliases:
-        wandb.termwarn(
+        tracklab.termwarn(
             (
                 "It is recommended to use the latest version of the "
                 "incremental table artifact for ordering guarantees."
@@ -1393,7 +1393,7 @@ def _get_data_from_increments(
             # If there's a timestamp part, use it for secondary sorting
             timestamp = int(increment_parts[1]) if len(increment_parts) > 1 else 0
         except (ValueError, IndexError):
-            wandb.termwarn(
+            tracklab.termwarn(
                 (
                     f"Could not parse artifact entry for increment {key}."
                     " The entry name does not follow the naming convention"
@@ -1419,7 +1419,7 @@ def _get_data_from_increments(
                 table_data = json.load(f)
             data.extend(table_data["data"])
         except (json.JSONDecodeError, KeyError) as e:
-            raise wandb.Error(f"Invalid table file {entry_key}") from e
+            raise tracklab.Error(f"Invalid table file {entry_key}") from e
     return data
 
 

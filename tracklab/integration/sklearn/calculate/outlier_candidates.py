@@ -46,7 +46,7 @@ def outlier_candidates(regressor, X, y):  # noqa: N803
             break
 
     table = make_table(distance_dict, outlier_percentage_, influence_threshold_)
-    chart = wandb.visualize("wandb/outliers/v1", table)
+    chart = tracklab.visualize("wandb/outliers/v1", table)
 
     return chart
 
@@ -64,6 +64,6 @@ def make_table(distance, outlier_percentage, influence_threshold):
         for i in range(len(distance))
     ]
 
-    table = wandb.Table(columns=columns, data=data)
+    table = tracklab.Table(columns=columns, data=data)
 
     return table

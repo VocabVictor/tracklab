@@ -227,7 +227,7 @@ class CohereRequestResponseResolver:
             # Built in Cohere.*.Generations function to color token_likelihoods and return a dict of response data
             _response_dict = _response._visualize_helper()
             try:
-                _response_dict["token_likelihoods"] = wandb.Html(
+                _response_dict["token_likelihoods"] = tracklab.Html(
                     _response_dict["token_likelihoods"]
                 )
             except (KeyError, ValueError):
@@ -342,6 +342,6 @@ class CohereRequestResponseResolver:
             packed_data, table_column_order
         )
 
-        request_response_table = wandb.Table(data=data, columns=columns)
+        request_response_table = tracklab.Table(data=data, columns=columns)
 
         return {f"{response_type}": request_response_table}

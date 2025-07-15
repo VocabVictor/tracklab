@@ -123,7 +123,7 @@ class TBWatcher:
         self._force = force
         # TODO(jhr): do we need locking in this queue?
         self._watcher_queue = queue.PriorityQueue()
-        wandb.tensorboard.reset_state()  # type: ignore
+        tracklab.tensorboard.reset_state()  # type: ignore
 
     def _calculate_namespace(self, logdir: str, rootdir: str) -> Optional[str]:
         namespace: Optional[str]
@@ -430,7 +430,7 @@ class TBEventConsumer:
     def _handle_event(
         self, event: "ProtoEvent", history: Optional["TBHistory"] = None
     ) -> None:
-        wandb.tensorboard._log(  # type: ignore
+        tracklab.tensorboard._log(  # type: ignore
             event.event,
             step=event.event.step,
             namespace=event.namespace,
@@ -489,7 +489,7 @@ class TBHistory:
                     bad += v
                     dropped_keys.append(k)
                     del self._data[k]
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Step {self._step} exceeds max data limit, dropping {len(dropped_keys)} of the largest keys:"
             )
             print("\t" + ("\n\t".join(dropped_keys)))  # noqa: T201

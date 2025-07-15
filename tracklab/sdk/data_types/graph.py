@@ -247,16 +247,16 @@ class Graph(Media):
 
     This class is typically used for saving and displaying neural net models.
     It represents the graph as an array of nodes and edges. The nodes can have
-    labels that can be visualized by wandb.
+    labels that can be visualized by tracklab.
 
     Attributes:
         format (string): Format to help wandb display the graph nicely.
-        nodes ([wandb.Node]): List of `wandb.Nodes`.
+        nodes ([tracklab.Node]): List of `tracklab.Nodes`.
         nodes_by_id (dict): dict of ids -> nodes
-        edges ([(wandb.Node, wandb.Node)]): List of pairs of nodes interpreted
+        edges ([(tracklab.Node, tracklab.Node)]): List of pairs of nodes interpreted
             as edges.
         loaded (boolean): Flag to tell whether the graph is completely loaded.
-        root (wandb.Node): Root node of the graph.
+        root (tracklab.Node): Root node of the graph.
 
     Examples:
     Import a keras model.
@@ -264,7 +264,7 @@ class Graph(Media):
     ```python
     import tracklab
 
-    wandb.Graph.from_keras(keras_model)
+    tracklab.Graph.from_keras(keras_model)
     ```
     """
 

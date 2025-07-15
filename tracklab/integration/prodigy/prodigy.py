@@ -9,9 +9,9 @@ Example usage:
 import tracklab
 from tracklab.integration.prodigy import upload_dataset
 
-run = wandb.init(project="prodigy")
+run = tracklab.init(project="prodigy")
 upload_dataset("name_of_dataset")
-wandb.finish()
+tracklab.finish()
 ```
 """
 
@@ -50,7 +50,7 @@ def named_entity(docs):
         html = spacy.displacy.render(
             docs, style="ent", page=True, minify=True, jupyter=False
         )
-        wandb_html = wandb.Html(html)
+        wandb_html = tracklab.Html(html)
         return wandb_html
 
 
@@ -189,7 +189,7 @@ def create_table(data):
         columns.append("spans_visual")
     if "image" in columns:
         columns.append("image_visual")
-    main_table = wandb.Table(columns=columns)
+    main_table = tracklab.Table(columns=columns)
 
     # Convert to dictionary format to maintain order during processing
     matrix = table_df.to_dict(orient="records")
@@ -235,9 +235,9 @@ def create_table(data):
                     # is url
                     try:
                         im = Image.open(urllib.request.urlopen(document["image"]))
-                        document["image_visual"] = wandb.Image(im)
+                        document["image_visual"] = tracklab.Image(im)
                     except urllib.error.URLError:
-                        wandb.termwarn(f"Image URL {document['image']} is invalid.")
+                        tracklab.termwarn(f"Image URL {document['image']} is invalid.")
                         document["image_visual"] = None
                 elif isbase64:
                     # is base64 uri
@@ -246,13 +246,13 @@ def create_table(data):
                         msg = base64.b64decode(imgb64)
                         buf = io.BytesIO(msg)
                         im = Image.open(buf)
-                        document["image_visual"] = wandb.Image(im)
+                        document["image_visual"] = tracklab.Image(im)
                     except base64.binascii.Error:
-                        wandb.termwarn(f"Base64 string {document['image']} is invalid.")
+                        tracklab.termwarn(f"Base64 string {document['image']} is invalid.")
                         document["image_visual"] = None
                 else:
                     # is data path
-                    document["image_visual"] = wandb.Image(document["image"])
+                    document["image_visual"] = tracklab.Image(document["image"])
 
         # Create row and append to table
         values_list = list(document.values())
@@ -266,11 +266,11 @@ def upload_dataset(dataset_name):
     Args:
         dataset_name: The name of the dataset in the Prodigy database.
     """
-    # Check if wandb.init has been called
-    if wandb.run is None:
-        raise ValueError("You must call wandb.init() before upload_dataset()")
+    # Check if tracklab.init has been called
+    if tracklab.run is None:
+        raise ValueError("You must call tracklab.init() before upload_dataset()")
 
-    with wb_telemetry.context(run=wandb.run) as tel:
+    with wb_telemetry.context(run=tracklab.run) as tel:
         tel.feature.prodigy = True
 
     prodigy_db = util.get_module(
@@ -287,5 +287,5 @@ def upload_dataset(dataset_name):
     for i, _d in enumerate(data):
         standardize(data[i], schema, array_dict_types)
     table = create_table(data)
-    wandb.log({dataset_name: table})
-    wandb.termlog(f"Prodigy dataset `{dataset_name}` uploaded.")
+    tracklab.log({dataset_name: table})
+    tracklab.termlog(f"Prodigy dataset `{dataset_name}` uploaded.")

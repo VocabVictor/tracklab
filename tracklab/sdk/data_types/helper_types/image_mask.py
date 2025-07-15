@@ -38,7 +38,7 @@ class ImageMask(Media):
         import numpy as np
         import tracklab
 
-        run = wandb.init()
+        run = tracklab.init()
         image = np.random.randint(low=0, high=256, size=(100, 100, 3), dtype=np.uint8)
         predicted_mask = np.empty((100, 100), dtype=np.uint8)
         ground_truth_mask = np.empty((100, 100), dtype=np.uint8)
@@ -55,7 +55,7 @@ class ImageMask(Media):
 
         class_labels = {0: "person", 1: "tree", 2: "car", 3: "road"}
 
-        masked_image = wandb.Image(
+        masked_image = tracklab.Image(
             image,
             masks={
                 "predictions": {
@@ -77,7 +77,7 @@ class ImageMask(Media):
         import numpy as np
         import tracklab
 
-        run = wandb.init()
+        run = tracklab.init()
         image = np.random.randint(low=0, high=256, size=(100, 100, 3), dtype=np.uint8)
         predicted_mask = np.empty((100, 100), dtype=np.uint8)
         ground_truth_mask = np.empty((100, 100), dtype=np.uint8)
@@ -94,7 +94,7 @@ class ImageMask(Media):
 
         class_labels = {0: "person", 1: "tree", 2: "car", 3: "road"}
 
-        class_set = wandb.Classes(
+        class_set = tracklab.Classes(
             [
                 {"name": "person", "id": 0},
                 {"name": "tree", "id": 1},
@@ -103,7 +103,7 @@ class ImageMask(Media):
             ]
         )
 
-        masked_image = wandb.Image(
+        masked_image = tracklab.Image(
             image,
             masks={
                 "predictions": {
@@ -118,7 +118,7 @@ class ImageMask(Media):
             classes=class_set,
         )
 
-        table = wandb.Table(columns=["image"])
+        table = tracklab.Table(columns=["image"])
         table.add_data(masked_image)
         run.log({"random_field": table})
         ```
@@ -168,7 +168,7 @@ class ImageMask(Media):
 
             pil_image = util.get_module(
                 "PIL.Image",
-                required='wandb.Image needs the PIL package. To get it, run "pip install pillow".',
+                required='tracklab.Image needs the PIL package. To get it, run "pip install pillow".',
             )
             image = pil_image.fromarray(val["mask_data"].astype(np.int8), mode="L")
 
@@ -216,11 +216,11 @@ class ImageMask(Media):
         if isinstance(run_or_artifact, Run):
             json_dict["_type"] = self.type_name()
             return json_dict
-        elif isinstance(run_or_artifact, wandb.Artifact):
+        elif isinstance(run_or_artifact, tracklab.Artifact):
             # Nothing special to add (used to add "digest", but no longer used.)
             return json_dict
         else:
-            raise TypeError("to_json accepts tracklab_run.Run or wandb.Artifact")
+            raise TypeError("to_json accepts tracklab_run.Run or tracklab.Artifact")
 
     @classmethod
     def type_name(cls: Type["ImageMask"]) -> str:

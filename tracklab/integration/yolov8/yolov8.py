@@ -48,7 +48,7 @@ class WandbCallback:
             project, str: The name of the Weights & Biases project, defaults to `"YOLOv8"` if `trainer.args.project` is not defined.
             tags, List[str]: A list of tags to be added to the Weights & Biases run, defaults to `["YOLOv8"]`.
             resume, str: Whether to resume a previous run on Weights & Biases, defaults to `None`.
-            **kwargs: Additional arguments to be passed to `wandb.init()`.
+            **kwargs: Additional arguments to be passed to `tracklab.init()`.
         """
         self.yolo = yolo
         self.run_name = run_name
@@ -64,8 +64,8 @@ class WandbCallback:
             trainer: A task trainer that's inherited from `:class:ultralytics.yolo.engine.trainer.BaseTrainer`
                     that contains the model training and optimization routine.
         """
-        if wandb.run is None:
-            self.run = wandb.init(
+        if tracklab.run is None:
+            self.run = tracklab.init(
                 name=self.run_name if self.run_name else trainer.args.name,
                 project=self.project
                 if self.project
@@ -76,7 +76,7 @@ class WandbCallback:
                 **self.kwargs,
             )
         else:
-            self.run = wandb.run
+            self.run = tracklab.run
         assert self.run is not None
         self.run.define_metric("epoch", hidden=True)
         self.run.define_metric(
@@ -94,7 +94,7 @@ class WandbCallback:
             "lr/*", step_metric="epoch", step_sync=True, summary="last"
         )
 
-        with telemetry.context(run=wandb.run) as tel:
+        with telemetry.context(run=tracklab.run) as tel:
             tel.feature.ultralytics_yolov8 = True
 
     def on_pretrain_routine_end(self, trainer: BaseTrainer) -> None:
@@ -127,7 +127,7 @@ class WandbCallback:
             self.run.log(
                 {
                     "train_batch_images": [
-                        wandb.Image(str(image_path), caption=image_path.stem)
+                        tracklab.Image(str(image_path), caption=image_path.stem)
                         for image_path in trainer.save_dir.glob("train_batch*.jpg")
                     ]
                 }
@@ -167,11 +167,11 @@ class WandbCallback:
             self.run.log(
                 {
                     "plots": [
-                        wandb.Image(str(image_path), caption=image_path.stem)
+                        tracklab.Image(str(image_path), caption=image_path.stem)
                         for image_path in trainer.save_dir.glob("*.png")
                     ],
                     "val_images": [
-                        wandb.Image(str(image_path), caption=image_path.stem)
+                        tracklab.Image(str(image_path), caption=image_path.stem)
                         for image_path in trainer.validator.save_dir.glob("val*.jpg")
                     ],
                 },
@@ -235,7 +235,7 @@ def add_callbacks(
         project, str: The name of the Weights & Biases project, defaults to `"YOLOv8"` if `trainer.args.project` is not defined.
         tags, List[str]: A list of tags to be added to the Weights & Biases run, defaults to `["YOLOv8"]`.
         resume, str: Whether to resume a previous run on Weights & Biases, defaults to `None`.
-        **kwargs: Additional arguments to be passed to `wandb.init()`.
+        **kwargs: Additional arguments to be passed to `tracklab.init()`.
 
     Usage:
     ```python
@@ -252,18 +252,18 @@ def add_callbacks(
     )
     ```
     """
-    wandb.termwarn(
+    tracklab.termwarn(
         """The wandb callback is currently in beta and is subject to change based on updates to `ultralytics yolov8`.
         The callback is tested and supported for ultralytics v8.0.43 and above.
         Please report any issues to https://github.com/wandb/wandb/issues with the tag `yolov8`.
         """,
         repeat=False,
     )
-    wandb.termwarn(
+    tracklab.termwarn(
         """This wandb callback is no longer functional and would be deprecated in the near future.
         We recommend you to use the updated callback using `from tracklab.integration.ultralytics import add_wandb_callback`.
         The updated callback is tested and supported for ultralytics 8.0.167 and above.
-        You can refer to https://docs.wandb.ai/guides/integrations/ultralytics for the updated documentation.
+        You can refer to https://docs.tracklab.ai/guides/integrations/ultralytics for the updated documentation.
         Please report any issues to https://github.com/wandb/wandb/issues with the tag `yolov8`.
         """,
         repeat=False,
@@ -277,7 +277,7 @@ def add_callbacks(
             yolo.add_callback(event, callback_fn)
         return yolo
     else:
-        wandb.termerror(
+        tracklab.termerror(
             "The RANK of the process to add the callbacks was neither 0 or -1."
             "No Weights & Biases callbacks were added to this instance of the YOLO model."
         )

@@ -302,7 +302,7 @@ class Registry:
         ):
             raise RuntimeError(
                 "saving the registry is not enabled on this wandb server version. "
-                "Please upgrade your server version or contact support at support@wandb.com."
+                "Please upgrade your server version or contact support at support@tracklab.com."
             )
 
         if self._no_updating_registry_types():
@@ -332,7 +332,7 @@ class Registry:
             raise ValueError(registry_save_error)
         if result.upsert_model.inserted:
             # This is not suppose trigger unless the user has messed with the `_saved_name` variable
-            wandb.termlog(
+            tracklab.termlog(
                 f"Created registry {self.name!r} in organization {self.organization!r} on save"
             )
         self._update_attributes(response["upsertModel"]["project"])
@@ -351,7 +351,7 @@ class Registry:
             self._saved_name = self.name
             if result.rename_project.inserted:
                 # This is not suppose trigger unless the user has messed with the `_saved_name` variable
-                wandb.termlog(f"Created new registry {self.name!r} on save")
+                tracklab.termlog(f"Created new registry {self.name!r} on save")
 
     def _no_updating_registry_types(self) -> bool:
         # artifact types draft means user assigned types to add that are not yet saved

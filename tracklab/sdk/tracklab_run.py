@@ -476,41 +476,41 @@ class RunStatus:
 class Run:
     """A unit of computation logged by W&B. Typically, this is an ML experiment.
 
-    Call [`wandb.init()`](https://docs.wandb.ai/ref/python/init/) to create a
-    new run. `wandb.init()` starts a new run and returns a `wandb.Run` object.
+    Call [`tracklab.init()`](https://docs.tracklab.ai/ref/python/init/) to create a
+    new run. `tracklab.init()` starts a new run and returns a `tracklab.Run` object.
     Each run is associated with a unique ID (run ID). W&B recommends using
     a context (`with` statement) manager to automatically finish the run.
 
     For distributed training experiments, you can either track each process
     separately using one run per process or track all processes to a single run.
-    See [Log distributed training experiments](https://docs.wandb.ai/guides/track/log/distributed-training)
+    See [Log distributed training experiments](https://docs.tracklab.ai/guides/track/log/distributed-training)
     for more information.
 
     You can log data to a run with `run.log()`. Anything you log using
     `run.log()` is sent to that run. See
-    [Create an experiment](https://docs.wandb.ai/guides/track/launch) or
-    [`wandb.init`](https://docs.wandb.ai/ref/python/init/) API reference page
+    [Create an experiment](https://docs.tracklab.ai/guides/track/launch) or
+    [`tracklab.init`](https://docs.tracklab.ai/ref/python/init/) API reference page
     or more information.
 
     There is a another `Run` object in the
-    [`wandb.apis.public`](https://docs.wandb.ai/ref/python/public-api/api/)
+    [`tracklab.apis.public`](https://docs.tracklab.ai/ref/python/public-api/api/)
     namespace. Use this object is to interact with runs that have already been
     created.
 
     Attributes:
         summary: (Summary) A summary of the run, which is a dictionary-like
             object. For more information, see
-            [Log summary metrics](https://docs.wandb.ai/guides/track/log/log-summary/).
+            [Log summary metrics](https://docs.tracklab.ai/guides/track/log/log-summary/).
 
     Examples:
-    Create a run with `wandb.init()`:
+    Create a run with `tracklab.init()`:
 
     ```python
     import tracklab
 
     # Start a new run and log some data
     # Use context manager (`with` statement) to automatically finish the run
-    with wandb.init(entity="entity", project="project") as run:
+    with tracklab.init(entity="entity", project="project") as run:
         run.log({"accuracy": acc, "loss": loss})
     ```
 
@@ -524,8 +524,8 @@ class Run:
 
     _teardown_hooks: list[TeardownHook]
 
-    _backend: wandb.sdk.backend.backend.Backend | None
-    _internal_run_interface: wandb.sdk.interface.interface_queue.InterfaceQueue | None
+    _backend: tracklab.sdk.backend.backend.Backend | None
+    _internal_run_interface: tracklab.sdk.interface.interface_queue.InterfaceQueue | None
     _wl: _WandbSetup | None
 
     _out_redir: redirect.RedirectBase | None
@@ -661,7 +661,7 @@ class Run:
 
         # Initial scope setup for sentry.
         # This might get updated when the actual run comes back.
-        wandb._sentry.configure_scope(
+        tracklab._sentry.configure_scope(
             tags=dict(self._settings),
             process_context="user",
         )
@@ -684,15 +684,15 @@ class Run:
             )
 
         # if run is from a launch queue, add queue id to _wandb config
-        launch_queue_name = wandb.env.get_launch_queue_name()
+        launch_queue_name = tracklab.env.get_launch_queue_name()
         if launch_queue_name:
             self._config[wandb_key]["launch_queue_name"] = launch_queue_name
 
-        launch_queue_entity = wandb.env.get_launch_queue_entity()
+        launch_queue_entity = tracklab.env.get_launch_queue_entity()
         if launch_queue_entity:
             self._config[wandb_key]["launch_queue_entity"] = launch_queue_entity
 
-        launch_trace_id = wandb.env.get_launch_trace_id()
+        launch_trace_id = tracklab.env.get_launch_trace_id()
         if launch_trace_id:
             self._config[wandb_key]["launch_trace_id"] = launch_trace_id
 
@@ -712,7 +712,7 @@ class Run:
                     os.environ.get("WANDB_ARTIFACTS", "{}")
                 )
             except (ValueError, SyntaxError):
-                wandb.termwarn("Malformed WANDB_ARTIFACTS, using original artifacts")
+                tracklab.termwarn("Malformed WANDB_ARTIFACTS, using original artifacts")
             else:
                 self._initialize_launch_artifact_maps(artifacts)
 
@@ -1011,7 +1011,7 @@ class Run:
         "training", "evaluation", or "inference". This is useful for organizing
         and filtering runs in the W&B UI, especially when you have multiple
         runs with different job types in the same project. For more
-        information, see [Organize runs](https://docs.wandb.ai/guides/runs/#organize-runs).
+        information, see [Organize runs](https://docs.tracklab.ai/guides/runs/#organize-runs).
         """
         return self._settings.run_job_type or ""
 
@@ -1066,7 +1066,7 @@ class Run:
         Offline runs do not have a project URL.
         """
         if self._settings._offline:
-            wandb.termwarn("URL not available in offline run")
+            tracklab.termwarn("URL not available in offline run")
             return None
         return self._settings.project_url
 
@@ -1105,7 +1105,7 @@ class Run:
         ```python
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.log_code()
         ```
 
@@ -1114,7 +1114,7 @@ class Run:
         ```python
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.log_code(
                 root="../",
                 include_fn=lambda path: path.endswith(".py") or path.endswith(".ipynb"),
@@ -1142,7 +1142,7 @@ class Run:
                 name_string = (
                     f"{self._settings.project}-{self._settings.program_relpath}"
                 )
-            name = wandb.util.make_artifact_name_safe(f"source-{name_string}")
+            name = tracklab.util.make_artifact_name_safe(f"source-{name_string}")
         art = InternalArtifact(name, "code")
         files_added = False
         if root is not None:
@@ -1159,7 +1159,7 @@ class Run:
                 files_added = True
                 art.add_file(file_path, name=save_name)
         if not files_added:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "No relevant files were detected in the specified directory. No code will be logged to your run."
             )
             return None
@@ -1199,7 +1199,7 @@ class Run:
         Offline runs do not have a sweep URL.
         """
         if self._settings._offline:
-            wandb.termwarn("URL not available in offline run")
+            tracklab.termwarn("URL not available in offline run")
             return None
         return self._settings.sweep_url
 
@@ -1229,7 +1229,7 @@ class Run:
         Offline runs will not have a url.
         """
         if self._settings._offline:
-            wandb.termwarn("URL not available in offline run")
+            tracklab.termwarn("URL not available in offline run")
             return None
         return self._settings.run_url
 
@@ -1268,12 +1268,12 @@ class Run:
             return
         for k, v in (("code", code), ("repo", repo), ("code_version", code_version)):
             if v and not RE_LABEL.match(v):
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Label added for '{k}' with invalid identifier '{v}' (ignored).",
                     repeat=False,
                 )
         for v in kwargs:
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Label added for unsupported key {v!r} (ignored).",
                 repeat=False,
             )
@@ -1342,7 +1342,7 @@ class Run:
         try:
             from IPython import display
         except ImportError:
-            wandb.termwarn(".display() only works in jupyter environments")
+            tracklab.termwarn(".display() only works in jupyter environments")
             return False
 
         display.display(display.HTML(self.to_html(height, hidden)))
@@ -1386,7 +1386,7 @@ class Run:
     ) -> Artifact:
         # artifacts can look like dicts as they are passed into the run config
         # since the run config stores them on the backend as a dict with fields shown
-        # in wandb.util.artifact_to_json
+        # in tracklab.util.artifact_to_json
         if _is_artifact_version_weave_dict(val):
             assert isinstance(val, dict)
             public_api = self._public_api()
@@ -1409,7 +1409,7 @@ class Run:
             else:
                 artifact = public_api._artifact(name=artifact_string)
             # in the future we'll need to support using artifacts from
-            # different instances of wandb.
+            # different instances of tracklab.
 
             assert artifact
             return self.use_artifact(artifact)
@@ -1435,7 +1435,7 @@ class Run:
     def _summary_get_current_summary_callback(self) -> dict[str, Any]:
         if self._is_finished:
             # TODO: WB-18420: fetch summary from backend and stage it before run is finished
-            wandb.termwarn("Summary data not available in finished run")
+            tracklab.termwarn("Summary data not available in finished run")
             return {}
         if not self._backend or not self._backend.interface:
             return {}
@@ -1549,7 +1549,7 @@ class Run:
         # Serialize custom charts before publishing
         data = self._serialize_custom_charts(data)
 
-        not_using_tensorboard = len(wandb.patched["tensorboard"]) == 0
+        not_using_tensorboard = len(tracklab.patched["tensorboard"]) == 0
         self._backend.interface.publish_partial_history(
             self,
             data,
@@ -1592,12 +1592,12 @@ class Run:
     def _set_library(self, library: _WandbSetup) -> None:
         self._wl = library
 
-    def _set_backend(self, backend: wandb.sdk.backend.backend.Backend) -> None:
+    def _set_backend(self, backend: tracklab.sdk.backend.backend.Backend) -> None:
         self._backend = backend
 
     def _set_internal_run_interface(
         self,
-        interface: wandb.sdk.interface.interface_queue.InterfaceQueue,
+        interface: tracklab.sdk.interface.interface_queue.InterfaceQueue,
     ) -> None:
         self._internal_run_interface = interface
 
@@ -1660,7 +1660,7 @@ class Run:
         if run_obj.forked:
             self._forked = run_obj.forked
 
-        wandb._sentry.configure_scope(
+        tracklab._sentry.configure_scope(
             process_context="user",
             tags=dict(self._settings),
         )
@@ -1680,7 +1680,7 @@ class Run:
             self._settings.git_remote_url = repo.remote_url
             self._settings.git_commit = repo.last_commit
         except Exception:
-            wandb.termwarn("Cannot find valid git repo associated with this directory.")
+            tracklab.termwarn("Cannot find valid git repo associated with this directory.")
 
     def _add_singleton(
         self, data_type: str, key: str, value: dict[int | str, str]
@@ -1718,16 +1718,16 @@ class Run:
         commit: bool | None = None,
     ) -> None:
         if not isinstance(data, Mapping):
-            raise TypeError("wandb.log must be passed a dictionary")
+            raise TypeError("tracklab.log must be passed a dictionary")
 
         if any(not isinstance(key, str) for key in data.keys()):
-            raise TypeError("Key values passed to `wandb.log` must be strings.")
+            raise TypeError("Key values passed to `tracklab.log` must be strings.")
 
         self._partial_history_callback(data, step, commit)
 
         if step is not None:
             if os.getpid() != self._init_pid or self._is_attached:
-                wandb.termwarn(
+                tracklab.termwarn(
                     "Note that setting step in multiprocessing can result in data loss. "
                     "Please use `run.define_metric(...)` to define a custom metric "
                     "to log your step values.",
@@ -1736,8 +1736,8 @@ class Run:
             # if step is passed in when tensorboard_sync is used we honor the step passed
             # to make decisions about how to close out the history record, but will strip
             # this history later on in publish_history()
-            if len(wandb.patched["tensorboard"]) > 0:
-                wandb.termwarn(
+            if len(tracklab.patched["tensorboard"]) > 0:
+                tracklab.termwarn(
                     "Step cannot be set when using tensorboard syncing. "
                     "Please use `run.define_metric(...)` to define a custom metric "
                     "to log your step values.",
@@ -1761,7 +1761,7 @@ class Run:
         """Upload run data.
 
         Use `log` to log data from runs, such as scalars, images, video,
-        histograms, plots, and tables. See [Log objects and media](https://docs.wandb.ai/guides/track/log) for
+        histograms, plots, and tables. See [Log objects and media](https://docs.tracklab.ai/guides/track/log) for
         code snippets, best practices, and more.
 
         Basic usage:
@@ -1769,23 +1769,23 @@ class Run:
         ```python
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.log({"train-loss": 0.5, "accuracy": 0.9})
         ```
 
         The previous code snippet saves the loss and accuracy to the run's
         history and updates the summary values for these metrics.
 
-        Visualize logged data in a workspace at [wandb.ai](https://wandb.ai),
-        or locally on a [self-hosted instance](https://docs.wandb.ai/guides/hosting)
+        Visualize logged data in a workspace at [tracklab.ai](https://tracklab.ai),
+        or locally on a [self-hosted instance](https://docs.tracklab.ai/guides/hosting)
         of the W&B app, or export data to visualize and explore locally, such as in a
-        Jupyter notebook, with the [Public API](https://docs.wandb.ai/guides/track/public-api-guide).
+        Jupyter notebook, with the [Public API](https://docs.tracklab.ai/guides/track/public-api-guide).
 
         Logged values don't have to be scalars. You can log any
-        [W&B supported Data Type](https://docs.wandb.ai/ref/python/data-types/)
+        [W&B supported Data Type](https://docs.tracklab.ai/ref/python/data-types/)
         such as images, audio, video, and more. For example, you can use
-        `wandb.Table` to log structured data. See
-        [Log tables, visualize and query data](https://docs.wandb.ai/guides/models/tables/tables-walkthrough)
+        `tracklab.Table` to log structured data. See
+        [Log tables, visualize and query data](https://docs.tracklab.ai/guides/models/tables/tables-walkthrough)
         tutorial for more details.
 
         W&B organizes metrics with a forward slash (`/`) in their name
@@ -1813,7 +1813,7 @@ class Run:
         By default, each call to `log` creates a new "step".
         The step must always increase, and it is not possible to log
         to a previous step. You can use any metric as the X axis in charts.
-        See [Custom log axes](https://docs.wandb.ai/guides/track/log/customize-logging-axes/)
+        See [Custom log axes](https://docs.tracklab.ai/guides/track/log/customize-logging-axes/)
         for more details.
 
         In many cases, it is better to treat the W&B step like
@@ -1850,7 +1850,7 @@ class Run:
         Args:
             data: A `dict` with `str` keys and values that are serializable
                 Python objects including: `int`, `float` and `string`;
-                any of the `wandb.data_types`; lists, tuples and NumPy arrays
+                any of the `tracklab.data_types`; lists, tuples and NumPy arrays
                 of serializable Python objects; other `dict`s of this
                 structure.
             step: The step number to log. If `None`, then an implicit
@@ -1863,14 +1863,14 @@ class Run:
 
         Examples:
         For more and more detailed examples, see
-        [our guides to logging](https://docs.wandb.com/guides/track/log).
+        [our guides to logging](https://docs.tracklab.com/guides/track/log).
 
         Basic usage
 
         ```python
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.log({"train-loss": 0.5, "accuracy": 0.9
         ```
 
@@ -1879,7 +1879,7 @@ class Run:
         ```python
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.log({"loss": 0.2}, commit=False)
             # Somewhere else when I'm ready to report this step:
             run.log({"accuracy": 0.8})
@@ -1893,8 +1893,8 @@ class Run:
 
         # sample gradients at random from normal distribution
         gradients = np.random.randn(100, 100)
-        with wandb.init() as run:
-            run.log({"gradients": wandb.Histogram(gradients)})
+        with tracklab.init() as run:
+            run.log({"gradients": tracklab.Histogram(gradients)})
         ```
 
         Image from NumPy
@@ -1903,11 +1903,11 @@ class Run:
         import numpy as np
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             examples = []
             for i in range(3):
                 pixels = np.random.randint(low=0, high=256, size=(100, 100, 3))
-                image = wandb.Image(pixels, caption=f"random field {i}")
+                image = tracklab.Image(pixels, caption=f"random field {i}")
                 examples.append(image)
             run.log({"examples": examples})
         ```
@@ -1919,7 +1919,7 @@ class Run:
         from PIL import Image as PILImage
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             examples = []
             for i in range(3):
                 pixels = np.random.randint(
@@ -1929,7 +1929,7 @@ class Run:
                     dtype=np.uint8,
                 )
                 pil_image = PILImage.fromarray(pixels, mode="RGB")
-                image = wandb.Image(pil_image, caption=f"random field {i}")
+                image = tracklab.Image(pil_image, caption=f"random field {i}")
                 examples.append(image)
             run.log({"examples": examples})
         ```
@@ -1940,7 +1940,7 @@ class Run:
         import numpy as np
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             # axes are (time, channel, height, width)
             frames = np.random.randint(
                 low=0,
@@ -1948,7 +1948,7 @@ class Run:
                 size=(10, 3, 100, 100),
                 dtype=np.uint8,
             )
-            run.log({"video": wandb.Video(frames, fps=4)})
+            run.log({"video": tracklab.Video(frames, fps=4)})
         ```
 
         Matplotlib plot
@@ -1958,7 +1958,7 @@ class Run:
         import numpy as np
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             fig, ax = plt.subplots()
             x = np.linspace(0, 10)
             y = x * x
@@ -1971,8 +1971,8 @@ class Run:
         ```python
         import tracklab
 
-        with wandb.init() as run:
-            run.log({"pr": wandb.plot.pr_curve(y_test, y_probas, labels)})
+        with tracklab.init() as run:
+            run.log({"pr": tracklab.plot.pr_curve(y_test, y_probas, labels)})
         ```
 
         3D Object
@@ -1980,20 +1980,20 @@ class Run:
         ```python
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.log(
                 {
                     "generated_samples": [
-                        wandb.Object3D(open("sample.obj")),
-                        wandb.Object3D(open("sample.gltf")),
-                        wandb.Object3D(open("sample.glb")),
+                        tracklab.Object3D(open("sample.obj")),
+                        tracklab.Object3D(open("sample.gltf")),
+                        tracklab.Object3D(open("sample.glb")),
                     ]
                 }
             )
         ```
 
         Raises:
-            wandb.Error: if called before `wandb.init`
+            tracklab.Error: if called before `tracklab.init`
             ValueError: if invalid data is passed
 
         """
@@ -2002,8 +2002,8 @@ class Run:
                 tel.feature.set_step_log = True
 
         if self._settings._shared and step is not None:
-            wandb.termwarn(
-                "In shared mode, the use of `wandb.log` with the step argument is not supported "
+            tracklab.termwarn(
+                "In shared mode, the use of `tracklab.log` with the step argument is not supported "
                 f"and will be ignored. Please refer to {url_registry.url('define-metric')} "
                 "on how to customize your x-axis.",
                 repeat=False,
@@ -2050,7 +2050,7 @@ class Run:
         ```python
         import tracklab
 
-        run = wandb.init()
+        run = tracklab.init()
 
         run.save("these/are/myfiles/*")
         # => Saves files in a "these/are/myfiles/" folder in the run.
@@ -2077,7 +2077,7 @@ class Run:
             glob_str = glob_str.decode("utf-8")
         if isinstance(glob_str, str) and (glob_str.startswith(("gs://", "s3://"))):
             # Provide a better error message for a common misuse.
-            wandb.termlog(f"{glob_str} is a cloud storage url, can't save file to W&B.")
+            tracklab.termlog(f"{glob_str} is a cloud storage url, can't save file to W&B.")
             return []
         # NOTE: We use PurePath instead of Path because WindowsPath doesn't
         # like asterisks and errors out in resolve(). It also makes logical
@@ -2091,10 +2091,10 @@ class Run:
             base_path = pathlib.Path(".")
         else:
             # Absolute glob paths with no base path get special handling.
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Saving files without folders. If you want to preserve "
-                "subdirectories pass base_path to wandb.save, i.e. "
-                'wandb.save("/mnt/folder/file.h5", base_path="/mnt")',
+                "subdirectories pass base_path to tracklab.save, i.e. "
+                'tracklab.save("/mnt/folder/file.h5", base_path="/mnt")',
                 repeat=False,
             )
             base_path = resolved_glob_path.parent.parent
@@ -2172,9 +2172,9 @@ class Run:
             file_str = f"{len(globbed_files)} file"
             if len(globbed_files) > 1:
                 file_str += "s"
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Symlinked {file_str} into the W&B run directory, "
-                "call wandb.save again to sync new files."
+                "call tracklab.save again to sync new files."
             )
 
         files_dict: FilesDict = {
@@ -2229,14 +2229,14 @@ class Run:
         Args:
             exit_code: Integer indicating the run's exit status. Use 0 for success,
                 any other value marks the run as failed.
-            quiet: Deprecated. Configure logging verbosity using `wandb.Settings(quiet=...)`.
+            quiet: Deprecated. Configure logging verbosity using `tracklab.Settings(quiet=...)`.
         """
         if quiet is not None:
             deprecate.deprecate(
                 field_name=Deprecated.run__finish_quiet,
                 warning_message=(
-                    "The `quiet` argument to `wandb.run.finish()` is deprecated, "
-                    "use `wandb.Settings(quiet=...)` to set this instead."
+                    "The `quiet` argument to `tracklab.run.finish()` is deprecated, "
+                    "use `tracklab.Settings(quiet=...)` to set this instead."
                 ),
                 run=self,
             )
@@ -2285,9 +2285,9 @@ class Run:
                 service.inform_finish(run_id=self._settings.run_id)
 
         finally:
-            if wandb.run is self:
+            if tracklab.run is self:
                 module.unset_globals()
-            wandb._sentry.end_session()
+            tracklab._sentry.end_session()
 
     @_log_to_run
     @_raise_if_finished
@@ -2380,7 +2380,7 @@ class Run:
                         "on Windows when tensorflow is imported. Falling back to "
                         "wrapping stdout/err."
                     )
-                    wandb.termlog(msg)
+                    tracklab.termlog(msg)
                     self._redirect(None, None, console="wrap")
 
                 add_import_hook("tensorflow", wrap_fallback)
@@ -2428,7 +2428,7 @@ class Run:
             self._err_redir = err_redir
             logger.info("Redirects installed.")
         except Exception as e:
-            wandb.termwarn(f"Failed to redirect: {e}")
+            tracklab.termwarn(f"Failed to redirect: {e}")
             logger.exception("Failed to redirect.")
         return
 
@@ -2466,14 +2466,14 @@ class Run:
             self._on_finish()
 
         except KeyboardInterrupt:
-            if not wandb.wandb_agent._is_running():  # type: ignore
-                wandb.termerror("Control-C detected -- Run data was not synced")
+            if not tracklab.wandb_agent._is_running():  # type: ignore
+                tracklab.termerror("Control-C detected -- Run data was not synced")
             raise
 
         except Exception:
             self._console_stop()
             logger.exception("Problem finishing run")
-            wandb.termerror("Problem finishing run")
+            tracklab.termerror("Problem finishing run")
             raise
 
         Run._footer(
@@ -2626,7 +2626,7 @@ class Run:
         if not docker_image_name:
             return None
 
-        name = wandb.util.make_artifact_name_safe(f"job-{docker_image_name}")
+        name = tracklab.util.make_artifact_name_safe(f"job-{docker_image_name}")
         s_args: Sequence[str] = args if args is not None else self._settings._args
         source_info: JobSourceDict = {
             "_version": "v0",
@@ -2658,7 +2658,7 @@ class Run:
         artifact = self.log_artifact(job_artifact)
 
         if not artifact:
-            raise wandb.Error(f"Job Artifact log unsuccessful: {artifact}")
+            raise tracklab.Error(f"Job Artifact log unsuccessful: {artifact}")
         else:
             return artifact
 
@@ -2779,7 +2779,7 @@ class Run:
         goal: str | None = None,
         overwrite: bool | None = None,
     ) -> tracklab_metric.Metric:
-        """Customize metrics logged with `wandb.log()`.
+        """Customize metrics logged with `tracklab.log()`.
 
         Args:
             name: The name of the metric to customize.
@@ -2841,7 +2841,7 @@ class Run:
         overwrite: bool | None = None,
     ) -> tracklab_metric.Metric:
         if not name:
-            raise wandb.Error("define_metric() requires non-empty name argument")
+            raise tracklab.Error("define_metric() requires non-empty name argument")
         if isinstance(step_metric, tracklab_metric.Metric):
             step_metric = step_metric.name
         for arg_name, arg_val, exp_type in (
@@ -2856,12 +2856,12 @@ class Run:
             # NOTE: type checking is broken for isinstance and str
             if arg_val is not None and not isinstance(arg_val, exp_type):
                 arg_type = type(arg_val).__name__
-                raise wandb.Error(
+                raise tracklab.Error(
                     f"Unhandled define_metric() arg: {arg_name} type: {arg_type}"
                 )
         stripped = name[:-1] if name.endswith("*") else name
         if "*" in stripped:
-            raise wandb.Error(
+            raise tracklab.Error(
                 f"Unhandled define_metric() arg: name (glob suffixes only): {name}"
             )
         summary_ops: Sequence[str] | None = None
@@ -2872,7 +2872,7 @@ class Run:
             # TODO: deprecate copy and best
             for i in summary_items:
                 if i not in valid:
-                    raise wandb.Error(f"Unhandled define_metric() arg: summary op: {i}")
+                    raise tracklab.Error(f"Unhandled define_metric() arg: summary op: {i}")
                 summary_ops.append(i)
             with telemetry.context(run=self) as tel:
                 tel.feature.metric_summary = True
@@ -2882,7 +2882,7 @@ class Run:
             goal_cleaned = goal[:3].lower()
             valid_goal = {"min", "max"}
             if goal_cleaned not in valid_goal:
-                raise wandb.Error(f"Unhandled define_metric() arg: goal: {goal}")
+                raise tracklab.Error(f"Unhandled define_metric() arg: goal: {goal}")
             with telemetry.context(run=self) as tel:
                 tel.feature.metric_goal = True
         if hidden:
@@ -2929,15 +2929,15 @@ class Run:
             log: Specifies whether to log "gradients", "parameters", or "all".
                 Set to None to disable logging. (default="gradients").
             log_freq: Frequency (in batches) to log gradients and parameters. (default=1000)
-            idx: Index used when tracking multiple models with `wandb.watch`. (default=None)
+            idx: Index used when tracking multiple models with `tracklab.watch`. (default=None)
             log_graph: Whether to log the model's computational graph. (default=False)
 
         Raises:
             ValueError:
-                If `wandb.init` has not been called or if any of the models are not instances
+                If `tracklab.init` has not been called or if any of the models are not instances
                 of `torch.nn.Module`.
         """
-        wandb.sdk._watch(self, models, criterion, log, log_freq, idx, log_graph)
+        tracklab.sdk._watch(self, models, criterion, log, log_freq, idx, log_graph)
 
     @_log_to_run
     @_attach
@@ -2949,7 +2949,7 @@ class Run:
         Args:
             models: Optional list of pytorch models that have had watch called on them.
         """
-        wandb.sdk._unwatch(self, models=models)
+        tracklab.sdk._unwatch(self, models=models)
 
     @_log_to_run
     @_raise_if_finished
@@ -3028,7 +3028,7 @@ class Run:
         ```python
         import tracklab
 
-        run = wandb.init(project="<example>")
+        run = tracklab.init(project="<example>")
 
         # Use an artifact by name and alias
         artifact_a = run.use_artifact(artifact_or_name="<name>:<alias>")
@@ -3093,7 +3093,7 @@ class Run:
                 aliases = [aliases]
             if isinstance(artifact_or_name, Artifact) and artifact.is_draft():
                 if use_as is not None:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         "Indicating use_as is not supported when using a draft artifact"
                     )
                 self._log_artifact(
@@ -3112,7 +3112,7 @@ class Run:
             else:
                 raise ValueError(
                     'You must pass an artifact name (e.g. "pedestrian-dataset:v1"), '
-                    "an instance of `wandb.Artifact`, or `wandb.Api().artifact()` to `use_artifact`"
+                    "an instance of `tracklab.Artifact`, or `tracklab.Api().artifact()` to `use_artifact`"
                 )
         if self._backend and self._backend.interface:
             self._backend.interface.publish_use_artifact(artifact)
@@ -3138,7 +3138,7 @@ class Run:
                     - `/local/directory/file.txt`
                     - `s3://bucket/path`
                 You can also pass an Artifact object created by calling
-                `wandb.Artifact`.
+                `tracklab.Artifact`.
             name: (str, optional) An artifact name. Valid names can be in the following forms:
                     - name:version
                     - name:alias
@@ -3234,7 +3234,7 @@ class Run:
                     - `/local/directory/file.txt`
                     - `s3://bucket/path`
                 You can also pass an Artifact object created by calling
-                `wandb.Artifact`.
+                `tracklab.Artifact`.
             name: An artifact name. May be prefixed with entity/project.
                 Valid names can be in the following forms:
                     - name:version
@@ -3280,7 +3280,7 @@ class Run:
         use_after_commit: bool = False,
     ) -> Artifact:
         if self._settings.anonymous in ["allow", "must"]:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Artifacts logged anonymously cannot be claimed and expire after 7 days."
             )
 
@@ -3407,7 +3407,7 @@ class Run:
             artifact = artifact_or_path
         if not isinstance(artifact, Artifact):
             raise TypeError(
-                "You must pass an instance of wandb.Artifact or a "
+                "You must pass an instance of tracklab.Artifact or a "
                 "valid file path to log_artifact"
             )
 
@@ -3697,7 +3697,7 @@ class Run:
             return
 
         # TODO: add this to a higher verbosity level
-        self._printer.display(f"Tracking run with wandb version {wandb.__version__}")
+        self._printer.display(f"Tracking run with wandb version {tracklab.__version__}")
 
     def _header_sync_info(self) -> None:
         if self._settings._offline:
@@ -3741,7 +3741,7 @@ class Run:
         if printer.supports_html:
             import tracklab.jupyter
 
-            if not wandb.jupyter.display_if_magic_is_used(self):
+            if not tracklab.jupyter.display_if_magic_is_used(self):
                 run_line = f"<strong>{printer.link(run_url, run_name)}</strong>"
                 project_line, sweep_line = "", ""
 
@@ -3889,7 +3889,7 @@ class Run:
             logger.info("rendering history")
 
             sampled_history = {
-                item.key: wandb.util.downsample(
+                item.key: tracklab.util.downsample(
                     item.values_float or item.values_int, 40
                 )
                 for item in history.item
@@ -3973,26 +3973,26 @@ def restore(
     Args:
         name: The name of the file.
         run_path: Optional path to a run to pull files from, i.e. `username/project_name/run_id`
-            if wandb.init has not been called, this is required.
+            if tracklab.init has not been called, this is required.
         replace: Whether to download the file even if it already exists locally
         root: The directory to download the file to.  Defaults to the current
-            directory or the run directory if wandb.init was called.
+            directory or the run directory if tracklab.init was called.
 
     Returns:
         None if it can't find the file, otherwise a file object open for reading.
 
     Raises:
-        wandb.CommError: If W&B can't connect to the W&B backend.
+        tracklab.CommError: If W&B can't connect to the W&B backend.
         ValueError: If the file is not found or can't find run_path.
     """
-    is_disabled = wandb.run is not None and wandb.run.disabled
-    run = None if is_disabled else wandb.run
+    is_disabled = tracklab.run is not None and tracklab.run.disabled
+    run = None if is_disabled else tracklab.run
     if run_path is None:
         if run is not None:
             run_path = run.path
         else:
             raise ValueError(
-                "run_path required when calling wandb.restore before wandb.init"
+                "run_path required when calling tracklab.restore before tracklab.init"
             )
     if root is None:
         if run is not None:
@@ -4040,7 +4040,7 @@ def finish(
     Args:
         exit_code: Integer indicating the run's exit status. Use 0 for success,
             any other value marks the run as failed.
-        quiet: Deprecated. Configure logging verbosity using `wandb.Settings(quiet=...)`.
+        quiet: Deprecated. Configure logging verbosity using `tracklab.Settings(quiet=...)`.
     """
-    if wandb.run:
-        wandb.run.finish(exit_code=exit_code, quiet=quiet)
+    if tracklab.run:
+        tracklab.run.finish(exit_code=exit_code, quiet=quiet)

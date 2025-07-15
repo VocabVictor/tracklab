@@ -29,7 +29,7 @@ def summary_metrics(model=None, X=None, y=None, X_test=None, y_test=None):  # no
 
     Example:
     ```python
-    wandb.sklearn.plot_summary_metrics(model, X_train, y_train, X_test, y_test)
+    tracklab.sklearn.plot_summary_metrics(model, X_train, y_train, X_test, y_test)
     ```
     """
     not_missing = utils.test_missing(
@@ -42,7 +42,7 @@ def summary_metrics(model=None, X=None, y=None, X_test=None, y_test=None):  # no
 
     if not_missing and correct_types and model_fitted:
         metrics_chart = calculate.summary_metrics(model, X, y, X_test, y_test)
-        wandb.log({"summary_metrics": metrics_chart})
+        tracklab.log({"summary_metrics": metrics_chart})
 
 
 def learning_curve(
@@ -74,7 +74,7 @@ def learning_curve(
 
     Example:
     ```python
-    wandb.sklearn.plot_learning_curve(model, X, y)
+    tracklab.sklearn.plot_learning_curve(model, X, y)
     ```
     """
     not_missing = utils.test_missing(model=model, X=X, y=y)
@@ -88,4 +88,4 @@ def learning_curve(
             model, X, y, cv, shuffle, random_state, train_sizes, n_jobs, scoring
         )
 
-        wandb.log({"learning_curve": learning_curve_chart})
+        tracklab.log({"learning_curve": learning_curve_chart})

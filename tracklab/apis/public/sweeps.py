@@ -23,8 +23,8 @@ print(f"Metrics: {best_run.summary}")
 
 Note:
     This module is part of the W&B Public API and provides read-only access
-    to sweep data. For creating and controlling sweeps, use the wandb.sweep()
-    and wandb.agent() functions from the main wandb package.
+    to sweep data. For creating and controlling sweeps, use the tracklab.sweep()
+    and tracklab.agent() functions from the main wandb package.
 """
 
 import urllib
@@ -119,7 +119,7 @@ class Sweep(Attrs):
     @property
     def username(self):
         """Deprecated. Use `Sweep.entity` instead."""
-        wandb.termwarn("Sweep.username is deprecated. please use Sweep.entity instead.")
+        tracklab.termwarn("Sweep.username is deprecated. please use Sweep.entity instead.")
         return self._entity
 
     @property
@@ -158,11 +158,11 @@ class Sweep(Attrs):
         else:
             order = public.QueryGenerator.format_order_key(order)
         if order is None:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "No order specified and couldn't find metric in sweep config, returning most recent run"
             )
         else:
-            wandb.termlog("Sorting runs by {}".format(order))
+            tracklab.termlog("Sorting runs by {}".format(order))
         filters = {"$and": [{"sweep": self.id}]}
         try:
             return public.Runs(
@@ -199,7 +199,7 @@ class Sweep(Attrs):
         The sweep URL is generated from the entity, project, the term
         "sweeps", and the sweep ID.run_id. For
         SaaS users, it takes the form
-        of `https://wandb.ai/entity/project/sweeps/sweeps_ID`.
+        of `https://tracklab.ai/entity/project/sweeps/sweeps_ID`.
         """
         path = self.path
         path.insert(2, "sweeps")

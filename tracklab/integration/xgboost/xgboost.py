@@ -46,20 +46,20 @@ def wandb_callback() -> "Callable":
 
     def callback(env: "CallbackEnv") -> None:
         for k, v in env.evaluation_result_list:
-            wandb.log({k: v}, commit=False)
-        wandb.log({})
+            tracklab.log({k: v}, commit=False)
+        tracklab.log({})
 
     return callback
 
 
 class WandbCallback(xgb.callback.TrainingCallback):
-    """`WandbCallback` automatically integrates XGBoost with wandb.
+    """`WandbCallback` automatically integrates XGBoost with tracklab.
 
     Args:
         log_model: (boolean) if True save and upload the model to Weights & Biases Artifacts
         log_feature_importance: (boolean) if True log a feature importance bar plot
         importance_type: (str) one of {weight, gain, cover, total_gain, total_cover} for tree model. weight for linear model.
-        define_metric: (boolean) if True (default) capture model performance at the best step, instead of the last step, of training in your `wandb.summary`.
+        define_metric: (boolean) if True (default) capture model performance at the best step, instead of the last step, of training in your `tracklab.summary`.
 
     Passing `WandbCallback` to XGBoost will:
 
@@ -69,7 +69,7 @@ class WandbCallback(xgb.callback.TrainingCallback):
     - log the best score and the best iteration
     - save and upload your trained model to Weights & Biases Artifacts (when `log_model = True`)
     - log feature importance plot when `log_feature_importance=True` (default).
-    - Capture the best eval metric in `wandb.summary` when `define_metric=True` (default).
+    - Capture the best eval metric in `tracklab.summary` when `define_metric=True` (default).
 
     Example:
         ```python
@@ -105,8 +105,8 @@ class WandbCallback(xgb.callback.TrainingCallback):
         self.importance_type: str = importance_type
         self.define_metric: bool = define_metric
 
-        if wandb.run is None:
-            raise wandb.Error("You must call wandb.init() before WandbCallback()")
+        if tracklab.run is None:
+            raise tracklab.Error("You must call tracklab.init() before WandbCallback()")
 
         with wb_telemetry.context() as tel:
             tel.feature.xgboost_wandb_callback = True
@@ -115,7 +115,7 @@ class WandbCallback(xgb.callback.TrainingCallback):
         """Run before training is finished."""
         # Update W&B config
         config = model.save_config()
-        wandb.config.update(json.loads(config))
+        tracklab.config.update(json.loads(config))
 
         return model
 
@@ -131,7 +131,7 @@ class WandbCallback(xgb.callback.TrainingCallback):
 
         # Log the best score and best iteration
         if model.attr("best_score") is not None:
-            wandb.log(
+            tracklab.log(
                 {
                     "best_score": float(cast(str, model.attr("best_score"))),
                     "best_iteration": int(cast(str, model.attr("best_iteration"))),
@@ -147,32 +147,32 @@ class WandbCallback(xgb.callback.TrainingCallback):
             for metric_name, log in metric.items():
                 if self.define_metric:
                     self._define_metric(data, metric_name)
-                    wandb.log({f"{data}-{metric_name}": log[-1]}, commit=False)
+                    tracklab.log({f"{data}-{metric_name}": log[-1]}, commit=False)
                 else:
-                    wandb.log({f"{data}-{metric_name}": log[-1]}, commit=False)
+                    tracklab.log({f"{data}-{metric_name}": log[-1]}, commit=False)
 
-        wandb.log({"epoch": epoch})
+        tracklab.log({"epoch": epoch})
 
         self.define_metric = False
 
         return False
 
     def _log_model_as_artifact(self, model: Booster) -> None:
-        model_name = f"{wandb.run.id}_model.json"  # type: ignore
-        model_path = Path(wandb.run.dir) / model_name  # type: ignore
+        model_name = f"{tracklab.run.id}_model.json"  # type: ignore
+        model_path = Path(tracklab.run.dir) / model_name  # type: ignore
         model.save_model(str(model_path))
 
-        model_artifact = wandb.Artifact(name=model_name, type="model")
+        model_artifact = tracklab.Artifact(name=model_name, type="model")
         model_artifact.add_file(str(model_path))
-        wandb.log_artifact(model_artifact)
+        tracklab.log_artifact(model_artifact)
 
     def _log_feature_importance(self, model: Booster) -> None:
         fi = model.get_score(importance_type=self.importance_type)
         fi_data = [[k, fi[k]] for k in fi]
-        table = wandb.Table(data=fi_data, columns=["Feature", "Importance"])
-        wandb.log(
+        table = tracklab.Table(data=fi_data, columns=["Feature", "Importance"])
+        tracklab.log(
             {
-                "Feature Importance": wandb.plot.bar(
+                "Feature Importance": tracklab.plot.bar(
                     table, "Feature", "Importance", title="Feature Importance"
                 )
             }
@@ -180,10 +180,10 @@ class WandbCallback(xgb.callback.TrainingCallback):
 
     def _define_metric(self, data: str, metric_name: str) -> None:
         if "loss" in str.lower(metric_name):
-            wandb.define_metric(f"{data}-{metric_name}", summary="min")
+            tracklab.define_metric(f"{data}-{metric_name}", summary="min")
         elif str.lower(metric_name) in MINIMIZE_METRICS:
-            wandb.define_metric(f"{data}-{metric_name}", summary="min")
+            tracklab.define_metric(f"{data}-{metric_name}", summary="min")
         elif str.lower(metric_name) in MAXIMIZE_METRICS:
-            wandb.define_metric(f"{data}-{metric_name}", summary="max")
+            tracklab.define_metric(f"{data}-{metric_name}", summary="max")
         else:
             pass

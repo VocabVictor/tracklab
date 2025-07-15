@@ -17,7 +17,7 @@ class WandbMetricsLogger(callbacks.Callback):
     """Logger that sends system metrics to W&B.
 
     `WandbMetricsLogger` automatically logs the `logs` dictionary that callback methods
-    take as argument to wandb.
+    take as argument to tracklab.
 
     This callback automatically logs the following to a W&B run page:
     * system (CPU/GPU/TPU) metrics,
@@ -51,12 +51,12 @@ class WandbMetricsLogger(callbacks.Callback):
     ) -> None:
         super().__init__(*args, **kwargs)
 
-        if wandb.run is None:
-            raise wandb.Error(
-                "You must call `wandb.init()` before WandbMetricsLogger()"
+        if tracklab.run is None:
+            raise tracklab.Error(
+                "You must call `tracklab.init()` before WandbMetricsLogger()"
             )
 
-        with telemetry.context(run=wandb.run) as tel:
+        with telemetry.context(run=tracklab.run) as tel:
             tel.feature.keras_metrics_logger = True
 
         if log_freq == "batch":
@@ -69,14 +69,14 @@ class WandbMetricsLogger(callbacks.Callback):
 
         if self.logging_batch_wise:
             # define custom x-axis for batch logging.
-            wandb.define_metric("batch/batch_step")
+            tracklab.define_metric("batch/batch_step")
             # set all batch metrics to be logged against batch_step.
-            wandb.define_metric("batch/*", step_metric="batch/batch_step")
+            tracklab.define_metric("batch/*", step_metric="batch/batch_step")
         else:
             # define custom x-axis for epoch-wise logging.
-            wandb.define_metric("epoch/epoch")
+            tracklab.define_metric("epoch/epoch")
             # set all epoch-wise metrics to be logged against epoch.
-            wandb.define_metric("epoch/*", step_metric="epoch/epoch")
+            tracklab.define_metric("epoch/*", step_metric="epoch/epoch")
 
     def _get_lr(self) -> Union[float, None]:
         if isinstance(
@@ -92,7 +92,7 @@ class WandbMetricsLogger(callbacks.Callback):
                 self.model.optimizer.learning_rate(step=self.global_step).numpy().item()
             )
         except Exception as e:
-            wandb.termerror(f"Unable to log learning rate: {e}", repeat=False)
+            tracklab.termerror(f"Unable to log learning rate: {e}", repeat=False)
             return None
 
     def on_epoch_end(self, epoch: int, logs: Optional[Dict[str, Any]] = None) -> None:
@@ -105,7 +105,7 @@ class WandbMetricsLogger(callbacks.Callback):
         if lr is not None:
             logs["epoch/learning_rate"] = lr
 
-        wandb.log(logs)
+        tracklab.log(logs)
 
     def on_batch_end(self, batch: int, logs: Optional[Dict[str, Any]] = None) -> None:
         self.global_step += 1
@@ -118,7 +118,7 @@ class WandbMetricsLogger(callbacks.Callback):
             if lr is not None:
                 logs["batch/learning_rate"] = lr
 
-            wandb.log(logs)
+            tracklab.log(logs)
 
             self.global_batch += self.log_freq
 

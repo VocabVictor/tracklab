@@ -836,12 +836,12 @@ class InterfaceBase:
     ):
         """Publishes a request to add inputs to the job.
 
-        If run_config is True, the wandb.config will be added as a job input.
+        If run_config is True, the tracklab.config will be added as a job input.
         If file_path is provided, the file at file_path will be added as a job
         input.
 
         The paths provided as arguments are sequences of dictionary keys that
-        specify a path within the wandb.config. If a path is included, the
+        specify a path within the tracklab.config. If a path is included, the
         corresponding field will be treated as a job input. If a path is
         excluded, the corresponding field will not be treated as a job input.
 
@@ -850,7 +850,7 @@ class InterfaceBase:
             exclude_paths: paths within config to exclude as job inputs.
             input_schema: A JSON Schema describing which attributes will be
                 editable from the Launch drawer.
-            run_config: bool indicating whether wandb.config is the input source.
+            run_config: bool indicating whether tracklab.config is the input source.
             file_path: path to file to include as a job input.
         """
         if run_config and file_path:

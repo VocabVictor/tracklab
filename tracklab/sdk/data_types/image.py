@@ -46,14 +46,14 @@ def _warn_on_invalid_data_range(
 
     np = util.get_module(
         "numpy",
-        required="wandb.Image requires numpy if not supplying PIL Images: pip install numpy",
+        required="tracklab.Image requires numpy if not supplying PIL Images: pip install numpy",
     )
 
     if np.min(data) < 0 or np.max(data) > 255:
-        wandb.termwarn(
-            "Data passed to `wandb.Image` should consist of values in the range [0, 255], "
+        tracklab.termwarn(
+            "Data passed to `tracklab.Image` should consist of values in the range [0, 255], "
             "image data will be normalized to this range, "
-            "but behavior will be removed in a future version of wandb.",
+            "but behavior will be removed in a future version of tracklab.",
             repeat=False,
         )
 
@@ -76,8 +76,8 @@ def _guess_and_rescale_to_0_255(data: "np.ndarray") -> "np.ndarray":
     try:
         import numpy as np
     except ImportError:
-        raise wandb.Error(
-            "wandb.Image requires numpy if not supplying PIL images: pip install numpy"
+        raise tracklab.Error(
+            "tracklab.Image requires numpy if not supplying PIL images: pip install numpy"
         ) from None
 
     data_min: float = data.min()
@@ -96,7 +96,7 @@ def _guess_and_rescale_to_0_255(data: "np.ndarray") -> "np.ndarray":
 def _convert_to_uint8(data: "np.ndarray") -> "np.ndarray":
     np = util.get_module(
         "numpy",
-        required="wandb.Image requires numpy if not supplying PIL Images: pip install numpy",
+        required="tracklab.Image requires numpy if not supplying PIL Images: pip install numpy",
     )
     return data.astype(np.uint8)
 
@@ -161,7 +161,7 @@ class Image(BatchableMedia):
         file_type: Optional[str] = None,
         normalize: bool = True,
     ) -> None:
-        """Initialize a `wandb.Image` object.
+        """Initialize a `tracklab.Image` object.
 
         Args:
             data_or_path: Accepts NumPy array/pytorch tensor of image data,
@@ -180,45 +180,45 @@ class Image(BatchableMedia):
             classes: A list of class information for the image,
                 used for labeling bounding boxes, and image masks.
             boxes: A dictionary containing bounding box information for the image.
-                see: https://docs.wandb.ai/ref/python/data-types/boundingboxes2d/
+                see: https://docs.tracklab.ai/ref/python/data-types/boundingboxes2d/
             masks: A dictionary containing mask information for the image.
-                see: https://docs.wandb.ai/ref/python/data-types/imagemask/
+                see: https://docs.tracklab.ai/ref/python/data-types/imagemask/
             file_type: The file type to save the image as.
                 This parameter has no effect if data_or_path is a path to an image file.
             normalize: If True, normalize the image pixel values to fall within the range of [0, 255].
                 Normalize is only applied if data_or_path is a numpy array or pytorch tensor.
 
         Examples:
-        Create a wandb.Image from a numpy array
+        Create a tracklab.Image from a numpy array
 
         ```python
         import numpy as np
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             examples = []
             for i in range(3):
                 pixels = np.random.randint(low=0, high=256, size=(100, 100, 3))
-                image = wandb.Image(pixels, caption=f"random field {i}")
+                image = tracklab.Image(pixels, caption=f"random field {i}")
                 examples.append(image)
             run.log({"examples": examples})
         ```
 
-        Create a wandb.Image from a PILImage
+        Create a tracklab.Image from a PILImage
 
         ```python
         import numpy as np
         from PIL import Image as PILImage
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             examples = []
             for i in range(3):
                 pixels = np.random.randint(
                     low=0, high=256, size=(100, 100, 3), dtype=np.uint8
                 )
                 pil_image = PILImage.fromarray(pixels, mode="RGB")
-                image = wandb.Image(pil_image, caption=f"random field {i}")
+                image = tracklab.Image(pil_image, caption=f"random field {i}")
                 examples.append(image)
             run.log({"examples": examples})
         ```
@@ -229,11 +229,11 @@ class Image(BatchableMedia):
         import numpy as np
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             examples = []
             for i in range(3):
                 pixels = np.random.randint(low=0, high=256, size=(100, 100, 3))
-                image = wandb.Image(
+                image = tracklab.Image(
                     pixels, caption=f"random field {i}", file_type="jpg"
                 )
                 examples.append(image)
@@ -356,7 +356,7 @@ class Image(BatchableMedia):
     def _initialize_from_path(self, path: str) -> None:
         pil_image = util.get_module(
             "PIL.Image",
-            required='wandb.Image needs the PIL package. To get it, run "pip install pillow".',
+            required='tracklab.Image needs the PIL package. To get it, run "pip install pillow".',
         )
         self._set_file(path, is_tmp=False)
         self._image = pil_image.open(path)
@@ -382,7 +382,7 @@ class Image(BatchableMedia):
     ) -> None:
         pil_image = util.get_module(
             "PIL.Image",
-            required='wandb.Image needs the PIL package. To get it, run "pip install pillow".',
+            required='tracklab.Image needs the PIL package. To get it, run "pip install pillow".',
         )
 
         accepted_formats = ["png", "jpg", "jpeg", "bmp"]
@@ -551,13 +551,13 @@ class Image(BatchableMedia):
         if self._grouping:
             json_dict["grouping"] = self._grouping
 
-        if isinstance(run_or_artifact, wandb.Artifact):
+        if isinstance(run_or_artifact, tracklab.Artifact):
             artifact = run_or_artifact
             if (
                 self._masks is not None or self._boxes is not None
             ) and self._classes is None:
                 raise ValueError(
-                    "classes must be passed to wandb.Image which have masks or bounding boxes when adding to artifacts"
+                    "classes must be passed to tracklab.Image which have masks or bounding boxes when adding to artifacts"
                 )
 
             if self._classes is not None:
@@ -612,7 +612,7 @@ class Image(BatchableMedia):
             return "RGB"
         elif num_channels == 4:
             if file_type in ["jpg", "jpeg"]:
-                wandb.termwarn(
+                tracklab.termwarn(
                     "JPEG format does not support transparency. "
                     "Ignoring alpha channel.",
                     repeat=False,
@@ -679,7 +679,7 @@ class Image(BatchableMedia):
                 obj.get("path", obj.get("artifact_path")) for obj in jsons
             ]
         else:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Unable to log image array filenames. In some cases, this can prevent images from being "
                 "viewed in the UI. Please upgrade your wandb server",
                 repeat=False,
@@ -816,7 +816,7 @@ class Image(BatchableMedia):
             if self._path is not None and not self.path_is_reference(self._path):
                 pil_image = util.get_module(
                     "PIL.Image",
-                    required='wandb.Image needs the PIL package. To get it, run "pip install pillow".',
+                    required='tracklab.Image needs the PIL package. To get it, run "pip install pillow".',
                 )
                 self._image = pil_image.open(self._path)
                 self._image.load()
@@ -826,7 +826,7 @@ class Image(BatchableMedia):
 # Custom dtypes for typing system
 class _ImageFileType(_dtypes.Type):
     name = "image-file"
-    legacy_names = ["wandb.Image"]
+    legacy_names = ["tracklab.Image"]
     types = [Image]
 
     def __init__(
@@ -935,7 +935,7 @@ class _ImageFileType(_dtypes.Type):
     @classmethod
     def from_obj(cls, py_obj):
         if not isinstance(py_obj, Image):
-            raise TypeError("py_obj must be a wandb.Image")
+            raise TypeError("py_obj must be a tracklab.Image")
         else:
             if hasattr(py_obj, "_boxes") and py_obj._boxes:
                 box_layers = {

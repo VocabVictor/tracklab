@@ -116,7 +116,7 @@ class SizedPaginator(Paginator[T], Sized):
 
     @property
     def length(self) -> int | None:
-        wandb.termwarn(
+        tracklab.termwarn(
             (
                 "`.length` is deprecated and will be removed in a future version. "
                 "Use `len(...)` instead."

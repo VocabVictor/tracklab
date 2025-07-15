@@ -1,7 +1,7 @@
-# wandb.integrations.data_logging.py
+# tracklab.integrations.data_logging.py
 #
 # Contains common utility functions that enable
-# logging datasets and predictions to wandb.
+# logging datasets and predictions to tracklab.
 import sys
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
@@ -15,7 +15,7 @@ CAN_INFER_IMAGE_AND_VIDEO = sys.version_info.major == 3 and sys.version_info.min
 
 
 class ValidationDataLogger:
-    """Logs validation data as a wandb.Table.
+    """Logs validation data as a tracklab.Table.
 
     ValidationDataLogger is intended to be used inside of library integrations
     in order to facilitate the process of optionally building a validation dataset
@@ -27,7 +27,7 @@ class ValidationDataLogger:
     validation_targets: Optional[Union[Sequence, Dict[str, Sequence]]]
     validation_indexes: List["_TableIndex"]
     prediction_row_processor: Optional[Callable]
-    class_labels_table: Optional["wandb.Table"]
+    class_labels_table: Optional["tracklab.Table"]
     infer_missing_processors: bool
 
     def __init__(
@@ -52,7 +52,7 @@ class ValidationDataLogger:
             targets: A list of target vectors or dictionary of lists of target vectors
                 (used if the model has multiple named targets/putputs). Defaults to `None`.
                 `targets` and `indexes` cannot both be `None`.
-            indexes: An ordered list of `wandb.data_types._TableIndex` mapping the
+            indexes: An ordered list of `tracklab.data_types._TableIndex` mapping the
                 input items to their source table. This is most commonly retrieved by using
                 `indexes = my_data_table.get_index()`. Defaults to `None`. `targets`
                 and `indexes` cannot both be `None`.
@@ -64,7 +64,7 @@ class ValidationDataLogger:
                 `row["target"]` will be the target data for the row. Else, it will
                 be keyed based on `targets`. For example, if your input data is a
                 single ndarray, but you wish to visualize the data as an image,
-                then you can provide `lambda ndx, row: {"img": wandb.Image(row["input"])}`
+                then you can provide `lambda ndx, row: {"img": tracklab.Image(row["input"])}`
                 as the processor. If `None`, we will try to guess the appropriate processor.
                 Ignored if `log_evaluation` is `False` or `val_keys` are present. Defaults to `None`.
             prediction_row_processor: Same as validation_row_processor, but applied to the
@@ -84,9 +84,9 @@ class ValidationDataLogger:
             infer_missing_processors: Determines if processors are inferred if
                 they are missing. Defaults to True.
         """
-        class_labels_table: Optional[wandb.Table]
+        class_labels_table: Optional[tracklab.Table]
         if isinstance(class_labels, list) and len(class_labels) > 0:
-            class_labels_table = wandb.Table(
+            class_labels_table = tracklab.Table(
                 columns=["label"], data=[[label] for label in class_labels]
             )
         else:
@@ -94,7 +94,7 @@ class ValidationDataLogger:
 
         if indexes is None:
             assert targets is not None
-            local_validation_table = wandb.Table(columns=[], data=[])
+            local_validation_table = tracklab.Table(columns=[], data=[])
 
             if isinstance(targets, dict):
                 for col_name in targets:
@@ -123,10 +123,10 @@ class ValidationDataLogger:
             if validation_row_processor is not None:
                 local_validation_table.add_computed_columns(validation_row_processor)
 
-            local_validation_artifact = wandb.Artifact(table_name, artifact_type)
+            local_validation_artifact = tracklab.Artifact(table_name, artifact_type)
             local_validation_artifact.add(local_validation_table, "validation_data")
-            if wandb.run:
-                wandb.run.use_artifact(local_validation_artifact)
+            if tracklab.run:
+                tracklab.run.use_artifact(local_validation_artifact)
             indexes = local_validation_table.get_index()
         else:
             local_validation_artifact = None
@@ -161,7 +161,7 @@ class ValidationDataLogger:
         val_ndx_col_name: str = "val_row",
         table_name: str = "validation_predictions",
         commit: bool = True,
-    ) -> wandb.data_types.Table:
+    ) -> tracklab.data_types.Table:
         """Log a set of predictions.
 
         Intended usage:
@@ -177,7 +177,7 @@ class ValidationDataLogger:
             table_name (str, optional): name of the prediction table. Defaults to "validation_predictions".
             commit (bool, optional): determines if commit should be called on the logged data. Defaults to False.
         """
-        pred_table = wandb.Table(columns=[], data=[])
+        pred_table = tracklab.Table(columns=[], data=[])
         if isinstance(predictions, dict):
             for col_name in predictions:
                 pred_table.add_column(col_name, predictions[col_name])
@@ -200,7 +200,7 @@ class ValidationDataLogger:
         if self.prediction_row_processor is not None:
             pred_table.add_computed_columns(self.prediction_row_processor)
 
-        wandb.log({table_name: pred_table}, commit=commit)
+        tracklab.log({table_name: pred_table}, commit=commit)
         return pred_table
 
 
@@ -245,7 +245,7 @@ def _bind(lambda_fn: Callable, **closure_kwargs: Any) -> Callable:
 
 def _infer_single_example_keyed_processor(
     example: Union[Sequence, Any],
-    class_labels_table: Optional["wandb.Table"] = None,
+    class_labels_table: Optional["tracklab.Table"] = None,
     possible_base_example: Optional[Union[Sequence, Any]] = None,
 ) -> Dict[str, Callable]:
     """Infers a processor from a single example.
@@ -260,7 +260,7 @@ def _infer_single_example_keyed_processor(
         and len(shape) == 1
         and shape[0] == len(class_labels_table.data)
     ):
-        np = wandb.util.get_module(
+        np = tracklab.util.get_module(
             "numpy",
             required="Inferring processors require numpy",
         )
@@ -299,7 +299,7 @@ def _infer_single_example_keyed_processor(
         else:
             processors["val"] = lambda n, d, p: d[0]
     elif len(shape) == 1:
-        np = wandb.util.get_module(
+        np = tracklab.util.get_module(
             "numpy",
             required="Inferring processors require numpy",
         )
@@ -325,7 +325,7 @@ def _infer_single_example_keyed_processor(
             and shape == _get_example_shape(possible_base_example)
         ):
             # consider this a segmentation mask
-            processors["image"] = lambda n, d, p: wandb.Image(
+            processors["image"] = lambda n, d, p: tracklab.Image(
                 p,
                 masks={
                     "masks": {
@@ -336,13 +336,13 @@ def _infer_single_example_keyed_processor(
             )
         else:
             # consider this a 2d image
-            processors["image"] = lambda n, d, p: wandb.Image(d)
+            processors["image"] = lambda n, d, p: tracklab.Image(d)
     elif len(shape) == 3 and CAN_INFER_IMAGE_AND_VIDEO:
         # consider this an image
-        processors["image"] = lambda n, d, p: wandb.Image(d)
+        processors["image"] = lambda n, d, p: tracklab.Image(d)
     elif len(shape) == 4 and CAN_INFER_IMAGE_AND_VIDEO:
         # consider this a video
-        processors["video"] = lambda n, d, p: wandb.Video(d)
+        processors["video"] = lambda n, d, p: tracklab.Video(d)
 
     return processors
 
@@ -350,7 +350,7 @@ def _infer_single_example_keyed_processor(
 def _infer_validation_row_processor(
     example_input: Union[Dict, Sequence],
     example_target: Union[Dict, Sequence, Any],
-    class_labels_table: Optional["wandb.Table"] = None,
+    class_labels_table: Optional["tracklab.Table"] = None,
     input_col_name: str = "input",
     target_col_name: str = "target",
 ) -> Callable:
@@ -427,7 +427,7 @@ def _infer_validation_row_processor(
 def _infer_prediction_row_processor(
     example_prediction: Union[Dict, Sequence],
     example_input: Union[Dict, Sequence],
-    class_labels_table: Optional["wandb.Table"] = None,
+    class_labels_table: Optional["tracklab.Table"] = None,
     input_col_name: str = "input",
     output_col_name: str = "output",
 ) -> Callable:

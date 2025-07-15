@@ -45,7 +45,7 @@ _WANDB_QA_URI_REGEX = re.compile(
     r"^https?://ap\w.qa.wandb"
 )  # for testing, not sure if we wanna keep this
 _WANDB_DEV_URI_REGEX = re.compile(
-    r"^https?://ap\w.wandb.test"
+    r"^https?://ap\w.tracklab.test"
 )  # for testing, not sure if we wanna keep this
 _WANDB_LOCAL_DEV_URI_REGEX = re.compile(
     r"^https?://localhost"
@@ -211,7 +211,7 @@ def set_project_entity_defaults(
     prefix = ""
     if platform.system() != "Windows" and sys.stdout.encoding == "UTF-8":
         prefix = "🚀 "
-    wandb.termlog(
+    tracklab.termlog(
         f"{LOG_PREFIX}{prefix}Launching run into {entity}{'/' + project if project else ''}"
     )
     return project, entity
@@ -228,7 +228,7 @@ def strip_resource_args_and_template_vars(launch_spec: Dict[str, Any]) -> None:
     if launch_spec.get("resource_args", None) and launch_spec.get(
         "template_variables", None
     ):
-        wandb.termwarn(
+        tracklab.termwarn(
             "Launch spec contains both resource_args and template_variables, "
             "only one can be set. Using template_variables."
         )
@@ -344,7 +344,7 @@ def get_local_python_deps(
             subprocess.call(["pip", "freeze"], env=env, stdout=f)
         return filename
     except subprocess.CalledProcessError as e:
-        wandb.termerror(f"Command failed: {e}")
+        tracklab.termerror(f"Command failed: {e}")
         return None
 
 
@@ -443,7 +443,7 @@ def apply_patch(patch_string: str, dst_dir: str) -> None:
             ]
         )
     except subprocess.CalledProcessError:
-        raise wandb.Error("Failed to apply diff.patch associated with run.")
+        raise tracklab.Error("Failed to apply diff.patch associated with run.")
 
 
 def _fetch_git_repo(dst_dir: str, uri: str, version: Optional[str]) -> Optional[str]:
@@ -466,10 +466,10 @@ def _fetch_git_repo(dst_dir: str, uri: str, version: Optional[str]) -> Optional[
 
 
 def convert_jupyter_notebook_to_script(fname: str, project_dir: str) -> str:
-    nbconvert = wandb.util.get_module(
+    nbconvert = tracklab.util.get_module(
         "nbconvert", "nbformat and nbconvert are required to use launch with notebooks"
     )
-    nbformat = wandb.util.get_module(
+    nbformat = tracklab.util.get_module(
         "nbformat", "nbformat and nbconvert are required to use launch with notebooks"
     )
 
@@ -605,7 +605,7 @@ def warn_failed_packages_from_build_logs(
     match = FAILED_PACKAGES_REGEX.search(log)
     if match:
         _msg = f"Failed to install the following packages: {match.group(1)} for image: {image_uri}. Will attempt to launch image without them."
-        wandb.termwarn(_msg)
+        tracklab.termwarn(_msg)
         if job_tracker is not None:
             res = job_tracker.saver.save_contents(
                 _msg, "failed-packages.log", "warning"

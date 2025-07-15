@@ -181,7 +181,7 @@ def _validate_schema(schema: dict) -> None:
     validator = jsonschema.Draft202012Validator(META_SCHEMA)
     errs = sorted(validator.iter_errors(schema), key=str)
     if errs:
-        wandb.termwarn(f"Schema includes unhandled or invalid configurations:\n{errs}")
+        tracklab.termwarn(f"Schema includes unhandled or invalid configurations:\n{errs}")
 
 
 def handle_config_file_input(
@@ -231,8 +231,8 @@ def handle_config_file_input(
         file_path=path,
         run_config=False,
     )
-    if wandb.run is not None:
-        _publish_job_input(arguments, wandb.run)
+    if tracklab.run is not None:
+        _publish_job_input(arguments, tracklab.run)
     else:
         staged_inputs = StagedLaunchInputs()
         staged_inputs.add_staged_input(arguments)
@@ -243,7 +243,7 @@ def handle_run_config_input(
     exclude: Optional[List[str]] = None,
     schema: Optional[Any] = None,
 ):
-    """Declare wandb.config as an overridable configuration for a launch job.
+    """Declare tracklab.config as an overridable configuration for a launch job.
 
     The include and exclude paths are sent to the backend interface of the
     active run and used to configure the job builder.
@@ -272,8 +272,8 @@ def handle_run_config_input(
         run_config=True,
         file_path=None,
     )
-    if wandb.run is not None:
-        _publish_job_input(arguments, wandb.run)
+    if tracklab.run is not None:
+        _publish_job_input(arguments, tracklab.run)
     else:
         stage_inputs = StagedLaunchInputs()
         stage_inputs.add_staged_input(arguments)

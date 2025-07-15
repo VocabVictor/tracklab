@@ -65,12 +65,12 @@ class BoundingBoxes2D(JSONMetadata):
         import numpy as np
         import tracklab
 
-        run = wandb.init()
+        run = tracklab.init()
         image = np.random.randint(low=0, high=256, size=(200, 300, 3))
 
         class_labels = {0: "person", 1: "car", 2: "road", 3: "building"}
 
-        img = wandb.Image(
+        img = tracklab.Image(
             image,
             boxes={
                 "predictions": {
@@ -115,12 +115,12 @@ class BoundingBoxes2D(JSONMetadata):
         import numpy as np
         import tracklab
 
-        run = wandb.init()
+        run = tracklab.init()
         image = np.random.randint(low=0, high=256, size=(200, 300, 3))
 
         class_labels = {0: "person", 1: "car", 2: "road", 3: "building"}
 
-        class_set = wandb.Classes(
+        class_set = tracklab.Classes(
             [
                 {"name": "person", "id": 0},
                 {"name": "car", "id": 1},
@@ -129,7 +129,7 @@ class BoundingBoxes2D(JSONMetadata):
             ]
         )
 
-        img = wandb.Image(
+        img = tracklab.Image(
             image,
             boxes={
                 "predictions": {
@@ -166,7 +166,7 @@ class BoundingBoxes2D(JSONMetadata):
             classes=class_set,
         )
 
-        table = wandb.Table(columns=["image"])
+        table = tracklab.Table(columns=["image"])
         table.add_data(img)
         run.log({"driving_scene": table})
         ```
@@ -314,13 +314,13 @@ class BoundingBoxes2D(JSONMetadata):
 
         if isinstance(run_or_artifact, Run):
             return super().to_json(run_or_artifact)
-        elif isinstance(run_or_artifact, wandb.Artifact):
+        elif isinstance(run_or_artifact, tracklab.Artifact):
             # TODO (tim): I would like to log out a proper dictionary representing this object, but don't
             # want to mess with the visualizations that are currently available in the UI. This really should output
             # an object with a _type key. Will need to push this change to the UI first to ensure backwards compat
             return self._val
         else:
-            raise TypeError("to_json accepts tracklab_run.Run or wandb.Artifact")
+            raise TypeError("to_json accepts tracklab_run.Run or tracklab.Artifact")
 
     @classmethod
     def from_json(

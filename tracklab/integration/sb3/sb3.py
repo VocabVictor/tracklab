@@ -18,7 +18,7 @@ config = {
     "total_timesteps": 25000,
     "env_name": "CartPole-v1",
 }
-run = wandb.init(
+run = tracklab.init(
     project="sb3",
     config=config,
     sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
@@ -68,7 +68,7 @@ class WandbCallback(BaseCallback):
         - Added model tracking and uploading
         - Added complete hyperparameters recording
         - Added gradient logging
-        - Note that `wandb.init(...)` must be called before the WandbCallback can be used.
+        - Note that `tracklab.init(...)` must be called before the WandbCallback can be used.
 
     Args:
         verbose: The verbosity of sb3 output
@@ -87,15 +87,15 @@ class WandbCallback(BaseCallback):
         log: Optional[Literal["gradients", "parameters", "all"]] = "all",
     ) -> None:
         super().__init__(verbose)
-        if wandb.run is None:
-            raise wandb.Error("You must call wandb.init() before WandbCallback()")
+        if tracklab.run is None:
+            raise tracklab.Error("You must call tracklab.init() before WandbCallback()")
         with wb_telemetry.context() as tel:
             tel.feature.sb3 = True
         self.model_save_freq = model_save_freq
         self.model_save_path = model_save_path
         self.gradient_save_freq = gradient_save_freq
         if log not in ["gradients", "parameters", "all", None]:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "`log` must be one of `None`, 'gradients', 'parameters', or 'all', "
                 "falling back to 'all'"
             )
@@ -115,19 +115,19 @@ class WandbCallback(BaseCallback):
         if "algo" not in d:
             d["algo"] = type(self.model).__name__
         for key in self.model.__dict__:
-            if key in wandb.config:
+            if key in tracklab.config:
                 continue
             if type(self.model.__dict__[key]) in [float, int, str]:
                 d[key] = self.model.__dict__[key]
             else:
                 d[key] = str(self.model.__dict__[key])
         if self.gradient_save_freq > 0:
-            wandb.watch(
+            tracklab.watch(
                 self.model.policy,
                 log_freq=self.gradient_save_freq,
                 log=self.log,
             )
-        wandb.config.setdefaults(d)
+        tracklab.config.setdefaults(d)
 
     def _on_step(self) -> bool:
         if self.model_save_freq > 0:
@@ -142,6 +142,6 @@ class WandbCallback(BaseCallback):
 
     def save_model(self) -> None:
         self.model.save(self.path)
-        wandb.save(self.path, base_path=self.model_save_path)
+        tracklab.save(self.path, base_path=self.model_save_path)
         if self.verbose > 1:
             logger.info(f"Saving model checkpoint to {self.path}")

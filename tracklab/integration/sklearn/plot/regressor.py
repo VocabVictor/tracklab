@@ -35,22 +35,22 @@ def regressor(model, X_train, X_test, y_train, y_test, model_name="Regressor"): 
 
     Example:
     ```python
-    wandb.sklearn.plot_regressor(reg, X_train, X_test, y_train, y_test, "Ridge")
+    tracklab.sklearn.plot_regressor(reg, X_train, X_test, y_train, y_test, "Ridge")
     ```
     """
-    wandb.termlog(f"\nPlotting {model_name}.")
+    tracklab.termlog(f"\nPlotting {model_name}.")
 
     shared.summary_metrics(model, X_train, y_train, X_test, y_test)
-    wandb.termlog("Logged summary metrics.")
+    tracklab.termlog("Logged summary metrics.")
 
     shared.learning_curve(model, X_train, y_train)
-    wandb.termlog("Logged learning curve.")
+    tracklab.termlog("Logged learning curve.")
 
     outlier_candidates(model, X_train, y_train)
-    wandb.termlog("Logged outlier candidates.")
+    tracklab.termlog("Logged outlier candidates.")
 
     residuals(model, X_train, y_train)
-    wandb.termlog("Logged residuals.")
+    tracklab.termlog("Logged residuals.")
 
 
 def outlier_candidates(regressor=None, X=None, y=None):  # noqa: N803
@@ -73,7 +73,7 @@ def outlier_candidates(regressor=None, X=None, y=None):  # noqa: N803
 
     Example:
     ```python
-    wandb.sklearn.plot_outlier_candidates(model, X, y)
+    tracklab.sklearn.plot_outlier_candidates(model, X, y)
     ```
     """
     is_missing = utils.test_missing(regressor=regressor, X=X, y=y)
@@ -84,7 +84,7 @@ def outlier_candidates(regressor=None, X=None, y=None):  # noqa: N803
         y = np.asarray(y)
 
         outliers_chart = calculate.outlier_candidates(regressor, X, y)
-        wandb.log({"outlier_candidates": outliers_chart})
+        tracklab.log({"outlier_candidates": outliers_chart})
 
 
 def residuals(regressor=None, X=None, y=None):  # noqa: N803
@@ -107,7 +107,7 @@ def residuals(regressor=None, X=None, y=None):  # noqa: N803
 
     Example:
     ```python
-    wandb.sklearn.plot_residuals(model, X, y)
+    tracklab.sklearn.plot_residuals(model, X, y)
     ```
     """
     not_missing = utils.test_missing(regressor=regressor, X=X, y=y)
@@ -118,4 +118,4 @@ def residuals(regressor=None, X=None, y=None):  # noqa: N803
         y = np.asarray(y)
 
         residuals_chart = calculate.residuals(regressor, X, y)
-        wandb.log({"residuals": residuals_chart})
+        tracklab.log({"residuals": residuals_chart})

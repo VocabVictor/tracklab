@@ -62,7 +62,7 @@ def classifier(
 
     Example:
     ```python
-    wandb.sklearn.plot_classifier(
+    tracklab.sklearn.plot_classifier(
         model,
         X_train,
         X_test,
@@ -77,34 +77,34 @@ def classifier(
     )
     ```
     """
-    wandb.termlog(f"\nPlotting {model_name}.")
+    tracklab.termlog(f"\nPlotting {model_name}.")
 
     if not isinstance(model, naive_bayes.MultinomialNB):
         feature_importances(model, feature_names)
-        wandb.termlog("Logged feature importances.")
+        tracklab.termlog("Logged feature importances.")
 
     if log_learning_curve:
         shared.learning_curve(model, X_train, y_train)
-        wandb.termlog("Logged learning curve.")
+        tracklab.termlog("Logged learning curve.")
 
     confusion_matrix(y_test, y_pred, labels)
-    wandb.termlog("Logged confusion matrix.")
+    tracklab.termlog("Logged confusion matrix.")
 
     shared.summary_metrics(model, X=X_train, y=y_train, X_test=X_test, y_test=y_test)
-    wandb.termlog("Logged summary metrics.")
+    tracklab.termlog("Logged summary metrics.")
 
     class_proportions(y_train, y_test, labels)
-    wandb.termlog("Logged class proportions.")
+    tracklab.termlog("Logged class proportions.")
 
     if not isinstance(model, naive_bayes.MultinomialNB):
         calibration_curve(model, X_train, y_train, model_name)
-        wandb.termlog("Logged calibration curve.")
+        tracklab.termlog("Logged calibration curve.")
 
     roc(y_test, y_probas, labels)
-    wandb.termlog("Logged roc curve.")
+    tracklab.termlog("Logged roc curve.")
 
     precision_recall(y_test, y_probas, labels)
-    wandb.termlog("Logged precision-recall curve.")
+    tracklab.termlog("Logged precision-recall curve.")
 
 
 def roc(
@@ -131,11 +131,11 @@ def roc(
 
     Example:
     ```python
-    wandb.sklearn.plot_roc(y_true, y_probas, labels)
+    tracklab.sklearn.plot_roc(y_true, y_probas, labels)
     ```
     """
-    roc_chart = wandb.plot.roc_curve(y_true, y_probas, labels, classes_to_plot)
-    wandb.log({"roc": roc_chart})
+    roc_chart = tracklab.plot.roc_curve(y_true, y_probas, labels, classes_to_plot)
+    tracklab.log({"roc": roc_chart})
 
 
 def confusion_matrix(
@@ -164,7 +164,7 @@ def confusion_matrix(
 
     Example:
     ```python
-    wandb.sklearn.plot_confusion_matrix(y_true, y_probas, labels)
+    tracklab.sklearn.plot_confusion_matrix(y_true, y_probas, labels)
     ```
     """
     y_true = np.asarray(y_true)
@@ -183,7 +183,7 @@ def confusion_matrix(
             normalize,
         )
 
-        wandb.log({"confusion_matrix": confusion_matrix_chart})
+        tracklab.log({"confusion_matrix": confusion_matrix_chart})
 
 
 def precision_recall(
@@ -208,14 +208,14 @@ def precision_recall(
 
     Example:
     ```python
-    wandb.sklearn.plot_precision_recall(y_true, y_probas, labels)
+    tracklab.sklearn.plot_precision_recall(y_true, y_probas, labels)
     ```
     """
-    precision_recall_chart = wandb.plot.pr_curve(
+    precision_recall_chart = tracklab.plot.pr_curve(
         y_true, y_probas, labels, classes_to_plot
     )
 
-    wandb.log({"precision_recall": precision_recall_chart})
+    tracklab.log({"precision_recall": precision_recall_chart})
 
 
 def feature_importances(
@@ -237,7 +237,7 @@ def feature_importances(
 
     Example:
     ```python
-    wandb.sklearn.plot_feature_importances(model, ["width", "height", "length"])
+    tracklab.sklearn.plot_feature_importances(model, ["width", "height", "length"])
     ```
     """
     not_missing = utils.test_missing(model=model)
@@ -246,7 +246,7 @@ def feature_importances(
 
     if not_missing and correct_types and model_fitted:
         feature_importance_chart = calculate.feature_importances(model, feature_names)
-        wandb.log({"feature_importances": feature_importance_chart})
+        tracklab.log({"feature_importances": feature_importance_chart})
 
 
 def class_proportions(y_train=None, y_test=None, labels=None):
@@ -268,7 +268,7 @@ def class_proportions(y_train=None, y_test=None, labels=None):
 
     Example:
     ```python
-    wandb.sklearn.plot_class_proportions(y_train, y_test, ["dog", "cat", "owl"])
+    tracklab.sklearn.plot_class_proportions(y_train, y_test, ["dog", "cat", "owl"])
     ```
     """
     not_missing = utils.test_missing(y_train=y_train, y_test=y_test)
@@ -277,7 +277,7 @@ def class_proportions(y_train=None, y_test=None, labels=None):
         y_train, y_test = np.array(y_train), np.array(y_test)
         class_proportions_chart = calculate.class_proportions(y_train, y_test, labels)
 
-        wandb.log({"class_proportions": class_proportions_chart})
+        tracklab.log({"class_proportions": class_proportions_chart})
 
 
 def calibration_curve(clf=None, X=None, y=None, clf_name="Classifier"):  # noqa: N803
@@ -310,7 +310,7 @@ def calibration_curve(clf=None, X=None, y=None, clf_name="Classifier"):  # noqa:
 
     Example:
     ```python
-    wandb.sklearn.plot_calibration_curve(clf, X, y, "RandomForestClassifier")
+    tracklab.sklearn.plot_calibration_curve(clf, X, y, "RandomForestClassifier")
     ```
     """
     not_missing = utils.test_missing(clf=clf, X=X, y=y)
@@ -319,11 +319,11 @@ def calibration_curve(clf=None, X=None, y=None, clf_name="Classifier"):  # noqa:
     if not_missing and correct_types and is_fitted:
         y = np.asarray(y)
         if y.dtype.char == "U" or not ((y == 0) | (y == 1)).all():
-            wandb.termwarn(
+            tracklab.termwarn(
                 "This function only supports binary classification at the moment and therefore expects labels to be binary. Skipping calibration curve."
             )
             return
 
         calibration_curve_chart = calculate.calibration_curves(clf, X, y, clf_name)
 
-        wandb.log({"calibration_curve": calibration_curve_chart})
+        tracklab.log({"calibration_curve": calibration_curve_chart})

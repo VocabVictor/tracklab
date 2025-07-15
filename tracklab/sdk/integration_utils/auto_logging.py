@@ -62,7 +62,7 @@ class PatchAPI:
         """Returns the API module."""
         lib_name = self.name.lower()
         if self._api is None:
-            self._api = wandb.util.get_module(
+            self._api = tracklab.util.get_module(
                 name=lib_name,
                 required=f"To use the W&B {self.name} Autolog, "
                 f"you need to have the `{lib_name}` python "
@@ -71,7 +71,7 @@ class PatchAPI:
             )
         return self._api
 
-    def patch(self, run: "wandb.sdk.tracklab_run.Run") -> None:
+    def patch(self, run: "tracklab.sdk.tracklab_run.Run") -> None:
         """Patches the API to log media or metrics to W&B."""
         for symbol in self.symbols:
             # split on dots, e.g. "Client.generate" -> ["Client", "generate"]
@@ -163,7 +163,7 @@ class AutologAPI:
             resolver=resolver,
         )
         self._name = self._patch_api.name
-        self._run: Optional[wandb.sdk.tracklab_run.Run] = None
+        self._run: Optional[tracklab.sdk.tracklab_run.Run] = None
         self.__run_created_by_autolog: bool = False
 
     @property
@@ -177,28 +177,28 @@ class AutologAPI:
 
     def _run_init(self, init: AutologInitArgs = None) -> None:
         """Handle wandb run initialization."""
-        # - autolog(init: dict = {...}) calls wandb.init(**{...})
-        #   regardless of whether there is a wandb.run or not,
+        # - autolog(init: dict = {...}) calls tracklab.init(**{...})
+        #   regardless of whether there is a tracklab.run or not,
         #   we only track if the run was created by autolog
         #    - todo: autolog(init: dict | run = run) would use the user-provided run
-        # - autolog() uses the wandb.run if there is one, otherwise it calls wandb.init()
+        # - autolog() uses the tracklab.run if there is one, otherwise it calls tracklab.init()
         if init:
-            _tracklab_run = wandb.run
-            # we delegate dealing with the init dict to wandb.init()
-            self._run = wandb.init(**init)
+            _tracklab_run = tracklab.run
+            # we delegate dealing with the init dict to tracklab.init()
+            self._run = tracklab.init(**init)
             if _tracklab_run != self._run:
                 self.__run_created_by_autolog = True
-        elif wandb.run is None:
-            self._run = wandb.init()
+        elif tracklab.run is None:
+            self._run = tracklab.init()
             self.__run_created_by_autolog = True
         else:
-            self._run = wandb.run
+            self._run = tracklab.run
 
     def enable(self, init: AutologInitArgs = None) -> None:
         """Enable autologging.
 
         Args:
-            init: Optional dictionary of arguments to pass to wandb.init().
+            init: Optional dictionary of arguments to pass to tracklab.init().
 
         """
         if self._is_enabled:

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 def histogram(
-    table: wandb.Table,
+    table: tracklab.Table,
     value: str,
     title: str = "",
     split_table: bool = False,
@@ -27,7 +27,7 @@ def histogram(
 
     Returns:
         CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Example:
 
@@ -40,20 +40,20 @@ def histogram(
     data = [[i, random.random() + math.sin(i / 10)] for i in range(100)]
 
     # Create a W&B Table
-    table = wandb.Table(
+    table = tracklab.Table(
         data=data,
         columns=["step", "height"],
     )
 
     # Create a histogram plot
-    histogram = wandb.plot.histogram(
+    histogram = tracklab.plot.histogram(
         table,
         value="height",
         title="My Histogram",
     )
 
     # Log the histogram plot to W&B
-    with wandb.init(...) as run:
+    with tracklab.init(...) as run:
         run.log({"histogram-plot1": histogram})
     ```
     """

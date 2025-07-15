@@ -15,7 +15,7 @@ class Attrs:
 
     def display(self, height=420, hidden=False) -> bool:
         """Display this object in jupyter."""
-        if wandb.run and wandb.run._settings.silent:
+        if tracklab.run and tracklab.run._settings.silent:
             return False
 
         if not ipython.in_jupyter():
@@ -23,13 +23,13 @@ class Attrs:
 
         html = self.to_html(height, hidden)
         if html is None:
-            wandb.termwarn("This object does not support `.display()`")
+            tracklab.termwarn("This object does not support `.display()`")
             return False
 
         try:
             from IPython import display
         except ImportError:
-            wandb.termwarn(".display() only works in jupyter environments")
+            tracklab.termwarn(".display() only works in jupyter environments")
             return False
 
         display.display(display.HTML(html))

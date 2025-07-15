@@ -23,14 +23,14 @@ class Config:
     """Config object.
 
     Config objects are intended to hold all of the hyperparameters associated
-    with a wandb run and are saved with the run object when `wandb.init` is
+    with a wandb run and are saved with the run object when `tracklab.init` is
     called.
 
     We recommend setting the config once when initializing your run by passing
     the `config` parameter to `init`:
 
     ```
-    wandb.init(config=my_config_dict)
+    tracklab.init(config=my_config_dict)
     ```
 
     You can create a file called `config-defaults.yaml`, and it will
@@ -38,22 +38,22 @@ class Config:
     of the file as the `config` parameter to `init`:
 
     ```
-    wandb.init(config="my_config.yaml")
+    tracklab.init(config="my_config.yaml")
     ```
 
-    See https://docs.wandb.com/guides/track/config#file-based-configs.
+    See https://docs.tracklab.com/guides/track/config#file-based-configs.
 
     Examples:
         Basic usage
         ```
-        with wandb.init(config={"epochs": 4}) as run:
+        with tracklab.init(config={"epochs": 4}) as run:
             for x in range(run.config.epochs):
                 # train
         ```
 
         Nested values
         ```
-        with wandb.init(config={"train": {"epochs": 4}}) as run:
+        with tracklab.init(config={"train": {"epochs": 4}}) as run:
             for x in range(run.config["train"]["epochs"]):
                 # train
         ```
@@ -61,13 +61,13 @@ class Config:
         Using absl flags
         ```
         flags.DEFINE_string("model", None, "model to run")  # name, default, help
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.config.update(flags.FLAGS)  # adds all absl flags to config
         ```
 
         Argparse flags
         ```python
-        with wandb.init(config={"epochs": 4}) as run:
+        with tracklab.init(config={"epochs": 4}) as run:
             parser = argparse.ArgumentParser()
             parser.add_argument(
                 "-b",
@@ -87,7 +87,7 @@ class Config:
         flags.DEFINE_string("data_dir", "/tmp/data")
         flags.DEFINE_integer("batch_size", 128, "Batch size.")
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             run.config.update(flags.FLAGS)
         ```
     """
@@ -137,7 +137,7 @@ class Config:
         if locked is not None:
             locked_user = self._users_inv[locked]
             if not ignore_locked:
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Config item '{key}' was locked by '{locked_user}' (ignored update)."
                 )
             return True
@@ -146,7 +146,7 @@ class Config:
     def __setitem__(self, key, val):
         if self._check_locked(key):
             return
-        with wandb.sdk.lib.telemetry.context() as tel:
+        with tracklab.sdk.lib.telemetry.context() as tel:
             tel.feature.set_config_item = True
         self._raise_value_error_on_nested_artifact(val, nested=True)
         key, val = self._sanitize(key, val)
@@ -271,7 +271,7 @@ class Config:
     def _sanitize(self, key, val, allow_val_change=None):
         # TODO: enable WBValues in the config in the future
         # refuse all WBValues which is all Media and Histograms
-        if isinstance(val, wandb.sdk.data_types.base_types.wb_value.WBValue):
+        if isinstance(val, tracklab.sdk.data_types.base_types.wb_value.WBValue):
             raise TypeError("WBValue objects cannot be added to the run config")
         # Let jupyter change config freely by default
         if self._settings and self._settings._jupyter and allow_val_change is None:
@@ -281,7 +281,7 @@ class Config:
         if _is_artifact_representation(val):
             val = self._artifact_callback(key, val)
         # if the user inserts an artifact into the config
-        if not isinstance(val, wandb.Artifact):
+        if not isinstance(val, tracklab.Artifact):
             val = json_friendly_val(val)
         if not allow_val_change:
             if key in self._items and val != self._items[key]:
@@ -298,7 +298,7 @@ class Config:
         # best if we don't allow nested artifacts until we can lock nested keys in the config
         if isinstance(v, dict) and check_dict_contains_nested_artifact(v, nested):
             raise ValueError(
-                "Instances of wandb.Artifact can only be top level keys in"
+                "Instances of tracklab.Artifact can only be top level keys in"
                 " a run's config"
             )
 

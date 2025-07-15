@@ -15,12 +15,12 @@ try:
     MIN_KFP_VERSION = "1.6.1"
 
     if parse(kfp_version) < parse(MIN_KFP_VERSION):
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Your version of kfp {kfp_version} may not work.  This integration requires kfp>={MIN_KFP_VERSION}"
         )
 
 except ImportError:
-    wandb.termerror("kfp not found!  Please `pip install kfp`")
+    tracklab.termerror("kfp not found!  Please `pip install kfp`")
 
 from .wandb_logging import tracklab_log
 
@@ -54,44 +54,44 @@ def full_path_exists(full_func):
         return zip(parents, children)
 
     for parent, child in get_parent_child_pairs(full_func):
-        module = wandb.util.get_module(parent)
+        module = tracklab.util.get_module(parent)
         if not module or not hasattr(module, child) or getattr(module, child) is None:
             return False
     return True
 
 
 def patch(module_name, func):
-    module = wandb.util.get_module(module_name)
+    module = tracklab.util.get_module(module_name)
     success = False
 
     full_func = f"{module_name}.{func.__name__}"
     if not full_path_exists(full_func):
-        wandb.termerror(
+        tracklab.termerror(
             f"Failed to patch {module_name}.{func.__name__}!  Please check if this package/module is installed!"
         )
     else:
-        wandb.patched.setdefault(module.__name__, [])
+        tracklab.patched.setdefault(module.__name__, [])
         # if already patched, do not patch again
-        if [module, func.__name__] not in wandb.patched[module.__name__]:
+        if [module, func.__name__] not in tracklab.patched[module.__name__]:
             setattr(module, f"orig_{func.__name__}", getattr(module, func.__name__))
             setattr(module, func.__name__, func)
-            wandb.patched[module.__name__].append([module, func.__name__])
+            tracklab.patched[module.__name__].append([module, func.__name__])
         success = True
 
     return success
 
 
 def unpatch(module_name):
-    if module_name in wandb.patched:
-        for module, func in wandb.patched[module_name]:
+    if module_name in tracklab.patched:
+        for module, func in tracklab.patched[module_name]:
             setattr(module, func, getattr(module, f"orig_{func}"))
-        wandb.patched[module_name] = []
+        tracklab.patched[module_name] = []
 
 
 def unpatch_kfp():
     unpatch("kfp.components")
     unpatch("kfp.components._python_op")
-    unpatch("wandb.integration.kfp")
+    unpatch("tracklab.integration.kfp")
 
 
 def patch_kfp():
@@ -116,10 +116,10 @@ def patch_kfp():
         success = patch(module_name, func)
         successes.append(success)
     if not all(successes):
-        wandb.termerror(
+        tracklab.termerror(
             "Failed to patch one or more kfp functions.  Patching @wandb_log decorator to no-op."
         )
-        patch("wandb.integration.kfp", wandb_log)
+        patch("tracklab.integration.kfp", wandb_log)
 
 
 def wandb_log(

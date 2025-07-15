@@ -48,7 +48,7 @@ def sweep(
     Args:
       sweep: The configuration of a hyperparameter search.
         (or configuration generator). See
-        [Sweep configuration structure](https://docs.wandb.ai/guides/sweeps/define-sweep-configuration)
+        [Sweep configuration structure](https://docs.tracklab.ai/guides/sweeps/define-sweep-configuration)
         for information on how to define your sweep.
         If you provide a callable, ensure that the callable does
         not take arguments and that it returns a dictionary that
@@ -80,7 +80,7 @@ def sweep(
         env.set_project(project)
 
     # Make sure we are logged in
-    if wandb.run is None:
+    if tracklab.run is None:
         tracklab_login._login(_silent=True)
     api = InternalApi()
     sweep_id, warnings = api.upsert_sweep(sweep, prior_runs=prior_runs)
@@ -103,7 +103,7 @@ def controller(
         ```python
         import tracklab
 
-        tuner = wandb.controller(...)
+        tuner = tracklab.controller(...)
         print(tuner.sweep_config)
         print(tuner.sweep_id)
         tuner.configure_search(...)

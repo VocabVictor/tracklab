@@ -32,9 +32,9 @@ from .internals import internal
 from .internals.protocols import PathStr, Policy
 from .internals.util import Namespace, for_each
 
-Artifact = wandb.Artifact
-Api = wandb.Api
-Project = wandb.apis.public.Project
+Artifact = tracklab.Artifact
+Api = tracklab.Api
+Project = tracklab.apis.public.Project
 
 ARTIFACT_ERRORS_FNAME = "artifact_errors.jsonl"
 ARTIFACT_SUCCESSES_FNAME = "artifact_successes.jsonl"
@@ -69,7 +69,7 @@ else:
 
 @dataclass
 class ArtifactSequence:
-    artifacts: Iterable[wandb.Artifact]
+    artifacts: Iterable[tracklab.Artifact]
     entity: str
     project: str
     type_: str
@@ -109,11 +109,11 @@ class WandbRun:
         dst_api_key: str,
     ) -> None:
         self.run = run
-        self.api = wandb.Api(
+        self.api = tracklab.Api(
             api_key=src_api_key,
             overrides={"base_url": src_base_url},
         )
-        self.dst_api = wandb.Api(
+        self.dst_api = tracklab.Api(
             api_key=dst_api_key,
             overrides={"base_url": dst_base_url},
         )
@@ -349,12 +349,12 @@ class WandbImporter:
         if custom_api_kwargs is None:
             custom_api_kwargs = {"timeout": 600}
 
-        self.src_api = wandb.Api(
+        self.src_api = tracklab.Api(
             api_key=src_api_key,
             overrides={"base_url": src_base_url},
             **custom_api_kwargs,
         )
-        self.dst_api = wandb.Api(
+        self.dst_api = tracklab.Api(
             api_key=dst_api_key,
             overrides={"base_url": dst_base_url},
             **custom_api_kwargs,
@@ -452,13 +452,13 @@ class WandbImporter:
         )
         try:
             dst_collection = self.dst_api.artifact_collection(art_type, art_name)
-        except (wandb.CommError, ValueError):
+        except (tracklab.CommError, ValueError):
             logger.warning(f"Collection doesn't exist {art_type=}, {art_name=}")
             return
 
         try:
             dst_collection.delete()
-        except (wandb.CommError, ValueError) as e:
+        except (tracklab.CommError, ValueError) as e:
             logger.warning(
                 f"Collection can't be deleted, {art_type=}, {art_name=}, {e=}"
             )
@@ -547,7 +547,7 @@ class WandbImporter:
         try:
             retry_arts_func = internal.exp_retry(self._dst_api.artifacts)
             dst_arts = list(retry_arts_func(seq.type_, seq.name))
-        except wandb.CommError:
+        except tracklab.CommError:
             logger.warning(
                 f"{seq=} does not exist in dst.  Has it already been deleted?"
             )
@@ -564,7 +564,7 @@ class WandbImporter:
 
             try:
                 art.delete(delete_aliases=True)
-            except wandb.CommError as e:
+            except tracklab.CommError as e:
                 if "cannot delete system managed artifact" in str(e):
                     logger.warning("Cannot delete system managed artifact")
                 else:
@@ -608,7 +608,7 @@ class WandbImporter:
 
         dst_f = dst_run.file(fname)
         try:
-            contents = wandb.util.download_file_into_memory(
+            contents = tracklab.util.download_file_into_memory(
                 dst_f.url, self.dst_api.api_key
             )
         except urllib3.exceptions.ReadTimeoutError:
@@ -618,7 +618,7 @@ class WandbImporter:
                 return {"Bad upload": f"File not found: {fname}"}
             return {"http problem": f"{fname}: ({e})"}
 
-        dst_meta = wandb.wandb_sdk.lib.json_util.loads(contents)
+        dst_meta = tracklab.wandb_sdk.lib.json_util.loads(contents)
 
         non_matching = {}
         if src_run.metadata:
@@ -715,7 +715,7 @@ class WandbImporter:
     def _import_report(
         self, report: Report, *, namespace: Optional[Namespace] = None
     ) -> None:
-        """Import one wandb.Report.
+        """Import one tracklab.Report.
 
         Use `namespace` to specify alternate settings like where the report should be uploaded
         """
@@ -989,7 +989,7 @@ class WandbImporter:
 
         try:
             dst_run = self.dst_api.run(f"{dst_entity}/{dst_project}/{run_id}")
-        except wandb.CommError:
+        except tracklab.CommError:
             problems = [f"run does not exist in dst at {dst_entity=}/{dst_project=}"]
         else:
             problems = self._get_run_problems(src_run, dst_run)
@@ -1327,7 +1327,7 @@ class WandbImporter:
         api = coalesce(api, self.src_api)
         namespaces = coalesce(namespaces, self._all_namespaces())
 
-        wandb.login(key=self.src_api_key, host=self.src_base_url)
+        tracklab.login(key=self.src_api_key, host=self.src_base_url)
 
         def reports():
             for ns in namespaces:

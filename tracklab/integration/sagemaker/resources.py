@@ -11,7 +11,7 @@ from . import config
 from . import files as sm_files
 
 
-def set_run_id(run_settings: wandb.Settings) -> bool:
+def set_run_id(run_settings: tracklab.Settings) -> bool:
     """Set a run ID and group when using SageMaker.
 
     Returns whether the ID and group were updated.
@@ -20,7 +20,7 @@ def set_run_id(run_settings: wandb.Settings) -> bool:
     #
     # Prevents SageMaker from overriding the run ID configured
     # in environment variables. Note, however, that it will still
-    # override a run ID passed explicitly to `wandb.init()`.
+    # override a run ID passed explicitly to `tracklab.init()`.
     if os.getenv("WANDB_RUN_ID"):
         return False
 
@@ -38,7 +38,7 @@ def set_run_id(run_settings: wandb.Settings) -> bool:
     return True
 
 
-def set_global_settings(settings: wandb.Settings) -> None:
+def set_global_settings(settings: tracklab.Settings) -> None:
     """Set global W&B settings based on the SageMaker environment."""
     if env := parse_sm_secrets():
         settings.update_from_env_vars(env)

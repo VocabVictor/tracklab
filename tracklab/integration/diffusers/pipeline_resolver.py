@@ -11,7 +11,7 @@ from .resolvers import (
 class DiffusersPipelineResolver:
     """Resolver for `DiffusionPipeline` request and responses from [HuggingFace Diffusers](https://huggingface.co/docs/diffusers/index), providing necessary data transformations, formatting, and logging.
 
-    This is based off `wandb.sdk.integration_utils.auto_logging.RequestResponseResolver`.
+    This is based off `tracklab.sdk.integration_utils.auto_logging.RequestResponseResolver`.
     """
 
     def __init__(self) -> None:
@@ -31,7 +31,7 @@ class DiffusersPipelineResolver:
         Args:
             args: (Sequence[Any]) List of arguments.
             kwargs: (Dict[str, Any]) Dictionary of keyword arguments.
-            response: (wandb.sdk.integration_utils.auto_logging.Response) The response from
+            response: (tracklab.sdk.integration_utils.auto_logging.Response) The response from
                 the request.
             start_time: (float) Time when request started.
             time_elapsed: (float) Time elapsed for the request.

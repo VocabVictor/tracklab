@@ -1,14 +1,14 @@
 """Use the Public API to export or update data that you have saved to W&B.
 
 Before using this API, you'll want to log data from your script — check the
-[Quickstart](https://docs.wandb.ai/quickstart) for more details.
+[Quickstart](https://docs.tracklab.ai/quickstart) for more details.
 
 You might use the Public API to
  - update metadata or metrics for an experiment after it has been completed,
  - pull down your results as a dataframe for post-hoc analysis in a Jupyter notebook, or
  - check your saved model artifacts for those tagged as `ready-to-deploy`.
 
-For more on using the Public API, check out [our guide](https://docs.wandb.com/guides/track/public-api-guide).
+For more on using the Public API, check out [our guide](https://docs.tracklab.com/guides/track/public-api-guide).
 """
 
 import json
@@ -116,9 +116,9 @@ class RetryingClient:
         except requests.exceptions.ReadTimeout:
             if "timeout" not in kwargs:
                 timeout = self._client.transport.default_timeout
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"A graphql request initiated by the public wandb API timed out (timeout={timeout} sec). "
-                    f"Create a new API with an integer timeout larger than {timeout}, e.g., `api = wandb.Api(timeout={timeout + 10})` "
+                    f"Create a new API with an integer timeout larger than {timeout}, e.g., `api = tracklab.Api(timeout={timeout + 10})` "
                     f"to increase the graphql timeout."
                 )
             raise
@@ -144,11 +144,11 @@ class Api:
 
     Examples:
         Most common way to initialize
-        >>> wandb.Api()
+        >>> tracklab.Api()
 
     Args:
         overrides: (dict) You can set `base_url` if you are using a wandb server
-            other than https://api.wandb.ai.
+            other than https://api.tracklab.ai.
             You can also set defaults for `entity`, `project`, and `run`.
     """
 
@@ -288,14 +288,14 @@ class Api:
         if "organization" in _overrides:
             self.settings["organization"] = _overrides["organization"]
         if "username" in _overrides and "entity" not in _overrides:
-            wandb.termwarn(
+            tracklab.termwarn(
                 'Passing "username" to Api is deprecated. please use "entity" instead.'
             )
             self.settings["entity"] = _overrides["username"]
 
         self._api_key = api_key
         if self.api_key is None and _thread_local_api_settings.cookies is None:
-            wandb.login(host=_overrides.get("base_url"))
+            tracklab.login(host=_overrides.get("base_url"))
 
         self._viewer = None
         self._projects = {}
@@ -395,7 +395,7 @@ class Api:
 
         Raises:
             ValueError if any of the parameters are invalid
-            wandb.Error on wandb API errors
+            tracklab.Error on wandb API errors
         """
         # TODO(np): Need to check server capabilities for this feature
         # 0. assert params are valid/normalized
@@ -447,7 +447,7 @@ class Api:
             entity, type, config_json, template_variables
         )
         if not create_config_result["success"]:
-            raise wandb.Error("failed to create default resource config")
+            raise tracklab.Error("failed to create default resource config")
         config_id = create_config_result["defaultResourceConfigID"]
 
         # 3. create run queue
@@ -460,7 +460,7 @@ class Api:
             config_id,
         )
         if not create_queue_result["success"]:
-            raise wandb.Error("failed to create run queue")
+            raise tracklab.Error("failed to create run queue")
 
         return public.RunQueue(
             client=self.client,
@@ -497,14 +497,14 @@ class Api:
             The ID of the created chart preset in the format "entity/name"
 
         Raises:
-            wandb.Error: If chart creation fails
+            tracklab.Error: If chart creation fails
             UnsupportedError: If the server doesn't support custom charts
 
         Example:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
 
             # Define a simple bar chart specification
             vega_spec = {
@@ -527,8 +527,8 @@ class Api:
                 spec=vega_spec,
             )
 
-            # Use with wandb.plot_table()
-            chart = wandb.plot_table(
+            # Use with tracklab.plot_table()
+            chart = tracklab.plot_table(
                 vega_spec_name=chart_id,
                 data_table=my_table,
                 fields={"x": "category", "y": "value"},
@@ -548,7 +548,7 @@ class Api:
             spec=spec,
         )
         if result is None or result.get("chart") is None:
-            raise wandb.Error("failed to create custom chart")
+            raise tracklab.Error("failed to create custom chart")
         return result["chart"]["id"]
 
     def upsert_run_queue(
@@ -591,7 +591,7 @@ class Api:
 
         Raises:
             ValueError if any of the parameters are invalid
-            wandb.Error on wandb API errors
+            tracklab.Error on wandb API errors
         """
         if entity is None:
             entity = self.settings["entity"] or self.default_entity
@@ -653,12 +653,12 @@ class Api:
             prioritization_mode=prioritization_mode,
         )
         if not upsert_run_queue_result["success"]:
-            raise wandb.Error("failed to create run queue")
+            raise tracklab.Error("failed to create run queue")
         schema_errors = (
             upsert_run_queue_result.get("configSchemaValidationErrors") or []
         )
         for error in schema_errors:
-            wandb.termwarn(f"resource config validation: {error}")
+            tracklab.termwarn(f"resource config validation: {error}")
 
         return public.RunQueue(
             client=self.client,
@@ -679,7 +679,7 @@ class Api:
         return public.User.create(self, email, admin)
 
     def sync_tensorboard(self, root_dir, run_id=None, project=None, entity=None):
-        """Sync a local directory containing tfevent files to wandb."""
+        """Sync a local directory containing tfevent files to tracklab."""
         from tracklab.sync import SyncManager  # TODO: circular import madness
 
         run_id = run_id or runid.generate_id()
@@ -708,7 +708,7 @@ class Api:
 
     @property
     def user_agent(self) -> str:
-        return "W&B Public Client {}".format(wandb.__version__)
+        return "W&B Public Client {}".format(tracklab.__version__)
 
     @property
     def api_key(self) -> Optional[str]:
@@ -771,7 +771,7 @@ class Api:
             A `Project`, `Run`, `Sweep`, or `BetaReport` instance.
 
         Raises:
-            wandb.Error if path is invalid or the object doesn't exist
+            tracklab.Error if path is invalid or the object doesn't exist
         """
         parts = path.strip("/ ").split("/")
         if len(parts) == 1:
@@ -788,7 +788,7 @@ class Api:
             elif parts[2].startswith("report"):
                 if "--" not in parts[-1]:
                     if "-" in parts[-1]:
-                        raise wandb.Error(
+                        raise tracklab.Error(
                             "Invalid report path, should be team/project/reports/Name--XXXX"
                         )
                     else:
@@ -804,7 +804,7 @@ class Api:
                     parts[0],
                     parts[1],
                 )
-        raise wandb.Error(
+        raise tracklab.Error(
             "Invalid path, should be TEAM/PROJECT/TYPE/ID where TYPE is runs, sweeps, or reports"
         )
 
@@ -993,7 +993,7 @@ class Api:
         if len(res["users"]["edges"]) == 0:
             return None
         elif len(res["users"]["edges"]) > 1:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Found multiple users, returning the first user matching {}".format(
                     username_or_email
                 )
@@ -1196,7 +1196,7 @@ class Api:
     ):
         """Return the named `RunQueue` for entity.
 
-        To create a new `RunQueue`, use `wandb.Api().create_run_queue(...)`.
+        To create a new `RunQueue`, use `tracklab.Api().create_run_queue(...)`.
         """
         return public.RunQueue(
             self.client,
@@ -1400,7 +1400,7 @@ class Api:
                 "Could not determine entity. Please include the entity as part of the artifact name path."
             )
 
-        artifact = wandb.Artifact._from_name(
+        artifact = tracklab.Artifact._from_name(
             entity=entity,
             project=project,
             name=artifact_name,
@@ -1518,7 +1518,7 @@ class Api:
             )
 
             if not artifact_query or not artifact_query["project"]:
-                wandb.termerror(
+                tracklab.termerror(
                     f"Project: '{project}' not found in entity: '{entity}' or access denied."
                 )
                 return []
@@ -1552,7 +1552,7 @@ class Api:
         """
         try:
             self._artifact(name, type)
-        except wandb.errors.CommError:
+        except tracklab.errors.CommError:
             return False
 
         return True
@@ -1572,7 +1572,7 @@ class Api:
         """
         try:
             self.artifact_collection(type, name)
-        except wandb.errors.CommError:
+        except tracklab.errors.CommError:
             return False
 
         return True
@@ -1592,7 +1592,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()  # specify an org if your entity belongs to multiple orgs
+            api = tracklab.Api()  # specify an org if your entity belongs to multiple orgs
             api.registries(filter={"name": {"$regex": "model"}})
             ```
 
@@ -1634,7 +1634,7 @@ class Api:
         if not InternalApi()._server_supports(ServerFeature.ARTIFACT_REGISTRY_SEARCH):
             raise RuntimeError(
                 "Registry search API is not enabled on this wandb server version. "
-                "Please upgrade your server version or contact support at support@wandb.com."
+                "Please upgrade your server version or contact support at support@tracklab.com."
             )
 
         organization = organization or fetch_org_from_settings_or_entity(
@@ -1661,7 +1661,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
             registry = api.registry(name="my-registry", organization="my-org")
             registry.description = "This is an updated description"
             registry.save()
@@ -1670,7 +1670,7 @@ class Api:
         if not InternalApi()._server_supports(ServerFeature.ARTIFACT_REGISTRY_SEARCH):
             raise RuntimeError(
                 "api.registry() is not enabled on this wandb server version. "
-                "Please upgrade your server version or contact support at support@wandb.com."
+                "Please upgrade your server version or contact support at support@tracklab.com."
             )
         organization = organization or fetch_org_from_settings_or_entity(
             self.settings, self.default_entity
@@ -1713,7 +1713,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
             registry = api.create_registry(
                 name="my-registry",
                 visibility="restricted",
@@ -1728,7 +1728,7 @@ class Api:
         ):
             raise RuntimeError(
                 "create_registry api is not enabled on this wandb server version. "
-                "Please upgrade your server version or contact support at support@wandb.com."
+                "Please upgrade your server version or contact support at support@tracklab.com."
             )
 
         organization = organization or fetch_org_from_settings_or_entity(
@@ -1797,7 +1797,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
             webhook_integrations = api.webhook_integrations(entity="my-team")
             ```
 
@@ -1838,7 +1838,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
             slack_integrations = api.slack_integrations(entity="my-team")
             ```
 
@@ -1953,7 +1953,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
             automation = api.automation(name="my-automation")
             ```
 
@@ -1996,7 +1996,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
             automations = api.automations(entity="my-team")
             ```
         """
@@ -2063,7 +2063,7 @@ class Api:
             import tracklab
             from tracklab.automations import OnRunMetric, RunEvent, SendNotification
 
-            api = wandb.Api()
+            api = tracklab.Api()
 
             project = api.project("my-project", entity="my-team")
 
@@ -2097,7 +2097,7 @@ class Api:
                 f"Automation event or action ({event!r} -> {action!r}) "
                 "is not supported on this wandb server version. "
                 "Please upgrade your server version, or contact support at "
-                "support@wandb.com."
+                "support@tracklab.com."
             )
 
         # If needed, rewrite the GraphQL field selection set to omit unsupported fields/fragments/types
@@ -2112,7 +2112,7 @@ class Api:
             status = HTTPStatus(e.response.status_code)
             if status is HTTPStatus.CONFLICT:  # 409
                 if fetch_existing:
-                    wandb.termlog(f"Automation {name!r} exists. Fetching it instead.")
+                    tracklab.termlog(f"Automation {name!r} exists. Fetching it instead.")
                     return self.automation(name=name)
 
                 raise ValueError(
@@ -2166,7 +2166,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
 
             automation = api.automation(name="my-automation")
             automation.enabled = False
@@ -2180,7 +2180,7 @@ class Api:
             ```python
             import tracklab
 
-            api = wandb.Api()
+            api = tracklab.Api()
 
             automation = api.automation(name="my-automation")
 
@@ -2203,7 +2203,7 @@ class Api:
         if not self._supports_automation(action=ActionType.NO_OP):
             raise RuntimeError(
                 "Updating existing automations is not enabled on this wandb server version. "
-                "Please upgrade your server version, or contact support at support@wandb.com."
+                "Please upgrade your server version, or contact support at support@tracklab.com."
             )
 
         gql_input = prepare_to_update(obj, **kwargs)
@@ -2216,7 +2216,7 @@ class Api:
                 f"Automation event or action ({event.value} -> {action.value}) "
                 "is not supported on this wandb server version. "
                 "Please upgrade your server version, or contact support at "
-                "support@wandb.com."
+                "support@tracklab.com."
             )
 
         # If needed, rewrite the GraphQL field selection set to omit unsupported fields/fragments/types
@@ -2231,7 +2231,7 @@ class Api:
             status = HTTPStatus(e.response.status_code)
             if status is HTTPStatus.NOT_FOUND:  # 404
                 if create_missing:
-                    wandb.termlog(f"Automation {name!r} not found. Creating it.")
+                    tracklab.termlog(f"Automation {name!r} not found. Creating it.")
                     return self.create_automation(obj)
 
                 raise ValueError(
@@ -2239,7 +2239,7 @@ class Api:
                 ) from e
 
             # Not a (known) recoverable HTTP error
-            wandb.termerror(f"Got response status {status!r}: {e.response.text!r}")
+            tracklab.termerror(f"Got response status {status!r}: {e.response.text!r}")
             raise
 
         try:

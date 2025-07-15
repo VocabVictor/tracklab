@@ -11,7 +11,7 @@ from tracklab.sdk.lib import telemetry as wb_telemetry
 
 
 class WandbCallback:
-    """`WandbCallback` automatically integrates CatBoost with wandb.
+    """`WandbCallback` automatically integrates CatBoost with tracklab.
 
     Args:
         - metric_period: (int) if you are passing `metric_period` to your CatBoost model please pass the same value here (default=1).
@@ -42,8 +42,8 @@ class WandbCallback:
     """
 
     def __init__(self, metric_period: int = 1):
-        if wandb.run is None:
-            raise wandb.Error("You must call `wandb.init()` before `WandbCallback()`")
+        if tracklab.run is None:
+            raise tracklab.Error("You must call `tracklab.init()` before `WandbCallback()`")
 
         with wb_telemetry.context() as tel:
             tel.feature.catboost_wandb_callback = True
@@ -54,10 +54,10 @@ class WandbCallback:
         if info.iteration % self.metric_period == 0:
             for data, metric in info.metrics.items():
                 for metric_name, log in metric.items():
-                    # todo: replace with wandb.run._log once available
-                    wandb.log({f"{data}-{metric_name}": log[-1]}, commit=False)
-            # todo: replace with wandb.run._log once available
-            wandb.log({f"iteration@metric-period-{self.metric_period}": info.iteration})
+                    # todo: replace with tracklab.run._log once available
+                    tracklab.log({f"{data}-{metric_name}": log[-1]}, commit=False)
+            # todo: replace with tracklab.run._log once available
+            tracklab.log({f"iteration@metric-period-{self.metric_period}": info.iteration})
 
         return True
 
@@ -66,29 +66,29 @@ def _checkpoint_artifact(
     model: Union[CatBoostClassifier, CatBoostRegressor], aliases: List[str]
 ) -> None:
     """Upload model checkpoint as W&B artifact."""
-    if wandb.run is None:
-        raise wandb.Error(
-            "You must call `wandb.init()` before `_checkpoint_artifact()`"
+    if tracklab.run is None:
+        raise tracklab.Error(
+            "You must call `tracklab.init()` before `_checkpoint_artifact()`"
         )
 
-    model_name = f"model_{wandb.run.id}"
+    model_name = f"model_{tracklab.run.id}"
     # save the model in the default `cbm` format
-    model_path = Path(wandb.run.dir) / "model"
+    model_path = Path(tracklab.run.dir) / "model"
 
     model.save_model(model_path)
 
-    model_artifact = wandb.Artifact(name=model_name, type="model")
+    model_artifact = tracklab.Artifact(name=model_name, type="model")
     model_artifact.add_file(str(model_path))
-    wandb.log_artifact(model_artifact, aliases=aliases)
+    tracklab.log_artifact(model_artifact, aliases=aliases)
 
 
 def _log_feature_importance(
     model: Union[CatBoostClassifier, CatBoostRegressor],
 ) -> None:
     """Log feature importance with default settings."""
-    if wandb.run is None:
-        raise wandb.Error(
-            "You must call `wandb.init()` before `_checkpoint_artifact()`"
+    if tracklab.run is None:
+        raise tracklab.Error(
+            "You must call `tracklab.init()` before `_checkpoint_artifact()`"
         )
 
     feat_df = model.get_feature_importance(prettified=True)
@@ -97,11 +97,11 @@ def _log_feature_importance(
         [feat, feat_imp]
         for feat, feat_imp in zip(feat_df["Feature Id"], feat_df["Importances"])
     ]
-    table = wandb.Table(data=fi_data, columns=["Feature", "Importance"])
-    # todo: replace with wandb.run._log once available
-    wandb.log(
+    table = tracklab.Table(data=fi_data, columns=["Feature", "Importance"])
+    # todo: replace with tracklab.run._log once available
+    tracklab.log(
         {
-            "Feature Importance": wandb.plot.bar(
+            "Feature Importance": tracklab.plot.bar(
                 table, "Feature", "Importance", title="Feature Importance"
             )
         },
@@ -126,7 +126,7 @@ def log_summary(
     Using this along with `wandb_callback` will:
 
     - save the hyperparameters as W&B config,
-    - log `best_iteration` and `best_score` as `wandb.summary`,
+    - log `best_iteration` and `best_score` as `tracklab.summary`,
     - save and upload your trained model to Weights & Biases Artifacts (when `save_model_checkpoint = True`)
     - log feature importance plot.
 
@@ -152,11 +152,11 @@ def log_summary(
         log_summary(model)
         ```
     """
-    if wandb.run is None:
-        raise wandb.Error("You must call `wandb.init()` before `log_summary()`")
+    if tracklab.run is None:
+        raise tracklab.Error("You must call `tracklab.init()` before `log_summary()`")
 
     if not (isinstance(model, (CatBoostClassifier, CatBoostRegressor))):
-        raise wandb.Error(
+        raise tracklab.Error(
             "Model should be an instance of CatBoostClassifier or CatBoostRegressor"
         )
 
@@ -166,11 +166,11 @@ def log_summary(
     # log configs
     params = model.get_all_params()
     if log_all_params:
-        wandb.config.update(params)
+        tracklab.config.update(params)
 
     # log best score and iteration
-    wandb.run.summary["best_iteration"] = model.get_best_iteration()
-    wandb.run.summary["best_score"] = model.get_best_score()
+    tracklab.run.summary["best_iteration"] = model.get_best_iteration()
+    tracklab.run.summary["best_score"] = model.get_best_score()
 
     # log model
     if save_model_checkpoint:

@@ -37,20 +37,20 @@ def clusterer(model, X_train, cluster_labels, labels=None, model_name="Clusterer
 
     Example:
     ```python
-    wandb.sklearn.plot_clusterer(kmeans, X, cluster_labels, labels, "KMeans")
+    tracklab.sklearn.plot_clusterer(kmeans, X, cluster_labels, labels, "KMeans")
     ```
     """
-    wandb.termlog(f"\nPlotting {model_name}.")
+    tracklab.termlog(f"\nPlotting {model_name}.")
     if isinstance(model, sklearn.cluster.KMeans):
         elbow_curve(model, X_train)
-        wandb.termlog("Logged elbow curve.")
+        tracklab.termlog("Logged elbow curve.")
 
         silhouette(model, X_train, cluster_labels, labels=labels, kmeans=True)
 
     else:
         silhouette(model, X_train, cluster_labels, kmeans=False)
 
-    wandb.termlog("Logged silhouette plot.")
+    tracklab.termlog("Logged silhouette plot.")
 
 
 def elbow_curve(
@@ -78,11 +78,11 @@ def elbow_curve(
 
     Example:
     ```python
-    wandb.sklearn.plot_elbow_curve(model, X_train)
+    tracklab.sklearn.plot_elbow_curve(model, X_train)
     ```
     """
     if not hasattr(clusterer, "n_clusters"):
-        wandb.termlog(
+        tracklab.termlog(
             "n_clusters attribute not in classifier. Cannot plot elbow method."
         )
         return
@@ -96,7 +96,7 @@ def elbow_curve(
             clusterer, X, cluster_ranges, n_jobs, show_cluster_time
         )
 
-        wandb.log({"elbow_curve": elbow_curve_chart})
+        tracklab.log({"elbow_curve": elbow_curve_chart})
 
 
 def silhouette(
@@ -130,7 +130,7 @@ def silhouette(
 
     Example:
     ```python
-    wandb.sklearn.plot_silhouette(model, X_train, ["spam", "not spam"])
+    tracklab.sklearn.plot_silhouette(model, X_train, ["spam", "not spam"])
     ```
     """
     not_missing = utils.test_missing(clusterer=clusterer)
@@ -143,4 +143,4 @@ def silhouette(
         silhouette_chart = calculate.silhouette(
             clusterer, X, cluster_labels, labels, metric, kmeans
         )
-        wandb.log({"silhouette_plot": silhouette_chart})
+        tracklab.log({"silhouette_plot": silhouette_chart})

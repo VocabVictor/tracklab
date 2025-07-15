@@ -53,7 +53,7 @@ class Audio(BatchableMedia):
         else:
             if sample_rate is None:
                 raise ValueError(
-                    'Argument "sample_rate" is required when instantiating wandb.Audio with raw data.'
+                    'Argument "sample_rate" is required when instantiating tracklab.Audio with raw data.'
                 )
 
             soundfile = util.get_module(
@@ -124,7 +124,7 @@ class Audio(BatchableMedia):
 
         util.get_module(
             "soundfile",
-            required="wandb.Audio requires the soundfile package. To get it, run: pip install soundfile",
+            required="tracklab.Audio requires the soundfile package. To get it, run: pip install soundfile",
         )
         base_path = os.path.join(run.dir, "media", "audio")
         filesystem.mkdir_exists_ok(base_path)

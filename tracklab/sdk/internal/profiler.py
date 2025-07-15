@@ -15,13 +15,13 @@ def torch_trace_handler():
 
      Provide as an argument to `torch.profiler.profile`:
      ```python
-     torch.profiler.profile(..., on_trace_ready=wandb.profiler.torch_trace_handler())
+     torch.profiler.profile(..., on_trace_ready=tracklab.profiler.torch_trace_handler())
      ```
 
     Calling this function ensures that profiler charts & tables can be viewed in
-    your run dashboard on wandb.ai.
+    your run dashboard on tracklab.ai.
 
-    Please note that `wandb.init()` must be called before this function is
+    Please note that `tracklab.init()` must be called before this function is
     invoked, and the reinit setting must not be set to "create_new". The PyTorch
     (torch) version must also be at least 1.9, in order to ensure stability of
     their Profiler API.
@@ -33,17 +33,17 @@ def torch_trace_handler():
         None
 
     Raises:
-        UsageError if wandb.init() hasn't been called before profiling.
+        UsageError if tracklab.init() hasn't been called before profiling.
         Error if torch version is less than 1.9.0.
 
     Examples:
     ```python
-    run = wandb.init()
+    run = tracklab.init()
     run.config.id = "profile_code"
 
     with torch.profiler.profile(
         schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
-        on_trace_ready=wandb.profiler.torch_trace_handler(),
+        on_trace_ready=tracklab.profiler.torch_trace_handler(),
         record_shapes=True,
         with_stack=True,
     ) as prof:
@@ -56,8 +56,8 @@ def torch_trace_handler():
     """
     from packaging.version import parse
 
-    torch = wandb.util.get_module(PYTORCH_MODULE, required=True)
-    torch_profiler = wandb.util.get_module(PYTORCH_PROFILER_MODULE, required=True)
+    torch = tracklab.util.get_module(PYTORCH_MODULE, required=True)
+    torch_profiler = tracklab.util.get_module(PYTORCH_PROFILER_MODULE, required=True)
 
     if parse(torch.__version__) < parse("1.9.0"):
         raise Error(
@@ -66,11 +66,11 @@ def torch_trace_handler():
         )
 
     try:
-        logdir = os.path.join(wandb.run.dir, "pytorch_traces")  # type: ignore
+        logdir = os.path.join(tracklab.run.dir, "pytorch_traces")  # type: ignore
         os.mkdir(logdir)
     except AttributeError:
         raise UsageError(
-            "Please call `wandb.init()` before `wandb.profiler.torch_trace_handler()`"
+            "Please call `tracklab.init()` before `tracklab.profiler.torch_trace_handler()`"
         ) from None
 
     with telemetry.context() as tel:

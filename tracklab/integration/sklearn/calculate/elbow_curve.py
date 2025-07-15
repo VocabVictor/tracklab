@@ -22,7 +22,7 @@ def elbow_curve(clusterer, X, cluster_ranges, n_jobs, show_cluster_time):  # noq
     clfs = np.absolute(clfs)
 
     table = make_table(cluster_ranges, clfs, times)
-    chart = wandb.visualize("wandb/elbow/v1", table)
+    chart = tracklab.visualize("wandb/elbow/v1", table)
 
     return chart
 
@@ -32,7 +32,7 @@ def make_table(cluster_ranges, clfs, times):
 
     data = list(zip(cluster_ranges, clfs, times))
 
-    table = wandb.Table(columns=columns, data=data)
+    table = tracklab.Table(columns=columns, data=data)
 
     return table
 

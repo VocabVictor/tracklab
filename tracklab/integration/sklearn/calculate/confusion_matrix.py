@@ -63,7 +63,7 @@ def confusion_matrix(
         cm = cm[:, pred_label_indexes]
 
     table = make_table(cm, pred_classes, true_classes, labels)
-    chart = wandb.visualize("wandb/confusion_matrix/v1", table)
+    chart = tracklab.visualize("wandb/confusion_matrix/v1", table)
 
     return chart
 
@@ -88,6 +88,6 @@ def make_table(cm, pred_classes, true_classes, labels):
         ):
             break
 
-    table = wandb.Table(columns=["Predicted", "Actual", "Count"], data=data)
+    table = tracklab.Table(columns=["Predicted", "Actual", "Count"], data=data)
 
     return table

@@ -46,13 +46,13 @@ def wandb_log(  # noqa: C901
 
     def log_input_scalar(name, data, run=None):
         run.config[name] = data
-        wandb.termlog(f"Setting config: {name} to {data}")
+        tracklab.termlog(f"Setting config: {name} to {data}")
 
     def log_input_artifact(name, data, type, run=None):
-        artifact = wandb.Artifact(name, type=type)
+        artifact = tracklab.Artifact(name, type=type)
         artifact.add_file(data)
         run.use_artifact(artifact)
-        wandb.termlog(f"Using artifact: {name}")
+        tracklab.termlog(f"Using artifact: {name}")
 
     def log_output_scalar(name, data, run=None):
         if isinstance_namedtuple(data):
@@ -62,19 +62,19 @@ def wandb_log(  # noqa: C901
             run.log({name: data})
 
     def log_output_artifact(name, data, type, run=None):
-        artifact = wandb.Artifact(name, type=type)
+        artifact = tracklab.Artifact(name, type=type)
         artifact.add_file(data)
         run.log_artifact(artifact)
-        wandb.termlog(f"Logging artifact: {name}")
+        tracklab.termlog(f"Logging artifact: {name}")
 
     def _log_component_file(func, run=None):
         name = func.__name__
         output_component_file = f"{name}.yml"
         components._python_op.func_to_component_file(func, output_component_file)
-        artifact = wandb.Artifact(name, type="kubeflow_component_file")
+        artifact = tracklab.Artifact(name, type="kubeflow_component_file")
         artifact.add_file(output_component_file)
         run.log_artifact(artifact)
-        wandb.termlog(f"Logging component file: {output_component_file}")
+        tracklab.termlog(f"Logging component file: {output_component_file}")
 
     # Add `mlpipeline_ui_metadata_path` to signature to show W&B run in "ML Visualizations tab"
     sig = signature(func)
@@ -127,7 +127,7 @@ def wandb_log(  # noqa: C901
             mlpipeline_ui_metadata_path = bound.arguments["mlpipeline_ui_metadata_path"]
             del bound.arguments["mlpipeline_ui_metadata_path"]
 
-            with wandb.init(
+            with tracklab.init(
                 job_type=func.__name__,
                 group="{{workflow.annotations.pipelines.kubeflow.org/run_name}}",
             ) as run:

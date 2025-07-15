@@ -451,7 +451,7 @@ class Versions(Paginator):
             )
 
         artifacts = (
-            wandb.Artifact._from_attrs(
+            tracklab.Artifact._from_attrs(
                 a["node"]["artifactCollection"]["project"]["entity"]["name"],
                 a["node"]["artifactCollection"]["project"]["name"],
                 a["node"]["artifactCollection"]["name"]

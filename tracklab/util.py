@@ -275,10 +275,10 @@ def app_url(api_url: str) -> str:
     app_url = tracklab.env.get_app_url()
     if app_url is not None:
         return str(app_url.strip("/"))
-    if "://api.wandb.test" in api_url:
+    if "://api.tracklab.test" in api_url:
         # dev mode
         return api_url.replace("://api.", "://app.").strip("/")
-    elif "://api.wandb." in api_url:
+    elif "://api.tracklab." in api_url:
         # cloud
         return api_url.replace("://api.", "://").strip("/")
     elif "://api." in api_url:
@@ -725,7 +725,7 @@ def launch_browser(attempt_launch_browser: bool = True) -> bool:
 
 
 def generate_id(length: int = 8) -> str:
-    # Do not use this; use wandb.sdk.lib.runid.generate_id instead.
+    # Do not use this; use tracklab.sdk.lib.runid.generate_id instead.
     # This is kept only for legacy code.
     return runid.generate_id(length)
 
@@ -1462,7 +1462,7 @@ def to_native_slash_path(path: str) -> FilePathStr:
 
 def check_and_warn_old(files: List[str]) -> bool:
     if "wandb-metadata.json" in files:
-        tracklab.termwarn("These runs were logged with a previous version of wandb.")
+        tracklab.termwarn("These runs were logged with a previous version of tracklab.")
         tracklab.termwarn(
             "Run pip install wandb<0.10.0 to get the old library and sync your runs."
         )
@@ -1893,7 +1893,7 @@ def sample_with_exponential_decay_weights(
 ) -> Tuple[List, List, Optional[List]]:
     """Sample from a list of lists with weights that decay exponentially.
 
-    May be used with the wandb.plot.line_series function.
+    May be used with the tracklab.plot.line_series function.
     """
     xs_array = np.array(xs)
     ys_array = np.array(ys)
@@ -1967,7 +1967,7 @@ def get_core_path() -> str:
     if not bin_path.exists():
         raise WandbCoreNotAvailableError(
             f"File not found: {bin_path}."
-            " Please contact support at support@wandb.com."
+            " Please contact support at support@tracklab.com."
             f" Your platform is: {platform.platform()}."
         )
 

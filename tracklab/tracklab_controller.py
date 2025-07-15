@@ -14,14 +14,14 @@ Example:
     # There are three different ways sweeps can be created:
     # (1) create with sweep id from `wandb sweep` command
     sweep_id = 'xyzxyz2'
-    tuner = wandb.controller(sweep_id)
+    tuner = tracklab.controller(sweep_id)
     # (2) create with sweep config
     sweep_config = {}
-    tuner = wandb.controller()
+    tuner = tracklab.controller()
     tuner.configure(sweep_config)
     tuner.create()
     # (3) create by constructing programmatic sweep configuration
-    tuner = wandb.controller()
+    tuner = tracklab.controller()
     tuner.configure_search('random')
     tuner.configure_program('train-dummy.py')
     tuner.configure_parameter('param1', values=[1,2,3])

@@ -22,7 +22,7 @@ class User(Attrs):
     to handle user attributes.
 
     Args:
-        client: (`wandb.apis.internal.Api`) The client instance to use
+        client: (`tracklab.apis.internal.Api`) The client instance to use
         attrs: (dict) The user attributes
 
     Note:
@@ -76,7 +76,7 @@ class User(Attrs):
     def user_api(self):
         """An instance of the api using credentials from the user."""
         if self._user_api is None and len(self.api_keys) > 0:
-            self._user_api = wandb.Api(api_key=self.api_keys[0])
+            self._user_api = tracklab.Api(api_key=self.api_keys[0])
         return self._user_api
 
     @classmethod

@@ -27,7 +27,7 @@ for project in projects:
 
 Note:
     This module is part of the W&B Public API and provides methods to access
-    and manage projects. For creating new projects, use wandb.init()
+    and manage projects. For creating new projects, use tracklab.init()
     with a new project name.
 """
 
@@ -58,7 +58,7 @@ class Projects(Paginator["Project"]):
     An iterable interface to access projects created and saved by the entity.
 
     Args:
-        client (`wandb.apis.internal.Api`): The API client instance to use.
+        client (`tracklab.apis.internal.Api`): The API client instance to use.
         entity (str): The entity name (username or team) to fetch projects for.
         per_page (int): Number of projects to fetch per request (default is 50).
 

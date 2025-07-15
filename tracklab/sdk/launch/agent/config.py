@@ -101,7 +101,7 @@ class EnvironmentConfig(BaseModel):
         """Check for extra fields and print a warning."""
         for key in values:
             if key not in ["type", "region"]:
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Unrecognized field {key} in environment block. Please check your config file."
                 )
         return values
@@ -289,7 +289,7 @@ def validate_registry_uri(uri: str) -> str:
             )
         return uri
 
-    wandb.termwarn(
+    tracklab.termwarn(
         f"Unable to recognize registry type in URI {uri}. You are responsible "
         "for ensuring the agent can push images to this registry."
     )

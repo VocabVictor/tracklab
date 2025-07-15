@@ -10,7 +10,7 @@ requirement_env_var_mapping: Dict[str, str] = {
 
 
 def requires(requirement: str) -> FuncT:  # type: ignore
-    """Decorate functions to gate features with wandb.require."""
+    """Decorate functions to gate features with tracklab.require."""
     env_var = requirement_env_var_mapping[requirement]
 
     def deco(func: FuncT) -> FuncT:
@@ -18,7 +18,7 @@ def requires(requirement: str) -> FuncT:  # type: ignore
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             if not os.getenv(env_var):
                 raise Exception(
-                    f"You need to enable this feature with `wandb.require({requirement!r})`"
+                    f"You need to enable this feature with `tracklab.require({requirement!r})`"
                 )
             return func(*args, **kwargs)
 
@@ -40,5 +40,5 @@ class RequiresMixin:
         env_var = requirement_env_var_mapping[self.requirement]
         if not os.getenv(env_var):
             raise Exception(
-                f'You must explicitly enable this feature with `wandb.require("{self.requirement})"'
+                f'You must explicitly enable this feature with `tracklab.require("{self.requirement})"'
             )

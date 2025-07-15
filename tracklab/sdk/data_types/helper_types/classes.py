@@ -60,7 +60,7 @@ class Classes(Media):
 
 class _ClassesIdType(_dtypes.Type):
     name = "classesId"
-    legacy_names = ["wandb.Classes_id"]
+    legacy_names = ["tracklab.Classes_id"]
     types = [Classes]
 
     def __init__(
@@ -115,7 +115,7 @@ class _ClassesIdType(_dtypes.Type):
 
     def to_json(self, artifact: Optional["Artifact"] = None) -> Dict[str, Any]:
         cl_dict = super().to_json(artifact)
-        # TODO (tss): Refactor this block with the similar one in wandb.Image.
+        # TODO (tss): Refactor this block with the similar one in tracklab.Image.
         # This is a bit of a smell that the classes object does not follow
         # the same file-pattern as other media types.
         if artifact is not None:

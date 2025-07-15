@@ -86,9 +86,9 @@ class MlflowRun:
             dir_path = mlflow.artifacts.download_artifacts(run_id=self.run.info.run_id)
 
         # Since mlflow doesn't have extra metadata about the artifacts,
-        # we just lump them all together into a single wandb.Artifact
+        # we just lump them all together into a single tracklab.Artifact
         artifact_name = self._handle_incompatible_strings(self.display_name())
-        art = wandb.Artifact(artifact_name, "imported-artifacts")
+        art = tracklab.Artifact(artifact_name, "imported-artifacts")
         art.add_dir(dir_path)
 
         return [art]
@@ -160,7 +160,7 @@ class MlflowImporter:
         if custom_api_kwargs is None:
             custom_api_kwargs = {"timeout": 600}
 
-        self.dst_api = wandb.Api(
+        self.dst_api = tracklab.Api(
             api_key=dst_api_key,
             overrides={"base_url": dst_base_url},
             **custom_api_kwargs,

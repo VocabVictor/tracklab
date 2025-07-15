@@ -229,8 +229,8 @@ class Api:
         self,
         default_settings: Optional[
             Union[
-                "wandb.sdk.tracklab_settings.Settings",
-                "wandb.sdk.internal.settings_static.SettingsStatic",
+                "tracklab.sdk.tracklab_settings.Settings",
+                "tracklab.sdk.internal.settings_static.SettingsStatic",
                 Settings,
                 dict,
             ]
@@ -250,7 +250,7 @@ class Api:
             "section": "default",
             "git_remote": "origin",
             "ignore_globs": [],
-            "base_url": "https://api.wandb.ai",
+            "base_url": "https://api.tracklab.ai",
             "root_dir": None,
             "api_key": None,
             "entity": None,
@@ -400,7 +400,7 @@ class Api:
             assert response is not None
             logger.exception("Error executing GraphQL.")
             for error in parse_backend_error_messages(response):
-                wandb.termerror(f"Error while calling W&B API: {error} ({response})")
+                tracklab.termerror(f"Error while calling W&B API: {error} ({response})")
             raise
 
     def validate_api_key(self) -> bool:
@@ -417,7 +417,7 @@ class Api:
 
     @property
     def user_agent(self) -> str:
-        return f"W&B Internal Client {wandb.__version__}"
+        return f"TrackLab Internal Client {tracklab.__version__}"
 
     @property
     def api_key(self) -> Optional[str]:
@@ -469,7 +469,7 @@ class Api:
 
     @property
     def app_url(self) -> str:
-        return wandb.util.app_url(self.api_url)
+        return tracklab.util.app_url(self.api_url)
 
     @property
     def default_entity(self) -> str:
@@ -488,7 +488,7 @@ class Api:
 
                 {
                     "entity": "models",
-                    "base_url": "https://api.wandb.ai",
+                    "base_url": "https://api.tracklab.ai",
                     "project": None,
                     "organization": "my-org",
                 }
@@ -1913,7 +1913,7 @@ class Api:
         if not matching_queues:
             # in the case of a missing default queue. create it
             if queue_name == "default":
-                wandb.termlog(
+                tracklab.termlog(
                     f"No default queue existing for entity: {entity} in project: {project_queue}, creating one."
                 )
                 res = self.create_run_queue(
@@ -1924,7 +1924,7 @@ class Api:
                 )
 
                 if res is None or res.get("queueID") is None:
-                    wandb.termerror(
+                    tracklab.termerror(
                         f"Unable to create default queue for entity: {entity} on project: {project_queue}. Run could not be added to a queue"
                     )
                     return None
@@ -1935,10 +1935,10 @@ class Api:
                     _msg = f"Unable to push to run queue {queue_name}. Queue not found."
                 else:
                     _msg = f"Unable to push to run queue {project_queue}/{queue_name}. Queue not found."
-                wandb.termwarn(_msg)
+                tracklab.termwarn(_msg)
                 return None
         elif len(matching_queues) > 1:
-            wandb.termerror(
+            tracklab.termerror(
                 f"Unable to push to run queue {queue_name}. More than one queue found with this name."
             )
             return None
@@ -3002,7 +3002,7 @@ class Api:
                 _e = retry.TransientError(exc=e)
                 raise _e.with_traceback(sys.exc_info()[2])
             else:
-                wandb._sentry.reraise(e)
+                tracklab._sentry.reraise(e)
         return response
 
     def upload_file(
@@ -3033,7 +3033,7 @@ class Api:
                 self.upload_file_azure(url, progress, extra_headers)
             else:
                 if "x-ms-blob-type" in extra_headers:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         "Azure uploads over 256MB require the azure SDK, install with pip install wandb[azure]",
                         repeat=False,
                     )
@@ -3069,7 +3069,7 @@ class Api:
                 _e = retry.TransientError(exc=e)
                 raise _e.with_traceback(sys.exc_info()[2])
             else:
-                wandb._sentry.reraise(e)
+                tracklab._sentry.reraise(e)
 
         return response
 
@@ -3577,7 +3577,7 @@ class Api:
                     entity=entity, organization=organization
                 )
             except ValueError as e:
-                wandb.termerror(str(e))
+                tracklab.termerror(str(e))
                 raise
 
         def replace(a: str, b: str) -> None:
@@ -4075,13 +4075,13 @@ class Api:
         fields = self.server_create_artifact_introspection()
         artifact_fields = self.server_artifact_introspection()
         if ("ttlIsInherited" not in artifact_fields) and ttl_duration_seconds:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Server not compatible with setting Artifact TTLs, please upgrade the server to use Artifact TTL"
             )
             # ttlDurationSeconds is only usable if ttlIsInherited is also present
             ttl_duration_seconds = None
         if ("tags" not in artifact_fields) and tags:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Server not compatible with Artifact tags. "
                 "To use Artifact tags, please upgrade the server to v0.85 or higher."
             )

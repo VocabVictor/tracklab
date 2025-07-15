@@ -767,7 +767,7 @@ class Artifacts(SizedPaginator["Artifact"]):
         return self.last_response.edges[-1].cursor
 
     def convert_objects(self) -> list[Artifact]:
-        """Convert the raw response data into a list of wandb.Artifact objects.
+        """Convert the raw response data into a list of tracklab.Artifact objects.
 
         <!-- lazydoc-ignore: internal -->
         """
@@ -776,7 +776,7 @@ class Artifacts(SizedPaginator["Artifact"]):
 
         artifact_edges = (edge for edge in self.last_response.edges if edge.node)
         artifacts = (
-            wandb.Artifact._from_attrs(
+            tracklab.Artifact._from_attrs(
                 entity=self.entity,
                 project=self.project,
                 name=f"{self.collection_name}:{edge.version}",
@@ -878,7 +878,7 @@ class RunArtifacts(SizedPaginator["Artifact"]):
         return self.last_response.edges[-1].cursor
 
     def convert_objects(self) -> list[Artifact]:
-        """Convert the raw response data into a list of wandb.Artifact objects.
+        """Convert the raw response data into a list of tracklab.Artifact objects.
 
         <!-- lazydoc-ignore: internal -->
         """
@@ -886,7 +886,7 @@ class RunArtifacts(SizedPaginator["Artifact"]):
             return []
 
         return [
-            wandb.Artifact._from_attrs(
+            tracklab.Artifact._from_attrs(
                 entity=proj.entity_name,
                 project=proj.name,
                 name=f"{artifact_seq.name}:v{node.version_index}",
@@ -1042,7 +1042,7 @@ def server_supports_artifact_collections_gql_edges(
     supported = client.version_supported("0.12.11")  # edges were merged on
     if not supported and warn:
         # First local release to include the above is 0.9.50: https://github.com/wandb/local/releases/tag/0.9.50
-        wandb.termwarn(
+        tracklab.termwarn(
             "W&B Local Server version does not support ArtifactCollection gql edges; falling back to using legacy ArtifactSequence. Please update server to at least version 0.9.50."
         )
     return supported

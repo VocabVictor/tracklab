@@ -57,7 +57,7 @@ def launch_add(
 
     Arguments:
         uri: URI of experiment to run. A wandb run uri or a Git repository URI.
-        job: string reference to a wandb.Job eg: wandb/test/my-job:latest
+        job: string reference to a tracklab.Job eg: wandb/test/my-job:latest
         config: A dictionary containing the configuration for the run. May also contain
             resource specific arguments under the key "resource_args"
         template_variables: A dictionary containing values of template variables for a run queue.
@@ -92,18 +92,18 @@ def launch_add(
     params = {"alpha": 0.5, "l1_ratio": 0.01}
     # Run W&B project and create a reproducible docker environment
     # on a local host
-    api = wandb.apis.internal.Api()
+    api = tracklab.apis.internal.Api()
     launch_add(uri=project_uri, parameters=params)
     ```
 
 
     Returns:
-        an instance of`wandb.api.public.QueuedRun` which gives information about the
+        an instance of`tracklab.api.public.QueuedRun` which gives information about the
         queued run, or if `wait_until_started` or `wait_until_finished` are called, gives access
         to the underlying Run information.
 
     Raises:
-        `wandb.exceptions.LaunchError` if unsuccessful
+        `tracklab.exceptions.LaunchError` if unsuccessful
     """
     api = Api()
 
@@ -179,14 +179,14 @@ def _launch_add(
             )
 
         if launch_spec.get("job") is not None:
-            wandb.termwarn("Build doesn't support setting a job. Overwriting job.")
+            tracklab.termwarn("Build doesn't support setting a job. Overwriting job.")
             launch_spec["job"] = None
 
         launch_project = LaunchProject.from_spec(launch_spec, api)
         docker_image_uri = asyncio.run(
             build_image_from_project(launch_project, api, config or {})
         )
-        run = wandb.run or wandb.init(
+        run = tracklab.run or tracklab.init(
             project=launch_spec["project"],
             entity=launch_spec["entity"],
             job_type="launch_job",
@@ -232,10 +232,10 @@ def _launch_add(
             launch_spec["resource"] = updated_spec.get("resource")
 
     if project_queue == LAUNCH_DEFAULT_PROJECT:
-        wandb.termlog(f"{LOG_PREFIX}Added run to queue {queue_name}.")
+        tracklab.termlog(f"{LOG_PREFIX}Added run to queue {queue_name}.")
     else:
-        wandb.termlog(f"{LOG_PREFIX}Added run to queue {project_queue}/{queue_name}.")
-    wandb.termlog(f"{LOG_PREFIX}Launch spec:\n{pprint.pformat(launch_spec)}\n")
+        tracklab.termlog(f"{LOG_PREFIX}Added run to queue {project_queue}/{queue_name}.")
+    tracklab.termlog(f"{LOG_PREFIX}Launch spec:\n{pprint.pformat(launch_spec)}\n")
 
     public_api = public.Api()
     if job is not None:

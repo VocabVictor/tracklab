@@ -29,7 +29,7 @@ def class_proportions(y_train, y_test, labels):
         class_column = get_named_labels(labels, class_column)
 
     table = make_table(class_column, dataset_column, count_column)
-    chart = wandb.visualize("wandb/class_proportions/v1", table)
+    chart = tracklab.visualize("wandb/class_proportions/v1", table)
 
     return chart
 
@@ -38,7 +38,7 @@ def make_table(class_column, dataset_column, count_column):
     columns = ["class", "dataset", "count"]
     data = list(zip(class_column, dataset_column, count_column))
 
-    return wandb.Table(data=data, columns=columns)
+    return tracklab.Table(data=data, columns=columns)
 
 
 def make_columns(class_ids, counts_train, counts_test):

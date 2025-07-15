@@ -14,8 +14,8 @@ _T = TypeVar("_T")
 
 
 def allow_relogging_after_mutation(
-    method: Callable[Concatenate[wandb.Table, _P], _T],
-) -> Callable[Concatenate[wandb.Table, _P], _T]:
+    method: Callable[Concatenate[tracklab.Table, _P], _T],
+) -> Callable[Concatenate[tracklab.Table, _P], _T]:
     """Decorator that handles table state after mutations based on log_mode.
 
     For MUTABLE tables, resets the run and artifact target to allow re-logging.
@@ -23,7 +23,7 @@ def allow_relogging_after_mutation(
     """
 
     @wraps(method)
-    def wrapper(self: wandb.Table, *args: Any, **kwargs: Any) -> _T:
+    def wrapper(self: tracklab.Table, *args: Any, **kwargs: Any) -> _T:
         has_been_logged = self._run is not None or self._artifact_target is not None
 
         if self.log_mode == "MUTABLE":
@@ -32,7 +32,7 @@ def allow_relogging_after_mutation(
             self._path = None
             self._sha256 = None
         elif self.log_mode == "IMMUTABLE" and has_been_logged:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "You are mutating a Table with log_mode='IMMUTABLE' that has been "
                 "logged already. Subsequent log() calls will have no effect. "
                 "Set log_mode='MUTABLE' to enable re-logging after mutations",
@@ -45,8 +45,8 @@ def allow_relogging_after_mutation(
 
 
 def allow_incremental_logging_after_append(
-    method: Callable[Concatenate[wandb.Table, _P], _T],
-) -> Callable[Concatenate[wandb.Table, _P], _T]:
+    method: Callable[Concatenate[tracklab.Table, _P], _T],
+) -> Callable[Concatenate[tracklab.Table, _P], _T]:
     """Decorator that handles incremental logging state after append operations.
 
     For INCREMENTAL tables, manages artifact references and increments counters
@@ -54,7 +54,7 @@ def allow_incremental_logging_after_append(
     """
 
     @wraps(method)
-    def wrapper(self: wandb.Table, *args: Any, **kwargs: Any) -> _T:
+    def wrapper(self: tracklab.Table, *args: Any, **kwargs: Any) -> _T:
         res = method(self, *args, **kwargs)
 
         if self.log_mode != "INCREMENTAL" or self._artifact_target is None:
@@ -81,7 +81,7 @@ def allow_incremental_logging_after_append(
 
         self._increment_num += 1
         if self._increment_num > 99:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "You have exceeded 100 increments for this table. "
                 "Only the latest 100 increments will be visualized in the run workspace.",
                 repeat=False,
@@ -92,14 +92,14 @@ def allow_incremental_logging_after_append(
 
 
 def ensure_not_incremental(
-    method: Callable[Concatenate[wandb.Table, _P], _T],
-) -> Callable[Concatenate[wandb.Table, _P], _T]:
+    method: Callable[Concatenate[tracklab.Table, _P], _T],
+) -> Callable[Concatenate[tracklab.Table, _P], _T]:
     """Decorator that checks if log mode is incremental to disallow methods from being called."""
 
     @wraps(method)
-    def wrapper(self: wandb.Table, *args: Any, **kwargs: Any) -> _T:
+    def wrapper(self: tracklab.Table, *args: Any, **kwargs: Any) -> _T:
         if self.log_mode == "INCREMENTAL":
-            raise wandb.Error(
+            raise tracklab.Error(
                 f"Operation '{method.__name__}' is not supported for tables with "
                 "log_mode='INCREMENTAL'. Use a different log mode like 'MUTABLE' or 'IMMUTABLE'."
             )

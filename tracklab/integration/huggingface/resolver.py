@@ -77,7 +77,7 @@ class HuggingFacePipelineRequestResponseResolver:
                 # TODO: Let users decide the name in a way that does not use an environment variable
 
                 return {
-                    table_name: wandb.Table(
+                    table_name: tracklab.Table(
                         columns=packed_data[0], data=packed_data[1:]
                     )
                 }

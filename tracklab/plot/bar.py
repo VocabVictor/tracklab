@@ -10,13 +10,13 @@ if TYPE_CHECKING:
 
 
 def bar(
-    table: wandb.Table,
+    table: tracklab.Table,
     label: str,
     value: str,
     title: str = "",
     split_table: bool = False,
 ) -> CustomChart:
-    """Constructs a bar chart from a wandb.Table of data.
+    """Constructs a bar chart from a tracklab.Table of data.
 
     Args:
         table: A table containing the data for the bar chart.
@@ -29,7 +29,7 @@ def bar(
 
     Returns:
         CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Example:
 
@@ -46,12 +46,12 @@ def bar(
     ]
 
     # Create a table with the data
-    table = wandb.Table(data=data, columns=["class", "accuracy"])
+    table = tracklab.Table(data=data, columns=["class", "accuracy"])
 
     # Initialize a W&B run and log the bar plot
-    with wandb.init(project="bar_chart") as run:
+    with tracklab.init(project="bar_chart") as run:
         # Create a bar plot from the table
-        bar_plot = wandb.plot.bar(
+        bar_plot = tracklab.plot.bar(
             table=table,
             label="class",
             value="accuracy",

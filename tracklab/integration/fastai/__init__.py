@@ -54,7 +54,7 @@ try:
         matplotlib.use("Agg")  # non-interactive backend (avoid tkinter issues)
     import matplotlib.pyplot as plt
 except ImportError:
-    wandb.termwarn("matplotlib required if logging sample image predictions")
+    tracklab.termwarn("matplotlib required if logging sample image predictions")
 
 
 class WandbCallback(TrackerCallback):
@@ -89,9 +89,9 @@ class WandbCallback(TrackerCallback):
         predictions: int = 36,
         seed: int = 12345,
     ) -> None:
-        # Check if wandb.init has been called
-        if wandb.run is None:
-            raise ValueError("You must call wandb.init() before WandbCallback()")
+        # Check if tracklab.init has been called
+        if tracklab.run is None:
+            raise ValueError("You must call tracklab.init() before WandbCallback()")
 
         # Adapted from fast.ai "SaveModelCallback"
         if monitor is None:
@@ -100,7 +100,7 @@ class WandbCallback(TrackerCallback):
         else:
             super().__init__(learn, monitor=monitor, mode=mode)
         self.save_model = save_model
-        self.model_path = Path(wandb.run.dir) / "bestmodel.pth"
+        self.model_path = Path(tracklab.run.dir) / "bestmodel.pth"
 
         self.log = log
         self.input_type = input_type
@@ -124,7 +124,7 @@ class WandbCallback(TrackerCallback):
             WandbCallback._watch_called = True
 
             # Logs model topology and optionally gradients and weights
-            wandb.watch(self.learn.model, log=self.log)
+            tracklab.watch(self.learn.model, log=self.log)
 
     def on_epoch_end(
         self, epoch: int, smooth_loss: float, last_metrics: list, **kwargs: Any
@@ -134,7 +134,7 @@ class WandbCallback(TrackerCallback):
             # Adapted from fast.ai "SaveModelCallback"
             current = self.get_monitor_value()
             if current is not None and self.operator(current, self.best):
-                wandb.termlog(
+                tracklab.termlog(
                     f"Better model found at epoch {epoch} with {self.monitor} value: {current}."
                 )
                 self.best = current
@@ -148,10 +148,10 @@ class WandbCallback(TrackerCallback):
             try:
                 self._wandb_log_predictions()
             except FastaiError as e:
-                wandb.termwarn(e.message)
+                tracklab.termwarn(e.message)
                 self.validation_data = None  # prevent from trying again on next loop
             except Exception as e:
-                wandb.termwarn(f"Unable to log prediction samples.\n{e}")
+                tracklab.termwarn(f"Unable to log prediction samples.\n{e}")
                 self.validation_data = None  # prevent from trying again on next loop
 
         # Log losses & metrics
@@ -162,7 +162,7 @@ class WandbCallback(TrackerCallback):
                 zip(self.learn.recorder.names, [epoch, smooth_loss] + last_metrics)
             )
         }
-        wandb.log(logs)
+        tracklab.log(logs)
 
     def on_train_end(self, **kwargs: Any) -> None:
         """Load the best model."""
@@ -171,7 +171,7 @@ class WandbCallback(TrackerCallback):
             if self.model_path.is_file():
                 with self.model_path.open("rb") as model_file:
                     self.learn.load(model_file, purge=False)
-                    wandb.termlog(f"Loaded best saved model from {self.model_path}")
+                    tracklab.termlog(f"Loaded best saved model from {self.model_path}")
 
     def _wandb_log_predictions(self) -> None:
         """Log prediction samples."""
@@ -192,7 +192,7 @@ class WandbCallback(TrackerCallback):
             # tensor of dim 1 -> likely to be multicategory
             if not pred[1].shape or pred[1].dim() == 1:
                 pred_log.append(
-                    wandb.Image(
+                    tracklab.Image(
                         x.data,
                         caption=f"Ground Truth: {y}\nPrediction: {pred[0]}",
                     )
@@ -201,7 +201,7 @@ class WandbCallback(TrackerCallback):
             # most vision datasets have a "show" function we can use
             elif hasattr(x, "show"):
                 # log input data
-                pred_log.append(wandb.Image(x.data, caption="Input data", grouping=3))
+                pred_log.append(tracklab.Image(x.data, caption="Input data", grouping=3))
 
                 # log label and prediction
                 for im, capt in ((pred[0], "Prediction"), (y, "Ground Truth")):
@@ -217,7 +217,7 @@ class WandbCallback(TrackerCallback):
 
                     # Superpose label or prediction to input image
                     x.show(ax=ax, y=im)
-                    pred_log.append(wandb.Image(fig, caption=capt))
+                    pred_log.append(tracklab.Image(fig, caption=capt))
                     plt.close(fig)
 
             # likely to be an image
@@ -226,18 +226,18 @@ class WandbCallback(TrackerCallback):
             ):
                 pred_log.extend(
                     [
-                        wandb.Image(x.data, caption="Input data", grouping=3),
-                        wandb.Image(pred[0].data, caption="Prediction"),
-                        wandb.Image(y.data, caption="Ground Truth"),
+                        tracklab.Image(x.data, caption="Input data", grouping=3),
+                        tracklab.Image(pred[0].data, caption="Prediction"),
+                        tracklab.Image(y.data, caption="Ground Truth"),
                     ]
                 )
 
             # we just log input data
             else:
-                pred_log.append(wandb.Image(x.data, caption="Input data"))
+                pred_log.append(tracklab.Image(x.data, caption="Input data"))
 
-            wandb.log({"Prediction Samples": pred_log}, commit=False)
+            tracklab.log({"Prediction Samples": pred_log}, commit=False)
 
 
-class FastaiError(wandb.Error):
+class FastaiError(tracklab.Error):
     pass

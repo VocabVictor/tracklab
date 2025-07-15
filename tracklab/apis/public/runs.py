@@ -28,7 +28,7 @@ for run in runs:
 
 Note:
     This module is part of the W&B Public API and provides read/write access
-    to run data. For logging new runs, use the wandb.init() function from
+    to run data. For logging new runs, use the tracklab.init() function from
     the main wandb package.
 """
 
@@ -123,7 +123,7 @@ class Runs(SizedPaginator["Run"]):
     This is generally used indirectly using the `Api.runs` namespace.
 
     Args:
-        client: (`wandb.apis.public.RetryingClient`) The API client to use
+        client: (`tracklab.apis.public.RetryingClient`) The API client to use
             for requests.
         entity: (str) The entity (username or team) that owns the project.
         project: (str) The name of the project to fetch runs from.
@@ -429,7 +429,7 @@ class Run(Attrs):
         notes (str): Notes about the run
         read_only (boolean): Whether the run is editable
         history_keys (str): Keys of the history metrics that have been logged
-            with `wandb.log({key: value})`
+            with `tracklab.log({key: value})`
         metadata (str): Metadata about the run from tracklab-metadata.json
     """
 
@@ -445,7 +445,7 @@ class Run(Attrs):
         """Initialize a Run object.
 
         Run is always initialized by calling api.runs() where api is an instance of
-        wandb.Api.
+        tracklab.Api.
         """
         _attrs = attrs or {}
         super().__init__(dict(_attrs))
@@ -482,13 +482,13 @@ class Run(Attrs):
     @property
     def username(self):
         """This API is deprecated. Use `entity` instead."""
-        wandb.termwarn("Run.username is deprecated. Please use Run.entity instead.")
+        tracklab.termwarn("Run.username is deprecated. Please use Run.entity instead.")
         return self._entity
 
     @property
     def storage_id(self):
         """The unique storage identifier for the run."""
-        # For compatibility with wandb.Run, which has storage IDs
+        # For compatibility with tracklab.Run, which has storage IDs
         # in self.storage_id and names in self.id.
 
         return self._attrs.get("id")
@@ -852,14 +852,14 @@ class Run(Attrs):
             list of dicts: If pandas=False returns a list of dicts of history metrics.
         """
         if keys is not None and not isinstance(keys, list):
-            wandb.termerror("keys must be specified in a list")
+            tracklab.termerror("keys must be specified in a list")
             return []
         if keys is not None and len(keys) > 0 and not isinstance(keys[0], str):
-            wandb.termerror("keys argument must be a list of strings")
+            tracklab.termerror("keys argument must be a list of strings")
             return []
 
         if keys and stream != "default":
-            wandb.termerror("stream must be default when specifying keys")
+            tracklab.termerror("stream must be default when specifying keys")
             return []
         elif keys:
             lines = self._sampled_history(keys=keys, x_axis=x_axis, samples=samples)
@@ -870,7 +870,7 @@ class Run(Attrs):
             if pd:
                 lines = pd.DataFrame.from_records(lines)
             else:
-                wandb.termwarn("Unable to load pandas, call history with pandas=False")
+                tracklab.termwarn("Unable to load pandas, call history with pandas=False")
         return lines
 
     @normalize_exceptions
@@ -896,10 +896,10 @@ class Run(Attrs):
         ```
         """
         if keys is not None and not isinstance(keys, list):
-            wandb.termerror("keys must be specified in a list")
+            tracklab.termerror("keys must be specified in a list")
             return []
         if keys is not None and len(keys) > 0 and not isinstance(keys[0], str):
-            wandb.termerror("keys argument must be a list of strings")
+            tracklab.termerror("keys argument must be a list of strings")
             return []
 
         last_step = self.lastHistoryStep
@@ -950,13 +950,13 @@ class Run(Attrs):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("This is a test artifact")
             tmp_path = tmp.name
-        run = wandb.init(project="artifact-example")
-        artifact = wandb.Artifact("test_artifact", type="dataset")
+        run = tracklab.init(project="artifact-example")
+        artifact = tracklab.Artifact("test_artifact", type="dataset")
         artifact.add_file(tmp_path)
         run.log_artifact(artifact)
         run.finish()
 
-        api = wandb.Api()
+        api = tracklab.Api()
 
         finished_run = api.run(f"{run.entity}/{run.project}/{run.id}")
 
@@ -985,11 +985,11 @@ class Run(Attrs):
         ```python
         import tracklab
 
-        run = wandb.init(project="artifact-example")
+        run = tracklab.init(project="artifact-example")
         run.use_artifact("test_artifact:latest")
         run.finish()
 
-        api = wandb.Api()
+        api = tracklab.Api()
         finished_run = api.run(f"{run.entity}/{run.project}/{run.id}")
         for used_artifact in finished_run.used_artifacts():
             print(used_artifact.name)
@@ -1004,7 +1004,7 @@ class Run(Attrs):
 
         Args:
             artifact (`Artifact`): An artifact returned from
-                `wandb.Api().artifact(name)`
+                `tracklab.Api().artifact(name)`
             use_as (string, optional): A string identifying
                 how the artifact is used in the script. Used
                 to easily differentiate artifacts used in a
@@ -1020,7 +1020,7 @@ class Run(Attrs):
         )
         api.set_current_run_id(self.id)
 
-        if isinstance(artifact, wandb.Artifact) and not artifact.is_draft():
+        if isinstance(artifact, tracklab.Artifact) and not artifact.is_draft():
             api.use_artifact(
                 artifact.id,
                 use_as=use_as or artifact.name,
@@ -1028,18 +1028,18 @@ class Run(Attrs):
                 artifact_project_name=artifact.project,
             )
             return artifact
-        elif isinstance(artifact, wandb.Artifact) and artifact.is_draft():
+        elif isinstance(artifact, tracklab.Artifact) and artifact.is_draft():
             raise ValueError(
                 "Only existing artifacts are accepted by this api. "
                 "Manually create one with `wandb artifact put`"
             )
         else:
-            raise ValueError("You must pass a wandb.Api().artifact() to use_artifact")
+            raise ValueError("You must pass a tracklab.Api().artifact() to use_artifact")
 
     @normalize_exceptions
     def log_artifact(
         self,
-        artifact: "wandb.Artifact",
+        artifact: "tracklab.Artifact",
         aliases: Optional[Collection[str]] = None,
         tags: Optional[Collection[str]] = None,
     ):
@@ -1047,7 +1047,7 @@ class Run(Attrs):
 
         Args:
             artifact (`Artifact`): An artifact returned from
-                `wandb.Api().artifact(name)`.
+                `tracklab.Api().artifact(name)`.
             aliases (list, optional): Aliases to apply to this artifact.
             tags: (list, optional) Tags to apply to this artifact, if any.
 
@@ -1060,8 +1060,8 @@ class Run(Attrs):
         )
         api.set_current_run_id(self.id)
 
-        if not isinstance(artifact, wandb.Artifact):
-            raise TypeError("You must pass a wandb.Api().artifact() to use_artifact")
+        if not isinstance(artifact, tracklab.Artifact):
+            raise TypeError("You must pass a tracklab.Api().artifact() to use_artifact")
         if artifact.is_draft():
             raise ValueError(
                 "Only existing artifacts are accepted by this api. "
@@ -1107,7 +1107,7 @@ class Run(Attrs):
         """The URL of the run.
 
         The run URL is generated from the entity, project, and run_id. For
-        SaaS users, it takes the form of `https://wandb.ai/entity/project/run_id`.
+        SaaS users, it takes the form of `https://tracklab.ai/entity/project/run_id`.
         """
         path = self.path
         path.insert(2, "runs")

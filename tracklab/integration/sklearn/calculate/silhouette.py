@@ -78,7 +78,7 @@ def silhouette(clusterer, X, cluster_labels, labels, metric, kmeans):  # noqa: N
         color_sil,
         silhouette_avg,
     )
-    chart = wandb.visualize("wandb/silhouette_/v1", table)
+    chart = tracklab.visualize("wandb/silhouette_/v1", table)
 
     return chart
 
@@ -113,6 +113,6 @@ def make_table(x, y, colors, centerx, centery, y_sil, x_sil, color_sil, silhouet
         for i in range(len(color_sil))
     ]
 
-    table = wandb.Table(data=data, columns=columns)
+    table = tracklab.Table(data=data, columns=columns)
 
     return table

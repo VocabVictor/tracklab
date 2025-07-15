@@ -39,7 +39,7 @@ def write_gif_with_image_io(
 
     imageio = util.get_module(
         "imageio",
-        required='wandb.Video requires imageio when passing raw data. Install with "pip install wandb[media]"',
+        required='tracklab.Video requires imageio when passing raw data. Install with "pip install wandb[media]"',
     )
 
     if parse(imageio.__version__) < parse("2.28.1"):
@@ -105,18 +105,18 @@ class Video(BatchableMedia):
         import numpy as np
         import tracklab
 
-        with wandb.init() as run:
+        with tracklab.init() as run:
             # axes are (number of frames, channel, height, width)
             frames = np.random.randint(
                 low=0, high=256, size=(10, 3, 100, 100), dtype=np.uint8
             )
-            run.log({"video": wandb.Video(frames, format="mp4", fps=4)})
+            run.log({"video": tracklab.Video(frames, format="mp4", fps=4)})
         ```
         """
         super().__init__(caption=caption)
 
         if format is None:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "`format` argument was not provided, defaulting to `gif`. "
                 "This parameter will be required in v0.20.0, "
                 "please specify the format explicitly."
@@ -127,7 +127,7 @@ class Video(BatchableMedia):
         self._channels = None
         if self._format not in Video.EXTS:
             raise ValueError(
-                "wandb.Video accepts {} formats".format(", ".join(Video.EXTS))
+                "tracklab.Video accepts {} formats".format(", ".join(Video.EXTS))
             )
 
         if isinstance(data_or_path, (BytesIO, str)) and fps:
@@ -135,7 +135,7 @@ class Video(BatchableMedia):
                 "`fps` argument does not affect the frame rate of the video "
                 "when providing a file path or raw bytes."
             )
-            wandb.termwarn(msg)
+            tracklab.termwarn(msg)
 
         if isinstance(data_or_path, BytesIO):
             filename = os.path.join(
@@ -151,7 +151,7 @@ class Video(BatchableMedia):
             ext = ext[1:].lower()
             if ext not in Video.EXTS:
                 raise ValueError(
-                    "wandb.Video accepts {} formats".format(", ".join(Video.EXTS))
+                    "tracklab.Video accepts {} formats".format(", ".join(Video.EXTS))
                 )
             self._set_file(data_or_path, is_tmp=False)
             # ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 data_or_path
@@ -162,7 +162,7 @@ class Video(BatchableMedia):
                 self.data = data_or_path
             else:
                 raise ValueError(
-                    "wandb.Video accepts a file path or numpy like data as input"
+                    "tracklab.Video accepts a file path or numpy like data as input"
                 )
             fps = fps or 4
             printer_asyncio.run_async_with_spinner(
@@ -179,7 +179,7 @@ class Video(BatchableMedia):
         # import ImageSequenceClip from the appropriate MoviePy module
         mpy = util.get_module(
             "moviepy.video.io.ImageSequenceClip",
-            required='wandb.Video requires moviepy when passing raw data. Install with "pip install wandb[media]"',
+            required='tracklab.Video requires moviepy when passing raw data. Install with "pip install wandb[media]"',
         )
 
         tensor = self._prepare_video(self.data)
@@ -226,7 +226,7 @@ class Video(BatchableMedia):
         """This logic was mostly taken from tensorboardX."""
         np = util.get_module(
             "numpy",
-            required='wandb.Video requires numpy when passing raw data. To get it, run "pip install numpy".',
+            required='tracklab.Video requires numpy when passing raw data. To get it, run "pip install numpy".',
         )
         if video.ndim < 4:
             raise ValueError(

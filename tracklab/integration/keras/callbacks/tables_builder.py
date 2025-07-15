@@ -38,7 +38,7 @@ class WandbEvalCallback(Callback, abc.ABC):
 
             def add_ground_truth(self):
                 for idx, (image, label) in enumerate(zip(self.x, self.y)):
-                    self.data_table.add_data(idx, wandb.Image(image), label)
+                    self.data_table.add_data(idx, tracklab.Image(image), label)
 
             def add_model_predictions(self, epoch):
                 preds = self.model.predict(self.x, verbose=0)
@@ -87,12 +87,12 @@ class WandbEvalCallback(Callback, abc.ABC):
     ) -> None:
         super().__init__(*args, **kwargs)
 
-        if wandb.run is None:
-            raise wandb.Error(
-                "You must call `wandb.init()` first before using this callback."
+        if tracklab.run is None:
+            raise tracklab.Error(
+                "You must call `tracklab.init()` first before using this callback."
             )
 
-        with telemetry.context(run=wandb.run) as tel:
+        with telemetry.context(run=tracklab.run) as tel:
             tel.feature.keras_wandb_eval_callback = True
 
         self.data_table_columns = data_table_columns
@@ -163,7 +163,7 @@ class WandbEvalCallback(Callback, abc.ABC):
         Args:
             column_names: (list) Column names for W&B Tables.
         """
-        self.data_table = wandb.Table(columns=column_names, allow_mixed_types=True)
+        self.data_table = tracklab.Table(columns=column_names, allow_mixed_types=True)
 
     def init_pred_table(self, column_names: List[str]) -> None:
         """Initialize the W&B Tables for model evaluation.
@@ -174,7 +174,7 @@ class WandbEvalCallback(Callback, abc.ABC):
         Args:
             column_names: (list) Column names for W&B Tables.
         """
-        self.pred_table = wandb.Table(columns=column_names)
+        self.pred_table = tracklab.Table(columns=column_names)
 
     def log_data_table(
         self, name: str = "val", type: str = "dataset", table_name: str = "val_data"
@@ -193,12 +193,12 @@ class WandbEvalCallback(Callback, abc.ABC):
             table_name: (str) The name of the table as will be displayed in the UI.
                 (default is 'val_data').
         """
-        data_artifact = wandb.Artifact(name, type=type)
+        data_artifact = tracklab.Artifact(name, type=type)
         data_artifact.add(self.data_table, table_name)
 
         # Calling `use_artifact` uploads the data to W&B.
-        assert wandb.run is not None
-        wandb.run.use_artifact(data_artifact)
+        assert tracklab.run is not None
+        tracklab.run.use_artifact(data_artifact)
         data_artifact.wait()
 
         # We get the reference table.
@@ -222,7 +222,7 @@ class WandbEvalCallback(Callback, abc.ABC):
                 (default is 'eval_data')
             aliases: (List[str]) List of aliases for the prediction table.
         """
-        assert wandb.run is not None
-        pred_artifact = wandb.Artifact(f"run_{wandb.run.id}_pred", type=type)
+        assert tracklab.run is not None
+        pred_artifact = tracklab.Artifact(f"run_{tracklab.run.id}_pred", type=type)
         pred_artifact.add(self.pred_table, table_name)
-        wandb.run.log_artifact(pred_artifact, aliases=aliases or ["latest"])
+        tracklab.run.log_artifact(pred_artifact, aliases=aliases or ["latest"])

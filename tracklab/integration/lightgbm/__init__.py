@@ -53,29 +53,29 @@ if TYPE_CHECKING:
 def _define_metric(data: str, metric_name: str) -> None:
     """Capture model performance at the best step.
 
-    instead of the last step, of training in your `wandb.summary`
+    instead of the last step, of training in your `tracklab.summary`
     """
     if "loss" in str.lower(metric_name):
-        wandb.define_metric(f"{data}_{metric_name}", summary="min")
+        tracklab.define_metric(f"{data}_{metric_name}", summary="min")
     elif str.lower(metric_name) in MINIMIZE_METRICS:
-        wandb.define_metric(f"{data}_{metric_name}", summary="min")
+        tracklab.define_metric(f"{data}_{metric_name}", summary="min")
     elif str.lower(metric_name) in MAXIMIZE_METRICS:
-        wandb.define_metric(f"{data}_{metric_name}", summary="max")
+        tracklab.define_metric(f"{data}_{metric_name}", summary="max")
 
 
 def _checkpoint_artifact(
     model: "Booster", iteration: int, aliases: "List[str]"
 ) -> None:
     """Upload model checkpoint as W&B artifact."""
-    # NOTE: type ignore required because wandb.run is improperly inferred as None type
-    model_name = f"model_{wandb.run.id}"  # type: ignore
-    model_path = Path(wandb.run.dir) / f"model_ckpt_{iteration}.txt"  # type: ignore
+    # NOTE: type ignore required because tracklab.run is improperly inferred as None type
+    model_name = f"model_{tracklab.run.id}"  # type: ignore
+    model_path = Path(tracklab.run.dir) / f"model_ckpt_{iteration}.txt"  # type: ignore
 
     model.save_model(model_path, num_iteration=iteration)
 
-    model_artifact = wandb.Artifact(name=model_name, type="model")
+    model_artifact = tracklab.Artifact(name=model_name, type="model")
     model_artifact.add_file(str(model_path))
-    wandb.log_artifact(model_artifact, aliases=aliases)
+    tracklab.log_artifact(model_artifact, aliases=aliases)
 
 
 def _log_feature_importance(model: "Booster") -> None:
@@ -83,10 +83,10 @@ def _log_feature_importance(model: "Booster") -> None:
     feat_imps = model.feature_importance()
     feats = model.feature_name()
     fi_data = [[feat, feat_imp] for feat, feat_imp in zip(feats, feat_imps)]
-    table = wandb.Table(data=fi_data, columns=["Feature", "Importance"])
-    wandb.log(
+    table = tracklab.Table(data=fi_data, columns=["Feature", "Importance"])
+    tracklab.log(
         {
-            "Feature Importance": wandb.plot.bar(
+            "Feature Importance": tracklab.plot.bar(
                 table, "Feature", "Importance", title="Feature Importance"
             )
         },
@@ -112,7 +112,7 @@ class _WandbCallback:
 
         # log the params as W&B config.
         if self.log_params:
-            wandb.config.update(env.params)
+            tracklab.config.update(env.params)
 
         # use `define_metric` to set the wandb summary to the best metric value.
         for item in env.evaluation_result_list:
@@ -132,7 +132,7 @@ class _WandbCallback:
         for item in env.evaluation_result_list:
             if len(item) == 4:
                 data_name, eval_name, result = item[:3]
-                wandb.log(
+                tracklab.log(
                     {data_name + "_" + eval_name: result},
                     commit=False,
                 )
@@ -140,7 +140,7 @@ class _WandbCallback:
                 data_name, eval_name = item[1].split()
                 res_mean = item[2]
                 res_stdv = item[4]
-                wandb.log(
+                tracklab.log(
                     {
                         data_name + "_" + eval_name + "-mean": res_mean,
                         data_name + "_" + eval_name + "-stdv": res_stdv,
@@ -149,20 +149,20 @@ class _WandbCallback:
                 )
 
         # call `commit=True` to log the data as a single W&B step.
-        wandb.log({"iteration": env.iteration}, commit=True)
+        tracklab.log({"iteration": env.iteration}, commit=True)
 
 
 def wandb_callback(log_params: bool = True, define_metric: bool = True) -> Callable:
-    """Automatically integrates LightGBM with wandb.
+    """Automatically integrates LightGBM with tracklab.
 
     Args:
         log_params: (boolean) if True (default) logs params passed to lightgbm.train as W&B config
-        define_metric: (boolean) if True (default) capture model performance at the best step, instead of the last step, of training in your `wandb.summary`
+        define_metric: (boolean) if True (default) capture model performance at the best step, instead of the last step, of training in your `tracklab.summary`
 
     Passing `wandb_callback` to LightGBM will:
       - log params passed to lightgbm.train as W&B config (default).
       - log evaluation metrics collected by LightGBM, such as rmse, accuracy etc to Weights & Biases
-      - Capture the best metric in `wandb.summary` when `define_metric=True` (default).
+      - Capture the best metric in `tracklab.summary` when `define_metric=True` (default).
 
     Use `log_summary` as an extension of this callback.
 
@@ -197,7 +197,7 @@ def log_summary(
 
     Using this along with `wandb_callback` will:
 
-    - log `best_iteration` and `best_score` as `wandb.summary`.
+    - log `best_iteration` and `best_score` as `tracklab.summary`.
     - log feature importance plot.
     - save and upload your best trained model to Weights & Biases Artifacts (when `save_model_checkpoint = True`)
 
@@ -219,14 +219,14 @@ def log_summary(
         log_summary(gbm)
         ```
     """
-    if wandb.run is None:
-        raise wandb.Error("You must call wandb.init() before WandbCallback()")
+    if tracklab.run is None:
+        raise tracklab.Error("You must call tracklab.init() before WandbCallback()")
 
     if not isinstance(model, Booster):
-        raise wandb.Error("Model should be an instance of lightgbm.basic.Booster")
+        raise tracklab.Error("Model should be an instance of lightgbm.basic.Booster")
 
-    wandb.run.summary["best_iteration"] = model.best_iteration
-    wandb.run.summary["best_score"] = model.best_score
+    tracklab.run.summary["best_iteration"] = model.best_iteration
+    tracklab.run.summary["best_score"] = model.best_score
 
     # Log feature importance
     if feature_importance:

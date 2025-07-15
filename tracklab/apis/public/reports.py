@@ -22,8 +22,8 @@ class Reports(SizedPaginator["BetaReport"]):
     """Reports is an iterable collection of `BetaReport` objects.
 
     Args:
-        client (`wandb.apis.internal.Api`): The API client instance to use.
-        project (`wandb.sdk.internal.Project`): The project to fetch reports from.
+        client (`tracklab.apis.internal.Api`): The API client instance to use.
+        project (`tracklab.sdk.internal.Project`): The project to fetch reports from.
         name (str, optional): The name of the report to filter by. If `None`,
             fetches all reports.
         entity (str, optional): The entity name for the project. Defaults to
@@ -445,7 +445,7 @@ class PythonMongoishQueryGenerator:
             return name.replace("config.", "").replace(".value", "")
         elif name.startswith("summary_metrics."):
             return name.replace("summary_metrics.", "")
-        wandb.termerror(f"Unknown token: {name}")
+        tracklab.termerror(f"Unknown token: {name}")
         return name
 
     # These are only used for ParallelCoordinatesPlot because it has weird backend names...

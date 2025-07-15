@@ -20,7 +20,7 @@ patch_tf_keras()
 class WandbModelCheckpoint(callbacks.ModelCheckpoint):
     """A checkpoint that periodically saves a Keras model or model weights.
 
-    Saved weights are uploaded to W&B as a `wandb.Artifact`.
+    Saved weights are uploaded to W&B as a `tracklab.Artifact`.
 
     Since this callback is subclassed from `tf.keras.callbacks.ModelCheckpoint`, the
     checkpointing logic is taken care of by the parent callback. You can learn more
@@ -29,7 +29,7 @@ class WandbModelCheckpoint(callbacks.ModelCheckpoint):
     This callback is to be used in conjunction with training using `model.fit()` to save
     a model or weights (in a checkpoint file) at some interval. The model checkpoints
     will be logged as W&B Artifacts. You can learn more here:
-    https://docs.wandb.ai/guides/artifacts
+    https://docs.tracklab.ai/guides/artifacts
 
     This callback provides the following features:
         - Save the model that has achieved "best performance" based on "monitor".
@@ -91,11 +91,11 @@ class WandbModelCheckpoint(callbacks.ModelCheckpoint):
             initial_value_threshold=initial_value_threshold,
             **kwargs,
         )
-        if wandb.run is None:
-            raise wandb.Error(
-                "You must call `wandb.init()` before `WandbModelCheckpoint()`"
+        if tracklab.run is None:
+            raise tracklab.Error(
+                "You must call `tracklab.init()` before `WandbModelCheckpoint()`"
             )
-        with telemetry.context(run=wandb.run) as tel:
+        with telemetry.context(run=tracklab.run) as tel:
             tel.feature.keras_model_checkpoint = True
 
         self.save_weights_only = save_weights_only
@@ -142,9 +142,9 @@ class WandbModelCheckpoint(callbacks.ModelCheckpoint):
     ) -> None:
         """Log model checkpoint as  W&B Artifact."""
         try:
-            assert wandb.run is not None
-            model_checkpoint_artifact = wandb.Artifact(
-                f"run_{wandb.run.id}_model", type="model"
+            assert tracklab.run is not None
+            model_checkpoint_artifact = tracklab.Artifact(
+                f"run_{tracklab.run.id}_model", type="model"
             )
             if os.path.isfile(filepath):
                 model_checkpoint_artifact.add_file(filepath)
@@ -152,7 +152,7 @@ class WandbModelCheckpoint(callbacks.ModelCheckpoint):
                 model_checkpoint_artifact.add_dir(filepath)
             else:
                 raise FileNotFoundError(f"No such file or directory {filepath}")
-            wandb.log_artifact(model_checkpoint_artifact, aliases=aliases or [])
+            tracklab.log_artifact(model_checkpoint_artifact, aliases=aliases or [])
         except ValueError:
             # This error occurs when `save_best_only=True` and the model
             # checkpoint is not saved for that epoch/batch. Since TF/Keras
@@ -165,7 +165,7 @@ class WandbModelCheckpoint(callbacks.ModelCheckpoint):
             if tup[1] is not None:
                 placeholders.append(tup[1])
         if len(placeholders) == 0:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "When using `save_best_only`, ensure that the `filepath` argument "
                 "contains formatting placeholders like `{epoch:02d}` or `{batch:02d}`. "
                 "This ensures correct interpretation of the logged artifacts.",

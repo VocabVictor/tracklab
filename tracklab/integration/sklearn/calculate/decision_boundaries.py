@@ -31,9 +31,9 @@ def decision_boundaries(
         y_dict.append(train_y[i])
         color_dict.append(train_color[i])
 
-    return wandb.visualize(
+    return tracklab.visualize(
         "wandb/decision_boundaries/v1",
-        wandb.Table(
+        tracklab.Table(
             columns=["x", "y", "color"],
             data=[[x_dict[i], y_dict[i], color_dict[i]] for i in range(len(x_dict))],
         ),

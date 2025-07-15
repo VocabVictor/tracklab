@@ -48,7 +48,7 @@ def summary_metrics(model=None, X=None, y=None, X_test=None, y_test=None):  # no
     metrics = {name: utils.round_2(metric) for name, metric in metrics.items()}
 
     table = make_table(metrics, model_name)
-    chart = wandb.visualize("wandb/metrics/v1", table)
+    chart = tracklab.visualize("wandb/metrics/v1", table)
 
     return chart
 
@@ -57,6 +57,6 @@ def make_table(metrics, model_name):
     columns = ["metric_name", "metric_value", "model_name"]
     table_content = [[name, value, model_name] for name, value in metrics.items()]
 
-    table = wandb.Table(columns=columns, data=table_content)
+    table = tracklab.Table(columns=columns, data=table_content)
 
     return table

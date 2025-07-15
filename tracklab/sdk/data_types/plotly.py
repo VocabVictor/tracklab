@@ -63,7 +63,7 @@ class Plotly(Media):
                 if util.matplotlib_contains_images(val):
                     raise ValueError(
                         "Plotly does not currently support converting matplotlib figures containing images. \
-                            You can convert the plot to a static image with `wandb.Image(plt)` "
+                            You can convert the plot to a static image with `tracklab.Image(plt)` "
                     )
                 val = util.matplotlib_to_plotly(val)
             else:

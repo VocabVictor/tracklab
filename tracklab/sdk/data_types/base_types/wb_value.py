@@ -26,13 +26,13 @@ def _is_maybe_offline() -> bool:
 
     # First check: if there's a run, check if it is offline.
     #
-    # This covers uses like `wandb.init(mode="offline")` which don't modify
+    # This covers uses like `tracklab.init(mode="offline")` which don't modify
     # the singleton's settings.
     if run := singleton.most_recent_active_run:
         return run.offline
 
     # Second check: default to global defaults derived from environment
-    # variables or passed explicitly to `wandb.setup()`.
+    # variables or passed explicitly to `tracklab.setup()`.
     return singleton.settings._offline
 
 
@@ -86,7 +86,7 @@ class _WBValueArtifactTarget:
 
 
 class WBValue:
-    """Typed objects that can be logged with `wandb.log()` and visualized by wandb.
+    """Typed objects that can be logged with `tracklab.log()` and visualized by tracklab.
 
     The objects will be serialized as JSON and always have a _type attribute that
     indicates how to interpret the other fields.
@@ -111,7 +111,7 @@ class WBValue:
         Uses current run or artifact to store additional data.
 
         Args:
-            run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+            run_or_artifact (tracklab.Run | tracklab.Artifact): the Run or Artifact for which
                 this object should be generating JSON for - this is useful to to store
                 additional data if needed.
 
@@ -129,7 +129,7 @@ class WBValue:
 
         Args:
             json_obj (dict): A JSON dictionary to deserialize source_artifact
-            (wandb.Artifact): An artifact which will hold any additional
+            (tracklab.Artifact): An artifact which will hold any additional
                 resources which were stored during the `to_json` function.
         """
         raise NotImplementedError
@@ -164,17 +164,17 @@ class WBValue:
         which created it. It will then call that subclass' `from_json` method.
         Importantly, this function will set the return object's `source_artifact`
         attribute to the passed in source artifact. This is critical for artifact
-        bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+        bookkeeping. If you choose to create a tracklab.Value via it's `from_json` method,
         make sure to properly set this `artifact_source` to avoid data duplication.
 
         Args:
             json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
                 key. This is used to lookup the correct subclass to use.
-            source_artifact (wandb.Artifact): An artifact which will hold any additional
+            source_artifact (tracklab.Artifact): An artifact which will hold any additional
                 resources which were stored during the `to_json` function.
 
         Returns:
-            wandb.Value: a newly created instance of a subclass of wandb.Value
+            tracklab.Value: a newly created instance of a subclass of tracklab.Value
         """
         class_option = WBValue.type_mapping().get(json_obj["_type"])
         if class_option is not None:

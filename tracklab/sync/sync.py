@@ -57,7 +57,7 @@ class SyncThread(threading.Thread):
     ):
         threading.Thread.__init__(self)
         # mark this process as internal
-        wandb._set_internal_process(disable=True)
+        tracklab._set_internal_process(disable=True)
         self._sync_list = sync_list
         self._project = project
         self._entity = entity
@@ -135,11 +135,11 @@ class SyncThread(threading.Thread):
         """Return true if this sync item can be synced as tensorboard."""
         if tb_root is not None:
             if tb_event_files > 0 and sync_item.endswith(WANDB_SUFFIX):
-                wandb.termwarn("Found .wandb file, not streaming tensorboard metrics.")
+                tracklab.termwarn("Found .wandb file, not streaming tensorboard metrics.")
             else:
                 print(f"Found {tb_event_files} tfevent files in {tb_root}")  # noqa: T201
                 if len(tb_logdirs) > 3:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         f"Found {len(tb_logdirs)} directories containing tfevent files. "
                         "If these represent multiple experiments, sync them "
                         "individually or pass a list of paths."
@@ -152,8 +152,8 @@ class SyncThread(threading.Thread):
             viewer, _ = send_manager._api.viewer_server_info()
             self._entity = viewer.get("entity")
         proto_run = tracklab_internal_pb2.RunRecord()
-        proto_run.run_id = self._run_id or wandb.util.generate_id()
-        proto_run.project = self._project or wandb.util.auto_project_name(None)
+        proto_run.run_id = self._run_id or tracklab.util.generate_id()
+        proto_run.project = self._project or tracklab.util.auto_project_name(None)
         proto_run.entity = self._entity
         proto_run.telemetry.feature.sync_tfevents = True
 
@@ -180,7 +180,7 @@ class SyncThread(threading.Thread):
             context_keeper=context_keeper,
         )
         record = send_manager._interface._make_record(run=proto_run)
-        settings = wandb.Settings(
+        settings = tracklab.Settings(
             root_dir=self._tmp_dir.name,
             run_id=proto_run.run_id,
             x_start_time=time.time(),
@@ -219,7 +219,7 @@ class SyncThread(threading.Thread):
                 send_manager.send(data)
 
             print_line = spinner_states[progress_step % 4] + line
-            wandb.termlog(print_line, newline=False, prefix=True)
+            tracklab.termlog(print_line, newline=False, prefix=True)
             progress_step += 1
 
         # finish sending any data
@@ -236,7 +236,7 @@ class SyncThread(threading.Thread):
             return ds.scan_data()
         except AssertionError as e:
             if ds.in_last_block():
-                wandb.termwarn(
+                tracklab.termwarn(
                     f".wandb file is incomplete ({e}), be sure to sync this run again once it's finished"
                 )
                 return None

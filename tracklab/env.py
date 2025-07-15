@@ -95,7 +95,7 @@ USE_V1_ARTIFACTS = "_WANDB_USE_V1_ARTIFACTS"
 def immutable_keys() -> list[str]:
     """These are env keys that shouldn't change within a single process.
 
-    We use this to maintain certain values between multiple calls to wandb.init within a single process.
+    We use this to maintain certain values between multiple calls to tracklab.init within a single process.
     """
     return [
         DIR,

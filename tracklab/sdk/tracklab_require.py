@@ -5,8 +5,8 @@ and notify the user when features have been deprecated.
 
 Example:
     import tracklab
-    wandb.require("wandb-service@beta")
-    wandb.require("incremental-artifacts@beta")
+    tracklab.require("wandb-service@beta")
+    tracklab.require("incremental-artifacts@beta")
 """
 
 from __future__ import annotations
@@ -33,16 +33,16 @@ class _Requires:
     def require_service(self) -> None:
         # Legacy no-op kept solely for backward compatibility:
         # some integrations (e.g. PyTorch Lightning) still call
-        # `wandb.require('service')`, which routes here.
-        wandb.termwarn(
-            "`wandb.require('service')` is a no-op as it is now the default behavior."
+        # `tracklab.require('service')`, which routes here.
+        tracklab.termwarn(
+            "`tracklab.require('service')` is a no-op as it is now the default behavior."
         )
 
     def require_core(self) -> None:
         # Legacy no-op kept solely for backward compatibility:
-        # many public codebases still call `wandb.require('core')`.
-        wandb.termwarn(
-            "`wandb.require('core')` is a no-op as it is now the default behavior."
+        # many public codebases still call `tracklab.require('core')`.
+        tracklab.termwarn(
+            "`tracklab.require('core')` is a no-op as it is now the default behavior."
         )
 
     def apply(self) -> None:
@@ -55,7 +55,7 @@ class _Requires:
             func = getattr(self, func_str, None)
             if not func:
                 last_message = f"require() unsupported requirement: {feature}"
-                wandb.termwarn(last_message)
+                tracklab.termwarn(last_message)
                 continue
             func()
 
@@ -78,7 +78,7 @@ def require(
         experiment: An alias for `requirement`.
 
     Raises:
-        wandb.errors.UnsupportedError: If a feature name is unknown.
+        tracklab.errors.UnsupportedError: If a feature name is unknown.
     """
     features = requirement or experiment
     if not features:

@@ -209,10 +209,10 @@ class Media(WBValue):
         """Serialize the object into a JSON blob.
 
         Uses run or artifact to store additional data. If `run_or_artifact` is a
-        wandb.Run then `self.bind_to_run()` must have been previously been called.
+        tracklab.Run then `self.bind_to_run()` must have been previously been called.
 
         Args:
-            run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+            run_or_artifact (tracklab.Run | tracklab.Artifact): the Run or Artifact for which
                 this object should be generating JSON for - this is useful to store
                 additional data if needed.
 
@@ -263,7 +263,7 @@ class Media(WBValue):
                     os.path.relpath(self._path, self._run.dir)
                 )
 
-        elif isinstance(run, wandb.Artifact):
+        elif isinstance(run, tracklab.Artifact):
             if self.file_is_set():
                 # The following two assertions are guaranteed to pass
                 # by definition of the call above, but are needed for

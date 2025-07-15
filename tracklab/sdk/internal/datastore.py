@@ -79,7 +79,7 @@ class DataStore:
             self._crc[x] = zlib.crc32(strtobytes(chr(x))) & 0xFFFFFFFF
 
         assert (
-            wandb._assert_is_internal_process  # type: ignore
+            tracklab._assert_is_internal_process  # type: ignore
         ), "DataStore can only be used in the internal process"
 
     def open_for_write(self, fname: str) -> None:

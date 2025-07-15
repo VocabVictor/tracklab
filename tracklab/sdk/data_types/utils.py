@@ -82,7 +82,7 @@ def val_to_json(
     typename = util.get_full_typename(val)
 
     if util.is_pandas_data_frame(val):
-        val = wandb.Table(dataframe=val)
+        val = tracklab.Table(dataframe=val)
 
     elif util.is_matplotlib_typename(typename) or util.is_plotly_typename(typename):
         val = Plotly.make_plot_media(val)
@@ -119,7 +119,7 @@ def val_to_json(
                         ignore_copy_err=ignore_copy_err,
                     )
                 if run._attach_id and run._init_pid != os.getpid():
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         f"Attempting to log a sequence of {items[0].__class__.__name__} objects from multiple processes might result in data loss. Please upgrade your wandb server",
                         repeat=False,
                     )
@@ -159,7 +159,7 @@ def val_to_json(
 
         res = val.to_json(run)
 
-        if isinstance(val, wandb.Table) and val.log_mode == "INCREMENTAL":
+        if isinstance(val, tracklab.Table) and val.log_mode == "INCREMENTAL":
             # Set the _last_logged_idx AFTER the Table has been logged and
             # bound to the run.
             val._last_logged_idx = len(val.data) - 1
@@ -183,7 +183,7 @@ def _log_table_artifact(val: "Media", key: str, run: "LocalRun") -> None:
     """
     from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
 
-    if isinstance(val, wandb.Table) and val.log_mode == "INCREMENTAL":
+    if isinstance(val, tracklab.Table) and val.log_mode == "INCREMENTAL":
         if (
             run.resumed
             and val._previous_increments_paths is None

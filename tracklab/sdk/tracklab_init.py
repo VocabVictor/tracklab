@@ -1,11 +1,11 @@
-"""Defines wandb.init() and associated classes and methods.
+"""Defines tracklab.init() and associated classes and methods.
 
-`wandb.init()` indicates the beginning of a new run. In an ML training pipeline,
-you could add `wandb.init()` to the beginning of your training script as well as
+`tracklab.init()` indicates the beginning of a new run. In an ML training pipeline,
+you could add `tracklab.init()` to the beginning of your training script as well as
 your evaluation script, and each step would be tracked as a run in W&B.
 
-For more on using `wandb.init()`, including code snippets, check out our
-[guide and FAQs](https://docs.wandb.ai/guides/track/launch).
+For more on using `tracklab.init()`, including code snippets, check out our
+[guide and FAQs](https://docs.tracklab.ai/guides/track/launch).
 """
 
 from __future__ import annotations
@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 
 def _huggingface_version() -> str | None:
     if "transformers" in sys.modules:
-        trans = wandb.util.get_module("transformers")
+        trans = tracklab.util.get_module("transformers")
         if hasattr(trans, "__version__"):
             return str(trans.__version__)
     return None
@@ -67,7 +67,7 @@ def _handle_launch_config(settings: Settings) -> dict[str, Any]:
         try:
             launch_run_config = json.loads(os.environ.get("WANDB_CONFIG", "{}"))
         except (ValueError, SyntaxError):
-            wandb.termwarn("Malformed WANDB_CONFIG, using original config")
+            tracklab.termwarn("Malformed WANDB_CONFIG, using original config")
     elif settings.launch_config_path and os.path.exists(settings.launch_config_path):
         with open(settings.launch_config_path) as fp:
             launch_config = json.loads(fp.read())
@@ -87,7 +87,7 @@ def _handle_launch_config(settings: Settings) -> dict[str, Any]:
             try:
                 launch_run_config = json.loads(config_string)
             except (ValueError, SyntaxError):
-                wandb.termwarn("Malformed WANDB_CONFIG, using original config")
+                tracklab.termwarn("Malformed WANDB_CONFIG, using original config")
 
     return launch_run_config
 
@@ -158,7 +158,7 @@ class _WandbInit:
         self.backend: Backend | None = None
 
         self._teardown_hooks: list[TeardownHook] = []
-        self.notebook: wandb.jupyter.Notebook | None = None
+        self.notebook: tracklab.jupyter.Notebook | None = None
 
         self.deprecated_features_used: dict[str, str] = dict()
 
@@ -172,7 +172,7 @@ class _WandbInit:
         This may change the W&B singleton settings.
 
         Args:
-            init_settings: Settings passed to `wandb.init()` or set via
+            init_settings: Settings passed to `tracklab.init()` or set via
                 keyword arguments.
         """
         # Allow settings passed to init() to override inferred values.
@@ -197,7 +197,7 @@ class _WandbInit:
         )
 
     def warn_env_vars_change_after_setup(self) -> _PrinterCallback:
-        """Warn if environment variables changed after `wandb.setup()`.
+        """Warn if environment variables changed after `tracklab.setup()`.
 
         Returns:
             A callback to print any generated warnings.
@@ -226,7 +226,7 @@ class _WandbInit:
                 "Changes to your `wandb` environment variables will be ignored "
                 "because your `wandb` session has already started. "
                 "For more information on how to modify your settings with "
-                "`wandb.init()` arguments, please refer to "
+                "`tracklab.init()` arguments, please refer to "
                 f"{run_printer.link(url_registry.url('wandb-init'), 'the W&B docs')}."
             )
             run_printer.display(line, level="warn")
@@ -240,7 +240,7 @@ class _WandbInit:
         """Clear project/entity/run_id keys if in a Sweep or a Launch context.
 
         Args:
-            init_settings: Settings specified in the call to `wandb.init()`.
+            init_settings: Settings specified in the call to `tracklab.init()`.
 
         Returns:
             A callback to print any generated warnings.
@@ -283,7 +283,7 @@ class _WandbInit:
         """Returns the run's settings and any warnings.
 
         Args:
-            init_settings: Settings passed to `wandb.init()` or set via
+            init_settings: Settings passed to `tracklab.init()` or set via
                 keyword arguments.
         """
         warning_callbacks: list[_PrinterCallback] = [
@@ -321,7 +321,7 @@ class _WandbInit:
         # avoid failure cases in other parts of the code that will be
         # removed with the switch to wandb-core.
         if settings.project is None:
-            settings.project = wandb.util.auto_project_name(settings.program)
+            settings.project = tracklab.util.auto_project_name(settings.program)
 
         settings.x_start_time = time.time()
 
@@ -386,7 +386,7 @@ class _WandbInit:
 
         Args:
             settings: The run's settings derived from the environment
-                and explicit values passed to `wandb.init()`.
+                and explicit values passed to `tracklab.init()`.
         """
         if settings.resume == "auto" and settings.resume_fname:
             resume_path = pathlib.Path(settings.resume_fname)
@@ -402,7 +402,7 @@ class _WandbInit:
                 self._logger.info(f"loaded run ID from {resume_path}")
                 settings.run_id = previous_id
             elif settings.run_id != previous_id:
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Ignoring ID {previous_id} loaded due to resume='auto'"
                     f" because the run ID is set to {settings.run_id}.",
                 )
@@ -444,13 +444,13 @@ class _WandbInit:
         if config_exclude_keys:
             self.deprecated_features_used["init__config_exclude_keys"] = (
                 "config_exclude_keys is deprecated. Use"
-                " `config=wandb.helper.parse_config(config_object,"
+                " `config=tracklab.helper.parse_config(config_object,"
                 " exclude=('key',))` instead."
             )
         if config_include_keys:
             self.deprecated_features_used["init__config_include_keys"] = (
                 "config_include_keys is deprecated. Use"
-                " `config=wandb.helper.parse_config(config_object,"
+                " `config=tracklab.helper.parse_config(config_object,"
                 " include=('key',))` instead."
             )
         config = parse_config(
@@ -523,9 +523,9 @@ class _WandbInit:
         return result
 
     def teardown(self) -> None:
-        # TODO: currently this is only called on failed wandb.init attempts
+        # TODO: currently this is only called on failed tracklab.init attempts
         # normally this happens on the run object
-        self._logger.info("tearing down wandb.init")
+        self._logger.info("tearing down tracklab.init")
         for hook in self._teardown_hooks:
             hook.call()
 
@@ -593,7 +593,7 @@ class _WandbInit:
         self.backend.interface.publish_resume()
 
     def _jupyter_teardown(self) -> None:
-        """Teardown hooks and display saving, called with wandb.finish."""
+        """Teardown hooks and display saving, called with tracklab.finish."""
         assert self.notebook
         ipython = self.notebook.shell
 
@@ -614,7 +614,7 @@ class _WandbInit:
 
     def monkeypatch_ipython(self, settings: Settings) -> None:
         """Add hooks, and session history saving."""
-        self.notebook = wandb.jupyter.Notebook(settings)
+        self.notebook = tracklab.jupyter.Notebook(settings)
         ipython = self.notebook.shell
 
         # Monkey patch ipython publish to capture displayed outputs
@@ -712,7 +712,7 @@ class _WandbInit:
         """Returns a Run-like object where all methods are no-ops.
 
         This method is used when the `mode` setting is set to "disabled", such as
-        by wandb.init(mode="disabled") or by setting the WANDB_MODE environment
+        by tracklab.init(mode="disabled") or by setting the WANDB_MODE environment
         variable to "disabled".
 
         It creates a Run object that mimics the behavior of a normal Run but doesn't
@@ -736,7 +736,7 @@ class _WandbInit:
             )
         )
         # config, summary, and metadata objects
-        drun._config = wandb.sdk.tracklab_config.Config()
+        drun._config = tracklab.sdk.tracklab_config.Config()
         drun._config.update(config.sweep_no_artifacts)
         drun._config.update(config.base_no_artifacts)
         drun.summary = SummaryDisabled()  # type: ignore
@@ -745,7 +745,7 @@ class _WandbInit:
         drun.log = lambda data, *_, **__: drun.summary.update(data)  # type: ignore[method-assign]
         drun.finish = lambda *_, **__: module.unset_globals()  # type: ignore[method-assign]
         drun.join = drun.finish  # type: ignore[method-assign]
-        drun.define_metric = lambda *_, **__: wandb.sdk.tracklab_metric.Metric("dummy")  # type: ignore[method-assign]
+        drun.define_metric = lambda *_, **__: tracklab.sdk.tracklab_metric.Metric("dummy")  # type: ignore[method-assign]
         drun.save = lambda *_, **__: False  # type: ignore[method-assign]
         for symbol in (
             "alert",
@@ -833,14 +833,14 @@ class _WandbInit:
         assert self._wl is not None
 
         self._logger.info(
-            f"wandb.init called with sweep_config: {config.sweep_no_artifacts}"
+            f"tracklab.init called with sweep_config: {config.sweep_no_artifacts}"
             f"\nconfig: {config.base_no_artifacts}"
         )
 
         if previous_run := self._wl.most_recent_active_run:
             if (
                 settings.reinit in (True, "finish_previous")
-                # calling wandb.init() in notebooks finishes previous runs
+                # calling tracklab.init() in notebooks finishes previous runs
                 # by default for user convenience.
                 or (settings.reinit == "default" and wb_ipython.in_notebook())
             ):
@@ -852,13 +852,13 @@ class _WandbInit:
 
             elif settings.reinit == "create_new":
                 self._logger.info(
-                    "wandb.init() called while a run is active,"
+                    "tracklab.init() called while a run is active,"
                     " and reinit is set to 'create_new', so continuing"
                 )
 
             else:
                 run_printer.display(
-                    "wandb.init() called while a run is active and reinit is"
+                    "tracklab.init() called while a run is active and reinit is"
                     f" set to {settings.reinit!r}, so returning the previous"
                     " run."
                 )
@@ -891,7 +891,7 @@ class _WandbInit:
 
         # Populate initial telemetry
         with telemetry.context(run=run, obj=self._telemetry) as tel:
-            tel.cli_version = wandb.__version__
+            tel.cli_version = tracklab.__version__
             tel.python_version = platform.python_version()
             tel.platform = f"{platform.system()}-{platform.machine()}".lower()
             hf_version = _huggingface_version()
@@ -925,16 +925,16 @@ class _WandbInit:
             if settings.x_flow_control_custom:
                 tel.feature.flow_control_custom = True
             if settings._shared:
-                wandb.termwarn(
+                tracklab.termwarn(
                     "The `shared` mode feature is experimental and may change. "
-                    "Please contact support@wandb.com for guidance and to report any issues."
+                    "Please contact support@tracklab.com for guidance and to report any issues."
                 )
                 tel.feature.shared_mode = True
 
             if settings.x_label:
                 tel.feature.user_provided_label = True
 
-            if wandb.env.dcgm_profiling_enabled():
+            if tracklab.env.dcgm_profiling_enabled():
                 tel.feature.dcgm_profiling_enabled = True
 
         if not settings.label_disable:
@@ -966,11 +966,11 @@ class _WandbInit:
             run._populate_git_info()
 
         if settings._offline and settings.resume:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "`resume` will be ignored since W&B syncing is set to `offline`. "
                 f"Starting a new run with run id {run.id}."
             )
-        error: wandb.Error | None = None
+        error: tracklab.Error | None = None
 
         timeout = settings.init_timeout
 
@@ -985,7 +985,7 @@ class _WandbInit:
 
             with progress.progress_printer(
                 run_printer,
-                default_text="Waiting for wandb.init()...",
+                default_text="Waiting for tracklab.init()...",
             ) as progress_printer:
                 await progress.loop_printing_operation_stats(
                     progress_printer,
@@ -1009,7 +1009,7 @@ class _WandbInit:
             raise CommError(
                 f"Run initialization has timed out after {timeout} sec."
                 " Please try increasing the timeout with the `init_timeout`"
-                " setting: `wandb.init(settings=wandb.Settings(init_timeout=120))`."
+                " setting: `tracklab.init(settings=tracklab.Settings(init_timeout=120))`."
             )
 
         assert result.run_result
@@ -1061,7 +1061,7 @@ class _WandbInit:
         for k, v in config.artifacts.items():
             run.config.update({k: v}, allow_val_change=True)
         job_artifact = run._launch_artifact_mapping.get(
-            wandb.util.LAUNCH_JOB_ARTIFACT_SLOT_NAME
+            tracklab.util.LAUNCH_JOB_ARTIFACT_SLOT_NAME
         )
         if job_artifact:
             run.use_artifact(job_artifact)
@@ -1100,7 +1100,7 @@ def _attach(
         raise UsageError(
             "Either `attach_id` or `run_id` must be specified or `run` must have `_attach_id`"
         )
-    wandb._assert_is_user_process()  # type: ignore
+    tracklab._assert_is_user_process()  # type: ignore
 
     _wl = tracklab_setup.singleton()
     logger = _wl._get_logger()
@@ -1122,7 +1122,7 @@ def _attach(
         }
     )
 
-    # TODO: consolidate this codepath with wandb.init()
+    # TODO: consolidate this codepath with tracklab.init()
     backend = Backend(settings=settings, service=service)
     backend.ensure_launched()
     logger.info("attach backend started and connected")
@@ -1153,7 +1153,7 @@ def _attach(
 
 
 def _set_global_run(run: Run) -> None:
-    """Set `wandb.run` and point some top-level functions to its methods.
+    """Set `tracklab.run` and point some top-level functions to its methods.
 
     Args:
         run: The run to make global.
@@ -1178,8 +1178,8 @@ def _set_global_run(run: Run) -> None:
 
 
 def _monkeypatch_openai_gym() -> None:
-    """Patch OpenAI gym to log to the global `wandb.run`."""
-    if len(wandb.patched["gym"]) > 0:
+    """Patch OpenAI gym to log to the global `tracklab.run`."""
+    if len(tracklab.patched["gym"]) > 0:
         return
 
     from tracklab.integration import gym
@@ -1188,8 +1188,8 @@ def _monkeypatch_openai_gym() -> None:
 
 
 def _monkeypatch_tensorboard() -> None:
-    """Patch TensorBoard to log to the global `wandb.run`."""
-    if len(wandb.patched["tensorboard"]) > 0:
+    """Patch TensorBoard to log to the global `tracklab.run`."""
+    if len(tracklab.patched["tensorboard"]) > 0:
         return
 
     from tracklab.integration import tensorboard as tb_module
@@ -1213,14 +1213,14 @@ def try_create_root_dir(settings: Settings) -> None:
     try:
         os.makedirs(settings.root_dir, exist_ok=True)
     except OSError:
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Unable to create root directory {settings.root_dir}",
             repeat=False,
         )
         fallback_to_temp_dir = True
     else:
         if not os.access(settings.root_dir, os.W_OK | os.R_OK):
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Path {settings.root_dir} wasn't read/writable",
                 repeat=False,
             )
@@ -1233,11 +1233,11 @@ def try_create_root_dir(settings: Settings) -> None:
     if not os.access(tmp_dir, os.W_OK | os.R_OK):
         raise ValueError(
             f"System temp directory ({tmp_dir}) is not writable/readable, "
-            "please set the `dir` argument in `wandb.init()` to a writable/readable directory."
+            "please set the `dir` argument in `tracklab.init()` to a writable/readable directory."
         )
 
     settings.root_dir = tmp_dir
-    wandb.termwarn(
+    tracklab.termwarn(
         f"Falling back to temporary directory {tmp_dir}.",
         repeat=False,
     )
@@ -1282,20 +1282,20 @@ def init(  # noqa: C901
 ) -> Run:
     r"""Start a new run to track and log to W&B.
 
-    In an ML training pipeline, you could add `wandb.init()` to the beginning of
+    In an ML training pipeline, you could add `tracklab.init()` to the beginning of
     your training script as well as your evaluation script, and each piece would
     be tracked as a run in W&B.
 
-    `wandb.init()` spawns a new background process to log data to a run, and it
-    also syncs data to https://wandb.ai by default, so you can see your results
+    `tracklab.init()` spawns a new background process to log data to a run, and it
+    also syncs data to https://tracklab.ai by default, so you can see your results
     in real-time.
 
-    Call `wandb.init()` to start a run before logging data with `wandb.log()`.
-    When you're done logging data, call `wandb.finish()` to end the run. If you
-    don't call `wandb.finish()`, the run will end when your script exits.
+    Call `tracklab.init()` to start a run before logging data with `tracklab.log()`.
+    When you're done logging data, call `tracklab.finish()` to end the run. If you
+    don't call `tracklab.finish()`, the run will end when your script exits.
 
-    For more on using `wandb.init()`, including detailed examples, check out our
-    [guide and FAQs](https://docs.wandb.ai/guides/track/launch).
+    For more on using `tracklab.init()`, including detailed examples, check out our
+    [guide and FAQs](https://docs.tracklab.ai/guides/track/launch).
 
     Examples:
         ### Explicitly set the entity and project and choose a name for the run:
@@ -1303,7 +1303,7 @@ def init(  # noqa: C901
         ```python
         import tracklab
 
-        run = wandb.init(
+        run = tracklab.init(
             entity="geoff",
             project="capsules",
             name="experiment-2021-10-31",
@@ -1320,21 +1320,21 @@ def init(  # noqa: C901
         import tracklab
 
         config = {"lr": 0.01, "batch_size": 32}
-        with wandb.init(config=config) as run:
+        with tracklab.init(config=config) as run:
             run.config.update({"architecture": "resnet", "depth": 34})
 
             # ... your training code here ...
         ```
 
-        Note that you can use `wandb.init()` as a context manager to automatically
-        call `wandb.finish()` at the end of the block.
+        Note that you can use `tracklab.init()` as a context manager to automatically
+        call `tracklab.finish()` at the end of the block.
 
     Args:
         entity: The username or team name under which the runs will be logged.
             The entity must already exist, so ensure you’ve created your account
             or team in the UI before starting to log runs. If not specified, the
             run will default your default entity. To change the default entity,
-            go to [your settings](https://wandb.ai/settings) and update the
+            go to [your settings](https://tracklab.ai/settings) and update the
             "Default location to create new projects" under "Default team".
         project: The name of the project under which this run will be logged.
             If not specified, we use a heuristic to infer the project name based
@@ -1364,8 +1364,8 @@ def init(  # noqa: C901
             the UI.
             If resuming a run, the tags provided here will replace any existing
             tags. To add tags to a resumed run without overwriting the current
-            tags, use `run.tags += ("new_tag",)` after calling `run = wandb.init()`.
-        config: Sets `wandb.config`, a dictionary-like object for storing input
+            tags, use `run.tags += ("new_tag",)` after calling `run = tracklab.init()`.
+        config: Sets `tracklab.config`, a dictionary-like object for storing input
             parameters to your run, such as model hyperparameters or data
             preprocessing settings.
             The config appears in the UI in an overview page, allowing you to
@@ -1374,15 +1374,15 @@ def init(  # noqa: C901
             smaller than 10 MB.
             If a dictionary, `argparse.Namespace`, or `absl.flags.FLAGS` is
             provided, the key-value pairs will be loaded directly into
-            `wandb.config`.
+            `tracklab.config`.
             If a string is provided, it is interpreted as a path to a YAML file,
-            from which configuration values will be loaded into `wandb.config`.
-        config_exclude_keys: A list of specific keys to exclude from `wandb.config`.
-        config_include_keys: A list of specific keys to include in `wandb.config`.
+            from which configuration values will be loaded into `tracklab.config`.
+        config_exclude_keys: A list of specific keys to exclude from `tracklab.config`.
+        config_include_keys: A list of specific keys to include in `tracklab.config`.
         allow_val_change: Controls whether config values can be modified after their
             initial set. By default, an exception is raised if a config value is
             overwritten. For tracking variables that change during training, such as
-            a learning rate, consider using `wandb.log()` instead. By default, this
+            a learning rate, consider using `tracklab.log()` instead. By default, this
             is `False` in scripts and `True` in Notebook environments.
         group: Specify a group name to organize individual runs as part of a larger
             experiment. This is useful for cases like cross-validation or running
@@ -1390,7 +1390,7 @@ def init(  # noqa: C901
             Grouping allows you to manage related runs collectively in the UI,
             making it easy to toggle and review results as a unified experiment.
             For more information, refer to our
-            [guide to grouping runs](https://docs.wandb.com/guides/runs/grouping).
+            [guide to grouping runs](https://docs.tracklab.com/guides/runs/grouping).
         job_type: Specify the type of run, especially helpful when organizing runs
             within a group as part of a larger experiment. For example, in a group,
             you might label runs with job types such as "train" and "eval".
@@ -1419,7 +1419,7 @@ def init(  # noqa: C901
             - `"must"`: Forces the run to be logged to an anonymous account, even
                 if the user is logged in.
         reinit: Shorthand for the "reinit" setting. Determines the behavior of
-            `wandb.init()` when a run is active.
+            `tracklab.init()` when a run is active.
         resume: Controls the behavior when resuming a run with the specified `id`.
             Available options are:
             - `"allow"`: If a run with the specified `id` exists, it will resume
@@ -1436,7 +1436,7 @@ def init(  # noqa: C901
             Note: If `resume` is set, `fork_from` and `resume_from` cannot be
             used. When `resume` is unset, the system will always start a new run.
             For more details, see our
-            [guide to resuming runs](https://docs.wandb.com/guides/runs/resuming).
+            [guide to resuming runs](https://docs.tracklab.com/guides/runs/resuming).
         resume_from: Specifies a moment in a previous run to resume a run from,
             using the format `{run_id}?_step={step}`. This allows users to truncate
             the history logged to a run at an intermediate step and resume logging
@@ -1458,21 +1458,21 @@ def init(  # noqa: C901
         save_code: Enables saving the main script or notebook to W&B, aiding in
             experiment reproducibility and allowing code comparisons across runs in
             the UI. By default, this is disabled, but you can change the default to
-            enable on your [settings page](https://wandb.ai/settings).
+            enable on your [settings page](https://tracklab.ai/settings).
         tensorboard: Deprecated. Use `sync_tensorboard` instead.
         sync_tensorboard: Enables automatic syncing of W&B logs from TensorBoard
             or TensorBoardX, saving relevant event files for viewing in the W&B UI.
             saving relevant event files for viewing in the W&B UI. (Default: `False`)
         monitor_gym: Enables automatic logging of videos of the environment when
             using OpenAI Gym. For additional details, see our
-            [guide for gym integration](https://docs.wandb.com/guides/integrations/openai-gym).
-        settings: Specifies a dictionary or `wandb.Settings` object with advanced
+            [guide for gym integration](https://docs.tracklab.com/guides/integrations/openai-gym).
+        settings: Specifies a dictionary or `tracklab.Settings` object with advanced
             settings for the run.
 
     Returns:
         A `Run` object, which is a handle to the current run. Use this object
         to perform operations like logging data, saving files, and finishing
-        the run. See the [Run API](https://docs.wandb.ai/ref/python/run) for
+        the run. See the [Run API](https://docs.tracklab.ai/ref/python/run) for
         more details.
 
     Raises:
@@ -1484,7 +1484,7 @@ def init(  # noqa: C901
         KeyboardInterrupt: If the user interrupts the run initialization process.
             If the user interrupts the run initialization process.
     """
-    wandb._assert_is_user_process()  # type: ignore
+    tracklab._assert_is_user_process()  # type: ignore
 
     init_telemetry = telemetry.TelemetryRecord()
 
@@ -1593,7 +1593,7 @@ def init(  # noqa: C901
             if monitor_gym:
                 _monkeypatch_openai_gym()
 
-            if wandb.patched["tensorboard"]:
+            if tracklab.patched["tensorboard"]:
                 # NOTE: The user may have called the patch function directly.
                 init_telemetry.feature.tensorboard_patch = True
             if run_settings.sync_tensorboard:
@@ -1613,8 +1613,8 @@ def init(  # noqa: C901
 
     except Exception as e:
         if wl:
-            wl._get_logger().exception("error in wandb.init()", exc_info=e)
+            wl._get_logger().exception("error in tracklab.init()", exc_info=e)
 
         # Need to build delay into this sentry capture because our exit hooks
         # mess with sentry's ability to send out errors before the program ends.
-        wandb._sentry.reraise(e)
+        tracklab._sentry.reraise(e)

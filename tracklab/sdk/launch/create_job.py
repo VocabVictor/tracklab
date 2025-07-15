@@ -64,7 +64,7 @@ def create_job(
 
     Example:
         ```python
-        artifact_job = wandb.create_job(
+        artifact_job = tracklab.create_job(
             job_type="code",
             path=".",
             entity="wandb",
@@ -116,17 +116,17 @@ def _create_job(
     dockerfile: Optional[str] = None,
     base_image: Optional[str] = None,
 ) -> Tuple[Optional[Artifact], str, List[str]]:
-    wandb.termlog(f"Creating launch job of type: {job_type}...")
+    tracklab.termlog(f"Creating launch job of type: {job_type}...")
 
     if name and name != make_artifact_name_safe(name):
-        wandb.termerror(
+        tracklab.termerror(
             f"Artifact names may only contain alphanumeric characters, dashes, underscores, and dots. Did you mean: {make_artifact_name_safe(name)}"
         )
         return None, "", []
 
     if runtime is not None:
         if not re.match(r"^3\.\d+$", runtime):
-            wandb.termerror(
+            tracklab.termerror(
                 f"Runtime (-r, --runtime) must be a minor version of Python 3, "
                 f"e.g. 3.9 or 3.10, received {runtime}"
             )
@@ -145,7 +145,7 @@ def _create_job(
         if not metadata:
             return None, "", []
     except Exception as e:
-        wandb.termerror(f"Error creating job: {e}")
+        tracklab.termerror(f"Error creating job: {e}")
         return None, "", []
 
     _dump_metadata_and_requirements(
@@ -156,7 +156,7 @@ def _create_job(
 
     try:
         # init hidden wandb run with job building disabled (handled manually)
-        run = wandb.init(
+        run = tracklab.init(
             dir=tempdir.name,
             settings={"silent": True, "disable_job_creation": True},
             entity=entity,
@@ -164,7 +164,7 @@ def _create_job(
             job_type="cli_create_job",
         )
     except Exception:
-        # Error printed by wandb.init
+        # Error printed by tracklab.init
         return None, "", []
 
     job_builder = _configure_job_builder_for_partial(tempdir.name, job_source=job_type)
@@ -193,7 +193,7 @@ def _create_job(
         base_image=base_image,
     )
     if not artifact:
-        wandb.termerror("JobBuilder failed to build a job")
+        tracklab.termerror("JobBuilder failed to build a job")
         _logger.debug("Failed to build job, check job source and metadata")
         return None, "", []
 
@@ -233,7 +233,7 @@ def _create_job(
     run.finish()  # type: ignore
 
     # fetch, then delete hidden run
-    _run = wandb.Api().run(f"{entity}/{project}/{run.id}")  # type: ignore
+    _run = tracklab.Api().run(f"{entity}/{project}/{run.id}")  # type: ignore
     _run.delete()
 
     return artifact, action, aliases
@@ -276,25 +276,25 @@ def _make_metadata_for_partial_job(
 
     if job_type == "image":
         if runtime:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Setting runtime is not supported for image jobs, ignoring runtime"
             )
         # TODO(gst): support entrypoint for image based jobs
         if entrypoint:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Setting an entrypoint is not currently supported for image jobs, ignoring entrypoint argument"
             )
         metadata.update({"python": runtime or "", "docker": path})
         return metadata, None
 
-    wandb.termerror(f"Invalid job type: {job_type}")
+    tracklab.termerror(f"Invalid job type: {job_type}")
     return None, None
 
 
 def _maybe_warn_python_no_executable(entrypoint: str):
     entrypoint_list = entrypoint.split(" ")
     if len(entrypoint_list) == 1 and entrypoint_list[0].endswith(".py"):
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Entrypoint {entrypoint} is a python file without an executable, you may want to use `python {entrypoint}` as the entrypoint instead."
         )
 
@@ -308,18 +308,18 @@ def _create_repo_metadata(
 ) -> Optional[Dict[str, Any]]:
     # Make sure the entrypoint doesn't contain any backward path traversal
     if entrypoint and ".." in entrypoint:
-        wandb.termerror("Entrypoint cannot contain backward path traversal")
+        tracklab.termerror("Entrypoint cannot contain backward path traversal")
         return None
 
     _maybe_warn_python_no_executable(entrypoint)
 
     if not _is_git_uri(path):
-        wandb.termerror("Path must be a git URI")
+        tracklab.termerror("Path must be a git URI")
         return None
 
     ref = GitReference(path, git_hash)
     if not ref:
-        wandb.termerror("Could not parse git URI")
+        tracklab.termerror("Could not parse git URI")
         return None
 
     ref.fetch(tempdir)
@@ -327,7 +327,7 @@ def _create_repo_metadata(
     commit = ref.commit_hash
     if not commit:
         if not ref.commit_hash:
-            wandb.termerror("Could not find git commit hash")
+            tracklab.termerror("Could not find git commit hash")
             return None
         commit = ref.commit_hash
 
@@ -362,7 +362,7 @@ def _create_artifact_metadata(
     path: str, entrypoint: str, runtime: Optional[str] = None
 ) -> Tuple[Optional[Dict[str, Any]], Optional[List[str]]]:
     if not os.path.isdir(path):
-        wandb.termerror("Path must be a valid file or directory")
+        tracklab.termerror("Path must be a valid file or directory")
         return {}, []
 
     _maybe_warn_python_no_executable(entrypoint)
@@ -378,7 +378,7 @@ def _create_artifact_metadata(
             requirements = f.read().splitlines()
 
     if not any(["wandb" in r for r in requirements]):
-        wandb.termwarn("wandb is not present in requirements.txt.")
+        tracklab.termwarn("wandb is not present in requirements.txt.")
 
     if runtime:
         python_version = _clean_python_version(runtime)
@@ -404,7 +404,7 @@ def _configure_job_builder_for_partial(tmpdir: str, job_source: str) -> JobBuild
     if job_source == "code":
         job_source = "artifact"
 
-    settings = wandb.Settings(x_files_dir=tmpdir, job_source=job_source)
+    settings = tracklab.Settings(x_files_dir=tmpdir, job_source=job_source)
     job_builder = JobBuilder(
         settings=settings,  # type: ignore
         verbose=True,
@@ -421,7 +421,7 @@ def _configure_job_builder_for_partial(tmpdir: str, job_source: str) -> JobBuild
 def _make_code_artifact(
     api: Api,
     job_builder: JobBuilder,
-    run: "wandb.sdk.tracklab_run.Run",
+    run: "tracklab.sdk.tracklab_run.Run",
     path: str,
     entrypoint: str,
     entity: Optional[str],
@@ -439,7 +439,7 @@ def _make_code_artifact(
     # wandb job create.
     entrypoint_file = entrypoint_list[-1]
     artifact_name = _make_code_artifact_name(os.path.join(path, entrypoint_file), name)
-    code_artifact = wandb.Artifact(
+    code_artifact = tracklab.Artifact(
         name=artifact_name,
         type="code",
         description="Code artifact for job",
@@ -449,10 +449,10 @@ def _make_code_artifact(
         code_artifact.add_dir(path)
     except Exception as e:
         if os.path.islink(path):
-            wandb.termerror(
+            tracklab.termerror(
                 "Symlinks are not supported for code artifact jobs, please copy the code into a directory and try again"
             )
-        wandb.termerror(f"Error adding to code artifact: {e}")
+        tracklab.termerror(f"Error adding to code artifact: {e}")
         return None
 
     # Remove paths we don't want to include, if present

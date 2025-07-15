@@ -16,10 +16,10 @@ TENSORBOARD_PYTORCH_MODULE = "torch.utils.tensorboard.writer"
 
 
 def unpatch() -> None:
-    for module, method in wandb.patched["tensorboard"]:
-        writer = wandb.util.get_module(module, lazy=False)
+    for module, method in tracklab.patched["tensorboard"]:
+        writer = tracklab.util.get_module(module, lazy=False)
         setattr(writer, method, getattr(writer, f"orig_{method}"))
-    wandb.patched["tensorboard"] = []
+    tracklab.patched["tensorboard"] = []
 
 
 def patch(
@@ -28,23 +28,23 @@ def patch(
     pytorch: Optional[bool] = None,
     root_logdir: str = "",
 ) -> None:
-    if len(wandb.patched["tensorboard"]) > 0:
+    if len(tracklab.patched["tensorboard"]) > 0:
         raise ValueError(
-            "Tensorboard already patched. Call `wandb.tensorboard.unpatch()` first; "
-            "remove `sync_tensorboard=True` from `wandb.init`; "
-            "or only call `wandb.tensorboard.patch` once."
+            "Tensorboard already patched. Call `tracklab.tensorboard.unpatch()` first; "
+            "remove `sync_tensorboard=True` from `tracklab.init`; "
+            "or only call `tracklab.tensorboard.patch` once."
         )
 
     # TODO: Some older versions of tensorflow don't require tensorboard to be present.
     # we may want to lift this requirement, but it's safer to have it for now
-    wandb.util.get_module(
+    tracklab.util.get_module(
         "tensorboard", required="Please install tensorboard package", lazy=False
     )
-    c_writer = wandb.util.get_module(TENSORBOARD_C_MODULE, lazy=False)
-    py_writer = wandb.util.get_module(TENSORFLOW_PY_MODULE, lazy=False)
-    tb_writer = wandb.util.get_module(TENSORBOARD_WRITER_MODULE, lazy=False)
-    pt_writer = wandb.util.get_module(TENSORBOARD_PYTORCH_MODULE, lazy=False)
-    tbx_writer = wandb.util.get_module(TENSORBOARD_X_MODULE, lazy=False)
+    c_writer = tracklab.util.get_module(TENSORBOARD_C_MODULE, lazy=False)
+    py_writer = tracklab.util.get_module(TENSORFLOW_PY_MODULE, lazy=False)
+    tb_writer = tracklab.util.get_module(TENSORBOARD_WRITER_MODULE, lazy=False)
+    pt_writer = tracklab.util.get_module(TENSORBOARD_PYTORCH_MODULE, lazy=False)
+    tbx_writer = tracklab.util.get_module(TENSORBOARD_X_MODULE, lazy=False)
 
     if not pytorch and not tensorboard_x and c_writer:
         _patch_tensorflow2(
@@ -83,7 +83,7 @@ def patch(
             root_logdir=root_logdir,
         )
     if not c_writer and not tb_writer and not tb_writer:
-        wandb.termerror("Unsupported tensorboard configuration")
+        tracklab.termerror("Unsupported tensorboard configuration")
 
 
 def _patch_tensorflow2(
@@ -106,9 +106,9 @@ def _patch_tensorflow2(
         root_logdir_arg = root_logdir
 
         if len(set(logdir_hist)) > 1 and root_logdir == "":
-            wandb.termwarn(
+            tracklab.termwarn(
                 "When using several event log directories, "
-                'please call `wandb.tensorboard.patch(root_logdir="...")` before `wandb.init`'
+                'please call `tracklab.tensorboard.patch(root_logdir="...")` before `tracklab.init`'
             )
         # if the logdir contains the hostname, the writer was not given a logdir.
         # In this case, the generated logdir
@@ -120,7 +120,7 @@ def _patch_tensorflow2(
         elif root_logdir is not None and not os.path.abspath(logdir).startswith(
             os.path.abspath(root_logdir)
         ):
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Found log directory outside of given root_logdir, "
                 f"dropping given root_logdir for event file in {logdir}"
             )
@@ -131,7 +131,7 @@ def _patch_tensorflow2(
 
     writer.orig_create_summary_file_writer = old_csfw_func
     writer.create_summary_file_writer = new_csfw_func
-    wandb.patched["tensorboard"].append([module, "create_summary_file_writer"])
+    tracklab.patched["tensorboard"].append([module, "create_summary_file_writer"])
 
 
 def _patch_file_writer(
@@ -148,9 +148,9 @@ def _patch_file_writer(
             logdir_hist.append(logdir)
             root_logdir_arg = root_logdir
             if len(set(logdir_hist)) > 1 and root_logdir == "":
-                wandb.termwarn(
+                tracklab.termwarn(
                     "When using several event log directories, "
-                    'please call `wandb.tensorboard.patch(root_logdir="...")` before `wandb.init`'
+                    'please call `tracklab.tensorboard.patch(root_logdir="...")` before `tracklab.init`'
                 )
 
             # if the logdir contains the hostname, the writer was not given a logdir.
@@ -164,7 +164,7 @@ def _patch_file_writer(
             elif root_logdir is not None and not os.path.abspath(logdir).startswith(
                 os.path.abspath(root_logdir)
             ):
-                wandb.termwarn(
+                tracklab.termwarn(
                     "Found log directory outside of given root_logdir, "
                     f"dropping given root_logdir for event file in {logdir}"
                 )
@@ -176,11 +176,11 @@ def _patch_file_writer(
 
     writer.orig_EventFileWriter = writer.EventFileWriter
     writer.EventFileWriter = TBXEventFileWriter
-    wandb.patched["tensorboard"].append([module, "EventFileWriter"])
+    tracklab.patched["tensorboard"].append([module, "EventFileWriter"])
 
 
 def _notify_tensorboard_logdir(
     logdir: str, save: bool = True, root_logdir: str = ""
 ) -> None:
-    if wandb.run is not None:
-        wandb.run._tensorboard_callback(logdir, save=save, root_logdir=root_logdir)
+    if tracklab.run is not None:
+        tracklab.run._tensorboard_callback(logdir, save=save, root_logdir=root_logdir)

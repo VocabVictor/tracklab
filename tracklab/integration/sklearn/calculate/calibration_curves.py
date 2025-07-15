@@ -92,7 +92,7 @@ def calibration_curves(clf, X, y, clf_name):  # noqa: N803
         hist_column,
         edge_column,
     )
-    chart = wandb.visualize("wandb/calibration/v1", table)
+    chart = tracklab.visualize("wandb/calibration/v1", table)
 
     return chart
 
@@ -122,4 +122,4 @@ def make_table(
         )
     )
 
-    return wandb.Table(columns=columns, data=data)
+    return tracklab.Table(columns=columns, data=data)

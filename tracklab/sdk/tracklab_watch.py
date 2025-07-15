@@ -39,7 +39,7 @@ def _watch(
     extended to support arbitrary machine learning models in the future.
 
     Args:
-        run (wandb.sdk.tracklab_run.Run): The run object to log to.
+        run (tracklab.sdk.tracklab_run.Run): The run object to log to.
         models (Union[torch.nn.Module, Sequence[torch.nn.Module]]):
             A single model or a sequence of models to be monitored.
         criterion (Optional[torch.F]):
@@ -50,16 +50,16 @@ def _watch(
         log_freq (int):
             Frequency (in batches) to log gradients and parameters. (default=1000)
         idx (Optional[int]):
-            Index used when tracking multiple models with `wandb.watch`. (default=None)
+            Index used when tracking multiple models with `tracklab.watch`. (default=None)
          log_graph (bool):
             Whether to log the model's computational graph. (default=False)
 
     Returns:
-        wandb.Graph:
+        tracklab.Graph:
             The graph object, which will be populated after the first backward pass.
 
     Raises:
-        ValueError: If `wandb.init` has not been called.
+        ValueError: If `tracklab.init` has not been called.
         TypeError: If any of the models are not instances of `torch.nn.Module`.
     """
     global _global_watch_idx
@@ -78,8 +78,8 @@ def _watch(
     if not isinstance(models, (tuple, list)):
         models = (models,)
 
-    torch = wandb.util.get_module(
-        "torch", required="wandb.watch only works with pytorch, couldn't import torch."
+    torch = tracklab.util.get_module(
+        "torch", required="tracklab.watch only works with pytorch, couldn't import torch."
     )
 
     for model in models:
@@ -127,7 +127,7 @@ def _unwatch(
     """Remove pytorch model topology, gradient and parameter hooks.
 
     Args:
-        run (wandb.sdk.tracklab_run.Run):
+        run (tracklab.sdk.tracklab_run.Run):
             The run object to log to.
         models (torch.nn.Module | Sequence[torch.nn.Module]):
             Optional list of pytorch models that have had watch called on them
@@ -137,7 +137,7 @@ def _unwatch(
             models = (models,)
         for model in models:
             if not hasattr(model, "_wandb_hook_names"):
-                wandb.termwarn(f"{model} model has not been watched")
+                tracklab.termwarn(f"{model} model has not been watched")
             else:
                 for name in model._wandb_hook_names:
                     run._torch.unhook(name)

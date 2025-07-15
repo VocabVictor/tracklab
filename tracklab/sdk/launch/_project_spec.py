@@ -95,7 +95,7 @@ class LaunchProject:
         self.uri = uri
         self.job = job
         if job is not None:
-            wandb.termlog(f"{LOG_PREFIX}Launching job: {job}")
+            tracklab.termlog(f"{LOG_PREFIX}Launching job: {job}")
         self._job_artifact: Optional[Artifact] = None
         self.api = api
         self.launch_spec = launch_spec
@@ -195,7 +195,7 @@ class LaunchProject:
 
         Arguments:
             launch_spec: Dictionary representation of launch spec
-            api: Instance of wandb.apis.internal Api
+            api: Instance of tracklab.apis.internal Api
 
         Returns:
             An initialized `LaunchProject` object
@@ -251,11 +251,11 @@ class LaunchProject:
             cleaned_uri = self.uri.replace("https://", "/")
             first_sep = cleaned_uri.find("/")
             shortened_uri = cleaned_uri[first_sep:]
-            return wandb.util.make_docker_image_name_safe(shortened_uri)
+            return tracklab.util.make_docker_image_name_safe(shortened_uri)
         else:
             # this will always pass since one of these 3 is required
             assert self.job is not None
-            return wandb.util.make_docker_image_name_safe(self.job.split(":")[0])
+            return tracklab.util.make_docker_image_name_safe(self.job.split(":")[0])
 
     @property
     def queue_name(self) -> Optional[str]:
@@ -382,7 +382,7 @@ class LaunchProject:
 
         Arguments:
             launch_project: LaunchProject to fetch and validate.
-            api: Instance of wandb.apis.internal Api
+            api: Instance of tracklab.apis.internal Api
 
         Returns:
             A validated `LaunchProject` object.
@@ -425,7 +425,7 @@ class LaunchProject:
         Raises:
             LaunchError: If there is an error accessing the job.
         """
-        public_api = wandb.apis.public.Api()
+        public_api = tracklab.apis.public.Api()
         job_dir = tempfile.mkdtemp()
         try:
             job = public_api.job(self.job, path=job_dir)
@@ -466,11 +466,11 @@ class LaunchProject:
         if self.launch_spec.get("_resume_count", 0) > 0:
             env_vars["WANDB_RESUME"] = "allow"
         if self.queue_name:
-            env_vars[wandb.env.LAUNCH_QUEUE_NAME] = self.queue_name
+            env_vars[tracklab.env.LAUNCH_QUEUE_NAME] = self.queue_name
         if self.queue_entity:
-            env_vars[wandb.env.LAUNCH_QUEUE_ENTITY] = self.queue_entity
+            env_vars[tracklab.env.LAUNCH_QUEUE_ENTITY] = self.queue_entity
         if self.run_queue_item_id:
-            env_vars[wandb.env.LAUNCH_TRACE_ID] = self.run_queue_item_id
+            env_vars[tracklab.env.LAUNCH_TRACE_ID] = self.run_queue_item_id
 
         _inject_tracklab_config_env_vars(self.override_config, env_vars, max_env_length)
         _inject_file_overrides_env_vars(self.override_files, env_vars, max_env_length)
@@ -479,7 +479,7 @@ class LaunchProject:
         # if we're spinning up a launch process from a job
         # we should tell the run to use that artifact
         if self.job:
-            artifacts = {wandb.util.LAUNCH_JOB_ARTIFACT_SLOT_NAME: self.job}
+            artifacts = {tracklab.util.LAUNCH_JOB_ARTIFACT_SLOT_NAME: self.job}
         env_vars["WANDB_ARTIFACTS"] = json.dumps(
             {**artifacts, **self.override_artifacts}
         )
@@ -512,7 +512,7 @@ class LaunchProject:
 
             requirements_line += "WANDB_ONLY_INCLUDE={} ".format(",".join(include_only))
             if "wandb" not in requirements_line:
-                wandb.termwarn(f"{LOG_PREFIX}wandb is not present in requirements.txt.")
+                tracklab.termwarn(f"{LOG_PREFIX}wandb is not present in requirements.txt.")
         return requirements_line
 
 

@@ -10,7 +10,7 @@ from tracklab.apis.internal import Api
 from tracklab.sdk import lib as wandb_lib
 from tracklab.sdk.data_types.utils import val_to_json
 
-DEEP_SUMMARY_FNAME = "wandb.h5"
+DEEP_SUMMARY_FNAME = "tracklab.h5"
 H5_TYPES = ("numpy.ndarray", "tensorflow.Tensor", "torch.Tensor")
 h5py = util.get_module("h5py")
 np = util.get_module("numpy")
@@ -237,7 +237,7 @@ class Summary(SummarySubDict):
         del json_dict[path[-1]]
         if isinstance(val, dict) and val.get("_type") in H5_TYPES:
             if not h5py:
-                wandb.termerror("Deleting tensors in summary requires h5py")
+                tracklab.termerror("Deleting tensors in summary requires h5py")
             else:
                 self.open_h5()
                 h5_key = "summary/" + ".".join(path)
@@ -257,7 +257,7 @@ class Summary(SummarySubDict):
         self.open_h5()
 
         if not self._h5:
-            wandb.termerror("Storing tensors in summary requires h5py")
+            tracklab.termerror("Storing tensors in summary requires h5py")
         else:
             try:
                 del self._h5["summary/" + ".".join(path)]
@@ -271,7 +271,7 @@ class Summary(SummarySubDict):
         self.open_h5()
 
         if not self._h5:
-            wandb.termerror("Reading tensors from summary requires h5py")
+            tracklab.termerror("Reading tensors from summary requires h5py")
         else:
             return self._h5.get("summary/" + ".".join(path), val)
 
@@ -288,8 +288,8 @@ class Summary(SummarySubDict):
             if json_value.get("_type") in H5_TYPES:
                 return self.read_h5(path, json_value)
             elif json_value.get("_type") == "data-frame":
-                wandb.termerror(
-                    "This data frame was saved via the wandb data API. Contact support@wandb.com for help."
+                tracklab.termerror(
+                    "This data frame was saved via the wandb data API. Contact support@tracklab.com for help."
                 )
                 return None
             # TODO: transform wandb objects and plots
@@ -342,14 +342,14 @@ def download_h5(run_id, entity=None, project=None, out_dir=None):
     )
     if meta and "md5" in meta and meta["md5"] is not None:
         # TODO: make this non-blocking
-        wandb.termlog("Downloading summary data...")
+        tracklab.termlog("Downloading summary data...")
         path, res = api.download_write_file(meta, out_dir=out_dir)
         return path
 
 
 def upload_h5(file, run_id, entity=None, project=None):
     api = Api()
-    wandb.termlog("Uploading summary data...")
+    tracklab.termlog("Uploading summary data...")
     with open(file, "rb") as f:
         api.push(
             {os.path.basename(file): f}, run=run_id, project=project, entity=entity

@@ -52,7 +52,7 @@ try:
 
         if datasets:
             run.use_artifact(f"{name}:latest")
-            wandb.termlog(f"Using artifact: {name} ({type(data)})")
+            tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
     @dispatch
     def wandb_track(
@@ -68,14 +68,14 @@ try:
             return "pd.DataFrame" if datasets else None
 
         if datasets:
-            artifact = wandb.Artifact(name, type="dataset")
+            artifact = tracklab.Artifact(name, type="dataset")
             with artifact.new_file(f"{name}.parquet", "wb") as f:
                 data.to_parquet(f, engine="pyarrow")
             run.log_artifact(artifact)
-            wandb.termlog(f"Logging artifact: {name} ({type(data)})")
+            tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 except ImportError:
-    wandb.termwarn(
+    tracklab.termwarn(
         "`pandas` not installed >> @wandb_log(datasets=True) may not auto log your dataset!"
     )
 
@@ -98,7 +98,7 @@ try:
 
         if models:
             run.use_artifact(f"{name}:latest")
-            wandb.termlog(f"Using artifact: {name} ({type(data)})")
+            tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
     @dispatch
     def wandb_track(
@@ -114,14 +114,14 @@ try:
             return "nn.Module" if models else None
 
         if models:
-            artifact = wandb.Artifact(name, type="model")
+            artifact = tracklab.Artifact(name, type="model")
             with artifact.new_file(f"{name}.pkl", "wb") as f:
                 torch.save(data, f)
             run.log_artifact(artifact)
-            wandb.termlog(f"Logging artifact: {name} ({type(data)})")
+            tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 except ImportError:
-    wandb.termwarn(
+    tracklab.termwarn(
         "`pytorch` not installed >> @wandb_log(models=True) may not auto log your model!"
     )
 
@@ -143,7 +143,7 @@ try:
 
         if models:
             run.use_artifact(f"{name}:latest")
-            wandb.termlog(f"Using artifact: {name} ({type(data)})")
+            tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
     @dispatch
     def wandb_track(
@@ -159,14 +159,14 @@ try:
             return "BaseEstimator" if models else None
 
         if models:
-            artifact = wandb.Artifact(name, type="model")
+            artifact = tracklab.Artifact(name, type="model")
             with artifact.new_file(f"{name}.pkl", "wb") as f:
                 pickle.dump(data, f)
             run.log_artifact(artifact)
-            wandb.termlog(f"Logging artifact: {name} ({type(data)})")
+            tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 except ImportError:
-    wandb.termwarn(
+    tracklab.termwarn(
         "`sklearn` not installed >> @wandb_log(models=True) may not auto log your model!"
     )
 
@@ -217,13 +217,13 @@ def wandb_track(
         return "Path" if datasets else None
 
     if datasets:
-        artifact = wandb.Artifact(name, type="dataset")
+        artifact = tracklab.Artifact(name, type="dataset")
         if data.is_dir():
             artifact.add_dir(data)
         elif data.is_file():
             artifact.add_file(data)
         run.log_artifact(artifact)
-        wandb.termlog(f"Logging artifact: {name} ({type(data)})")
+        tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 
 # this is the base case
@@ -235,19 +235,19 @@ def wandb_track(
         return "generic" if others else None
 
     if others:
-        artifact = wandb.Artifact(name, type="other")
+        artifact = tracklab.Artifact(name, type="other")
         with artifact.new_file(f"{name}.pkl", "wb") as f:
             pickle.dump(data, f)
         run.log_artifact(artifact)
-        wandb.termlog(f"Logging artifact: {name} ({type(data)})")
+        tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 
 @dispatch
 def wandb_use(name: str, data, *args, **kwargs):
     try:
         return _wandb_use(name, data, *args, **kwargs)
-    except wandb.CommError:
-        wandb.termwarn(
+    except tracklab.CommError:
+        tracklab.termwarn(
             f"This artifact ({name}, {type(data)}) does not exist in the wandb datastore!"
             f"If you created an instance inline (e.g. sklearn.ensemble.RandomForestClassifier), then you can safely ignore this"
             f"Otherwise you may want to check your internet connection!"
@@ -270,7 +270,7 @@ def _wandb_use(
 
     if datasets:
         run.use_artifact(f"{name}:latest")
-        wandb.termlog(f"Using artifact: {name} ({type(data)})")
+        tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
 
 @dispatch
@@ -280,7 +280,7 @@ def _wandb_use(name: str, data, others=False, run=None, testing=False, *args, **
 
     if others:
         run.use_artifact(f"{name}:latest")
-        wandb.termlog(f"Using artifact: {name} ({type(data)})")
+        tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
 
 def coalesce(*arg):
@@ -307,7 +307,7 @@ def wandb_log(
         datasets: (`bool`). If `True`, log datasets.  Datasets can be a `pd.DataFrame` or `pathlib.Path`.  The default value is `False`, so datasets are not logged.
         models: (`bool`). If `True`, log models.  Models can be a `nn.Module` or `sklearn.base.BaseEstimator`.  The default value is `False`, so models are not logged.
         others: (`bool`). If `True`, log anything pickle-able.  The default value is `False`, so files are not logged.
-        settings: (`wandb.sdk.tracklab_settings.Settings`). Custom settings passed to `wandb.init`.  The default value is `None`, and is the same as passing `wandb.Settings()`.  If `settings.run_group` is `None`, it will be set to `{flow_name}/{run_id}.  If `settings.run_job_type` is `None`, it will be set to `{run_job_type}/{step_name}`
+        settings: (`tracklab.sdk.tracklab_settings.Settings`). Custom settings passed to `tracklab.init`.  The default value is `None`, and is the same as passing `tracklab.Settings()`.  If `settings.run_group` is `None`, it will be set to `{flow_name}/{run_id}.  If `settings.run_job_type` is `None`, it will be set to `{run_job_type}/{step_name}`
     """
 
     @wraps(func)
@@ -327,8 +327,8 @@ def wandb_log(
 
         @wraps(func)
         def wrapper(self, *args, settings=settings, **kwargs):
-            if not isinstance(settings, wandb.sdk.tracklab_settings.Settings):
-                settings = wandb.Settings()
+            if not isinstance(settings, tracklab.sdk.tracklab_settings.Settings):
+                settings = tracklab.Settings()
 
             settings.update_from_dict(
                 {
@@ -339,7 +339,7 @@ def wandb_log(
                 }
             )
 
-            with wandb.init(settings=settings) as run:
+            with tracklab.init(settings=settings) as run:
                 with wb_telemetry.context(run=run) as tel:
                     tel.feature.metaflow = True
                 proxy = ArtifactProxy(self)

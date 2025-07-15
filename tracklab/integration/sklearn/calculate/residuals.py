@@ -34,7 +34,7 @@ def residuals(regressor, X, y):  # noqa: N803
         train_score_,
         test_score_,
     )
-    chart = wandb.visualize("wandb/residuals_plot/v1", table)
+    chart = tracklab.visualize("wandb/residuals_plot/v1", table)
 
     return chart
 
@@ -81,6 +81,6 @@ def make_table(
         for i in range(len(y_pred_column))
     ]
 
-    table = wandb.Table(columns=columns, data=data)
+    table = tracklab.Table(columns=columns, data=data)
 
     return table

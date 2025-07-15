@@ -24,7 +24,7 @@ def _add_any(
     be moved to the Artifact class in the future.
 
     Args:
-        artifact: `Artifact` - artifact created with `wandb.Artifact(...)`
+        artifact: `Artifact` - artifact created with `tracklab.Artifact(...)`
         path_or_obj: `Union[str, ArtifactManifestEntry, data_types.WBValue]` - either a
             str or valid object which indicates what to add to an artifact.
 
@@ -89,10 +89,10 @@ def _log_artifact_version(
     """
     run = tracklab_setup.singleton().most_recent_active_run
     if not run:
-        run = wandb.init(
+        run = tracklab.init(
             project=project,
             job_type=job_type,
-            settings=wandb.Settings(silent=True),
+            settings=tracklab.Settings(silent=True),
         )
 
     if not scope_project:
@@ -101,13 +101,13 @@ def _log_artifact_version(
     if metadata is None:
         metadata = {}
 
-    art = wandb.Artifact(name, type, description, metadata, False, None)
+    art = tracklab.Artifact(name, type, description, metadata, False, None)
 
     for path in entries:
         _add_any(art, entries[path], path)
 
     # "latest" should always be present as an alias
-    aliases = wandb.util._resolve_aliases(aliases)
+    aliases = tracklab.util._resolve_aliases(aliases)
     run.log_artifact(art, aliases=aliases)
 
     return art
@@ -230,7 +230,7 @@ def use_model(aliased_path: str, unsafe: bool = False) -> "_SavedModel":
         return sm
     else:
         raise ValueError(
-            "use_model can only be called inside a run. Please call wandb.init() before use_model(...)"
+            "use_model can only be called inside a run. Please call tracklab.init() before use_model(...)"
         )
 
 
@@ -261,7 +261,7 @@ def link_model(
         link_model(sm, "my-portfolio")
 
     """
-    aliases = wandb.util._resolve_aliases(aliases)
+    aliases = tracklab.util._resolve_aliases(aliases)
 
     if run := tracklab_setup.singleton().most_recent_active_run:
         # _artifact_source, if it exists, points to a Public Artifact.

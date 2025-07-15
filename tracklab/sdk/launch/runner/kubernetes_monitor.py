@@ -23,7 +23,7 @@ from tracklab.sdk.launch.errors import LaunchError
 from tracklab.sdk.launch.runner.abstract import State, Status
 from tracklab.sdk.launch.utils import get_kube_context_and_api_client
 
-WANDB_K8S_LABEL_NAMESPACE = "wandb.ai"
+WANDB_K8S_LABEL_NAMESPACE = "tracklab.ai"
 WANDB_K8S_RUN_ID = f"{WANDB_K8S_LABEL_NAMESPACE}/run-id"
 WANDB_K8S_LABEL_AGENT = f"{WANDB_K8S_LABEL_NAMESPACE}/agent"
 WANDB_K8S_LABEL_MONITOR = f"{WANDB_K8S_LABEL_NAMESPACE}/monitor"
@@ -83,13 +83,13 @@ def _log_err_task_callback(task: asyncio.Task) -> None:
     exec = task.exception()
     if exec is not None:
         if isinstance(exec, asyncio.CancelledError):
-            wandb.termlog(f"Task {task.get_name()} was cancelled")
+            tracklab.termlog(f"Task {task.get_name()} was cancelled")
             return
         name = task.get_name()
-        wandb.termerror(f"Exception in task {name}")
+        tracklab.termerror(f"Exception in task {name}")
         tb = exec.__traceback__
         tb_str = "".join(traceback.format_tb(tb))
-        wandb.termerror(tb_str)
+        tracklab.termerror(tb_str)
 
 
 def _is_preempted(status: "V1PodStatus") -> bool:
@@ -328,7 +328,7 @@ class LaunchKubernetesMonitor:
     def _add_status_message(self, job_name: str, message: str) -> None:
         if job_name not in self._job_states:
             self._job_states[job_name] = Status("unknown")
-        wandb.termwarn(f"Warning from Kubernetes for job {job_name}: {message}")
+        tracklab.termwarn(f"Warning from Kubernetes for job {job_name}: {message}")
         self._job_states[job_name].messages.append(message)
 
     async def _monitor_pods(self, namespace: str) -> None:
@@ -458,7 +458,7 @@ class SafeWatch:
                 if self._stopped:
                     break
             except urllib3.exceptions.ProtocolError as e:
-                wandb.termwarn(f"Broken event stream: {e}, attempting to recover")
+                tracklab.termwarn(f"Broken event stream: {e}, attempting to recover")
             except ApiException as e:
                 if e.status == 410:
                     # If resource version is too old we need to start over.
@@ -467,6 +467,6 @@ class SafeWatch:
             except Exception as E:
                 exc_type = type(E).__name__
                 stack_trace = traceback.format_exc()
-                wandb.termerror(
+                tracklab.termerror(
                     f"Unknown exception in event stream of type {exc_type}: {E}, attempting to recover. Stack trace: {stack_trace}"
                 )

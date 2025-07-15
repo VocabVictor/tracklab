@@ -76,9 +76,9 @@ if TYPE_CHECKING:  # pragma: no cover
         target: Sequence[Point3D]
 
 
-def _install_numpy_error() -> "wandb.Error":
-    return wandb.Error(
-        "wandb.Object3D requires NumPy. To get it, run 'pip install numpy'."
+def _install_numpy_error() -> "tracklab.Error":
+    return tracklab.Error(
+        "tracklab.Object3D requires NumPy. To get it, run 'pip install numpy'."
     )
 
 
@@ -414,9 +414,9 @@ class Object3D(BatchableMedia):
         if point_cloud_type not in cls.SUPPORTED_POINT_CLOUD_TYPES:
             raise ValueError("Point cloud type not supported")
 
-        numpy = wandb.util.get_module(
+        numpy = tracklab.util.get_module(
             "numpy",
-            required="wandb.Object3D.from_point_cloud requires numpy. Install with `pip install numpy`",
+            required="tracklab.Object3D.from_point_cloud requires numpy. Install with `pip install numpy`",
         )
 
         data = {
@@ -444,7 +444,7 @@ class Object3D(BatchableMedia):
         json_dict = super().to_json(run_or_artifact)
         json_dict["_type"] = Object3D._log_type
 
-        if isinstance(run_or_artifact, wandb.Artifact):
+        if isinstance(run_or_artifact, tracklab.Artifact):
             if self._path is None or not self._path.endswith(".pts.json"):
                 raise ValueError(
                     "Non-point cloud 3D objects are not yet supported with Artifacts"

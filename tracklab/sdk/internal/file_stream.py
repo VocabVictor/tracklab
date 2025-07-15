@@ -76,7 +76,7 @@ class DefaultFilePolicy:
         # get key size and convert to MB
         key_sizes = [(k, len(json.dumps(v))) for k, v in loaded.items()]
         key_msg = [f"{k}: {v / 1048576:.5f} MB" for k, v in key_sizes]
-        wandb.termerror(f"Step: {loaded['_step']} | {key_msg}", repeat=False)
+        tracklab.termerror(f"Step: {loaded['_step']} | {key_msg}", repeat=False)
         self.has_debug_log = True
 
 
@@ -89,8 +89,8 @@ class JsonlFilePolicy(DefaultFilePolicy):
         for chunk in chunks:
             if len(chunk.data) > util.MAX_LINE_BYTES:
                 msg = f"Metric data exceeds maximum size of {util.to_human_size(util.MAX_LINE_BYTES)} ({util.to_human_size(len(chunk.data))})"
-                wandb.termerror(msg, repeat=False)
-                wandb._sentry.message(msg, repeat=False)
+                tracklab.termerror(msg, repeat=False)
+                tracklab._sentry.message(msg, repeat=False)
                 self._debug_log(chunk.data)
             else:
                 chunk_data.append(chunk.data)
@@ -106,8 +106,8 @@ class SummaryFilePolicy(DefaultFilePolicy):
         data = chunks[-1].data
         if len(data) > util.MAX_LINE_BYTES:
             msg = f"Summary data exceeds maximum size of {util.to_human_size(util.MAX_LINE_BYTES)}. Dropping it."
-            wandb.termerror(msg, repeat=False)
-            wandb._sentry.message(msg, repeat=False)
+            tracklab.termerror(msg, repeat=False)
+            tracklab._sentry.message(msg, repeat=False)
             self._debug_log(data)
             return False
         return {"offset": 0, "content": [data]}
@@ -493,13 +493,13 @@ class FileStreamApi:
             exc_info = sys.exc_info()
             self._exc_info = exc_info
             logger.exception("generic exception in filestream thread")
-            wandb._sentry.exception(exc_info)
+            tracklab._sentry.exception(exc_info)
             raise
 
     def _handle_response(self, response: Union[Exception, "requests.Response"]) -> None:
         """Log dropped chunks and updates dynamic settings."""
         if isinstance(response, Exception):
-            wandb.termerror(
+            tracklab.termerror(
                 "Dropped streaming file chunk (see wandb/debug-internal.log)"
             )
             logger.exception(f"dropped chunk {response}")

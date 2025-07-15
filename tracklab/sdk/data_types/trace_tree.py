@@ -192,9 +192,9 @@ class Trace:
             outputs={"assistant": "25 years old"},
             model_dict={"_kind": "openai", "api_type": "azure"}
               )
-        run = wandb.init(project=<my_awesome_project>,)
+        run = tracklab.init(project=<my_awesome_project>,)
         trace.log("my_trace")
-        wandb.finish()
+        tracklab.finish()
         ```
     """
 
@@ -433,8 +433,8 @@ class Trace:
         trace_tree = WBTraceTree(self._span, self._model_dict)
         # NOTE: Does not work for reinit="create_new" runs.
         #   This method should be deprecated and users should call run.log().
-        assert wandb.run is not None, (
-            "You must call wandb.init() before logging a trace"
+        assert tracklab.run is not None, (
+            "You must call tracklab.init() before logging a trace"
         )
         assert len(name.strip()) > 0, "You must provide a valid name to log the trace"
-        wandb.run.log({name: trace_tree})
+        tracklab.run.log({name: trace_tree})

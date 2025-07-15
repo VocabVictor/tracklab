@@ -159,7 +159,7 @@ class LocalContainerRunner(AbstractRunner):
             try:
                 pull_docker_image(image_uri)
             except Exception as e:
-                wandb.termwarn(f"Error attempting to pull docker image {image_uri}")
+                tracklab.termwarn(f"Error attempting to pull docker image {image_uri}")
                 if not docker_image_exists(image_uri):
                     raise LaunchError(
                         f"Failed to pull docker image {image_uri} with error: {e}"
@@ -178,7 +178,7 @@ class LocalContainerRunner(AbstractRunner):
         ).strip()
         sanitized_cmd_str = sanitize_wandb_api_key(command_str)
         _msg = f"{LOG_PREFIX}Launching run in docker with command: {sanitized_cmd_str}"
-        wandb.termlog(_msg)
+        tracklab.termlog(_msg)
         run = _run_entry_point(command_str, launch_project.project_dir)
         if synchronous:
             await run.wait()

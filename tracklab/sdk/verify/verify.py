@@ -53,15 +53,15 @@ def print_results(
 
 
 def check_host(host: str) -> bool:
-    if host in ("api.wandb.ai", "http://api.wandb.ai", "https://api.wandb.ai"):
-        print_results("Cannot run wandb verify against api.wandb.ai", False)
+    if host in ("api.tracklab.ai", "http://api.tracklab.ai", "https://api.tracklab.ai"):
+        print_results("Cannot run wandb verify against api.tracklab.ai", False)
         return False
     return True
 
 
 def check_logged_in(api: Api, host: str) -> bool:
     print("Checking if logged in".ljust(72, "."), end="")  # noqa: T201
-    login_doc_url = "https://docs.wandb.ai/ref/cli/wandb-login"
+    login_doc_url = "https://docs.tracklab.ai/ref/cli/wandb-login"
     fail_string = None
     if api.api_key is None:
         fail_string = (
@@ -131,7 +131,7 @@ def check_run(api: Api) -> bool:
     f.write("test")
     f.close()
 
-    with wandb.init(
+    with tracklab.init(
         id=nice_id("check_run"),
         reinit=True,
         config=config,
@@ -152,14 +152,14 @@ def check_run(api: Api) -> bool:
             )
 
         try:
-            run.log({"HT%3ML ": wandb.Html('<a href="https://mysite">Link</a>')})
+            run.log({"HT%3ML ": tracklab.Html('<a href="https://mysite">Link</a>')})
         except Exception:
             failed_test_strings.append(
                 "Failed to log to media. Contact W&B for support."
             )
 
         run.save(filepath)
-    public_api = wandb.Api()
+    public_api = tracklab.Api()
     prev_run = public_api.run(f"{entity}/{PROJECT_NAME}/{run_id}")
     # raise Exception(prev_run.__dict__)
     if prev_run is None:
@@ -239,7 +239,7 @@ def verify_digest(
 def artifact_with_path_or_paths(
     name: str, verify_dir: Optional[str] = None, singular: bool = False
 ) -> "Artifact":
-    art = wandb.Artifact(type="artsy", name=name)
+    art = tracklab.Artifact(type="artsy", name=name)
     # internal file
     with open("verify_int_test.txt", "w") as f:
         f.write("test 1")
@@ -273,7 +273,7 @@ def log_use_download_artifact(
     failed_test_strings: List[str],
     add_extra_file: bool,
 ) -> Tuple[bool, Optional["Artifact"], List[str]]:
-    with wandb.init(
+    with tracklab.init(
         id=nice_id("log_artifact"),
         reinit=True,
         project=PROJECT_NAME,
@@ -291,7 +291,7 @@ def log_use_download_artifact(
             failed_test_strings.append(f"Unable to log artifact. {e}")
             return False, None, failed_test_strings
 
-    with wandb.init(
+    with tracklab.init(
         id=nice_id("use_artifact"),
         project=PROJECT_NAME,
         config={"test": "artifact use"},
@@ -356,7 +356,7 @@ def check_artifacts() -> bool:
             "Artifact directory is missing files. Contact W&B for support."
         )
 
-    computed = wandb.Artifact("computed", type="dataset")
+    computed = tracklab.Artifact("computed", type="dataset")
     computed.add_dir(multi_art_dir)
     verify_digest(download_artifact, computed, failed_test_strings)
 
@@ -376,14 +376,14 @@ def check_graphql_put(api: Api, host: str) -> Tuple[bool, Optional[str]]:
     f = open(gql_fp, "w")
     f.write("test2")
     f.close()
-    with wandb.init(
+    with tracklab.init(
         id=nice_id("graphql_put"),
         reinit=True,
         project=PROJECT_NAME,
         config={"test": "put to graphql"},
     ) as run:
         run.save(gql_fp)
-    public_api = wandb.Api()
+    public_api = tracklab.Api()
     prev_run = public_api.run(f"{run.entity}/{PROJECT_NAME}/{run.id}")
     if prev_run is None:
         failed_test_strings.append(
@@ -434,7 +434,7 @@ def check_large_post() -> bool:
         }
         """
     )
-    public_api = wandb.Api()
+    public_api = tracklab.Api()
     client = public_api._base_client
 
     try:
@@ -477,9 +477,9 @@ def check_wandb_version(api: Api) -> None:
 
     from packaging.version import parse
 
-    if parse(wandb.__version__) < parse(min_cli_version):
+    if parse(tracklab.__version__) < parse(min_cli_version):
         fail_string = f"wandb version out of date, please run pip install --upgrade wandb=={max_cli_version}"
-    elif parse(wandb.__version__) > parse(max_cli_version):
+    elif parse(tracklab.__version__) > parse(max_cli_version):
         fail_string = (
             "wandb version is not supported by your local installation. This could "
             "cause some issues. If you're having problems try: please run `pip "
@@ -506,7 +506,7 @@ def check_sweeps(api: Api) -> bool:
 
     try:
         with contextlib.redirect_stdout(io.StringIO()):
-            sweep_id = wandb.sweep(
+            sweep_id = tracklab.sweep(
                 sweep=sweep_config, project=PROJECT_NAME, entity=api.default_entity
             )
     except Exception as e:
@@ -526,11 +526,11 @@ def check_sweeps(api: Api) -> bool:
             return score
 
         def main():
-            with wandb.init(project=PROJECT_NAME) as run:
+            with tracklab.init(project=PROJECT_NAME) as run:
                 score = objective(run.config)
                 run.log({"score": score})
 
-        wandb.agent(sweep_id, function=main, count=10)
+        tracklab.agent(sweep_id, function=main, count=10)
     except Exception as e:
         failed_test_strings.append(f"Failed to run sweep agent: {e}")
         print_results(failed_test_strings, False)

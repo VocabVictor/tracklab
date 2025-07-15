@@ -12,7 +12,7 @@ def feature_importances(model, feature_names):
     attributes_to_check = ["feature_importances_", "feature_log_prob_", "coef_"]
     found_attribute = check_for_attribute_on(model, attributes_to_check)
     if found_attribute is None:
-        wandb.termwarn(
+        tracklab.termwarn(
             f"could not find any of attributes {', '.join(attributes_to_check)} on classifier. Cannot plot feature importances."
         )
         return
@@ -29,7 +29,7 @@ def feature_importances(model, feature_names):
         n_significant_dims = sum(i > 1 for i in importances.shape)
         if n_significant_dims > 1:
             nd = len(importances.shape)
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"{nd}-dimensional feature importances array passed to plot_feature_importances. "
                 f"{nd}-dimensional and higher feature importances arrays are not currently supported. "
                 f"These importances will not be plotted."
@@ -47,13 +47,13 @@ def feature_importances(model, feature_names):
         feature_names = np.array(feature_names)[indices]
 
     table = make_table(feature_names, importances)
-    chart = wandb.visualize("wandb/feature_importances/v1", table)
+    chart = tracklab.visualize("wandb/feature_importances/v1", table)
 
     return chart
 
 
 def make_table(feature_names, importances):
-    table = wandb.Table(
+    table = tracklab.Table(
         columns=["feature_names", "importances"],
         data=[[feature_names[i], importances[i]] for i in range(len(feature_names))],
     )

@@ -57,10 +57,10 @@ def pr_curve(
 
     Returns:
         CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Raises:
-        wandb.Error: If NumPy, pandas, or scikit-learn is not installed.
+        tracklab.Error: If NumPy, pandas, or scikit-learn is not installed.
 
 
     Example:
@@ -80,8 +80,8 @@ def pr_curve(
 
     labels = ["not spam", "spam"]  # Optional class names for readability
 
-    with wandb.init(project="spam-detection") as run:
-        pr_curve = wandb.plot.pr_curve(
+    with tracklab.init(project="spam-detection") as run:
+        pr_curve = tracklab.plot.pr_curve(
             y_true=y_true,
             y_probas=y_probas,
             labels=labels,
@@ -156,21 +156,21 @@ def pr_curve(
         }
     ).round(3)
 
-    if len(df) > wandb.Table.MAX_ROWS:
-        wandb.termwarn(
-            f"Table has a limit of {wandb.Table.MAX_ROWS} rows. Resampling to fit."
+    if len(df) > tracklab.Table.MAX_ROWS:
+        tracklab.termwarn(
+            f"Table has a limit of {tracklab.Table.MAX_ROWS} rows. Resampling to fit."
         )
         # different sampling could be applied, possibly to ensure endpoints are kept
         df = sklearn_utils.resample(
             df,
             replace=False,
-            n_samples=wandb.Table.MAX_ROWS,
+            n_samples=tracklab.Table.MAX_ROWS,
             random_state=42,
             stratify=df["class"],
         ).sort_values(["precision", "recall", "class"])
 
     return plot_table(
-        data_table=wandb.Table(dataframe=df),
+        data_table=tracklab.Table(dataframe=df),
         vega_spec_name="wandb/area-under-curve/v0",
         fields={
             "x": "recall",

@@ -1,4 +1,4 @@
-"""Global functions for printing to stderr for wandb."""
+"""Global functions for printing to stderr for tracklab."""
 
 from __future__ import annotations
 
@@ -60,13 +60,13 @@ class SupportsLeveledLogging(Protocol):
 
 
 def termsetup(
-    settings: wandb.Settings,
+    settings: tracklab.Settings,
     logger: SupportsLeveledLogging | None,
 ) -> None:
     """Configure the global logging functions.
 
     Args:
-        settings: The settings object passed to wandb.setup() or wandb.init().
+        settings: The settings object passed to tracklab.setup() or tracklab.init().
         logger: A fallback logger to use for "silent" mode. In this mode,
             the logger is used instead of printing to stderr.
     """
@@ -96,11 +96,11 @@ def dynamic_text() -> Iterator[DynamicBlock | None]:
                 text_area.set_text(f"Still going... ({i}/2000)")
                 time.sleep(0.001)
         else:
-            wandb.termlog("Writing to a file or dumb terminal.")
+            tracklab.termlog("Writing to a file or dumb terminal.")
             time.sleep(1)
-            wandb.termlog("Finished 1000/2000 tasks, still working...")
+            tracklab.termlog("Finished 1000/2000 tasks, still working...")
             time.sleep(1)
-    wandb.termlog("Done!", err=True)
+    tracklab.termlog("Done!", err=True)
     ```
     """
     # For now, dynamic text always corresponds to the "INFO" level.

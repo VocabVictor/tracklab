@@ -224,7 +224,7 @@ class Type:
         If overridden by subclass, ensure that `from_json` is equivalently overridden.
 
         Args:
-            artifact (wandb.Artifact, optional): If the serialization is being performed
+            artifact (tracklab.Artifact, optional): If the serialization is being performed
             for a particular artifact, pass that artifact. Defaults to None.
 
         Returns:

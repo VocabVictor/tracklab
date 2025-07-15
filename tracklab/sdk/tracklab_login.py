@@ -27,7 +27,7 @@ def _handle_host_wandb_setting(host: Optional[str], cloud: bool = False) -> None
     application's APIs.
     """
     _api = InternalApi()
-    if host == "https://api.wandb.ai" or (host is None and cloud):
+    if host == "https://api.tracklab.ai" or (host is None and cloud):
         _api.clear_setting("base_url", globally=True, persist=True)
         # To avoid writing an empty local settings file, we only clear if it exists
         if os.path.exists(OldSettings._local_path()):
@@ -161,7 +161,7 @@ class _WandbLogin:
         login_info_str = (
             f"Use {click.style('`wandb login --relogin`', bold=True)} to force relogin"
         )
-        wandb.termlog(
+        tracklab.termlog(
             f"{login_state_str}. {login_info_str}",
             repeat=False,
         )
@@ -169,7 +169,7 @@ class _WandbLogin:
     def try_save_api_key(self, key: str) -> None:
         """Saves the API key to disk for future use."""
         if self._settings._notebook and not self._settings.silent:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "If you're specifying your api key in code, ensure this "
                 "code is not shared publicly.\nConsider setting the "
                 "WANDB_API_KEY environment variable, or running "
@@ -179,7 +179,7 @@ class _WandbLogin:
             try:
                 apikey.write_key(self._settings, key)
             except apikey.WriteNetrcError as e:
-                wandb.termwarn(str(e))
+                tracklab.termwarn(str(e))
 
     def update_session(
         self,
@@ -218,10 +218,10 @@ class _WandbLogin:
                 )
             except ValueError as e:
                 # invalid key provided, try again
-                wandb.termerror(e.args[0])
+                tracklab.termerror(e.args[0])
                 continue
             except TimeoutError:
-                wandb.termlog("W&B disabled due to login timeout.")
+                tracklab.termlog("W&B disabled due to login timeout.")
                 return None, ApiKeyStatus.DISABLED
             if key is False:
                 return None, ApiKeyStatus.NOTTY
@@ -238,7 +238,7 @@ class _WandbLogin:
             directive = (
                 "wandb login [your_api_key]"
                 if self._settings.x_cli_only_mode
-                else "wandb.login(key=[your_api_key])"
+                else "tracklab.login(key=[your_api_key])"
             )
             raise UsageError("api_key not configured (no-tty). call " + directive)
 
@@ -275,9 +275,9 @@ def _login(
     _silent: Optional[bool] = None,
     _disable_warning: Optional[bool] = None,
 ) -> bool:
-    if wandb.run is not None:
+    if tracklab.run is not None:
         if not _disable_warning:
-            wandb.termwarn("Calling wandb.login() after wandb.init() has no effect.")
+            tracklab.termwarn("Calling tracklab.login() after tracklab.init() has no effect.")
         return True
 
     wlogin = _WandbLogin(
@@ -293,10 +293,10 @@ def _login(
         return True
 
     if wlogin._settings._offline and not wlogin._settings.x_cli_only_mode:
-        wandb.termwarn("Unable to verify login in offline mode.")
+        tracklab.termwarn("Unable to verify login in offline mode.")
         return False
-    elif wandb.util._is_kaggle() and not wandb.util._has_internet():
-        wandb.termerror(
+    elif tracklab.util._is_kaggle() and not tracklab.util._has_internet():
+        tracklab.termerror(
             "To use W&B in kaggle you must enable internet in the settings panel on the right."
         )
         return False

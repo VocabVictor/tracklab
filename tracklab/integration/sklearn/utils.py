@@ -1,4 +1,4 @@
-"""Shared utilities for the modules in wandb.sklearn."""
+"""Shared utilities for the modules in tracklab.sklearn."""
 
 from collections.abc import Iterable, Sequence
 
@@ -24,7 +24,7 @@ def check_against_limit(count, chart, limit=None):
 
 def warn_chart_limit(limit, chart):
     warning = f"using only the first {limit} datapoints to create chart {chart}"
-    wandb.termwarn(warning)
+    tracklab.termwarn(warning)
 
 
 def encode_labels(df):
@@ -61,28 +61,28 @@ def test_types(**kwargs):
                     list,
                 ),
             ):
-                wandb.termerror(f"{k} is not an array. Please try again.")
+                tracklab.termerror(f"{k} is not an array. Please try again.")
                 test_passed = False
         # check for classifier types
         if k == "model":
             if (not sklearn.base.is_classifier(v)) and (
                 not sklearn.base.is_regressor(v)
             ):
-                wandb.termerror(
+                tracklab.termerror(
                     f"{k} is not a classifier or regressor. Please try again."
                 )
                 test_passed = False
         elif k == "clf" or k == "binary_clf":
             if not (sklearn.base.is_classifier(v)):
-                wandb.termerror(f"{k} is not a classifier. Please try again.")
+                tracklab.termerror(f"{k} is not a classifier. Please try again.")
                 test_passed = False
         elif k == "regressor":
             if not sklearn.base.is_regressor(v):
-                wandb.termerror(f"{k} is not a regressor. Please try again.")
+                tracklab.termerror(f"{k} is not a regressor. Please try again.")
                 test_passed = False
         elif k == "clusterer":
             if not (getattr(v, "_estimator_type", None) == "clusterer"):
-                wandb.termerror(f"{k} is not a clusterer. Please try again.")
+                tracklab.termerror(f"{k} is not a clusterer. Please try again.")
                 test_passed = False
     return test_passed
 
@@ -91,7 +91,7 @@ def test_fitted(model):
     try:
         model.predict(np.zeros((7, 3)))
     except sklearn.exceptions.NotFittedError:
-        wandb.termerror("Please fit the model before passing it in.")
+        tracklab.termerror("Please fit the model before passing it in.")
         return False
     except AttributeError:
         # Some clustering models (LDA, PCA, Agglomerative) don't implement ``predict``
@@ -115,7 +115,7 @@ def test_fitted(model):
                 all_or_any=any,
             )
         except sklearn.exceptions.NotFittedError:
-            wandb.termerror("Please fit the model before passing it in.")
+            tracklab.termerror("Please fit the model before passing it in.")
             return False
         else:
             return True
@@ -130,7 +130,7 @@ def test_missing(**kwargs):
     for k, v in kwargs.items():
         # Missing/empty params/datapoint arrays
         if v is None:
-            wandb.termerror(f"{k} is None. Please try again.")
+            tracklab.termerror(f"{k} is None. Please try again.")
             test_passed = False
         if (k == "X") or (k == "X_test"):
             if isinstance(v, scipy.sparse.csr.csr_matrix):
@@ -144,7 +144,7 @@ def test_missing(**kwargs):
             missing = 0
             missing = np.count_nonzero(pd.isnull(v))
             if missing > 0:
-                wandb.termwarn(f"{k} contains {missing} missing values. ")
+                tracklab.termwarn(f"{k} contains {missing} missing values. ")
                 test_passed = False
             # Ensure the dataset contains only integers
             non_nums = 0
@@ -168,7 +168,7 @@ def test_missing(**kwargs):
                     )
                 )
             if non_nums > 0:
-                wandb.termerror(
+                tracklab.termerror(
                     f"{k} contains values that are not numbers. Please vectorize, label encode or one hot encode {k} "
                     "and call the plotting function again."
                 )

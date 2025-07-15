@@ -91,7 +91,7 @@ class Job:
     def _get_code_artifact(self, artifact_string):
         artifact_string, base_url, is_id = util.parse_artifact_string(artifact_string)
         if is_id:
-            code_artifact = wandb.Artifact._from_id(artifact_string, self._api._client)
+            code_artifact = tracklab.Artifact._from_id(artifact_string, self._api._client)
         else:
             code_artifact = self._api._artifact(name=artifact_string, type="code")
         if code_artifact is None:
@@ -210,7 +210,7 @@ class Job:
         run_config = {}
         for key, item in config.items():
             if util._is_artifact_object(item):
-                if isinstance(item, wandb.Artifact) and item.is_draft():
+                if isinstance(item, tracklab.Artifact) and item.is_draft():
                     raise ValueError("Cannot queue jobs with unlogged artifacts")
                 run_config[key] = util.artifact_to_json(item)
 
@@ -218,7 +218,7 @@ class Job:
 
         assigned_config_type = self._input_types.assign(run_config)
         if self._partial:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Launching manually created job for the first time, can't verify types"
             )
         else:
@@ -454,11 +454,11 @@ class QueuedRun:
                     )
                     self._run_id = item["associatedRunId"]
                 except ValueError as e:
-                    wandb.termwarn(str(e))
+                    tracklab.termwarn(str(e))
                 else:
                     return self._run
             elif item:
-                wandb.termlog("Waiting for run to start")
+                tracklab.termlog("Waiting for run to start")
 
             time.sleep(3)
 

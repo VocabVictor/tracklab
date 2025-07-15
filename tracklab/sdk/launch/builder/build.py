@@ -108,7 +108,7 @@ async def build_image_from_project(
         launch_project.get_job_entry_point() or launch_project.override_entrypoint
     )
     assert entry_point is not None
-    wandb.termlog(f"{LOG_PREFIX}Building docker image from uri source")
+    tracklab.termlog(f"{LOG_PREFIX}Building docker image from uri source")
     image_uri = await builder.build_image(launch_project, entry_point)
     if not image_uri:
         raise LaunchError("Error building image uri")
@@ -182,7 +182,7 @@ def get_requirements_section(
     if builder_type == "docker":
         buildx_installed = docker.is_buildx_installed()
         if not buildx_installed:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Docker BuildX is not installed, for faster builds upgrade docker: https://github.com/docker/buildx#installing"
             )
             prefix = "RUN WANDB_DISABLE_CACHE=true"
@@ -204,7 +204,7 @@ def get_requirements_section(
         with open(base_path / "src" / "requirements.txt") as f:
             requirements = f.readlines()
         if not any(["wandb" in r for r in requirements]):
-            wandb.termwarn(f"{LOG_PREFIX}wandb is not present in requirements.txt.")
+            tracklab.termwarn(f"{LOG_PREFIX}wandb is not present in requirements.txt.")
         return PIP_TEMPLATE.format(
             buildx_optional_prefix=prefix,
             requirements_files=" ".join(requirements_files),
@@ -216,7 +216,7 @@ def get_requirements_section(
     elif (base_path / "src" / "pyproject.toml").exists():
         tomli = get_module("tomli")
         if tomli is None:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "pyproject.toml found but tomli could not be loaded. To "
                 "install dependencies from pyproject.toml please run "
                 "`pip install tomli` and try again."
@@ -230,7 +230,7 @@ def get_requirements_section(
             ]
             if project_deps:
                 if not any(["wandb" in d for d in project_deps]):
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         f"{LOG_PREFIX}wandb is not present as a dependency in pyproject.toml."
                     )
                 with open(base_path / "src" / "requirements.txt", "w") as f:
@@ -264,7 +264,7 @@ def get_requirements_section(
         with open(base_path / "src" / "requirements.frozen.txt") as f:
             requirements = f.readlines()
         if not any(["wandb" in r for r in requirements]):
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"{LOG_PREFIX}wandb is not present in requirements.frozen.txt."
             )
 
@@ -277,7 +277,7 @@ def get_requirements_section(
     else:
         # this means no deps file was found
         requirements_line = "RUN mkdir -p env/"  # Docker fails otherwise
-        wandb.termwarn("No requirements file found. No packages will be installed.")
+        tracklab.termwarn("No requirements file found. No packages will be installed.")
         return requirements_line
 
 

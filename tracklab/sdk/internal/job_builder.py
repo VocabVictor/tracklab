@@ -270,13 +270,13 @@ class JobBuilder:
         log_func: Optional[Union[Callable[[Any], None], Callable[[Any], None]]] = None
         if level == "log":
             _logger.info(message)
-            log_func = wandb.termlog
+            log_func = tracklab.termlog
         elif level == "warn":
             _logger.warning(message)
-            log_func = wandb.termwarn
+            log_func = tracklab.termwarn
         elif level == "error":
             _logger.error(message)
-            log_func = wandb.termerror
+            log_func = tracklab.termerror
 
         if self._verbose and log_func is not None:
             log_func(message)
@@ -297,7 +297,7 @@ class JobBuilder:
                 if not os.path.exists(os.path.basename(program_relpath)):
                     _logger.info("target path does not exist, exiting")
                     self._log_if_verbose(
-                        "No program path found when generating artifact job source for a non-colab notebook run. See https://docs.wandb.ai/guides/launch/create-job",
+                        "No program path found when generating artifact job source for a non-colab notebook run. See https://docs.tracklab.ai/guides/launch/create-job",
                         "warn",
                     )
                     return None, None
@@ -413,7 +413,7 @@ class JobBuilder:
                 self._log_if_verbose(
                     f"Source type is set to '{source_type}' but some required information is missing "
                     "from the environment. A job will not be created from this run. See "
-                    "https://docs.wandb.ai/guides/launch/create-job",
+                    "https://docs.tracklab.ai/guides/launch/create-job",
                     "warn",
                 )
             return None, None
@@ -448,7 +448,7 @@ class JobBuilder:
         # rather than building a new job version.
         if self._partial_source_id is not None:
             new_metadata = {
-                "input_types": {"@wandb.config": self.input_types},
+                "input_types": {"@tracklab.config": self.input_types},
                 "output_types": self.output_types,
             }
             api.update_artifact_metadata(
@@ -461,14 +461,14 @@ class JobBuilder:
             os.path.join(self._settings.files_dir, REQUIREMENTS_FNAME)
         ):
             self._log_if_verbose(
-                "No requirements.txt found, not creating job artifact. See https://docs.wandb.ai/guides/launch/create-job",
+                "No requirements.txt found, not creating job artifact. See https://docs.tracklab.ai/guides/launch/create-job",
                 "warn",
             )
             return None
         metadata = self._handle_metadata_file()
         if metadata is None:
             self._log_if_verbose(
-                f"Ensure read and write access to run files dir: {self._settings.files_dir}, control this via the WANDB_DIR env var. See https://docs.wandb.ai/guides/track/environment-variables",
+                f"Ensure read and write access to run files dir: {self._settings.files_dir}, control this via the WANDB_DIR env var. See https://docs.tracklab.ai/guides/track/environment-variables",
                 "warn",
             )
             return None
@@ -478,7 +478,7 @@ class JobBuilder:
         if runtime is None:
             self._log_if_verbose(
                 "No python version found in metadata, not creating job artifact. "
-                "See https://docs.wandb.ai/guides/launch/create-job",
+                "See https://docs.tracklab.ai/guides/launch/create-job",
                 "warn",
             )
             return None
@@ -508,7 +508,7 @@ class JobBuilder:
         if not self._partial and source_type != "image" and not program_relpath:
             self._log_if_verbose(
                 "No program path found, not creating job artifact. "
-                "See https://docs.wandb.ai/guides/launch/create-job",
+                "See https://docs.tracklab.ai/guides/launch/create-job",
                 "warn",
             )
             return None
@@ -596,7 +596,7 @@ class JobBuilder:
 
             if not program:
                 self._log_if_verbose(
-                    "Notebook 'program' path not found in metadata. See https://docs.wandb.ai/guides/launch/create-job",
+                    "Notebook 'program' path not found in metadata. See https://docs.tracklab.ai/guides/launch/create-job",
                     "warn",
                 )
 

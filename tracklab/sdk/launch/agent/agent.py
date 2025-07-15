@@ -74,7 +74,7 @@ class JobSpecAndQueue:
 
 
 def _convert_access(access: str) -> str:
-    """Convert access string to a value accepted by wandb."""
+    """Convert access string to a value accepted by tracklab."""
     access = access.upper()
     assert access == "PROJECT" or access == "USER", (
         "Queue access must be either project or user"
@@ -117,22 +117,22 @@ class InternalAgentLogger:
 
     def error(self, message: str):
         if self._print_to_terminal:
-            wandb.termerror(f"{LOG_PREFIX}{message}")
+            tracklab.termerror(f"{LOG_PREFIX}{message}")
         _logger.error(f"{LOG_PREFIX}{message}")
 
     def warn(self, message: str):
         if self._print_to_terminal:
-            wandb.termwarn(f"{LOG_PREFIX}{message}")
+            tracklab.termwarn(f"{LOG_PREFIX}{message}")
         _logger.warning(f"{LOG_PREFIX}{message}")
 
     def info(self, message: str):
         if self._print_to_terminal:
-            wandb.termlog(f"{LOG_PREFIX}{message}")
+            tracklab.termlog(f"{LOG_PREFIX}{message}")
         _logger.info(f"{LOG_PREFIX}{message}")
 
     def debug(self, message: str):
         if self._print_to_terminal:
-            wandb.termlog(f"{LOG_PREFIX}{message}")
+            tracklab.termlog(f"{LOG_PREFIX}{message}")
         _logger.debug(f"{LOG_PREFIX}{message}")
 
 
@@ -224,7 +224,7 @@ class LaunchAgent:
         self._known_warnings: List[str] = []
 
         # Get agent version from env var if present, otherwise wandb version
-        self.version: str = "wandb@" + wandb.__version__
+        self.version: str = "wandb@" + tracklab.__version__
         env_agent_version = os.environ.get("WANDB_AGENT_VERSION")
         if env_agent_version and env_agent_version != "wandb-launch-agent":
             self.version = env_agent_version
@@ -255,7 +255,7 @@ class LaunchAgent:
         )
         self._id = create_response["launchAgentId"]
         if self._api.entity_is_team(self._entity):
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"{LOG_PREFIX}Agent is running on team entity ({self._entity}). Members of this team will be able to run code on this device."
             )
 
@@ -308,10 +308,10 @@ class LaunchAgent:
         self._tracklab_run = None
 
         if self.gorilla_supports_agents:
-            settings = wandb.Settings(
+            settings = tracklab.Settings(
                 silent=True, disable_git=True, disable_job_creation=True
             )
-            self._tracklab_run = wandb.init(
+            self._tracklab_run = tracklab.init(
                 project=self._project,
                 entity=self._entity,
                 settings=settings,
@@ -374,7 +374,7 @@ class LaunchAgent:
             f"running {self.num_running_jobs} out of a maximum of {self._max_jobs} jobs"
         )
 
-        wandb.termlog(f"{LOG_PREFIX}{output_str}")
+        tracklab.termlog(f"{LOG_PREFIX}{output_str}")
         if self.num_running_jobs > 0:
             output_str += f": {','.join(str(job_id) for job_id in self.thread_ids)}"
 
@@ -391,7 +391,7 @@ class LaunchAgent:
             self._id, status, self.gorilla_supports_agents
         )
         if not update_ret["success"]:
-            wandb.termerror(f"{LOG_PREFIX}Failed to update agent status to {status}")
+            tracklab.termerror(f"{LOG_PREFIX}Failed to update agent status to {status}")
 
     def _check_run_exists_and_inited(
         self, entity: str, project: str, run_id: str, rqi_id: str
@@ -445,7 +445,7 @@ class LaunchAgent:
             self._internal_logger.info(
                 f"called finish_thread_id on thread whose tracker has no project or run id. RunQueueItemID: {job_and_run_status.run_queue_item_id}",
             )
-            wandb.termerror(
+            tracklab.termerror(
                 "Missing project or run id on thread called finish thread id"
             )
             await self.fail_run_queue_item(
@@ -482,7 +482,7 @@ class LaunchAgent:
             if not called_init:
                 fnames = None
                 if job_and_run_status.completed_status == "finished":
-                    _msg = "The submitted job exited successfully but failed to call wandb.init"
+                    _msg = "The submitted job exited successfully but failed to call tracklab.init"
                 else:
                     _msg = "The submitted run was not successfully started"
                 if logs:
@@ -496,7 +496,7 @@ class LaunchAgent:
             self._internal_logger.info(
                 f"Finish thread id {thread_id} had no exception and no run"
             )
-            wandb._sentry.exception(
+            tracklab._sentry.exception(
                 "launch agent called finish thread id on thread without run or exception"
             )
 
@@ -517,7 +517,7 @@ class LaunchAgent:
             job: Job to run.
         """
         _msg = f"{LOG_PREFIX}Launch agent received job:\n{pprint.pformat(job)}\n"
-        wandb.termlog(_msg)
+        tracklab.termlog(_msg)
         _logger.info(_msg)
         # update agent status
         await self.update_status(AGENT_RUNNING)
@@ -605,7 +605,7 @@ class LaunchAgent:
                                 # If job is a scheduler, and we are already at the cap, ignore,
                                 #    don't ack, and it will be pushed back onto the queue in 1 min
                                 if self.num_running_schedulers >= self._max_schedulers:
-                                    wandb.termwarn(
+                                    tracklab.termwarn(
                                         f"{LOG_PREFIX}Agent already running the maximum number "
                                         f"of sweep schedulers: {self._max_schedulers}. To set "
                                         "this value use `max_schedulers` key in the agent config"
@@ -613,10 +613,10 @@ class LaunchAgent:
                                     continue
                             await self.run_job(job, queue, file_saver)
                         except Exception as e:
-                            wandb.termerror(
+                            tracklab.termerror(
                                 f"{LOG_PREFIX}Error running job: {traceback.format_exc()}"
                             )
-                            wandb._sentry.exception(e)
+                            tracklab._sentry.exception(e)
 
                             # always the first phase, because we only enter phase 2 within the thread
                             files = file_saver.save_contents(
@@ -647,7 +647,7 @@ class LaunchAgent:
 
         except KeyboardInterrupt:
             await self.update_status(AGENT_KILLED)
-            wandb.termlog(f"{LOG_PREFIX}Shutting down, active jobs:")
+            tracklab.termlog(f"{LOG_PREFIX}Shutting down, active jobs:")
             self.print_status()
         finally:
             self._jobs_event.clear()
@@ -671,19 +671,19 @@ class LaunchAgent:
                 launch_spec, job, default_config, api, rqi_id, job_tracker
             )
         except LaunchDockerError as e:
-            wandb.termerror(
+            tracklab.termerror(
                 f"{LOG_PREFIX}agent {self._name} encountered an issue while starting Docker, see above output for details."
             )
             exception = e
-            wandb._sentry.exception(e)
+            tracklab._sentry.exception(e)
         except LaunchError as e:
-            wandb.termerror(f"{LOG_PREFIX}Error running job: {e}")
+            tracklab.termerror(f"{LOG_PREFIX}Error running job: {e}")
             exception = e
-            wandb._sentry.exception(e)
+            tracklab._sentry.exception(e)
         except Exception as e:
-            wandb.termerror(f"{LOG_PREFIX}Error running job: {traceback.format_exc()}")
+            tracklab.termerror(f"{LOG_PREFIX}Error running job: {traceback.format_exc()}")
             exception = e
-            wandb._sentry.exception(e)
+            tracklab._sentry.exception(e)
         finally:
             await self.finish_thread_id(rqi_id, exception)
 
@@ -744,7 +744,7 @@ class LaunchAgent:
         if self._is_scheduler_job(launch_spec):
             with self._jobs_lock:
                 self._jobs[thread_id].is_scheduler = True
-            wandb.termlog(
+            tracklab.termlog(
                 f"{LOG_PREFIX}Preparing to run sweep scheduler "
                 f"({self.num_running_schedulers}/{self._max_schedulers})"
             )
@@ -845,11 +845,11 @@ class LaunchAgent:
                 with self._jobs_lock:
                     job_tracker.completed_status = state
                 if config["_resume_count"] > MAX_RESUME_COUNT:
-                    wandb.termlog(
+                    tracklab.termlog(
                         f"{LOG_PREFIX}Run {job_tracker.run_id} has already resumed {MAX_RESUME_COUNT} times."
                     )
                     return True
-                wandb.termlog(
+                tracklab.termlog(
                     f"{LOG_PREFIX}Run {job_tracker.run_id} was preempted, requeuing..."
                 )
 
@@ -867,7 +867,7 @@ class LaunchAgent:
             # TODO change these statuses to an enum
             if state in ["stopped", "failed", "finished", "preempted"]:
                 if job_tracker.is_scheduler:
-                    wandb.termlog(f"{LOG_PREFIX}Scheduler finished with ID: {run.id}")
+                    tracklab.termlog(f"{LOG_PREFIX}Scheduler finished with ID: {run.id}")
                     if state == "failed":
                         # on fail, update sweep state. scheduler run_id should == sweep_id
                         try:
@@ -880,14 +880,14 @@ class LaunchAgent:
                         except Exception as e:
                             raise LaunchError(f"Failed to update sweep state: {e}")
                 else:
-                    wandb.termlog(f"{LOG_PREFIX}Job finished with ID: {run.id}")
+                    tracklab.termlog(f"{LOG_PREFIX}Job finished with ID: {run.id}")
                 with self._jobs_lock:
                     job_tracker.completed_status = state
                 return True
 
             return False
         except LaunchError as e:
-            wandb.termerror(
+            tracklab.termerror(
                 f"{LOG_PREFIX}Terminating job {run.id} because it failed to start: {str(e)}"
             )
             known_error = True
@@ -895,14 +895,14 @@ class LaunchAgent:
                 job_tracker.failed_to_start = True
         # TODO: make get_status robust to errors for each runner, and handle them
         except Exception as e:
-            wandb.termerror(f"{LOG_PREFIX}Error getting status for job {run.id}")
-            wandb.termerror(traceback.format_exc())
+            tracklab.termerror(f"{LOG_PREFIX}Error getting status for job {run.id}")
+            tracklab.termerror(traceback.format_exc())
             _logger.info("---")
             _logger.info("Caught exception while getting status.")
             _logger.info(f"Job ID: {run.id}")
             _logger.info(traceback.format_exc())
             _logger.info("---")
-            wandb._sentry.exception(e)
+            tracklab._sentry.exception(e)
         return known_error
 
     async def get_job_and_queue(self) -> Optional[JobSpecAndQueue]:

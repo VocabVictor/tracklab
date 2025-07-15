@@ -32,7 +32,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "source_subject_category",
             "target_subject_category",
         ],
-        "kwarg-actions": [wandb.Image, None, None, None, None],
+        "kwarg-actions": [tracklab.Image, None, None, None, None],
     },
     "BlipDiffusionControlNetPipeline": {
         "table-schema": [
@@ -52,7 +52,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "source_subject_category",
             "target_subject_category",
         ],
-        "kwarg-actions": [wandb.Image, wandb.Image, None, None, None, None],
+        "kwarg-actions": [tracklab.Image, tracklab.Image, None, None, None, None],
     },
     "StableDiffusionControlNetPipeline": {
         "table-schema": [
@@ -62,7 +62,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "StableDiffusionControlNetImg2ImgPipeline": {
         "table-schema": [
@@ -73,7 +73,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "control_image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, tracklab.Image, None, None],
     },
     "StableDiffusionControlNetInpaintPipeline": {
         "table-schema": [
@@ -91,7 +91,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "prompt",
             "negative_prompt",
         ],
-        "kwarg-actions": [wandb.Image, wandb.Image, wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, tracklab.Image, tracklab.Image, None, None],
     },
     "CycleDiffusionPipeline": {
         "table-schema": [
@@ -105,7 +105,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "prompt",
             "source_prompt",
         ],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "StableDiffusionInstructPix2PixPipeline": {
         "table-schema": [
@@ -119,7 +119,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "prompt",
             "negative_prompt",
         ],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "PaintByExamplePipeline": {
         "table-schema": [
@@ -133,7 +133,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "example_image",
             "mask_image",
         ],
-        "kwarg-actions": [wandb.Image, wandb.Image, wandb.Image],
+        "kwarg-actions": [tracklab.Image, tracklab.Image, tracklab.Image],
     },
     "RePaintPipeline": {
         "table-schema": [
@@ -145,7 +145,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "image",
             "mask_image",
         ],
-        "kwarg-actions": [wandb.Image, wandb.Image],
+        "kwarg-actions": [tracklab.Image, tracklab.Image],
     },
     "StableDiffusionPipeline": {
         "table-schema": ["Prompt", "Negative-Prompt", "Generated-Image"],
@@ -220,7 +220,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "KandinskyInpaintCombinedPipeline": {
         "table-schema": [
@@ -230,7 +230,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "KandinskyV22Img2ImgCombinedPipeline": {
         "table-schema": [
@@ -240,7 +240,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "KandinskyV22InpaintCombinedPipeline": {
         "table-schema": [
@@ -250,7 +250,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "AnimateDiffPipeline": {
         "table-schema": [
@@ -270,7 +270,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Video",
         ],
         "kwarg-logging": ["image", "fps"],
-        "kwarg-actions": [wandb.Image, None],
+        "kwarg-actions": [tracklab.Image, None],
         "output-type": "video",
     },
     "AudioLDMPipeline": {
@@ -341,7 +341,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "StableDiffusionInpaintPipeline": {
         "table-schema": [
@@ -352,7 +352,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "mask_image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, tracklab.Image, None, None],
     },
     "StableDiffusionDepth2ImgPipeline": {
         "table-schema": [
@@ -362,7 +362,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "StableDiffusionImageVariationPipeline": {
         "table-schema": [
@@ -372,7 +372,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
         "kwarg-logging": [
             "image",
         ],
-        "kwarg-actions": [wandb.Image],
+        "kwarg-actions": [tracklab.Image],
     },
     "StableDiffusionPipelineSafe": {
         "table-schema": [
@@ -391,7 +391,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Upscaled-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "StableDiffusionAdapterPipeline": {
         "table-schema": [
@@ -401,7 +401,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "StableDiffusionGLIGENPipeline": {
         "table-schema": [
@@ -419,7 +419,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "gligen_inpaint_image",
             "negative_prompt",
         ],
-        "kwarg-actions": [None, None, None, wandb.Image, None],
+        "kwarg-actions": [None, None, None, tracklab.Image, None],
     },
     "VersatileDiffusionTextToImagePipeline": {
         "table-schema": [
@@ -437,7 +437,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None],
+        "kwarg-actions": [tracklab.Image, None],
     },
     "VersatileDiffusionDualGuidedPipeline": {
         "table-schema": [
@@ -447,7 +447,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "Generated-Image",
         ],
         "kwarg-logging": ["image", "prompt", "negative_prompt"],
-        "kwarg-actions": [wandb.Image, None, None],
+        "kwarg-actions": [tracklab.Image, None, None],
     },
     "LDMPipeline": {
         "table-schema": [
@@ -505,7 +505,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "negative_prompt",
             "negative_prompt_2",
         ],
-        "kwarg-actions": [None, None, wandb.Image, None, None],
+        "kwarg-actions": [None, None, tracklab.Image, None, None],
     },
     "StableDiffusionXLControlNetImg2ImgPipeline": {
         "table-schema": [
@@ -525,7 +525,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "negative_prompt",
             "negative_prompt_2",
         ],
-        "kwarg-actions": [None, None, wandb.Image, wandb.Image, None, None],
+        "kwarg-actions": [None, None, tracklab.Image, tracklab.Image, None, None],
     },
     "Kandinsky3Pipeline": {
         "table-schema": [
@@ -551,7 +551,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "negative_prompt",
             "image",
         ],
-        "kwarg-actions": [None, None, wandb.Image],
+        "kwarg-actions": [None, None, tracklab.Image],
     },
     "StableDiffusionXLPipeline": {
         "table-schema": [
@@ -585,7 +585,7 @@ SUPPORTED_MULTIMODAL_PIPELINES = {
             "negative_prompt_2",
             "image",
         ],
-        "kwarg-actions": [None, None, None, None, wandb.Image],
+        "kwarg-actions": [None, None, None, None, tracklab.Image],
     },
 }
 
@@ -594,8 +594,8 @@ class DiffusersMultiModalPipelineResolver:
     """Resolver for  request and responses from [HuggingFace Diffusers](https://huggingface.co/docs/diffusers/index) multi-modal Diffusion Pipelines, providing necessary data transformations, formatting, and logging.
 
     This resolver is internally involved in the
-    `__call__` for `wandb.integration.diffusers.pipeline_resolver.DiffusersPipelineResolver`.
-    This is based on `wandb.sdk.integration_utils.auto_logging.RequestResponseResolver`.
+    `__call__` for `tracklab.integration.diffusers.pipeline_resolver.DiffusersPipelineResolver`.
+    This is based on `tracklab.sdk.integration_utils.auto_logging.RequestResponseResolver`.
 
     Args:
         pipeline_name: (str) The name of the Diffusion Pipeline.
@@ -608,8 +608,8 @@ class DiffusersMultiModalPipelineResolver:
         if pipeline_name in SUPPORTED_MULTIMODAL_PIPELINES:
             columns += SUPPORTED_MULTIMODAL_PIPELINES[pipeline_name]["table-schema"]
         else:
-            wandb.Error("Pipeline not supported for logging")
-        self.wandb_table = wandb.Table(columns=columns)
+            tracklab.Error("Pipeline not supported for logging")
+        self.wandb_table = tracklab.Table(columns=columns)
 
     def __call__(
         self,
@@ -624,7 +624,7 @@ class DiffusersMultiModalPipelineResolver:
         Args:
             args: (Sequence[Any]) List of arguments.
             kwargs: (Dict[str, Any]) Dictionary of keyword arguments.
-            response: (wandb.sdk.integration_utils.auto_logging.Response) The response from
+            response: (tracklab.sdk.integration_utils.auto_logging.Response) The response from
                 the request.
             start_time: (float) Time when request started.
             time_elapsed: (float) Time elapsed for the request.
@@ -643,8 +643,8 @@ class DiffusersMultiModalPipelineResolver:
             pipeline_configs = dict(pipeline.config)
             pipeline_configs["pipeline-name"] = self.pipeline_name
 
-            if "workflow" not in wandb.config:
-                wandb.config.update(
+            if "workflow" not in tracklab.config:
+                tracklab.config.update(
                     {
                         "workflow": [
                             {
@@ -656,7 +656,7 @@ class DiffusersMultiModalPipelineResolver:
                     }
                 )
             else:
-                existing_workflow = wandb.config.workflow
+                existing_workflow = tracklab.config.workflow
                 updated_workflow = existing_workflow + [
                     {
                         "pipeline": pipeline_configs,
@@ -664,7 +664,7 @@ class DiffusersMultiModalPipelineResolver:
                         "stage": f"Pipeline-Call-{self.pipeline_call_count}",
                     }
                 ]
-                wandb.config.update(
+                tracklab.config.update(
                     {"workflow": updated_workflow}, allow_val_change=True
                 )
 
@@ -678,7 +678,7 @@ class DiffusersMultiModalPipelineResolver:
         """Unpack the generated images, audio, video, etc. from the Diffusion Pipeline's response.
 
         Args:
-            response: (wandb.sdk.integration_utils.auto_logging.Response) The response from
+            response: (tracklab.sdk.integration_utils.auto_logging.Response) The response from
                 the request.
 
         Returns:
@@ -729,9 +729,9 @@ class DiffusersMultiModalPipelineResolver:
                     caption = loggable_kwarg_chunks[prompt_index][idx]
             except ValueError:
                 caption = None
-            wandb.log(
+            tracklab.log(
                 {
-                    f"Generated-Image/Pipeline-Call-{self.pipeline_call_count}": wandb.Image(
+                    f"Generated-Image/Pipeline-Call-{self.pipeline_call_count}": tracklab.Image(
                         image, caption=caption
                     )
                 }
@@ -748,9 +748,9 @@ class DiffusersMultiModalPipelineResolver:
                     caption = loggable_kwarg_chunks[prompt_index][idx]
                 except ValueError:
                     caption = None
-                wandb.log(
+                tracklab.log(
                     {
-                        f"Generated-Video/Pipeline-Call-{self.pipeline_call_count}": wandb.Video(
+                        f"Generated-Video/Pipeline-Call-{self.pipeline_call_count}": tracklab.Video(
                             postprocess_pils_to_np(image), fps=4, caption=caption
                         )
                     }
@@ -766,9 +766,9 @@ class DiffusersMultiModalPipelineResolver:
                     caption = loggable_kwarg_chunks[prompt_index][idx]
                 except ValueError:
                     caption = None
-                wandb.log(
+                tracklab.log(
                     {
-                        f"Generated-Audio/Pipeline-Call-{self.pipeline_call_count}": wandb.Audio(
+                        f"Generated-Audio/Pipeline-Call-{self.pipeline_call_count}": tracklab.Audio(
                             image, sample_rate=16000, caption=caption
                         )
                     }
@@ -777,7 +777,7 @@ class DiffusersMultiModalPipelineResolver:
     def add_data_to_table(
         self, image: Any, loggable_kwarg_chunks: List, idx: int
     ) -> None:
-        """Populate the row of the `wandb.Table`.
+        """Populate the row of the `tracklab.Table`.
 
         Args:
             image: (Any) The generated images, audio, video, etc. from the Diffusion
@@ -799,18 +799,18 @@ class DiffusersMultiModalPipelineResolver:
             else:
                 table_row.append(kwarg_actions[column_idx](loggable_kwarg_chunk[idx]))
         if "output-type" not in SUPPORTED_MULTIMODAL_PIPELINES[self.pipeline_name]:
-            table_row.append(wandb.Image(image))
+            table_row.append(tracklab.Image(image))
         else:
             if (
                 SUPPORTED_MULTIMODAL_PIPELINES[self.pipeline_name]["output-type"]
                 == "video"
             ):
-                table_row.append(wandb.Video(postprocess_pils_to_np(image), fps=4))
+                table_row.append(tracklab.Video(postprocess_pils_to_np(image), fps=4))
             elif (
                 SUPPORTED_MULTIMODAL_PIPELINES[self.pipeline_name]["output-type"]
                 == "audio"
             ):
-                table_row.append(wandb.Audio(image, sample_rate=16000))
+                table_row.append(tracklab.Audio(image, sample_rate=16000))
         self.wandb_table.add_data(*table_row)
 
     def prepare_loggable_dict(
@@ -820,7 +820,7 @@ class DiffusersMultiModalPipelineResolver:
 
         Args:
             pipeline: (Any) The Diffusion Pipeline.
-            response: (wandb.sdk.integration_utils.auto_logging.Response) The response from
+            response: (tracklab.sdk.integration_utils.auto_logging.Response) The response from
                 the request.
             kwargs: (Dict[str, Any]) Dictionary of keyword arguments.
 
@@ -840,9 +840,9 @@ class DiffusersMultiModalPipelineResolver:
             video = postprocess_np_arrays_for_video(
                 images, normalize=self.pipeline_name == "TextToVideoZeroPipeline"
             )
-            wandb.log(
+            tracklab.log(
                 {
-                    f"Generated-Video/Pipeline-Call-{self.pipeline_call_count}": wandb.Video(
+                    f"Generated-Video/Pipeline-Call-{self.pipeline_call_count}": tracklab.Video(
                         video, fps=4, caption=kwargs["prompt"]
                     )
                 }
@@ -854,7 +854,7 @@ class DiffusersMultiModalPipelineResolver:
                 kwargs[loggable_kwarg_ids[idx]]
                 for idx in range(len(loggable_kwarg_ids))
             ]
-            table_row.append(wandb.Video(video, fps=4))
+            table_row.append(tracklab.Video(video, fps=4))
             self.wandb_table.add_data(*table_row)
         else:
             loggable_kwarg_ids = SUPPORTED_MULTIMODAL_PIPELINES[self.pipeline_name][

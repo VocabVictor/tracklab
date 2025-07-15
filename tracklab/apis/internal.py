@@ -34,7 +34,7 @@ class Api:
     def api(self) -> InternalApi:
         # This is a property in order to delay construction of Internal API
         # for as long as possible. If constructed in constructor, then the
-        # whole InternalAPI is started when simply importing wandb.
+        # whole InternalAPI is started when simply importing tracklab.
         if self._api is None:
             self._api = InternalApi(*self._api_args, **self._api_kwargs)
         return self._api

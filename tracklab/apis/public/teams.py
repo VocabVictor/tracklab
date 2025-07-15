@@ -18,7 +18,7 @@ class Member(Attrs):
     """A member of a team.
 
     Args:
-        client (`wandb.apis.internal.Api`): The client instance to use
+        client (`tracklab.apis.internal.Api`): The client instance to use
         team (str): The name of the team this member belongs to
         attrs (dict): The member attributes
     """
@@ -63,7 +63,7 @@ class Team(Attrs):
     to handle team attributes.
 
     Args:
-        client (`wandb.apis.public.Api`): The api instance to use
+        client (`tracklab.apis.public.Api`): The api instance to use
         name (str): The name of the team
         attrs (dict): Optional dictionary of team attributes
 

@@ -23,7 +23,7 @@ openai = util.get_module(
 )
 
 if parse(openai.__version__) < parse("1.12.0"):
-    raise wandb.Error(
+    raise tracklab.Error(
         f"This integration requires openai version 1.12.0 and above. Your current version is {openai.__version__} "
         "To fix, please `pip install -U openai`"
     )
@@ -49,9 +49,9 @@ pd = util.get_module(
 
 
 class WandbLogger:
-    """Log OpenAI fine-tunes to [Weights & Biases](https://wandb.me/openai-docs)."""
+    """Log OpenAI fine-tunes to [Weights & Biases](https://tracklab.me/openai-docs)."""
 
-    _wandb_api: Optional[wandb.Api] = None
+    _wandb_api: Optional[tracklab.Api] = None
     _logged_in: bool = False
     openai_client: Optional[OpenAI] = None
     _run: Optional[Run] = None
@@ -88,7 +88,7 @@ class WandbLogger:
         cls.openai_client = openai_client
 
         if fine_tune_job_id:
-            wandb.termlog("Retrieving fine-tune job...")
+            tracklab.termlog("Retrieving fine-tune job...")
             fine_tune = openai_client.fine_tuning.jobs.retrieve(
                 fine_tuning_job_id=fine_tune_job_id
             )
@@ -97,7 +97,7 @@ class WandbLogger:
             # get list of fine_tune to log
             fine_tunes = openai_client.fine_tuning.jobs.list()
             if not fine_tunes or fine_tunes.data is None:
-                wandb.termwarn("No fine-tune has been retrieved")
+                tracklab.termwarn("No fine-tune has been retrieved")
                 return
             # Select the `num_fine_tunes` from the `fine_tunes.data` list.
             # If `num_fine_tunes` is None, it selects all items in the list (from start to end).
@@ -123,16 +123,16 @@ class WandbLogger:
                 wandb_status = tracklab_run.summary.get("status")
                 if show_individual_warnings:
                     if wandb_status == "succeeded" and not overwrite:
-                        wandb.termwarn(
+                        tracklab.termwarn(
                             f"Fine-tune {fine_tune_id} has already been logged successfully at {tracklab_run.url}. "
                             "Use `overwrite=True` if you want to overwrite previous run"
                         )
                     elif wandb_status != "succeeded" or overwrite:
                         if wandb_status != "succeeded":
-                            wandb.termwarn(
+                            tracklab.termwarn(
                                 f"A run for fine-tune {fine_tune_id} was previously created but didn't end successfully"
                             )
-                        wandb.termlog(
+                        tracklab.termlog(
                             f"A new wandb run will be created for fine-tune {fine_tune_id} and previous run will be overwritten"
                         )
                         overwrite = True
@@ -140,8 +140,8 @@ class WandbLogger:
                     return
 
             # check if the user has not created a wandb run externally
-            if wandb.run is None:
-                cls._run = wandb.init(
+            if tracklab.run is None:
+                cls._run = tracklab.init(
                     job_type="fine-tune",
                     project=project,
                     entity=entity,
@@ -151,7 +151,7 @@ class WandbLogger:
                 )
             else:
                 # if a run exits - created externally
-                cls._run = wandb.run
+                cls._run = tracklab.run
 
             if wait_for_job_success:
                 fine_tune = cls._wait_for_job_success(fine_tune)
@@ -169,29 +169,29 @@ class WandbLogger:
             )
 
         if not show_individual_warnings and not any(fine_tune_logged):
-            wandb.termwarn("No new successful fine-tunes were found")
+            tracklab.termwarn("No new successful fine-tunes were found")
 
         return "🎉 wandb sync completed successfully"
 
     @classmethod
     def _wait_for_job_success(cls, fine_tune: FineTuningJob) -> FineTuningJob:
-        wandb.termlog("Waiting for the OpenAI fine-tuning job to finish training...")
-        wandb.termlog(
+        tracklab.termlog("Waiting for the OpenAI fine-tuning job to finish training...")
+        tracklab.termlog(
             "To avoid blocking, you can call `WandbLogger.sync` with `wait_for_job_success=False` after OpenAI training completes."
         )
         while True:
             if fine_tune.status == "succeeded":
-                wandb.termlog(
+                tracklab.termlog(
                     "Fine-tuning finished, logging metrics, model metadata, and run metadata to Weights & Biases"
                 )
                 return fine_tune
             if fine_tune.status == "failed":
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Fine-tune {fine_tune.id} has failed and will not be logged"
                 )
                 return fine_tune
             if fine_tune.status == "cancelled":
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Fine-tune {fine_tune.id} was cancelled and will not be logged"
                 )
                 return fine_tune
@@ -222,7 +222,7 @@ class WandbLogger:
         # check run completed successfully
         if status != "succeeded":
             if show_individual_warnings:
-                wandb.termwarn(
+                tracklab.termwarn(
                     f'Fine-tune {fine_tune_id} has the status "{status}" and will not be logged'
                 )
             return
@@ -240,7 +240,7 @@ class WandbLogger:
                 results = cls.openai_client.files.content(file_id=results_id).text
         except openai.NotFoundError:
             if show_individual_warnings:
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Fine-tune {fine_tune_id} has no results and will not be logged"
                 )
             return
@@ -280,13 +280,13 @@ class WandbLogger:
     @classmethod
     def _ensure_logged_in(cls):
         if not cls._logged_in:
-            if wandb.login():
+            if tracklab.login():
                 cls._logged_in = True
             else:
                 raise Exception(
                     "It appears you are not currently logged in to Weights & Biases. "
-                    "Please run `wandb login` in your terminal or `wandb.login()` in a notebook."
-                    "When prompted, you can obtain your API key by visiting wandb.ai/authorize."
+                    "Please run `wandb login` in your terminal or `tracklab.login()` in a notebook."
+                    "When prompted, you can obtain your API key by visiting tracklab.ai/authorize."
                 )
 
     @classmethod
@@ -294,7 +294,7 @@ class WandbLogger:
         cls._ensure_logged_in()
         try:
             if cls._wandb_api is None:
-                cls._wandb_api = wandb.Api()
+                cls._wandb_api = tracklab.Api()
             return cls._wandb_api.run(run_path)
         except Exception:
             return None
@@ -304,7 +304,7 @@ class WandbLogger:
         cls._ensure_logged_in()
         try:
             if cls._wandb_api is None:
-                cls._wandb_api = wandb.Api()
+                cls._wandb_api = tracklab.Api()
             return cls._wandb_api.artifact(artifact_path)
         except Exception:
             return None
@@ -370,7 +370,7 @@ class WandbLogger:
         model_artifact_type: str,
     ) -> None:
         if log_datasets:
-            wandb.termlog("Logging training/validation files...")
+            tracklab.termlog("Logging training/validation files...")
             # training/validation files
             training_file = fine_tune.training_file if fine_tune.training_file else None
             validation_file = (
@@ -387,7 +387,7 @@ class WandbLogger:
 
         # fine-tune details
         fine_tune_id = fine_tune.id
-        artifact = wandb.Artifact(
+        artifact = tracklab.Artifact(
             model_artifact_name,
             type=model_artifact_type,
             metadata=dict(fine_tune),
@@ -432,12 +432,12 @@ class WandbLogger:
             try:
                 file_content = cls.openai_client.files.content(file_id=file_id)
             except openai.NotFoundError:
-                wandb.termerror(
+                tracklab.termerror(
                     f"File {file_id} could not be retrieved. Make sure you have OpenAI permissions to download training/validation files"
                 )
                 return
 
-            artifact = wandb.Artifact(artifact_name, type=artifact_type)
+            artifact = tracklab.Artifact(artifact_name, type=artifact_type)
             with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
                 tmp_file.write(file_content.content)
                 tmp_file_path = tmp_file.name
@@ -455,7 +455,7 @@ class WandbLogger:
                 cls._run.config.update({f"n_{prefix}": n_items})
                 artifact.metadata["items"] = n_items
             except Exception as e:
-                wandb.termerror(
+                tracklab.termerror(
                     f"Issue saving {file_id} as a Table to Artifacts, exception:\n  '{e}'"
                 )
         else:
@@ -466,7 +466,7 @@ class WandbLogger:
 
     @classmethod
     def _make_table(cls, file_content: str) -> Tuple[Table, int]:
-        table = wandb.Table(columns=["role: system", "role: user", "role: assistant"])
+        table = tracklab.Table(columns=["role: system", "role: user", "role: assistant"])
 
         df = pd.read_json(io.StringIO(file_content), orient="records", lines=True)
         for _idx, message in df.iterrows():

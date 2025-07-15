@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from tracklab.sdk.internal.tb_watcher import TBHistory
 
 # We have at least the default namestep and a global step to track
-# TODO: reset this structure on wandb.finish
+# TODO: reset this structure on tracklab.finish
 STEPS: Dict[str, Dict[str, Any]] = {
     "": {"step": 0},
     "global": {"step": 0, "last_log": None},
@@ -23,13 +23,13 @@ STEPS: Dict[str, Dict[str, Any]] = {
 # can be a floating point.
 RATE_LIMIT_SECONDS: Optional[Union[float, int]] = None
 IGNORE_KINDS = ["graphs"]
-tensor_util = wandb.util.get_module("tensorboard.util.tensor_util")
+tensor_util = tracklab.util.get_module("tensorboard.util.tensor_util")
 
 
 # prefer tensorboard, fallback to protobuf in tensorflow when tboard isn't available
-pb = wandb.util.get_module(
+pb = tracklab.util.get_module(
     "tensorboard.compat.proto.summary_pb2"
-) or wandb.util.get_module("tensorflow.core.framework.summary_pb2")
+) or tracklab.util.get_module("tensorflow.core.framework.summary_pb2")
 
 Summary = pb.Summary if pb else None
 
@@ -43,7 +43,7 @@ def make_ndarray(tensor: Any) -> Optional["np.ndarray"]:
         else:
             return res  # type: ignore
     else:
-        wandb.termwarn(
+        tracklab.termwarn(
             "Can't convert tensor summary, upgrade tensorboard with `pip"
             " install tensorboard --upgrade`"
         )
@@ -102,7 +102,7 @@ def tf_summary_to_dict(  # noqa: C901
         try:
             from PIL import Image
         except ImportError:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Install pillow if you are logging images with Tensorboard. "
                 "To install, run `pip install pillow`.",
                 repeat=False,
@@ -112,13 +112,13 @@ def tf_summary_to_dict(  # noqa: C901
         if len(_img_strs) == 0:
             return None
 
-        images: List[Union[wandb.Video, wandb.Image]] = []
+        images: List[Union[tracklab.Video, tracklab.Image]] = []
         for _img_str in _img_strs:
             # Supports gifs from TensorboardX
             if _img_str.startswith(b"GIF"):
-                images.append(wandb.Video(io.BytesIO(_img_str), format="gif"))
+                images.append(tracklab.Video(io.BytesIO(_img_str), format="gif"))
             else:
-                images.append(wandb.Image(Image.open(io.BytesIO(_img_str))))
+                images.append(tracklab.Image(Image.open(io.BytesIO(_img_str))))
         tag_idx = _value.tag.rsplit("/", 1)
         if len(tag_idx) > 1 and tag_idx[1].isdigit():
             tag, idx = tag_idx
@@ -162,13 +162,13 @@ def tf_summary_to_dict(  # noqa: C901
                 if len(counts) > 0:
                     try:
                         # TODO: we should just re-bin if there are too many buckets
-                        values[namespaced_tag(value.tag, namespace)] = wandb.Histogram(
+                        values[namespaced_tag(value.tag, namespace)] = tracklab.Histogram(
                             np_histogram=(counts, bins)  # type: ignore
                         )
                     except ValueError:
-                        wandb.termwarn(
+                        tracklab.termwarn(
                             f'Not logging key "{namespaced_tag(value.tag, namespace)}". '
-                            f"Histograms must have fewer than {wandb.Histogram.MAX_LENGTH} bins",
+                            f"Histograms must have fewer than {tracklab.Histogram.MAX_LENGTH} bins",
                             repeat=False,
                         )
             elif plugin_name == "pr_curves":
@@ -193,10 +193,10 @@ def tf_summary_to_dict(  # noqa: C901
                 # sort data so custom chart looks the same as tb generated pr curve
                 # ascending recall, descending precision for the same recall values
                 data = sorted(data, key=lambda x: (x[0], -x[1]))
-                data_table = wandb.Table(data=data, columns=["recall", "precision"])
+                data_table = tracklab.Table(data=data, columns=["recall", "precision"])
                 name = namespaced_tag(value.tag, namespace)
 
-                values[name] = wandb.plot_table(
+                values[name] = tracklab.plot_table(
                     "wandb/line/v0",
                     data_table,
                     {"x": "recall", "y": "precision"},
@@ -207,7 +207,7 @@ def tf_summary_to_dict(  # noqa: C901
             encode_images([img_str], value)
         # Coming soon...
         # elif kind == "audio":
-        #     audio = wandb.Audio(
+        #     audio = tracklab.Audio(
         #         six.BytesIO(value.audio.encoded_audio_string),
         #         sample_rate=value.audio.sample_rate,
         #         content_type=value.audio.content_type,
@@ -231,33 +231,33 @@ def tf_summary_to_dict(  # noqa: C901
                 )
                 try:
                     # TODO: we should just re-bin if there are too many buckets
-                    values[tag] = wandb.Histogram(np_histogram=np_histogram)  # type: ignore
+                    values[tag] = tracklab.Histogram(np_histogram=np_histogram)  # type: ignore
                 except ValueError:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         f"Not logging key {tag!r}. "
-                        f"Histograms must have fewer than {wandb.Histogram.MAX_LENGTH} bins",
+                        f"Histograms must have fewer than {tracklab.Histogram.MAX_LENGTH} bins",
                         repeat=False,
                     )
             else:
                 # TODO: is there a case where we can render this?
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Not logging key {tag!r}. Found a histogram with only 2 bins.",
                     repeat=False,
                 )
         # TODO(jhr): figure out how to share this between userspace and internal process or dont
         # elif value.tag == "_hparams_/session_start_info":
-        #     if wandb.util.get_module("tensorboard.plugins.hparams"):
+        #     if tracklab.util.get_module("tensorboard.plugins.hparams"):
         #         from tensorboard.plugins.hparams import plugin_data_pb2
         #
         #         plugin_data = plugin_data_pb2.HParamsPluginData()        #
         #         plugin_data.ParseFromString(value.metadata.plugin_data.content)
         #         for key, param in six.iteritems(plugin_data.session_start_info.hparams):
-        #             if not wandb.run.config.get(key):
-        #                 wandb.run.config[key] = (
+        #             if not tracklab.run.config.get(key):
+        #                 tracklab.run.config[key] = (
         #                     param.number_value or param.string_value or param.bool_value
         #                 )
         #     else:
-        #         wandb.termerror(
+        #         tracklab.termerror(
         #             "Received hparams tf.summary, but could not import "
         #             "the hparams plugin from tensorboard"
         #         )
@@ -265,7 +265,7 @@ def tf_summary_to_dict(  # noqa: C901
 
 
 def reset_state() -> None:
-    """Internal method for resetting state, called by wandb.finish()."""
+    """Internal method for resetting state, called by tracklab.finish()."""
     global STEPS
     STEPS = {"": {"step": 0}, "global": {"step": 0, "last_log": None}}
 
@@ -277,9 +277,9 @@ def _log(
     namespace: str = "",
     **kwargs: Any,
 ) -> None:
-    """Logs a tfsummary to wandb.
+    """Logs a tfsummary to tracklab.
 
-    Can accept a tf summary string or parsed event.  Will use wandb.run.history unless a
+    Can accept a tf summary string or parsed event.  Will use tracklab.run.history unless a
     history object is passed.  Can optionally namespace events.  Results are committed
     when step increases for this namespace.
 
@@ -325,24 +325,24 @@ def _log(
             or timestamp - STEPS["global"]["last_log"] >= RATE_LIMIT_SECONDS
         ):
             if history is None:
-                if wandb.run is not None:
-                    wandb.run._log({})
+                if tracklab.run is not None:
+                    tracklab.run._log({})
             else:
                 history.add({})
 
         STEPS["global"]["last_log"] = timestamp
 
     if history is None:
-        if wandb.run is not None:
-            wandb.run._log(log_dict, commit=False)
+        if tracklab.run is not None:
+            tracklab.run._log(log_dict, commit=False)
     else:
         history._row_update(log_dict)
 
 
 def log(tf_summary_str_or_pb: Any, step: int = 0, namespace: str = "") -> None:
-    if wandb.run is None:
-        raise wandb.Error(
-            "You must call `wandb.init()` before calling `wandb.tensorflow.log`"
+    if tracklab.run is None:
+        raise tracklab.Error(
+            "You must call `tracklab.init()` before calling `tracklab.tensorflow.log`"
         )
 
     with telemetry.context() as tel:

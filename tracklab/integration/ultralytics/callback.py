@@ -18,7 +18,7 @@ try:
     from tqdm.auto import tqdm
 
     if version.parse(ultralytics.__version__) > version.parse("8.0.238"):
-        wandb.termwarn(
+        tracklab.termwarn(
             """This integration is tested and supported for ultralytics v8.0.238 and below.
             Please report any issues to https://github.com/wandb/wandb/issues with the tag `yolov8`.""",
             repeat=False,
@@ -67,7 +67,7 @@ try:
         plot_pose_validation_results,
     )
 except Exception as e:
-    wandb.Error(e)
+    tracklab.Error(e)
 
 
 TRAINER_TYPE = Union[
@@ -165,13 +165,13 @@ class WandBUltralyticsCallback:
                 "Speed",
             ]
             train_columns = ["Epoch"] + validation_columns
-            self.train_validation_table = wandb.Table(
+            self.train_validation_table = tracklab.Table(
                 columns=["Model-Name"] + train_columns
             )
-            self.validation_table = wandb.Table(
+            self.validation_table = tracklab.Table(
                 columns=["Model-Name"] + validation_columns
             )
-            self.prediction_table = wandb.Table(
+            self.prediction_table = tracklab.Table(
                 columns=[
                     "Model-Name",
                     "Image",
@@ -192,13 +192,13 @@ class WandBUltralyticsCallback:
             ]
             validation_columns = ["Data-Index", "Batch-Index"] + classification_columns
             validation_columns.insert(3, "Ground-Truth-Category")
-            self.train_validation_table = wandb.Table(
+            self.train_validation_table = tracklab.Table(
                 columns=["Model-Name", "Epoch"] + validation_columns
             )
-            self.validation_table = wandb.Table(
+            self.validation_table = tracklab.Table(
                 columns=["Model-Name"] + validation_columns
             )
-            self.prediction_table = wandb.Table(
+            self.prediction_table = tracklab.Table(
                 columns=["Model-Name"] + classification_columns
             )
         elif self.task == "pose":
@@ -212,13 +212,13 @@ class WandBUltralyticsCallback:
                 "Speed",
             ]
             train_columns = ["Epoch"] + validation_columns
-            self.train_validation_table = wandb.Table(
+            self.train_validation_table = tracklab.Table(
                 columns=["Model-Name"] + train_columns
             )
-            self.validation_table = wandb.Table(
+            self.validation_table = tracklab.Table(
                 columns=["Model-Name"] + validation_columns
             )
-            self.prediction_table = wandb.Table(
+            self.prediction_table = tracklab.Table(
                 columns=[
                     "Model-Name",
                     "Image-Prediction",
@@ -239,7 +239,7 @@ class WandBUltralyticsCallback:
         self.predictor.args.verbose = None
 
     def _save_model(self, trainer: TRAINER_TYPE):
-        model_checkpoint_artifact = wandb.Artifact(f"run_{wandb.run.id}_model", "model")
+        model_checkpoint_artifact = tracklab.Artifact(f"run_{tracklab.run.id}_model", "model")
         checkpoint_dict = {
             "epoch": trainer.epoch,
             "best_fitness": trainer.best_fitness,
@@ -254,15 +254,15 @@ class WandBUltralyticsCallback:
         checkpoint_path = trainer.wdir / f"epoch{trainer.epoch}.pt"
         torch.save(checkpoint_dict, checkpoint_path, pickle_module=pickle)
         model_checkpoint_artifact.add_file(checkpoint_path)
-        wandb.log_artifact(
+        tracklab.log_artifact(
             model_checkpoint_artifact, aliases=[f"epoch_{trainer.epoch}"]
         )
 
     def on_train_start(self, trainer: TRAINER_TYPE):
-        with telemetry.context(run=wandb.run) as tel:
+        with telemetry.context(run=tracklab.run) as tel:
             tel.feature.ultralytics_yolov8 = True
-        wandb.config.train = vars(trainer.args)
-        self.run_id = wandb.run.id
+        tracklab.config.train = vars(trainer.args)
+        self.run_id = tracklab.run.id
 
     @torch.no_grad()
     def on_fit_epoch_end(self, trainer: DetectionTrainer):
@@ -327,10 +327,10 @@ class WandBUltralyticsCallback:
 
     def on_train_end(self, trainer: TRAINER_TYPE):
         if self.task in self.supported_tasks:
-            wandb.log({"Train-Table": self.train_validation_table}, commit=False)
+            tracklab.log({"Train-Table": self.train_validation_table}, commit=False)
 
     def on_val_start(self, validator: VALIDATOR_TYPE):
-        wandb.run or wandb.init(
+        tracklab.run or tracklab.init(
             project=validator.args.project or "YOLOv8",
             job_type="validation_" + validator.args.task,
         )
@@ -377,20 +377,20 @@ class WandBUltralyticsCallback:
                     table=self.validation_table,
                     max_validation_batches=self.max_validation_batches,
                 )
-            wandb.log({"Validation-Table": self.validation_table}, commit=False)
+            tracklab.log({"Validation-Table": self.validation_table}, commit=False)
 
     def on_predict_start(self, predictor: PREDICTOR_TYPE):
-        wandb.run or wandb.init(
+        tracklab.run or tracklab.init(
             project=predictor.args.project or "YOLOv8",
             config=vars(predictor.args),
             job_type="prediction_" + predictor.args.task,
         )
         if isinstance(predictor, SAMPredictor):
             self.prompts = copy.deepcopy(predictor.prompts)
-            self.prediction_table = wandb.Table(columns=["Image"])
+            self.prediction_table = tracklab.Table(columns=["Image"])
 
     def on_predict_end(self, predictor: PREDICTOR_TYPE):
-        wandb.config.prediction_configs = vars(predictor.args)
+        tracklab.config.prediction_configs = vars(predictor.args)
         if self.task in self.supported_tasks:
             for result in tqdm(predictor.results):
                 if self.task == "pose":
@@ -418,7 +418,7 @@ class WandBUltralyticsCallback:
                         result, self.model_name, self.prediction_table
                     )
 
-            wandb.log({"Prediction-Table": self.prediction_table}, commit=False)
+            tracklab.log({"Prediction-Table": self.prediction_table}, commit=False)
 
     @property
     def callbacks(self) -> Dict[str, Callable]:
@@ -479,17 +479,17 @@ def add_wandb_callback(
             artifacts at the end of eveny epoch if set to `True`.
         enable_train_validation_logging: (bool) enable logging the predictions and
             ground-truths as interactive image overlays on the images from
-            the validation dataloader to a `wandb.Table` along with
+            the validation dataloader to a `tracklab.Table` along with
             mean-confidence of the predictions per-class at the end of each
             training epoch.
         enable_validation_logging: (bool) enable logging the predictions and
             ground-truths as interactive image overlays on the images from the
-            validation dataloader to a `wandb.Table` along with
+            validation dataloader to a `tracklab.Table` along with
             mean-confidence of the predictions per-class at the end of
             validation.
         enable_prediction_logging: (bool) enable logging the predictions and
             ground-truths as interactive image overlays on the images from the
-            validation dataloader to a `wandb.Table` along with mean-confidence
+            validation dataloader to a `tracklab.Table` along with mean-confidence
             of the predictions per-class at the end of each prediction.
         max_validation_batches: (Optional[int]) maximum number of validation batches to log to
             a table per epoch.
@@ -520,7 +520,7 @@ def add_wandb_callback(
         for event, callback_fn in callbacks.items():
             model.add_callback(event, callback_fn)
     else:
-        wandb.termerror(
+        tracklab.termerror(
             "The RANK of the process to add the callbacks was neither 0 or "
             "-1. No Weights & Biases callbacks were added to this instance "
             "of the YOLO model."

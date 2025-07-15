@@ -90,11 +90,11 @@ def registry_from_config(
 
         return LocalRegistry()  # This is the default, dummy registry.
 
-    wandb.termwarn(
+    tracklab.termwarn(
         "The `registry` block of the launch agent config is being deprecated. "
         "Please specify an image repository URI under the `builder.destination` "
         "key of your launch agent config. See "
-        "https://docs.wandb.ai/guides/launch/setup-agent-advanced#agent-configuration "
+        "https://docs.tracklab.ai/guides/launch/setup-agent-advanced#agent-configuration "
         "for more information."
     )
 

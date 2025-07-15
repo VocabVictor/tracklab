@@ -38,14 +38,14 @@ def confusion_matrix(
 
     Returns:
         CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Raises:
         ValueError: If both `probs` and `preds` are provided or if the number of
             predictions and true labels are not equal. If the number of unique
             predicted classes exceeds the number of class names or if the number of
             unique true labels exceeds the number of class names.
-        wandb.Error: If numpy is not installed.
+        tracklab.Error: If numpy is not installed.
 
     Examples:
     Logging a confusion matrix with random probabilities for wildlife
@@ -70,8 +70,8 @@ def confusion_matrix(
     )
 
     # Initialize W&B run and log confusion matrix
-    with wandb.init(project="wildlife_classification") as run:
-        confusion_matrix = wandb.plot.confusion_matrix(
+    with tracklab.init(project="wildlife_classification") as run:
+        confusion_matrix = tracklab.plot.confusion_matrix(
             probs=wildlife_probs,
             y_true=wildlife_y_true,
             class_names=wildlife_class_names,
@@ -109,8 +109,8 @@ def confusion_matrix(
     ]
 
     # Initialize W&B run and log confusion matrix
-    with wandb.init(project="wildlife_classification") as run:
-        confusion_matrix = wandb.plot.confusion_matrix(
+    with tracklab.init(project="wildlife_classification") as run:
+        confusion_matrix = tracklab.plot.confusion_matrix(
             preds=wildlife_preds,
             y_true=wildlife_y_true,
             class_names=wildlife_class_names,
@@ -125,7 +125,7 @@ def confusion_matrix(
     np = util.get_module(
         "numpy",
         required=(
-            "numpy is required to use wandb.plot.confusion_matrix, "
+            "numpy is required to use tracklab.plot.confusion_matrix, "
             "install with `pip install numpy`",
         ),
     )
@@ -170,7 +170,7 @@ def confusion_matrix(
     ]
 
     return plot_table(
-        data_table=wandb.Table(
+        data_table=tracklab.Table(
             columns=["Actual", "Predicted", "nPredictions"],
             data=data,
         ),

@@ -143,7 +143,7 @@ class Scheduler(ABC):
             self._sweep_config = yaml.safe_load(resp["config"])
             self._num_runs_launched: int = self._get_num_runs_launched(resp["runs"])
             if self._num_runs_launched > 0:
-                wandb.termlog(
+                tracklab.termlog(
                     f"{LOG_PREFIX}Found {self._num_runs_launched} previous valid runs for sweep {self._sweep_id}"
                 )
         except Exception as e:
@@ -257,8 +257,8 @@ class Scheduler(ABC):
 
     def _init_tracklab_run(self) -> "SdkRun":
         """Controls resume or init logic for a scheduler wandb run."""
-        settings = wandb.Settings(disable_job_creation=True)
-        run: SdkRun = wandb.init(  # type: ignore
+        settings = tracklab.Settings(disable_job_creation=True)
+        run: SdkRun = tracklab.init(  # type: ignore
             name=f"Scheduler.{self._sweep_id}",
             resume="allow",
             config=self._kwargs,  # when run as a job, this sets config
@@ -278,9 +278,9 @@ class Scheduler(ABC):
 
     def start(self) -> None:
         """Start a scheduler, confirms prerequisites, begins execution loop."""
-        wandb.termlog(f"{LOG_PREFIX}Scheduler starting.")
+        tracklab.termlog(f"{LOG_PREFIX}Scheduler starting.")
         if not self.is_alive:
-            wandb.termerror(
+            tracklab.termerror(
                 f"{LOG_PREFIX}Sweep already in end state ({self.state.name.lower()}). Exiting..."
             )
             self.exit()
@@ -288,7 +288,7 @@ class Scheduler(ABC):
 
         self._state = SchedulerState.STARTING
         if not self._try_load_executable():
-            wandb.termerror(
+            tracklab.termerror(
                 f"{LOG_PREFIX}No 'job' or 'image_uri' loaded from sweep config."
             )
             self.exit()
@@ -301,7 +301,7 @@ class Scheduler(ABC):
 
     def run(self) -> None:
         """Main run function."""
-        wandb.termlog(f"{LOG_PREFIX}Scheduler running")
+        tracklab.termlog(f"{LOG_PREFIX}Scheduler running")
         self.state = SchedulerState.RUNNING
         try:
             while True:
@@ -309,20 +309,20 @@ class Scheduler(ABC):
                 if not self.is_alive:
                     break
 
-                wandb.termlog(f"{LOG_PREFIX}Polling for new runs to launch")
+                tracklab.termlog(f"{LOG_PREFIX}Polling for new runs to launch")
 
                 self._update_run_states()
                 self._poll()
                 if self.state == SchedulerState.FLUSH_RUNS:
                     if self.num_active_runs == 0:
-                        wandb.termlog(f"{LOG_PREFIX}Done polling on runs, exiting")
+                        tracklab.termlog(f"{LOG_PREFIX}Done polling on runs, exiting")
                         break
                     time.sleep(self._polling_sleep)
                     continue
 
                 for worker_id in self.available_workers:
                     if self.at_runcap:
-                        wandb.termlog(
+                        tracklab.termlog(
                             f"{LOG_PREFIX}Sweep at run_cap ({self._num_runs_launched})"
                         )
                         self.state = SchedulerState.FLUSH_RUNS
@@ -335,7 +335,7 @@ class Scheduler(ABC):
                     except SchedulerError as e:
                         raise SchedulerError(e)
                     except Exception as e:
-                        wandb.termerror(
+                        tracklab.termerror(
                             f"{LOG_PREFIX}Failed to get next sweep run: {e}"
                         )
                         self.state = SchedulerState.FAILED
@@ -346,12 +346,12 @@ class Scheduler(ABC):
 
                 time.sleep(self._polling_sleep)
         except KeyboardInterrupt:
-            wandb.termwarn(f"{LOG_PREFIX}Scheduler received KeyboardInterrupt. Exiting")
+            tracklab.termwarn(f"{LOG_PREFIX}Scheduler received KeyboardInterrupt. Exiting")
             self.state = SchedulerState.STOPPED
             self.exit()
             return
         except Exception as e:
-            wandb.termlog(f"{LOG_PREFIX}Scheduler failed with exception {e}")
+            tracklab.termlog(f"{LOG_PREFIX}Scheduler failed with exception {e}")
             self.state = SchedulerState.FAILED
             self.exit()
             raise
@@ -367,7 +367,7 @@ class Scheduler(ABC):
         try:
             self._save_state()
         except Exception:
-            wandb.termerror(
+            tracklab.termerror(
                 f"{LOG_PREFIX}Failed to save state: {traceback.format_exc()}"
             )
 
@@ -388,7 +388,7 @@ class Scheduler(ABC):
             status = "crashed"
             self._stop_runs()
 
-        wandb.termlog(f"{LOG_PREFIX}Scheduler {status}")
+        tracklab.termlog(f"{LOG_PREFIX}Scheduler {status}")
         self._tracklab_run.finish()
 
     def _get_num_runs_launched(self, runs: List[Dict[str, Any]]) -> int:
@@ -415,11 +415,11 @@ class Scheduler(ABC):
         if self._kwargs.get("job"):
             try:
                 _job_artifact = self._public_api.job(self._kwargs["job"])
-                wandb.termlog(
+                tracklab.termlog(
                     f"{LOG_PREFIX}Successfully loaded job ({_job_artifact.name}) in scheduler"
                 )
             except Exception:
-                wandb.termerror(f"{LOG_PREFIX}{traceback.format_exc()}")
+                tracklab.termerror(f"{LOG_PREFIX}{traceback.format_exc()}")
                 return False
             return True
         elif self._kwargs.get("image_uri"):
@@ -465,7 +465,7 @@ class Scheduler(ABC):
         """
         with self._threading_lock:
             for run_id in runs_to_remove:
-                wandb.termlog(f"{LOG_PREFIX}Cleaning up finished run ({run_id})")
+                tracklab.termlog(f"{LOG_PREFIX}Cleaning up finished run ({run_id})")
                 del self._runs[run_id]
 
     def _stop_runs(self) -> None:
@@ -474,9 +474,9 @@ class Scheduler(ABC):
             to_delete += [run_id]
 
         for run_id in to_delete:
-            wandb.termlog(f"{LOG_PREFIX}Stopping run ({run_id})")
+            tracklab.termlog(f"{LOG_PREFIX}Stopping run ({run_id})")
             if not self._stop_run(run_id):
-                wandb.termwarn(f"{LOG_PREFIX}Failed to stop run ({run_id})")
+                tracklab.termwarn(f"{LOG_PREFIX}Failed to stop run ({run_id})")
 
     def _stop_run(self, run_id: str) -> bool:
         """Stops a run and removes it from the scheduler."""
@@ -505,7 +505,7 @@ class Scheduler(ABC):
         try:
             success: bool = self._api.stop_run(run_id=encoded_run_id)
             if success:
-                wandb.termlog(f"{LOG_PREFIX}Stopped run {run_id}.")
+                tracklab.termlog(f"{LOG_PREFIX}Stopped run {run_id}.")
                 return True
         except Exception as e:
             _logger.debug(f"error stopping run ({run_id}): {e}")
@@ -607,14 +607,14 @@ class Scheduler(ABC):
             _logger.debug(f"error getting state for run ({run_id}): {e}")
             if prev_run_state == RunState.UNKNOWN:
                 # triggers when we get an unknown state for the second time
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Failed to get runstate for run ({run_id}). Error: {traceback.format_exc()}"
                 )
                 run_state = RunState.FAILED
             else:  # first time we get unknown state
                 run_state = RunState.UNKNOWN
         except (AttributeError, ValueError):
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Bad state ({run_state}) for run ({run_id}). Error: {traceback.format_exc()}"
             )
             run_state = RunState.UNKNOWN
@@ -638,7 +638,7 @@ class Scheduler(ABC):
         return {}
 
     def _set_sweep_state(self, state: str) -> None:
-        wandb.termlog(f"{LOG_PREFIX}Updating sweep state to: {state.lower()}")
+        tracklab.termlog(f"{LOG_PREFIX}Updating sweep state to: {state.lower()}")
         try:
             self._api.set_sweep_state(sweep=self._sweep_id, state=state)
         except Exception as e:
@@ -678,7 +678,7 @@ class Scheduler(ABC):
         if entry_point:
             unresolved = [x for x in entry_point if str(x).startswith("${")]
             if unresolved:
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"{LOG_PREFIX}Sweep command contains unresolved macros: "
                     f"{unresolved}, see launch docs for supported macros."
                 )
@@ -697,7 +697,7 @@ class Scheduler(ABC):
 
         entry_point, launch_config = self._make_entry_and_launch_config(run)
         if entry_point:
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"{LOG_PREFIX}Sweep command {entry_point} will override"
                 f" {'job' if _job else 'image_uri'} entrypoint"
             )
@@ -734,7 +734,7 @@ class Scheduler(ABC):
         run.state = RunState.RUNNING  # assume it will get picked up
         self._runs[run_id] = run
 
-        wandb.termlog(
+        tracklab.termlog(
             f"{LOG_PREFIX}Added run ({run_id}) to queue ({self._kwargs.get('queue')})"
         )
         return True

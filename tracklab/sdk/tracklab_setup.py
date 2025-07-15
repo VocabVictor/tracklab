@@ -2,19 +2,19 @@
 
 This module manages global state, which for wandb includes:
 
-- Settings configured through `wandb.setup()`
+- Settings configured through `tracklab.setup()`
 - The list of active runs
 - A subprocess ("the internal service") that asynchronously uploads metrics
 
 This module is fork-aware: in a forked process such as that spawned by the
-`multiprocessing` module, `wandb.singleton()` returns a new object, not the
+`multiprocessing` module, `tracklab.singleton()` returns a new object, not the
 one inherited from the parent process. This requirement comes from backward
 compatibility with old design choices: the hardest one to fix is that wandb
 was originally designed to have a single run for the entire process that
-`wandb.init()` was meant to return. Back then, the only way to create
+`tracklab.init()` was meant to return. Back then, the only way to create
 multiple simultaneous runs in a single script was to run subprocesses, and since
 the built-in `multiprocessing` module forks by default, this required a PID
-check to make `wandb.init()` ignore the inherited global run.
+check to make `tracklab.init()` ignore the inherited global run.
 
 Another reason for fork-awareness is that the process that starts up
 the internal service owns it and is responsible for shutting it down,
@@ -110,7 +110,7 @@ class _WandbSetup:
 
         self._settings = self._settings_setup(settings)
 
-        wandb.termsetup(self._settings, None)
+        tracklab.termsetup(self._settings, None)
 
         self._setup()
 
@@ -168,7 +168,7 @@ class _WandbSetup:
 
         # the pid of the process to monitor for system stats
         pid = os.getpid()
-        self._logger.info(f"Current SDK version is {wandb.__version__}")
+        self._logger.info(f"Current SDK version is {tracklab.__version__}")
         self._logger.info(f"Configure stats pid to {pid}")
         s.x_stats_pid = pid
 
@@ -403,20 +403,20 @@ def _setup(
 def setup(settings: Settings | None = None) -> _WandbSetup:
     """Prepares W&B for use in the current process and its children.
 
-    You can usually ignore this as it is implicitly called by `wandb.init()`.
+    You can usually ignore this as it is implicitly called by `tracklab.init()`.
 
-    When using wandb in multiple processes, calling `wandb.setup()`
+    When using wandb in multiple processes, calling `tracklab.setup()`
     in the parent process before starting child processes may improve
     performance and resource utilization.
 
-    Note that `wandb.setup()` modifies `os.environ`, and it is important
+    Note that `tracklab.setup()` modifies `os.environ`, and it is important
     that child processes inherit the modified environment variables.
 
-    See also `wandb.teardown()`.
+    See also `tracklab.teardown()`.
 
     Args:
         settings: Configuration settings to apply globally. These can be
-            overridden by subsequent `wandb.init()` calls.
+            overridden by subsequent `tracklab.init()` calls.
 
     Example:
         ```python
@@ -426,14 +426,14 @@ def setup(settings: Settings | None = None) -> _WandbSetup:
 
 
         def run_experiment(params):
-            with wandb.init(config=params):
+            with tracklab.init(config=params):
                 # Run experiment
                 pass
 
 
         if __name__ == "__main__":
             # Start backend and set global config
-            wandb.setup(settings={"project": "my_project"})
+            tracklab.setup(settings={"project": "my_project"})
 
             # Define experiment parameters
             experiment_params = [
@@ -453,7 +453,7 @@ def setup(settings: Settings | None = None) -> _WandbSetup:
                 p.join()
 
             # Optional: Explicitly shut down the backend
-            wandb.teardown()
+            tracklab.teardown()
         ```
     """
     return _setup(settings=settings)
@@ -467,7 +467,7 @@ def teardown(exit_code: int | None = None) -> None:
     using `run.finish()` and waits for all data to be uploaded.
 
     It is recommended to call this at the end of a session
-    that used `wandb.setup()`. It is invoked automatically
+    that used `tracklab.setup()`. It is invoked automatically
     in an `atexit` hook, but this is not reliable in certain setups
     such as when using Python's `multiprocessing` module.
     """

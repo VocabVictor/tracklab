@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 def line(
-    table: wandb.Table,
+    table: tracklab.Table,
     x: str,
     y: str,
     stroke: str | None = None,
@@ -32,7 +32,7 @@ def line(
 
     Returns:
        CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Example:
 
@@ -52,11 +52,11 @@ def line(
         data.append([i, i / 10 + random.uniform(-0.5, 0.5), "series_3"])
 
     # Define the columns for the table
-    table = wandb.Table(data=data, columns=["step", "value", "series"])
+    table = tracklab.Table(data=data, columns=["step", "value", "series"])
 
     # Initialize wandb run and log the line chart
-    with wandb.init(project="line_chart_example") as run:
-        line_chart = wandb.plot.line(
+    with tracklab.init(project="line_chart_example") as run:
+        line_chart = tracklab.plot.line(
             table=table,
             x="step",
             y="value",

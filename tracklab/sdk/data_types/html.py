@@ -42,16 +42,16 @@ class Html(BatchableMedia):
         It can be initialized by providing a path to a file:
 
         ```python
-        with wandb.init() as run:
-            run.log({"html": wandb.Html("./index.html")})
+        with tracklab.init() as run:
+            run.log({"html": tracklab.Html("./index.html")})
         ```
 
         Alternatively, it can be initialized by providing literal HTML,
         in either a string or IO object:
 
         ```python
-        with wandb.init() as run:
-            run.log({"html": wandb.Html("<h1>Hello, world!</h1>")})
+        with tracklab.init() as run:
+            run.log({"html": tracklab.Html("<h1>Hello, world!</h1>")})
         ```
         """
         super().__init__()
@@ -103,7 +103,7 @@ class Html(BatchableMedia):
             parts = ["", self.html]
         parts.insert(
             1,
-            '<base target="_blank"><link rel="stylesheet" type="text/css" href="https://app.wandb.ai/normalize.css" />',
+            '<base target="_blank"><link rel="stylesheet" type="text/css" href="https://app.tracklab.ai/normalize.css" />',
         )
         self.html = join.join(parts).strip()
 

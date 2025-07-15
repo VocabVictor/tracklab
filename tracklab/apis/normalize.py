@@ -16,7 +16,7 @@ _F = TypeVar("_F", bound=Callable)
 
 
 def normalize_exceptions(func: _F) -> _F:
-    """Function decorator for catching common errors and re-raising as wandb.Error."""
+    """Function decorator for catching common errors and re-raising as tracklab.Error."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):

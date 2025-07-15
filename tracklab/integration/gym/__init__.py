@@ -22,13 +22,13 @@ def monitor():
     gym_lib: Optional[GymLib] = None
 
     # gym is not maintained anymore, gymnasium is the drop-in replacement - prefer it
-    if wandb.util.get_module("gymnasium") is not None:
+    if tracklab.util.get_module("gymnasium") is not None:
         gym_lib = "gymnasium"
-    elif wandb.util.get_module("gym") is not None:
+    elif tracklab.util.get_module("gym") is not None:
         gym_lib = "gym"
 
     if gym_lib is None:
-        raise wandb.Error(_required_error_msg)
+        raise tracklab.Error(_required_error_msg)
 
     global _gym_version_lt_0_26
     global _gymnasium_version_lt_1_0_0
@@ -48,13 +48,13 @@ def monitor():
     path = "path"  # Default path
     if gym_lib == "gymnasium" and not _gymnasium_version_lt_1_0_0:
         vcr_recorder_attribute = "RecordVideo"
-        wrappers = wandb.util.get_module(
+        wrappers = tracklab.util.get_module(
             f"{gym_lib}.wrappers",
             required=_required_error_msg,
         )
         recorder = getattr(wrappers, vcr_recorder_attribute)
     else:
-        vcr = wandb.util.get_module(
+        vcr = tracklab.util.get_module(
             f"{gym_lib}.wrappers.monitoring.video_recorder",
             required=_required_error_msg,
         )
@@ -73,10 +73,10 @@ def monitor():
         recorder.orig_close(self)
         if not self.enabled:
             return
-        if wandb.run:
+        if tracklab.run:
             m = re.match(r".+(video\.\d+).+", getattr(self, path))
             key = m.group(1) if m else "videos"
-            wandb.log({key: wandb.Video(getattr(self, path))})
+            tracklab.log({key: tracklab.Video(getattr(self, path))})
 
     def del_(self):
         self.orig_close()
@@ -90,7 +90,7 @@ def monitor():
     else:
         wrapper_name = f"monitoring.video_recorder.{vcr_recorder_attribute}"
 
-    wandb.patched["gym"].append(
+    tracklab.patched["gym"].append(
         [
             f"{gym_lib}.wrappers.{wrapper_name}",
             "close",

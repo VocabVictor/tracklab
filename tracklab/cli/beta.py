@@ -22,12 +22,12 @@ def beta():
     # this is the future that requires wandb-core!
     import tracklab.env
 
-    wandb._sentry.configure_scope(process_context="wandb_beta")
+    tracklab._sentry.configure_scope(process_context="wandb_beta")
 
     try:
         get_core_path()
     except WandbCoreNotAvailableError as e:
-        wandb._sentry.exception(f"using `wandb beta`. failed with {e}")
+        tracklab._sentry.exception(f"using `wandb beta`. failed with {e}")
         click.secho(
             (e),
             fg="red",
@@ -103,7 +103,7 @@ def sync_beta(  # noqa: C901
                     continue
                 wandb_files = [p for p in d.glob("*.wandb") if p.is_file()]
                 if len(wandb_files) > 1:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         f"Multiple wandb files found in directory {d}, skipping"
                     )
                 elif len(wandb_files) == 1:
@@ -123,10 +123,10 @@ def sync_beta(  # noqa: C901
     if skip_synced:
         synced_paths = set()
         for path in paths:
-            tracklab_synced_files = [p for p in path.glob("*.wandb.synced") if p.is_file()]
+            tracklab_synced_files = [p for p in path.glob("*.tracklab.synced") if p.is_file()]
             if len(tracklab_synced_files) > 1:
-                wandb.termwarn(
-                    f"Multiple wandb.synced files found in directory {path}, skipping"
+                tracklab.termwarn(
+                    f"Multiple tracklab.synced files found in directory {path}, skipping"
                 )
             elif len(tracklab_synced_files) == 1:
                 synced_paths.add(path)
@@ -148,7 +148,7 @@ def sync_beta(  # noqa: C901
     if dry_run:
         return
 
-    wandb.setup()
+    tracklab.setup()
 
     # TODO: make it thread-safe in the Rust code
     with concurrent.futures.ProcessPoolExecutor(

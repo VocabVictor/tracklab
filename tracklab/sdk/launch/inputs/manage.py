@@ -66,12 +66,12 @@ def manage_tracklab_config(
     exclude: Optional[List[str]] = None,
     schema: Optional[Any] = None,
 ):
-    r"""Declare wandb.config as an overridable configuration for a launch job.
+    r"""Declare tracklab.config as an overridable configuration for a launch job.
 
     If a new job version is created from the active run, the run config
-    (wandb.config) will become an overridable input of the job. If the job is
+    (tracklab.config) will become an overridable input of the job. If the job is
     launched and overrides have been provided for the run config, the overrides
-    will be applied to the run config when `wandb.init` is called.
+    will be applied to the run config when `tracklab.init` is called.
     `include` and `exclude` are lists of dot separated paths with the config.
     The paths are used to filter subtrees of the configuration file out of the
     job's inputs.

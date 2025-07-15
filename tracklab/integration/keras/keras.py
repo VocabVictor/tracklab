@@ -23,7 +23,7 @@ def _check_keras_version():
     from packaging.version import parse
 
     if parse(keras_version) < parse("2.4.0"):
-        wandb.termwarn(
+        tracklab.termwarn(
             f"Keras version {keras_version} is not fully supported. Required keras >= 2.4.0"
         )
 
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_dataset(data):
-    dataset_ops = wandb.util.get_module("tensorflow.python.data.ops.dataset_ops")
+    dataset_ops = tracklab.util.get_module("tensorflow.python.data.ops.dataset_ops")
     if dataset_ops and hasattr(dataset_ops, "DatasetV2"):
         dataset_types = (dataset_ops.DatasetV2,)
         if hasattr(dataset_ops, "DatasetV1"):
@@ -62,7 +62,7 @@ def is_generator_like(data):
     # Checks if data is a generator, Sequence, or Iterator.
 
     types = (tf.keras.utils.Sequence,)
-    iterator_ops = wandb.util.get_module("tensorflow.python.data.ops.iterator_ops")
+    iterator_ops = tracklab.util.get_module("tensorflow.python.data.ops.iterator_ops")
     if iterator_ops:
         types = types + (iterator_ops.Iterator,)
         # EagerIterator was in tensorflow < 2
@@ -84,7 +84,7 @@ def patch_tf_keras():  # noqa: C901
             from keras.engine import training_arrays_v1 as training_arrays
             from keras.engine import training_generator_v1 as training_generator
         except (ImportError, AttributeError):
-            wandb.termerror("Unable to patch Tensorflow/Keras")
+            tracklab.termerror("Unable to patch Tensorflow/Keras")
             logger.exception("exception while trying to patch_tf_keras")
             return
     else:
@@ -106,14 +106,14 @@ def patch_tf_keras():  # noqa: C901
                     training_generator,
                 )
             except (ImportError, AttributeError):
-                wandb.termerror("Unable to patch Tensorflow/Keras")
+                tracklab.termerror("Unable to patch Tensorflow/Keras")
                 logger.exception("exception while trying to patch_tf_keras")
                 return
 
     # Tensorflow 2.1
-    training_v2_1 = wandb.util.get_module("tensorflow.python.keras.engine.training_v2")
+    training_v2_1 = tracklab.util.get_module("tensorflow.python.keras.engine.training_v2")
     # Tensorflow 2.2
-    training_v2_2 = wandb.util.get_module(f"{keras_engine}.training_v1")
+    training_v2_2 = tracklab.util.get_module(f"{keras_engine}.training_v1")
 
     if training_v2_1:
         old_v2 = training_v2_1.Loop.fit
@@ -131,7 +131,7 @@ def patch_tf_keras():  # noqa: C901
                 if context.executing_eagerly():
                     cbk.generator = iter(val_data)
                 else:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         "Found a validation dataset in graph mode, can't patch Keras."
                     )
             elif isinstance(val_data, tuple) and isinstance(val_data[0], tf.Tensor):
@@ -174,19 +174,19 @@ def patch_tf_keras():  # noqa: C901
     training_arrays.fit_loop = new_arrays
     training_generator.orig_fit_generator = old_generator
     training_generator.fit_generator = new_generator
-    wandb.patched["keras"].append([f"{keras_engine}.training_arrays", "fit_loop"])
-    wandb.patched["keras"].append(
+    tracklab.patched["keras"].append([f"{keras_engine}.training_arrays", "fit_loop"])
+    tracklab.patched["keras"].append(
         [f"{keras_engine}.training_generator", "fit_generator"]
     )
 
     if training_v2_1:
         training_v2_1.Loop.fit = new_v2
-        wandb.patched["keras"].append(
+        tracklab.patched["keras"].append(
             ["tensorflow.python.keras.engine.training_v2.Loop", "fit"]
         )
     elif training_v2_2:
         training.Model.fit = new_v2
-        wandb.patched["keras"].append([f"{keras_engine}.training.Model", "fit"])
+        tracklab.patched["keras"].append([f"{keras_engine}.training.Model", "fit"])
 
 
 def _array_has_dtype(array):
@@ -202,7 +202,7 @@ def _update_if_numeric(metrics, key, values):
         _warn_not_logging_non_numeric(key)
         return
 
-    metrics[key] = wandb.Histogram(values)
+    metrics[key] = tracklab.Histogram(values)
 
 
 def is_numeric_array(array):
@@ -210,14 +210,14 @@ def is_numeric_array(array):
 
 
 def _warn_not_logging_non_numeric(name):
-    wandb.termwarn(
+    tracklab.termwarn(
         f"Non-numeric values found in layer: {name}, not logging this layer",
         repeat=False,
     )
 
 
 def _warn_not_logging(name):
-    wandb.termwarn(
+    tracklab.termwarn(
         f"Layer {name} has undetermined datatype not logging this layer",
         repeat=False,
     )
@@ -284,7 +284,7 @@ class _GradAccumulatorCallback(tf.keras.callbacks.Callback):
 
 
 class WandbCallback(tf.keras.callbacks.Callback):
-    """`WandbCallback` automatically integrates keras with wandb.
+    """`WandbCallback` automatically integrates keras with tracklab.
 
     Example:
         ```python
@@ -358,7 +358,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
         log_best_prefix: (string) if None, no extra summary metrics will be saved.
             If set to a string, the monitored metric and epoch will be prepended with this value
             and stored as summary metrics.
-        validation_indexes: ([wandb.data_types._TableLinkMixin]) an ordered list of index keys to associate
+        validation_indexes: ([tracklab.data_types._TableLinkMixin]) an ordered list of index keys to associate
             with each validation example.  If log_evaluation is True and `validation_indexes` is provided,
             then a Table of validation data will not be created and instead each prediction will
             be associated with the row represented by the `TableLinkMixin`. The most common way to obtain
@@ -368,7 +368,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
             then `row["input"]` will be the input data for the row. Else, it will be keyed based on the name of the
             input slot. If your fit function takes a single target, then `row["target"]` will be the target data for the row. Else,
             it will be keyed based on the name of the output slots. For example, if your input data is a single ndarray,
-            but you wish to visualize the data as an Image, then you can provide `lambda ndx, row: {"img": wandb.Image(row["input"])}`
+            but you wish to visualize the data as an Image, then you can provide `lambda ndx, row: {"img": tracklab.Image(row["input"])}`
             as the processor. Ignored if log_evaluation is False or `validation_indexes` are present.
         output_row_processor: (Callable) same as `validation_row_processor`, but applied to the model's output. `row["output"]` will contain
             the results of the model output.
@@ -410,8 +410,8 @@ class WandbCallback(tf.keras.callbacks.Callback):
         compute_flops=False,
         **kwargs,
     ):
-        if wandb.run is None:
-            raise wandb.Error("You must call wandb.init() before WandbCallback()")
+        if tracklab.run is None:
+            raise tracklab.Error("You must call tracklab.init() before WandbCallback()")
 
         deprecate(
             field_name=Deprecated.keras_callback,
@@ -419,11 +419,11 @@ class WandbCallback(tf.keras.callbacks.Callback):
                 "WandbCallback is deprecated and will be removed in a future release. "
                 "Please use the WandbMetricsLogger, WandbModelCheckpoint, and WandbEvalCallback "
                 "callbacks instead. "
-                "See https://docs.wandb.ai/guides/integrations/keras for more information."
+                "See https://docs.tracklab.ai/guides/integrations/keras for more information."
             ),
         )
 
-        with wandb.wandb_lib.telemetry.context(run=wandb.run) as tel:
+        with tracklab.wandb_lib.telemetry.context(run=tracklab.run) as tel:
             tel.feature.keras = True
         self.validation_data = None
         # This is kept around for legacy reasons
@@ -442,8 +442,8 @@ class WandbCallback(tf.keras.callbacks.Callback):
         self.save_weights_only = save_weights_only
         self.save_graph = save_graph
 
-        wandb.save("model-best.h5")
-        self.filepath = os.path.join(wandb.run.dir, "model-best.h5")
+        tracklab.save("model-best.h5")
+        self.filepath = os.path.join(tracklab.run.dir, "model-best.h5")
         self.save_model = save_model
         if save_model:
             deprecate(
@@ -468,7 +468,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
             deprecate(
                 field_name=Deprecated.keras_callback__data_type,
                 warning_message=(
-                    "The data_type argument of wandb.keras.WandbCallback is deprecated "
+                    "The data_type argument of tracklab.keras.WandbCallback is deprecated "
                     "and will be removed in a future release. Please use input_type instead.\n"
                     "Setting input_type = data_type."
                 ),
@@ -504,7 +504,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
 
         # From Keras
         if mode not in ["auto", "min", "max"]:
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"WandbCallback mode {mode} is unknown, fallback to auto mode."
             )
             mode = "auto"
@@ -523,7 +523,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
                 self.monitor_op = operator.lt
                 self.best = float("inf")
         # Get the previous best metric for resumed runs
-        previous_best = wandb.run.summary.get(f"{self.log_best_prefix}{self.monitor}")
+        previous_best = tracklab.run.summary.get(f"{self.log_best_prefix}{self.monitor}")
         if previous_best is not None:
             self.best = previous_best
 
@@ -562,11 +562,11 @@ class WandbCallback(tf.keras.callbacks.Callback):
     def set_model(self, model):
         super().set_model(model)
         if self.input_type == "auto" and len(model.inputs) == 1:
-            self.input_type = wandb.util.guess_data_type(
+            self.input_type = tracklab.util.guess_data_type(
                 model.inputs[0].shape, risky=True
             )
         if self.input_type and self.output_type is None and len(model.outputs) == 1:
-            self.output_type = wandb.util.guess_data_type(model.outputs[0].shape)
+            self.output_type = tracklab.util.guess_data_type(model.outputs[0].shape)
         if self.log_gradients:
             self._build_grad_accumulator_model()
 
@@ -574,7 +574,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
         if self.log_evaluation and self._validation_data_logger:
             try:
                 if not self.model:
-                    wandb.termwarn("WandbCallback unable to read model from trainer")
+                    tracklab.termwarn("WandbCallback unable to read model from trainer")
                 else:
                     self._validation_data_logger.log_predictions(
                         predictions=self._validation_data_logger.make_predictions(
@@ -584,16 +584,16 @@ class WandbCallback(tf.keras.callbacks.Callback):
                     )
                     self._model_trained_since_last_eval = False
             except Exception as e:
-                wandb.termwarn("Error during prediction logging for epoch: " + str(e))
+                tracklab.termwarn("Error during prediction logging for epoch: " + str(e))
 
     def on_epoch_end(self, epoch, logs=None):
         if logs is None:
             logs = {}
         if self.log_weights:
-            wandb.log(self._log_weights(), commit=False)
+            tracklab.log(self._log_weights(), commit=False)
 
         if self.log_gradients:
-            wandb.log(self._log_gradients(), commit=False)
+            tracklab.log(self._log_gradients(), commit=False)
 
         if self.input_type in (
             "image",
@@ -603,11 +603,11 @@ class WandbCallback(tf.keras.callbacks.Callback):
             if self.generator:
                 self.validation_data = next(self.generator)
             if self.validation_data is None:
-                wandb.termwarn(
+                tracklab.termwarn(
                     "No validation_data set, pass a generator to the callback."
                 )
             elif self.validation_data and len(self.validation_data) > 0:
-                wandb.log(
+                tracklab.log(
                     {"examples": self._log_images(num_images=self.predictions)},
                     commit=False,
                 )
@@ -618,18 +618,18 @@ class WandbCallback(tf.keras.callbacks.Callback):
         ):
             self._attempt_evaluation_log(commit=False)
 
-        wandb.log({"epoch": epoch}, commit=False)
-        wandb.log(logs, commit=True)
+        tracklab.log({"epoch": epoch}, commit=False)
+        tracklab.log(logs, commit=True)
 
         self.current = logs.get(self.monitor)
         if self.current and self.monitor_op(self.current, self.best):
             if self.log_best_prefix:
-                wandb.run.summary[f"{self.log_best_prefix}{self.monitor}"] = (
+                tracklab.run.summary[f"{self.log_best_prefix}{self.monitor}"] = (
                     self.current
                 )
-                wandb.run.summary["{}{}".format(self.log_best_prefix, "epoch")] = epoch
+                tracklab.run.summary["{}{}".format(self.log_best_prefix, "epoch")] = epoch
                 if self.verbose and not self.save_model:
-                    wandb.termlog(
+                    tracklab.termlog(
                         f"Epoch {epoch:05d}: {self.monitor} improved from {self.best:.5f} to {self.current:.5f}"
                     )
             if self.save_model:
@@ -648,11 +648,11 @@ class WandbCallback(tf.keras.callbacks.Callback):
     def on_batch_end(self, batch, logs=None):
         if self.save_graph and not self._graph_rendered:
             # Couldn't do this in train_begin because keras may still not be built
-            wandb.run.summary["graph"] = wandb.Graph.from_keras(self.model)
+            tracklab.run.summary["graph"] = tracklab.Graph.from_keras(self.model)
             self._graph_rendered = True
 
         if self.log_batch_frequency and batch % self.log_batch_frequency == 0:
-            wandb.log(logs, commit=True)
+            tracklab.log(logs, commit=True)
 
     def on_train_batch_begin(self, batch, logs=None):
         self._model_trained_since_last_eval = True
@@ -660,11 +660,11 @@ class WandbCallback(tf.keras.callbacks.Callback):
     def on_train_batch_end(self, batch, logs=None):
         if self.save_graph and not self._graph_rendered:
             # Couldn't do this in train_begin because keras may still not be built
-            wandb.run.summary["graph"] = wandb.Graph.from_keras(self.model)
+            tracklab.run.summary["graph"] = tracklab.Graph.from_keras(self.model)
             self._graph_rendered = True
 
         if self.log_batch_frequency and batch % self.log_batch_frequency == 0:
-            wandb.log(logs, commit=True)
+            tracklab.log(logs, commit=True)
 
     def on_test_begin(self, logs=None):
         pass
@@ -686,7 +686,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
                     validation_data = self.validation_data
                 elif self.generator:
                     if not self.validation_steps:
-                        wandb.termwarn(
+                        tracklab.termwarn(
                             "WandbCallback is unable to log validation data. "
                             "When using a generator for validation_data, you must pass validation_steps"
                         )
@@ -704,7 +704,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
                                 )
                         validation_data = (x, y_true)
                 else:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         "WandbCallback is unable to read validation_data from trainer "
                         "and therefore cannot log validation data. Ensure Keras is properly "
                         "patched by calling `from tracklab.keras import WandbCallback` at the top of your script."
@@ -720,17 +720,17 @@ class WandbCallback(tf.keras.callbacks.Callback):
                         infer_missing_processors=self._infer_missing_processors,
                     )
             except Exception as e:
-                wandb.termwarn(
+                tracklab.termwarn(
                     "Error initializing ValidationDataLogger in WandbCallback. "
                     f"Skipping logging validation data. Error: {str(e)}"
                 )
 
         if self.compute_flops and _can_compute_flops():
             try:
-                wandb.summary["GFLOPs"] = self.get_flops()
+                tracklab.summary["GFLOPs"] = self.get_flops()
             except Exception:
                 logger.exception("Error computing FLOPs")
-                wandb.termwarn("Unable to compute FLOPs for this model.")
+                tracklab.termwarn("Unable to compute FLOPs for this model.")
 
     def on_train_end(self, logs=None):
         if self._model_trained_since_last_eval:
@@ -760,7 +760,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
                 ]
             else:
                 if len(self.labels) != 0:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         "keras model is producing a single output, "
                         'so labels should be a length two array: ["False label", "True label"].'
                     )
@@ -789,7 +789,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
         class_colors = (
             self.class_colors
             if self.class_colors is not None
-            else np.array(wandb.util.class_colors(masks[0].shape[2]))
+            else np.array(tracklab.util.class_colors(masks[0].shape[2]))
         )
         imgs = class_colors[np.argmax(masks, axis=-1)]
         return imgs
@@ -840,11 +840,11 @@ class WandbCallback(tf.keras.callbacks.Callback):
                     else test_output
                 )
                 output_images = [
-                    wandb.Image(data, caption=captions[i], grouping=2)
+                    tracklab.Image(data, caption=captions[i], grouping=2)
                     for i, data in enumerate(output_image_data)
                 ]
                 reference_images = [
-                    wandb.Image(data, caption=captions[i])
+                    tracklab.Image(data, caption=captions[i])
                     for i, data in enumerate(reference_image_data)
                 ]
                 return list(chain.from_iterable(zip(output_images, reference_images)))
@@ -858,7 +858,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
                 # we just use the predicted label as the caption for now
                 captions = self._logits_to_captions(predictions)
                 return [
-                    wandb.Image(data, caption=captions[i])
+                    tracklab.Image(data, caption=captions[i])
                     for i, data in enumerate(test_data)
                 ]
             elif self.output_type in ("image", "images", "segmentation_mask"):
@@ -873,14 +873,14 @@ class WandbCallback(tf.keras.callbacks.Callback):
                     else test_output
                 )
                 input_images = [
-                    wandb.Image(data, grouping=3)
+                    tracklab.Image(data, grouping=3)
                     for i, data in enumerate(input_image_data)
                 ]
                 output_images = [
-                    wandb.Image(data) for i, data in enumerate(output_image_data)
+                    tracklab.Image(data) for i, data in enumerate(output_image_data)
                 ]
                 reference_images = [
-                    wandb.Image(data) for i, data in enumerate(reference_image_data)
+                    tracklab.Image(data) for i, data in enumerate(reference_image_data)
                 ]
                 return list(
                     chain.from_iterable(
@@ -889,7 +889,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
                 )
             else:
                 # unknown output, just log the input images
-                return [wandb.Image(img) for img in test_data]
+                return [tracklab.Image(img) for img in test_data]
         elif self.output_type in ("image", "images", "segmentation_mask"):
             # unknown input, just log the predicted and reference outputs without captions
             output_image_data = (
@@ -903,11 +903,11 @@ class WandbCallback(tf.keras.callbacks.Callback):
                 else test_output
             )
             output_images = [
-                wandb.Image(data, grouping=2)
+                tracklab.Image(data, grouping=2)
                 for i, data in enumerate(output_image_data)
             ]
             reference_images = [
-                wandb.Image(data) for i, data in enumerate(reference_image_data)
+                tracklab.Image(data) for i, data in enumerate(reference_image_data)
             ]
             return list(chain.from_iterable(zip(output_images, reference_images)))
 
@@ -945,7 +945,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
         metrics = {}
         for weight, grad in zip(weights, grads):
             metrics["gradients/" + weight.name.split(":")[0] + ".gradient"] = (
-                wandb.Histogram(grad)
+                tracklab.Histogram(grad)
             )
         return metrics
 
@@ -957,7 +957,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
             y_pred = self.model.predict(x)
         elif self.generator:
             if not self.validation_steps:
-                wandb.termwarn(
+                tracklab.termwarn(
                     "when using a generator for validation data with dataframes, "
                     "you must pass validation_steps. skipping"
                 )
@@ -976,14 +976,14 @@ class WandbCallback(tf.keras.callbacks.Callback):
                     )
 
         if self.input_type in ("image", "images") and self.output_type == "label":
-            return wandb.image_categorizer_dataframe(
+            return tracklab.image_categorizer_dataframe(
                 x=x, y_true=y_true, y_pred=y_pred, labels=self.labels
             )
         elif (
             self.input_type in ("image", "images")
             and self.output_type == "segmentation_mask"
         ):
-            return wandb.image_segmentation_dataframe(
+            return tracklab.image_segmentation_dataframe(
                 x=x,
                 y_true=y_true,
                 y_pred=y_pred,
@@ -991,16 +991,16 @@ class WandbCallback(tf.keras.callbacks.Callback):
                 class_colors=self.class_colors,
             )
         else:
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"unknown dataframe type for input_type={self.input_type} and output_type={self.output_type}"
             )
             return None
 
     def _save_model(self, epoch):
-        if wandb.run.disabled:
+        if tracklab.run.disabled:
             return
         if self.verbose > 0:
-            wandb.termlog(
+            tracklab.termlog(
                 f"Epoch {epoch:05d}: {self.monitor} improved from {self.best:.5f} to {self.current:.5f}, "
                 f"saving model to {self.filepath}"
             )
@@ -1014,13 +1014,13 @@ class WandbCallback(tf.keras.callbacks.Callback):
         # also saw `TypeError: can't pickle _thread.RLock objects`
         except (ImportError, RuntimeError, TypeError, AttributeError):
             logger.exception("Error saving model in the h5py format")
-            wandb.termerror(
+            tracklab.termerror(
                 "Can't save model in the h5py format. The model will be saved as "
                 "as an W&B Artifact in the 'tf' format."
             )
 
     def _save_model_as_artifact(self, epoch):
-        if wandb.run.disabled:
+        if tracklab.run.disabled:
             return
 
         # Save the model in the SavedModel format.
@@ -1029,10 +1029,10 @@ class WandbCallback(tf.keras.callbacks.Callback):
         self.model.save(self.filepath[:-3], overwrite=True, save_format="tf")
 
         # Log the model as artifact.
-        name = wandb.util.make_artifact_name_safe(f"model-{wandb.run.name}")
-        model_artifact = wandb.Artifact(name, type="model")
+        name = tracklab.util.make_artifact_name_safe(f"model-{tracklab.run.name}")
+        model_artifact = tracklab.Artifact(name, type="model")
         model_artifact.add_dir(self.filepath[:-3])
-        wandb.run.log_artifact(model_artifact, aliases=["latest", f"epoch_{epoch}"])
+        tracklab.run.log_artifact(model_artifact, aliases=["latest", f"epoch_{epoch}"])
 
         # Remove the SavedModel from tracklab dir as we don't want to log it to save memory.
         shutil.rmtree(self.filepath[:-3])
@@ -1043,7 +1043,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
         It uses tf.compat.v1.profiler under the hood.
         """
         if not hasattr(self, "model"):
-            raise wandb.Error("self.model must be set before using this method.")
+            raise tracklab.Error("self.model must be set before using this method.")
 
         if not isinstance(
             self.model, (tf.keras.models.Sequential, tf.keras.models.Model)

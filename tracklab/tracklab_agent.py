@@ -252,7 +252,7 @@ class Agent:
                             break
                     logger.info("Cleaning up finished run: %s", run_id)
 
-                    # wandb.teardown() was added with wandb service and is a hammer to make
+                    # tracklab.teardown() was added with wandb service and is a hammer to make
                     # sure that active runs are finished before moving on to another agent run
                     #
                     # In the future, a lighter weight way to implement this could be to keep a

@@ -160,7 +160,7 @@ class ResumeState:
         self.events = 0
         self.output = 0
         self.runtime = 0
-        # tracklab_runtime is the canonical runtime (stored in summary._wandb.runtime)
+        # tracklab_runtime is the canonical runtime (stored in summary._tracklab.runtime)
         self.tracklab_runtime = None
         self.summary = None
         self.config = None
@@ -261,7 +261,7 @@ class SendManager:
         self._entity = None
         self._flags = None
 
-        # State updated by wandb.init
+        # State updated by tracklab.init
         self._run = None
         self._project = None
 
@@ -328,7 +328,7 @@ class SendManager:
         Exclusively used in `sync.py`.
         """
         files_dir = os.path.join(root_dir, "files")
-        settings = wandb.Settings(
+        settings = tracklab.Settings(
             x_files_dir=files_dir,
             root_dir=root_dir,
             # _start_time=0,
@@ -918,7 +918,7 @@ class SendManager:
             # Ensure we have a project to query for status
             if run.project == "":
                 run.project = util.auto_project_name(self._settings.program)
-            # Only check resume status on `wandb.init`
+            # Only check resume status on `tracklab.init`
 
             if do_resume:
                 error = self._setup_resume(run)
@@ -1123,7 +1123,7 @@ class SendManager:
         run_settings = message_to_dict(self._run)
         _settings = dict(self._settings)
         _settings.update(run_settings)
-        wandb._sentry.configure_scope(tags=_settings, process_context="internal")
+        tracklab._sentry.configure_scope(tags=_settings, process_context="internal")
 
         self._fs.start()
         self._pusher = FilePusher(self._api, self._fs, settings=self._settings)
@@ -1606,7 +1606,7 @@ class SendManager:
         if self._fs:
             self._fs.finish(self._exit_code)
             self._fs = None
-        wandb._sentry.end_session()
+        tracklab._sentry.end_session()
 
     def _max_cli_version(self) -> Optional[str]:
         server_info = self.get_server_info()

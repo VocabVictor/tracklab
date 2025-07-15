@@ -34,12 +34,12 @@ def plot_pose_predictions(
     result: Results,
     model_name: str,
     visualize_skeleton: bool,
-    table: Optional[wandb.Table] = None,
+    table: Optional[tracklab.Table] = None,
 ):
     result = result.to("cpu")
     boxes, mean_confidence_map = get_boxes(result)
     annotated_image = annotate_keypoint_results(result, visualize_skeleton)
-    prediction_image = wandb.Image(annotated_image, boxes=boxes)
+    prediction_image = tracklab.Image(annotated_image, boxes=boxes)
     table_row = [
         model_name,
         prediction_image,
@@ -59,10 +59,10 @@ def plot_pose_validation_results(
     model_name: str,
     predictor: PosePredictor,
     visualize_skeleton: bool,
-    table: wandb.Table,
+    table: tracklab.Table,
     max_validation_batches: int,
     epoch: Optional[int] = None,
-) -> wandb.Table:
+) -> tracklab.Table:
     data_idx = 0
     num_dataloader_batches = len(dataloader.dataset) // dataloader.batch_size
     max_validation_batches = min(max_validation_batches, num_dataloader_batches)
@@ -78,7 +78,7 @@ def plot_pose_validation_results(
             table_row = plot_pose_predictions(
                 prediction_result, model_name, visualize_skeleton
             )
-            ground_truth_image = wandb.Image(
+            ground_truth_image = tracklab.Image(
                 annotate_keypoint_batch(
                     batch["im_file"][img_idx],
                     batch["keypoints"][img_idx],

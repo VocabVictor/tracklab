@@ -42,10 +42,10 @@ def roc_curve(
 
     Returns:
         CustomChart: A custom chart object that can be logged to W&B. To log the
-            chart, pass it to `wandb.log()`.
+            chart, pass it to `tracklab.log()`.
 
     Raises:
-        wandb.Error: If numpy, pandas, or scikit-learn are not found.
+        tracklab.Error: If numpy, pandas, or scikit-learn are not found.
 
     Example:
     ```python
@@ -70,8 +70,8 @@ def roc_curve(
     classes_to_plot = [0, 1, 2]
 
     # Initialize a W&B run and log a ROC curve plot for disease classification
-    with wandb.init(project="medical_diagnosis") as run:
-        roc_plot = wandb.plot.roc_curve(
+    with tracklab.init(project="medical_diagnosis") as run:
+        roc_plot = tracklab.plot.roc_curve(
             y_true=y_true,
             y_probas=y_probas,
             labels=disease_labels,
@@ -133,21 +133,21 @@ def roc_curve(
         }
     ).round(3)
 
-    if len(df) > wandb.Table.MAX_ROWS:
-        wandb.termwarn(
-            f"wandb uses only {wandb.Table.MAX_ROWS} data points to create the plots."
+    if len(df) > tracklab.Table.MAX_ROWS:
+        tracklab.termwarn(
+            f"wandb uses only {tracklab.Table.MAX_ROWS} data points to create the plots."
         )
         # different sampling could be applied, possibly to ensure endpoints are kept
         df = sklearn_utils.resample(
             df,
             replace=False,
-            n_samples=wandb.Table.MAX_ROWS,
+            n_samples=tracklab.Table.MAX_ROWS,
             random_state=42,
             stratify=df["class"],
         ).sort_values(["fpr", "tpr", "class"])
 
     return plot_table(
-        data_table=wandb.Table(dataframe=df),
+        data_table=tracklab.Table(dataframe=df),
         vega_spec_name="wandb/area-under-curve/v0",
         fields={
             "x": "fpr",

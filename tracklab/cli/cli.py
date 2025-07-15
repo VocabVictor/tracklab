@@ -43,7 +43,7 @@ from tracklab.sync import SyncManager, get_run_from_path, get_runs
 from .beta import beta
 
 # Send cli logs to wandb/debug-cli.<username>.log by default and fallback to a temp dir.
-_wandb_dir = wandb.old.core.wandb_dir(env.get_dir())
+_wandb_dir = tracklab.old.core.wandb_dir(env.get_dir())
 if not os.path.exists(_wandb_dir):
     _wandb_dir = tempfile.gettempdir()
 
@@ -78,7 +78,7 @@ RUN_CONTEXT = {
 
 
 def cli_unsupported(argument):
-    wandb.termerror(f"Unsupported argument `{argument}`")
+    tracklab.termerror(f"Unsupported argument `{argument}`")
     sys.exit(1)
 
 
@@ -96,17 +96,17 @@ class ClickWandbException(ClickException):
 
 
 def display_error(func):
-    """Function decorator for catching common errors and re-raising as wandb.Error."""
+    """Function decorator for catching common errors and re-raising as tracklab.Error."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except wandb.Error as e:
+        except tracklab.Error as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
             logger.exception("".join(lines))
-            wandb.termerror(f"Find detailed error logs at: {_wandb_log_path}")
+            tracklab.termerror(f"Find detailed error logs at: {_wandb_log_path}")
             click_exc = ClickWandbException(e)
             click_exc.orig_type = exc_type
             raise click_exc.with_traceback(sys.exc_info()[2])
@@ -122,7 +122,7 @@ def _get_cling_api(reset=None):
     global _api
     if reset:
         _api = None
-        wandb.teardown()
+        tracklab.teardown()
     if _api is None:
         # TODO(jhr): make a settings object that is better for non runs.
         # only override the necessary setting
@@ -142,7 +142,7 @@ def prompt_for_project(ctx, entity):
             project = api.upsert_project(project, entity=entity)["name"]
         else:
             project_names = [project["name"] for project in result] + ["Create New"]
-            wandb.termlog("Which project should we use?")
+            tracklab.termlog("Which project should we use?")
             result = util.prompt_choices(project_names)
             if result:
                 project = result
@@ -156,7 +156,7 @@ def prompt_for_project(ctx, entity):
                 # description = editor()
                 project = api.upsert_project(project, entity=entity)["name"]
 
-    except wandb.errors.CommError as e:
+    except tracklab.errors.CommError as e:
         raise ClickException(str(e))
 
     return project
@@ -173,7 +173,7 @@ class RunGroup(click.Group):
 
 
 @click.command(cls=RunGroup, invoke_without_command=True)
-@click.version_option(version=wandb.__version__)
+@click.version_option(version=tracklab.__version__)
 @click.pass_context
 def cli(ctx):
     if ctx.invoked_subcommand is None:
@@ -241,7 +241,7 @@ def login(key, host, cloud, relogin, anonymously, verify, no_offline=False):
     global_settings.x_cli_only_mode = True
     global_settings.x_disable_viewer = relogin and not verify
 
-    wandb.login(
+    tracklab.login(
         anonymous=anon_mode,
         force=True,
         host=host,
@@ -330,7 +330,7 @@ def init(ctx, project, entity, reset, mode):
         click.echo(
             click.style(
                 "We're sorry, there was a problem logging you in. "
-                "Please send us a note at support@wandb.com and tell us how this happened.",
+                "Please send us a note at support@tracklab.com and tell us how this happened.",
                 fg="red",
                 bold=True,
             )
@@ -342,7 +342,7 @@ def init(ctx, project, entity, reset, mode):
         team_names = [e["node"]["name"] for e in viewer["teams"]["edges"]] + [
             "Manual entry"
         ]
-        wandb.termlog(
+        tracklab.termlog(
             "Which team should we use?",
         )
         result = util.prompt_choices(team_names)
@@ -383,7 +383,7 @@ def init(ctx, project, entity, reset, mode):
         """
         ).format(
             code1=click.style("import tracklab", bold=True),
-            code2=click.style(f'wandb.init(project="{project}")', bold=True),
+            code2=click.style(f'tracklab.init(project="{project}")', bold=True),
             run=click.style("python <train.py>", bold=True),
         )
     )
@@ -408,7 +408,7 @@ def init(ctx, project, entity, reset, mode):
     "--sync-tensorboard/--no-sync-tensorboard",
     is_flag=True,
     default=None,
-    help="Stream tfevent files to wandb.",
+    help="Stream tfevent files to tracklab.",
 )
 @click.option("--include-globs", help="Comma separated list of globs to include.")
 @click.option("--exclude-globs", help="Comma separated list of globs to exclude.")
@@ -482,7 +482,7 @@ def sync(
 ):
     api = _get_cling_api()
     if not api.is_authenticated:
-        wandb.termlog("Login to W&B to sync offline runs")
+        tracklab.termlog("Login to W&B to sync offline runs")
         ctx.invoke(login, no_offline=True)
         api = _get_cling_api(reset=True)
 
@@ -513,27 +513,27 @@ def sync(
         for item in all_items:
             (synced if item.synced else unsynced).append(item)
         if sync_items:
-            wandb.termlog(f"Number of runs to be synced: {len(sync_items)}")
+            tracklab.termlog(f"Number of runs to be synced: {len(sync_items)}")
             if show and show < len(sync_items):
-                wandb.termlog(f"Showing {show} runs to be synced:")
+                tracklab.termlog(f"Showing {show} runs to be synced:")
             for item in sync_items[: (show or len(sync_items))]:
-                wandb.termlog(f"  {item}")
+                tracklab.termlog(f"  {item}")
         else:
-            wandb.termlog("No runs to be synced.")
+            tracklab.termlog("No runs to be synced.")
         if synced:
             clean_cmd = click.style("wandb sync --clean", fg="yellow")
-            wandb.termlog(
+            tracklab.termlog(
                 f"NOTE: use {clean_cmd} to delete {len(synced)} synced runs from local directory."
             )
         if unsynced:
             sync_cmd = click.style("wandb sync --sync-all", fg="yellow")
-            wandb.termlog(
+            tracklab.termlog(
                 f"NOTE: use {sync_cmd} to sync {len(unsynced)} unsynced runs from local directory."
             )
 
     def _sync_path(_path, _sync_tensorboard):
         if run_id and len(_path) > 1:
-            wandb.termerror("id can only be set for a single run.")
+            tracklab.termerror("id can only be set for a single run.")
             sys.exit(1)
         sm = SyncManager(
             project=project,
@@ -565,7 +565,7 @@ def sync(
             include_globs=include_globs,
         )
         if not sync_items:
-            wandb.termerror("Nothing to sync.")
+            tracklab.termerror("Nothing to sync.")
         else:
             # When syncing run directories, default to not syncing tensorboard
             sync_tb = sync_tensorboard if sync_tensorboard is not None else False
@@ -720,13 +720,13 @@ def sweep(
         sweep_id = config_yaml_or_sweep_id
         api = _get_cling_api()
         if not api.is_authenticated:
-            wandb.termlog("Login to W&B to use the sweep feature")
+            tracklab.termlog("Login to W&B to use the sweep feature")
             ctx.invoke(login, no_offline=True)
             api = _get_cling_api(reset=True)
         parts = dict(entity=entity, project=project, name=sweep_id)
         err = sweep_utils.parse_sweep_id(parts)
         if err:
-            wandb.termerror(err)
+            tracklab.termerror(err)
             return
         entity = parts.get("entity") or entity
         project = parts.get("project") or project
@@ -738,9 +738,9 @@ def sweep(
             "pause": "Pausing",
             "resume": "Resuming",
         }
-        wandb.termlog(f"{ings[state]} sweep {entity}/{project}/{sweep_id}")
+        tracklab.termlog(f"{ings[state]} sweep {entity}/{project}/{sweep_id}")
         getattr(api, f"{state}_sweep")(sweep_id, entity=entity, project=project)
-        wandb.termlog("Done.")
+        tracklab.termlog("Done.")
         return
     else:
         config_yaml = config_yaml_or_sweep_id
@@ -753,17 +753,17 @@ def sweep(
             for item in settings.split(","):
                 kv = item.split("=")
                 if len(kv) != 2:
-                    wandb.termwarn(
+                    tracklab.termwarn(
                         "Unable to parse sweep settings key value pair", repeat=False
                     )
                 ret.update(dict([kv]))
             return ret
-        wandb.termwarn("Unable to parse settings parameter", repeat=False)
+        tracklab.termwarn("Unable to parse settings parameter", repeat=False)
         return ret
 
     api = _get_cling_api()
     if not api.is_authenticated:
-        wandb.termlog("Login to W&B to use the sweep feature")
+        tracklab.termlog("Login to W&B to use the sweep feature")
         ctx.invoke(login, no_offline=True)
         api = _get_cling_api(reset=True)
 
@@ -772,7 +772,7 @@ def sweep(
         parts = dict(entity=entity, project=project, name=update)
         err = sweep_utils.parse_sweep_id(parts)
         if err:
-            wandb.termerror(err)
+            tracklab.termerror(err)
             return
         entity = parts.get("entity") or entity
         project = parts.get("project") or project
@@ -789,21 +789,21 @@ def sweep(
         )
 
         if not has_entity:
-            wandb.termerror(termerror_msg % (("entity",) * 2))
+            tracklab.termerror(termerror_msg % (("entity",) * 2))
             return
 
         if not has_project:
-            wandb.termerror(termerror_msg % (("project",) * 2))
+            tracklab.termerror(termerror_msg % (("project",) * 2))
             return
 
         found = api.sweep(sweep_id, "{}", entity=entity, project=project)
         if not found:
-            wandb.termerror(f"Could not find sweep {entity}/{project}/{sweep_id}")
+            tracklab.termerror(f"Could not find sweep {entity}/{project}/{sweep_id}")
             return
         sweep_obj_id = found["id"]
 
     action = "Updating" if sweep_obj_id else "Creating"
-    wandb.termlog(f"{action} sweep from: {config_yaml}")
+    tracklab.termlog(f"{action} sweep from: {config_yaml}")
     config = sweep_utils.load_sweep_config(config_yaml)
 
     # Set or override parameters
@@ -827,7 +827,7 @@ def sweep(
         tuner = wandb_controller()
         err = tuner._validate(config)
         if err:
-            wandb.termerror(f"Error in sweep file: {err}")
+            tracklab.termerror(f"Error in sweep file: {err}")
             return
 
     env = os.environ
@@ -856,12 +856,12 @@ def sweep(
 
     # Log nicely formatted sweep information
     styled_id = click.style(sweep_id, fg="yellow")
-    wandb.termlog(f"{action} sweep with ID: {styled_id}")
+    tracklab.termlog(f"{action} sweep with ID: {styled_id}")
 
     sweep_url = wandb_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
     if sweep_url:
         styled_url = click.style(sweep_url, underline=True, fg="blue")
-        wandb.termlog(f"View sweep at: {styled_url}")
+        tracklab.termlog(f"View sweep at: {styled_url}")
 
     # re-probe entity and project if it was auto-detected by upsert_sweep
     entity = entity or env.get("WANDB_ENTITY")
@@ -878,9 +878,9 @@ def sweep(
         sweep_path = f"{sweep_path!r}"
 
     styled_path = click.style(f"wandb agent {sweep_path}", fg="yellow")
-    wandb.termlog(f"Run sweep agent with: {styled_path}")
+    tracklab.termlog(f"Run sweep agent with: {styled_path}")
     if controller:
-        wandb.termlog("Starting wandb controller...")
+        tracklab.termlog("Starting wandb controller...")
         from tracklab import controller as wandb_controller
 
         tuner = wandb_controller(sweep_id)
@@ -940,18 +940,18 @@ def launch_sweep(
     api = _get_cling_api()
     env = os.environ
     if not api.is_authenticated:
-        wandb.termlog("Login to W&B to use the sweep feature")
+        tracklab.termlog("Login to W&B to use the sweep feature")
         ctx.invoke(login, no_offline=True)
         api = _get_cling_api(reset=True)
 
     entity = entity or env.get("WANDB_ENTITY") or api.settings("entity")
     if entity is None:
-        wandb.termerror("Must specify entity when using launch")
+        tracklab.termerror("Must specify entity when using launch")
         return
 
     project = project or env.get("WANDB_PROJECT") or api.settings("project")
     if project is None:
-        wandb.termerror("A project must be configured when using launch")
+        tracklab.termerror("A project must be configured when using launch")
         return
 
     # get personal username, not team name or service account, default to entity
@@ -959,7 +959,7 @@ def launch_sweep(
 
     # if not sweep_config XOR resume_id
     if not (config or resume_id):
-        wandb.termerror("'config' and/or 'resume_id' required")
+        tracklab.termerror("'config' and/or 'resume_id' required")
         return
 
     parsed_user_config = sweep_utils.load_launch_sweep_config(config)
@@ -970,7 +970,7 @@ def launch_sweep(
 
     scheduler_job: Optional[str] = scheduler_args.get("job")
     if scheduler_job:
-        wandb.termwarn(
+        tracklab.termwarn(
             "Using a scheduler job for launch sweeps is *experimental* and may change without warning"
         )
     queue: Optional[str] = queue or launch_args.get("queue")
@@ -985,7 +985,7 @@ def launch_sweep(
             sweep_config["method"] = "custom"
         elif scheduler_job and method != "custom":
             # TODO(gst): Check if using Anaconda2
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Use 'method': 'custom' in the sweep config when using scheduler jobs, "
                 "or omit it entirely. For jobs using the wandb optimization engine (WandbScheduler), "
                 "set the method in the sweep config under scheduler.settings.method "
@@ -999,20 +999,20 @@ def launch_sweep(
     else:  # Resuming an existing sweep
         found = api.sweep(resume_id, "{}", entity=entity, project=project)
         if not found:
-            wandb.termerror(f"Could not find sweep {entity}/{project}/{resume_id}")
+            tracklab.termerror(f"Could not find sweep {entity}/{project}/{resume_id}")
             return
 
         if found.get("state") == "RUNNING":
-            wandb.termerror(
+            tracklab.termerror(
                 f"Cannot resume sweep {entity}/{project}/{resume_id}, it is already running"
             )
             return
 
         sweep_obj_id = found["id"]
         sweep_config = yaml.safe_load(found["config"])
-        wandb.termlog(f"Resuming from existing sweep {entity}/{project}/{resume_id}")
+        tracklab.termlog(f"Resuming from existing sweep {entity}/{project}/{resume_id}")
         if len(parsed_user_config.keys()) > 0:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "Sweep parameters loaded from resumed sweep, ignoring provided config"
             )
 
@@ -1023,7 +1023,7 @@ def launch_sweep(
             and run_spec.get("job")
             and run_spec.get("job") != scheduler_job
         ):
-            wandb.termerror(
+            tracklab.termerror(
                 f"Resuming a launch sweep with a different scheduler job is not supported. Job loaded from sweep: {run_spec.get('job')}, job in config: {scheduler_job}"
             )
             return
@@ -1033,7 +1033,7 @@ def launch_sweep(
         scheduler_args.update(prev_scheduler_args)
         settings.update(prev_settings)
     if not queue:
-        wandb.termerror(
+        tracklab.termerror(
             "Launch-sweeps require setting a 'queue', use --queue option or a 'queue' key in the 'launch' section in the config"
         )
         return
@@ -1075,12 +1075,12 @@ def launch_sweep(
     resource = scheduler_args.get("resource")
     if resource:
         if resource == "local-process" and scheduler_job:
-            wandb.termerror(
+            tracklab.termerror(
                 "Scheduler jobs cannot be run with the 'local-process' resource"
             )
             return
         if resource == "local-process" and scheduler_args.get("docker_image"):
-            wandb.termerror(
+            tracklab.termerror(
                 "Scheduler jobs cannot be run with the 'local-process' resource and a docker image"
             )
             return
@@ -1126,12 +1126,12 @@ def launch_sweep(
     sweep_utils.handle_sweep_config_violations(warnings)
     # Log nicely formatted sweep information
     styled_id = click.style(sweep_id, fg="yellow")
-    wandb.termlog(f"{'Resumed' if resume_id else 'Created'} sweep with ID: {styled_id}")
+    tracklab.termlog(f"{'Resumed' if resume_id else 'Created'} sweep with ID: {styled_id}")
     sweep_url = wandb_sdk.tracklab_sweep._get_sweep_url(api, sweep_id)
     if sweep_url:
         styled_url = click.style(sweep_url, underline=True, fg="blue")
-        wandb.termlog(f"View sweep at: {styled_url}")
-    wandb.termlog(f"Scheduler added to launch queue ({queue})")
+        tracklab.termlog(f"View sweep at: {styled_url}")
+    tracklab.termlog(f"Scheduler added to launch queue ({queue})")
 
 
 @cli.command(help=f"Launch or queue a W&B Job. See {url_registry.url('wandb-launch')}")
@@ -1342,14 +1342,14 @@ def launch(
     queue, run `wandb launch [URI] --queue [optional queuename]`.
     """
     logger.info(
-        f"=== Launch called with kwargs {locals()} CLI Version: {wandb.__version__}==="
+        f"=== Launch called with kwargs {locals()} CLI Version: {tracklab.__version__}==="
     )
     from tracklab.sdk.launch._launch import _launch
     from tracklab.sdk.launch.create_job import _create_job
     from tracklab.sdk.launch.utils import _is_git_uri
 
     api = _get_cling_api()
-    wandb._sentry.configure_scope(process_context="launch_cli")
+    tracklab._sentry.configure_scope(process_context="launch_cli")
 
     if run_async and queue is not None:
         raise LaunchError(
@@ -1389,7 +1389,7 @@ def launch(
     try:
         launch_utils.check_logged_in(api)
     except Exception:
-        wandb.termerror(f"Error running job: {traceback.format_exc()}")
+        tracklab.termerror(f"Error running job: {traceback.format_exc()}")
 
     run_id = config.get("run_id")
 
@@ -1477,15 +1477,15 @@ def launch(
                 "stopped",
                 "preempted",
             ]:
-                wandb.termerror("Launched run exited with non-zero status")
+                tracklab.termerror("Launched run exited with non-zero status")
                 sys.exit(1)
         except LaunchError as e:
             logger.exception("An error occurred.")
-            wandb._sentry.exception(e)
+            tracklab._sentry.exception(e)
             sys.exit(e)
         except ExecutionError as e:
             logger.exception("An error occurred.")
-            wandb._sentry.exception(e)
+            tracklab._sentry.exception(e)
             sys.exit(e)
         except asyncio.CancelledError:
             sys.exit(0)
@@ -1513,7 +1513,7 @@ def launch(
             )
 
         except Exception as e:
-            wandb._sentry.exception(e)
+            tracklab._sentry.exception(e)
             raise
 
 
@@ -1575,7 +1575,7 @@ def launch_agent(
     verbose=0,
 ):
     logger.info(
-        f"=== Launch-agent called with kwargs {locals()}  CLI Version: {wandb.__version__} ==="
+        f"=== Launch-agent called with kwargs {locals()}  CLI Version: {tracklab.__version__} ==="
     )
     if url is not None:
         raise LaunchError(
@@ -1588,7 +1588,7 @@ def launch_agent(
         _launch.set_launch_logfile(log_file)
 
     api = _get_cling_api()
-    wandb._sentry.configure_scope(process_context="launch_agent")
+    tracklab._sentry.configure_scope(process_context="launch_agent")
     agent_config, api = _launch.resolve_agent_config(
         entity, max_jobs, queues, config, verbose
     )
@@ -1600,11 +1600,11 @@ def launch_agent(
 
     launch_utils.check_logged_in(api)
 
-    wandb.termlog("Starting launch agent ✨")
+    tracklab.termlog("Starting launch agent ✨")
     try:
         _launch.create_and_run_agent(api, agent_config)
     except Exception as e:
-        wandb._sentry.exception(e)
+        tracklab._sentry.exception(e)
         raise
 
 
@@ -1630,11 +1630,11 @@ def launch_agent(
 def agent(ctx, project, entity, count, sweep_id):
     api = _get_cling_api()
     if not api.is_authenticated:
-        wandb.termlog("Login to W&B to use the sweep agent feature")
+        tracklab.termlog("Login to W&B to use the sweep agent feature")
         ctx.invoke(login, no_offline=True)
         api = _get_cling_api(reset=True)
 
-    wandb.termlog("Starting wandb agent 🕵️")
+    tracklab.termlog("Starting wandb agent 🕵️")
     wandb_agent.agent(sweep_id, entity=entity, project=project, count=count)
 
     # you can send local commands like so:
@@ -1654,12 +1654,12 @@ def scheduler(
 ):
     api = InternalApi()
     if not api.is_authenticated:
-        wandb.termlog("Login to W&B to use the sweep scheduler feature")
+        tracklab.termlog("Login to W&B to use the sweep scheduler feature")
         ctx.invoke(login, no_offline=True)
         api = InternalApi(reset=True)
 
-    wandb._sentry.configure_scope(process_context="sweep_scheduler")
-    wandb.termlog("Starting a Launch Scheduler 🚀")
+    tracklab._sentry.configure_scope(process_context="sweep_scheduler")
+    tracklab.termlog("Starting a Launch Scheduler 🚀")
     from tracklab.sdk.launch.sweeps import load_scheduler
 
     # TODO(gst): remove this monstrosity
@@ -1682,7 +1682,7 @@ def scheduler(
         )
         _scheduler.start()
     except Exception as e:
-        wandb._sentry.exception(e)
+        tracklab._sentry.exception(e)
         raise
 
 
@@ -1706,16 +1706,16 @@ def job() -> None:
     help="The entity the jobs belong to",
 )
 def _list(project, entity):
-    wandb.termlog(f"Listing jobs in {entity}/{project}")
+    tracklab.termlog(f"Listing jobs in {entity}/{project}")
     public_api = PublicApi()
     try:
         jobs = public_api.list_jobs(entity=entity, project=project)
-    except wandb.errors.CommError as e:
-        wandb.termerror(f"{e}")
+    except tracklab.errors.CommError as e:
+        tracklab.termerror(f"{e}")
         return
 
     if len(jobs) == 0:
-        wandb.termlog("No jobs found")
+        tracklab.termlog("No jobs found")
         return
 
     for job in jobs:
@@ -1730,7 +1730,7 @@ def _list(project, entity):
 
         # only list the most recent 10 job versions
         aliases_str = ",".join(aliases[::-1])
-        wandb.termlog(f"{name} -- versions ({len(aliases)}): {aliases_str}")
+        tracklab.termlog(f"{name} -- versions ({len(aliases)}): {aliases_str}")
 
 
 @job.command(
@@ -1741,14 +1741,14 @@ def describe(job):
     public_api = PublicApi()
     try:
         job = public_api.job(name=job)
-    except wandb.errors.CommError as e:
-        wandb.termerror(f"{e}")
+    except tracklab.errors.CommError as e:
+        tracklab.termerror(f"{e}")
         return
 
     for key in job._job_info:
         if key.startswith("_"):
             continue
-        wandb.termlog(f"{key}: {job._job_info[key]}")
+        tracklab.termlog(f"{key}: {job._job_info[key]}")
 
 
 @job.command(
@@ -1856,26 +1856,26 @@ def create(
     from tracklab.sdk.launch.create_job import _create_job
 
     api = _get_cling_api()
-    wandb._sentry.configure_scope(process_context="job_create")
+    tracklab._sentry.configure_scope(process_context="job_create")
 
     entity = entity or os.getenv("WANDB_ENTITY") or api.default_entity
     if not entity:
-        wandb.termerror("No entity provided, use --entity or set WANDB_ENTITY")
+        tracklab.termerror("No entity provided, use --entity or set WANDB_ENTITY")
         return
 
     project = project or os.getenv("WANDB_PROJECT")
     if not project:
-        wandb.termerror("No project provided, use --project or set WANDB_PROJECT")
+        tracklab.termerror("No project provided, use --project or set WANDB_PROJECT")
         return
 
     if entrypoint is None and job_type in ["git", "code"]:
-        wandb.termwarn(
+        tracklab.termwarn(
             f"No entrypoint provided for {job_type} job, defaulting to main.py"
         )
         entrypoint = "main.py"
 
     if job_type == "image" and base_image:
-        wandb.termerror("Cannot provide --base-image/-B for an `image` job")
+        tracklab.termerror("Cannot provide --base-image/-B for an `image` job")
         return
 
     artifact, action, aliases = _create_job(
@@ -1895,7 +1895,7 @@ def create(
         dockerfile=dockerfile,
     )
     if not artifact:
-        wandb.termerror("Job creation failed")
+        tracklab.termerror("Job creation failed")
         return
 
     artifact_path = f"{entity}/{project}/{artifact.name}"
@@ -1907,10 +1907,10 @@ def create(
         alias_str = click.style(", ".join(aliases), fg="yellow")
         msg += f", with aliases: {alias_str}"
 
-    wandb.termlog(msg)
+    tracklab.termlog(msg)
     web_url = util.app_url(api.settings().get("base_url"))
     url = click.style(f"{web_url}/{entity}/{project}/jobs", underline=True)
-    wandb.termlog(f"View all jobs in project '{project}' here: {url}\n")
+    tracklab.termlog(f"View all jobs in project '{project}' here: {url}\n")
 
 
 @cli.command(context_settings=CONTEXT, help="Run the W&B local sweep controller")
@@ -1949,17 +1949,17 @@ def docker_run(ctx, docker_run_args):
     image = util.image_from_docker_args(args)
     resolved_image = None
     if image:
-        resolved_image = wandb.docker.image_id(image)
+        resolved_image = tracklab.docker.image_id(image)
     if resolved_image:
         args = ["-e", f"WANDB_DOCKER={resolved_image}"] + args
     else:
-        wandb.termlog(
+        tracklab.termlog(
             "Couldn't detect image argument, running command without the WANDB_DOCKER env variable"
         )
     if api.api_key:
         args = ["-e", f"WANDB_API_KEY={api.api_key}"] + args
     else:
-        wandb.termlog(
+        tracklab.termlog(
             "Not logged in, run `wandb login` from the host machine to enable result logging"
         )
     subprocess.call(["docker", "run"] + args)
@@ -2044,11 +2044,11 @@ def docker(
     if not util.docker_image_regex(image.split("@")[0]):
         if image:
             args = args + [image]
-        image = wandb.docker.default_image(gpu=nvidia)
+        image = tracklab.docker.default_image(gpu=nvidia)
         subprocess.call(["docker", "pull", image])
-    _, repo_name, tag = wandb.docker.parse(image)
+    _, repo_name, tag = tracklab.docker.parse(image)
 
-    resolved_image = wandb.docker.image_id(image)
+    resolved_image = tracklab.docker.image_id(image)
     if resolved_image is None:
         raise ClickException(
             f"Couldn't find image locally or in a registry, try running `docker pull {image}`"
@@ -2057,7 +2057,7 @@ def docker(
         sys.stdout.write(resolved_image)
         exit(0)
 
-    existing = wandb.docker.shell(["ps", "-f", f"ancestor={resolved_image}", "-q"])
+    existing = tracklab.docker.shell(["ps", "-f", f"ancestor={resolved_image}", "-q"])
     if existing:
         if click.confirm(
             "Found running container with the same image, do you want to attach?"
@@ -2074,7 +2074,7 @@ def docker(
         f"WANDB_DOCKER={resolved_image}",
         "--ipc=host",
         "-v",
-        wandb.docker.entrypoint + ":/wandb-entrypoint.sh",
+        tracklab.docker.entrypoint + ":/wandb-entrypoint.sh",
         "--entrypoint",
         "/wandb-entrypoint.sh",
     ]
@@ -2086,7 +2086,7 @@ def docker(
     if api.api_key:
         command.extend(["-e", f"WANDB_API_KEY={api.api_key}"])
     else:
-        wandb.termlog(
+        tracklab.termlog(
             "Couldn't find WANDB_API_KEY, run `wandb login` to enable streaming metrics"
         )
     if jupyter:
@@ -2100,7 +2100,7 @@ def docker(
         if cmd:
             command.extend(["-e", f"WANDB_COMMAND={cmd}"])
         command.extend(["-it", image, shell])
-        wandb.termlog("Launching docker container \U0001f6a2")
+        tracklab.termlog("Launching docker container \U0001f6a2")
     subprocess.call(command)
 
 
@@ -2125,7 +2125,7 @@ def docker(
 )
 @display_error
 def local(ctx, *args, **kwargs):
-    wandb.termwarn("`wandb local` has been replaced with `wandb server start`.")
+    tracklab.termwarn("`wandb local` has been replaced with `wandb server start`.")
     ctx.invoke(start, *args, **kwargs)
 
 
@@ -2163,15 +2163,15 @@ def start(ctx, port, env, daemon, upgrade, edge):
 
     import tracklab.docker
 
-    local_image_sha = wandb.docker.image_id("wandb/local").split("wandb/local")[-1]
-    registry_image_sha = wandb.docker.image_id_from_registry("wandb/local").split(
+    local_image_sha = tracklab.docker.image_id("wandb/local").split("wandb/local")[-1]
+    registry_image_sha = tracklab.docker.image_id_from_registry("wandb/local").split(
         "wandb/local"
     )[-1]
     if local_image_sha != registry_image_sha:
         if upgrade:
             subprocess.call(["docker", "pull", "wandb/local"])
         else:
-            wandb.termlog(
+            tracklab.termlog(
                 "A new version of the W&B server is available, upgrade by calling `wandb server start --upgrade`"
             )
     running = subprocess.check_output(
@@ -2181,7 +2181,7 @@ def start(ctx, port, env, daemon, upgrade, edge):
         if upgrade:
             subprocess.call(["docker", "stop", "wandb-local"])
         else:
-            wandb.termerror(
+            tracklab.termerror(
                 "A container named wandb-local is already running, run `docker stop wandb-local` if you want to start a new instance"
             )
             exit(1)
@@ -2216,13 +2216,13 @@ def start(ctx, port, env, daemon, upgrade, edge):
     code = subprocess.call(command, stdout=DEVNULL)
     if daemon:
         if code != 0:
-            wandb.termerror(
+            tracklab.termerror(
                 "Failed to launch the W&B server container, see the above error."
             )
             exit(1)
         else:
-            wandb.termlog(f"W&B server started at http://localhost:{port} \U0001f680")
-            wandb.termlog("You can stop the server by running `wandb server stop`")
+            tracklab.termlog(f"W&B server started at http://localhost:{port} \U0001f680")
+            tracklab.termlog("You can stop the server by running `wandb server stop`")
             if not api.api_key:
                 # Let the server start before potentially launching a browser
                 time.sleep(2)
@@ -2296,23 +2296,23 @@ def put(
     api = InternalApi()
     api.set_setting("entity", entity)
     api.set_setting("project", project)
-    artifact = wandb.Artifact(name=artifact_name, type=type, description=description)
+    artifact = tracklab.Artifact(name=artifact_name, type=type, description=description)
     artifact_path = f"{entity}/{project}/{artifact_name}:{alias[0]}"
     if os.path.isdir(path):
-        wandb.termlog(f'Uploading directory {path} to: "{artifact_path}" ({type})')
+        tracklab.termlog(f'Uploading directory {path} to: "{artifact_path}" ({type})')
         artifact.add_dir(path, skip_cache=skip_cache, policy=policy)
     elif os.path.isfile(path):
-        wandb.termlog(f'Uploading file {path} to: "{artifact_path}" ({type})')
+        tracklab.termlog(f'Uploading file {path} to: "{artifact_path}" ({type})')
         artifact.add_file(path, skip_cache=skip_cache, policy=policy)
     elif "://" in path:
-        wandb.termlog(
+        tracklab.termlog(
             f'Logging reference artifact from {path} to: "{artifact_path}" ({type})'
         )
         artifact.add_reference(path)
     else:
         raise ClickException("Path argument must be a file or directory")
 
-    with wandb.init(
+    with tracklab.init(
         entity=entity,
         project=project,
         config={"path": path},
@@ -2323,10 +2323,10 @@ def put(
         run.log_artifact(artifact, aliases=alias)
     artifact.wait()
 
-    wandb.termlog(
+    tracklab.termlog(
         "Artifact uploaded, use this artifact in a run by adding:\n", prefix=False
     )
-    wandb.termlog(
+    tracklab.termlog(
         f'    artifact = run.use_artifact("{artifact.source_qualified_name}")\n',
         prefix=False,
     )
@@ -2360,14 +2360,14 @@ def get(path, root, type):
                 entity=settings_entity, organization=organization
             )
         full_path = f"{entity}/{project}/{artifact_name}:{version}"
-        wandb.termlog(
+        tracklab.termlog(
             "Downloading {type} artifact {full_path}".format(
                 type=type or "dataset", full_path=full_path
             )
         )
         artifact = public_api.artifact(full_path, type=type)
         path = artifact.download(root=root)
-        wandb.termlog(f"Artifact downloaded to {path}")
+        tracklab.termlog(f"Artifact downloaded to {path}")
     except ValueError:
         raise ClickException("Unable to download artifact")
 
@@ -2393,7 +2393,7 @@ def ls(path, type):
                 per_page=1,
             )
             latest = next(versions)
-            wandb.termlog(
+            tracklab.termlog(
                 f"{kind.type:<15s}{latest.updated_at:<15s}{util.to_human_size(latest.size):>15s} {latest.name:<20s}"
             )
 
@@ -2414,7 +2414,7 @@ def cleanup(target_size, remove_temp):
     target_size = util.from_human_size(target_size)
     cache = get_artifact_file_cache()
     reclaimed_bytes = cache.cleanup(target_size, remove_temp)
-    wandb.termlog(f"Reclaimed {util.to_human_size(reclaimed_bytes)} of space")
+    tracklab.termlog(f"Reclaimed {util.to_human_size(reclaimed_bytes)} of space")
 
 
 @cli.command(context_settings=CONTEXT, help="Pull files from Weights & Biases")
@@ -2504,17 +2504,17 @@ Run `git clone {repo}` and restore from there or pass the --no-git flag."""
         if repo:
             raise ClickException(restore_message)
         elif image:
-            wandb.termlog(
+            tracklab.termlog(
                 "Original run has no git history.  Just restoring config and docker"
             )
 
     if commit and api.git.enabled:
-        wandb.termlog(f"Fetching origin and finding commit: {commit}")
+        tracklab.termlog(f"Fetching origin and finding commit: {commit}")
         subprocess.check_call(["git", "fetch", "--all"])
         try:
             api.git.repo.commit(commit)
         except ValueError:
-            wandb.termlog(f"Couldn't find original commit: {commit}")
+            tracklab.termlog(f"Couldn't find original commit: {commit}")
             commit = None
             files = api.download_urls(project, run=run, entity=entity)
             for filename in files:
@@ -2530,7 +2530,7 @@ Run `git clone {repo}` and restore from there or pass the --no-git flag."""
                         break
 
             if commit:
-                wandb.termlog(f"Falling back to upstream commit: {commit}")
+                tracklab.termlog(f"Falling back to upstream commit: {commit}")
                 patch_path, _ = api.download_write_file(files[filename])
             else:
                 raise ClickException(restore_message)
@@ -2545,14 +2545,14 @@ Run `git clone {repo}` and restore from there or pass the --no-git flag."""
         branch_name = f"wandb/{run}"
         if branch and branch_name not in api.git.repo.branches:
             api.git.repo.git.checkout(commit, b=branch_name)
-            wandb.termlog(f"Created branch {click.style(branch_name, bold=True)}")
+            tracklab.termlog(f"Created branch {click.style(branch_name, bold=True)}")
         elif branch:
-            wandb.termlog(
+            tracklab.termlog(
                 f"Using existing branch, run `git branch -D {branch_name}` from master for a clean checkout"
             )
             api.git.repo.git.checkout(branch_name)
         else:
-            wandb.termlog(f"Checking out {commit} in detached mode")
+            tracklab.termlog(f"Checking out {commit} in detached mode")
             api.git.repo.git.checkout(commit)
 
         if patch_path:
@@ -2566,9 +2566,9 @@ Run `git clone {repo}` and restore from there or pass the --no-git flag."""
                 ["git", "apply", "--reject", patch_rel_path], cwd=root
             )
             if exit_code == 0:
-                wandb.termlog("Applied patch")
+                tracklab.termlog("Applied patch")
             else:
-                wandb.termerror(
+                tracklab.termerror(
                     "Failed to apply patch, try un-staging any un-committed changes"
                 )
 
@@ -2590,7 +2590,7 @@ Run `git clone {repo}` and restore from there or pass the --no-git flag."""
     with open(config_path, "w") as f:
         f.write(s)
 
-    wandb.termlog(f"Restored config variables to {config_path}")
+    tracklab.termlog(f"Restored config variables to {config_path}")
     if image:
         if not metadata["program"].startswith("<") and metadata.get("args") is not None:
             # TODO: we may not want to default to python here.
@@ -2598,9 +2598,9 @@ Run `git clone {repo}` and restore from there or pass the --no-git flag."""
             command = runner + [metadata["program"]] + metadata["args"]
             cmd = " ".join(command)
         else:
-            wandb.termlog("Couldn't find original command, just restoring environment")
+            tracklab.termlog("Couldn't find original command, just restoring environment")
             cmd = None
-        wandb.termlog("Docker image found, attempting to start")
+        tracklab.termlog("Docker image found, attempting to start")
         ctx.invoke(docker, docker_run_args=[image], cmd=cmd)
 
     return commit, json_config, patch_content, repo, metadata
@@ -2710,18 +2710,18 @@ def verify(host):
     reinit = False
     if host is None:
         host = api.settings("base_url")
-        wandb.termlog(f"Default host selected: {host}")
+        tracklab.termlog(f"Default host selected: {host}")
     # if the given host does not match the default host, re-run init
     elif host != api.settings("base_url"):
         reinit = True
 
     tmp_dir = tempfile.mkdtemp()
-    wandb.termlog(
+    tracklab.termlog(
         "Find detailed logs for this test at: {}".format(os.path.join(tmp_dir, "wandb"))
     )
     os.chdir(tmp_dir)
     os.environ["WANDB_BASE_URL"] = host
-    wandb.login(host=host)
+    tracklab.login(host=host)
     if reinit:
         api = _get_cling_api(reset=True)
     if not wandb_verify.check_host(host):

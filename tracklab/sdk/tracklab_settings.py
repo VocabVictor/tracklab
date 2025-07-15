@@ -214,7 +214,7 @@ class Settings(BaseModel, validate_assignment=True):
     azure_account_url_to_access_key: Optional[Dict[str, str]] = None
     """Mapping of Azure account URLs to their corresponding access keys for Azure integration."""
 
-    base_url: str = "https://api.wandb.ai"
+    base_url: str = "https://api.tracklab.ai"
     """The URL of the W&B backend for data synchronization."""
 
     code_dir: Optional[str] = None
@@ -277,7 +277,7 @@ class Settings(BaseModel, validate_assignment=True):
     """The W&B organization."""
 
     force: bool = False
-    """Whether to pass the `force` flag to `wandb.login()`."""
+    """Whether to pass the `force` flag to `tracklab.login()`."""
 
     fork_from: Optional[RunMoment] = None
     """Specifies a point in a previous execution of a run to fork from.
@@ -320,7 +320,7 @@ class Settings(BaseModel, validate_assignment=True):
     """Unix glob patterns relative to `files_dir` specifying files to exclude from upload."""
 
     init_timeout: float = 90.0
-    """Time in seconds to wait for the `wandb.init` call to complete before timing out."""
+    """Time in seconds to wait for the `tracklab.init` call to complete before timing out."""
 
     insecure_disable_ssl: bool = False
     """Whether to insecurely disable SSL verification."""
@@ -384,17 +384,17 @@ class Settings(BaseModel, validate_assignment=True):
         ],
         bool,
     ] = "default"
-    """What to do when `wandb.init()` is called while a run is active.
+    """What to do when `tracklab.init()` is called while a run is active.
 
     Options:
     - "default": Use "finish_previous" in notebooks and "return_previous"
         otherwise.
     - "return_previous": Return the most recently created run
-        that is not yet finished. This does not update `wandb.run`; see
+        that is not yet finished. This does not update `tracklab.run`; see
         the "create_new" option.
     - "finish_previous": Finish all active runs, then return a new run.
     - "create_new": Create a new run without modifying other active runs.
-        Does not update `wandb.run` and top-level functions like `wandb.log`.
+        Does not update `tracklab.run` and top-level functions like `tracklab.log`.
         Because of this, some older integrations that rely on the global run
         will not work.
 
@@ -1010,14 +1010,14 @@ class Settings(BaseModel, validate_assignment=True):
     @classmethod
     def validate_base_url(cls, value):
         validate_url(value)
-        # wandb.ai-specific checks
+        # tracklab.ai-specific checks
         if re.match(r".*wandb\.ai[^\.]*$", value) and "api." not in value:
-            # user might guess app.wandb.ai or wandb.ai is the default cloud server
+            # user might guess app.tracklab.ai or tracklab.ai is the default cloud server
             raise ValueError(
-                f"{value} is not a valid server address, did you mean https://api.wandb.ai?"
+                f"{value} is not a valid server address, did you mean https://api.tracklab.ai?"
             )
         elif re.match(r".*wandb\.ai[^\.]*$", value) and not value.startswith("https"):
-            raise ValueError("http is not secure, please use https://api.wandb.ai")
+            raise ValueError("http is not secure, please use https://api.tracklab.ai")
         return value.rstrip("/")
 
     @field_validator("code_dir", mode="before")
@@ -1232,9 +1232,9 @@ class Settings(BaseModel, validate_assignment=True):
     def validate_start_method(cls, value):
         if value is None:
             return value
-        wandb.termwarn(
+        tracklab.termwarn(
             "`start_method` is deprecated and will be removed in a future version "
-            "of wandb. This setting is currently non-functional and safely ignored.",
+            "of tracklab. This setting is currently non-functional and safely ignored.",
             repeat=False,
         )
         return value
@@ -1450,7 +1450,7 @@ class Settings(BaseModel, validate_assignment=True):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def is_local(self) -> bool:
-        return str(self.base_url) != "https://api.wandb.ai"
+        return str(self.base_url) != "https://api.tracklab.ai"
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -1646,7 +1646,7 @@ class Settings(BaseModel, validate_assignment=True):
 
         # Attempt to get notebook information if not already set by the user
         if self._jupyter and (self.notebook_name is None or self.notebook_name == ""):
-            meta = wandb.jupyter.notebook_metadata(self.silent)  # type: ignore
+            meta = tracklab.jupyter.notebook_metadata(self.silent)  # type: ignore
             self.x_jupyter_path = meta.get("path")
             self.x_jupyter_name = meta.get("name")
             self.x_jupyter_root = meta.get("root")
@@ -1659,7 +1659,7 @@ class Settings(BaseModel, validate_assignment=True):
             self.x_jupyter_name = self.notebook_name
             self.x_jupyter_root = os.getcwd()
         elif self._jupyter:
-            wandb.termwarn(
+            tracklab.termwarn(
                 "WANDB_NOTEBOOK_NAME should be a path to a notebook file, "
                 f"couldn't find {self.notebook_name}.",
             )

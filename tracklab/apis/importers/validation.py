@@ -11,10 +11,10 @@ logger.setLevel(logging.INFO)
 
 
 def _compare_artifact_manifests(
-    src_art: wandb.Artifact, dst_art: wandb.Artifact
+    src_art: tracklab.Artifact, dst_art: tracklab.Artifact
 ) -> list:
     problems = []
-    if isinstance(dst_art, wandb.CommError):
+    if isinstance(dst_art, tracklab.CommError):
         return ["commError"]
 
     if src_art.digest != dst_art.digest:

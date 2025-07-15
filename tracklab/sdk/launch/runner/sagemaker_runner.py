@@ -57,7 +57,7 @@ class SagemakerSubmittedRun(AbstractRun):
                 logStreamNamePrefix=self.training_job_name,
             )
             if len(describe_res["logStreams"]) == 0:
-                wandb.termwarn(
+                tracklab.termwarn(
                     f"Failed to get logs for training job: {self.training_job_name}"
                 )
                 return None
@@ -72,12 +72,12 @@ class SagemakerSubmittedRun(AbstractRun):
                 [f"{event['timestamp']}:{event['message']}" for event in res["events"]]
             )
         except self.log_client.exceptions.ResourceNotFoundException:
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Failed to get logs for training job: {self.training_job_name}"
             )
             return None
         except Exception as e:
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Failed to handle logs for training job: {self.training_job_name} with error {str(e)}"
             )
             return None
@@ -85,7 +85,7 @@ class SagemakerSubmittedRun(AbstractRun):
     async def wait(self) -> bool:
         while True:
             status_state = (await self.get_status()).state
-            wandb.termlog(
+            tracklab.termlog(
                 f"{LOG_PREFIX}Training job {self.training_job_name} status: {status_state}"
             )
             if status_state in ["stopped", "failed", "finished"]:
@@ -190,7 +190,7 @@ class SageMakerRunner(AbstractRunner):
         try:
             log_client = session.client("logs")
         except Exception as e:
-            wandb.termwarn(
+            tracklab.termwarn(
                 f"Failed to connect to cloudwatch logs with error {str(e)}, logs will not be available"
             )
 
@@ -231,11 +231,11 @@ class SageMakerRunner(AbstractRunner):
         command_args += launch_project.override_args
         if command_args:
             command_str = " ".join(command_args)
-            wandb.termlog(
+            tracklab.termlog(
                 f"{LOG_PREFIX}Launching run on sagemaker with entrypoint: {command_str}"
             )
         else:
-            wandb.termlog(
+            tracklab.termlog(
                 f"{LOG_PREFIX}Launching run on sagemaker with user-provided entrypoint in image"
             )
         sagemaker_args = build_sagemaker_args(
@@ -395,11 +395,11 @@ async def launch_sagemaker_job(
         raise LaunchError("Failed to create training job when submitting to SageMaker")
 
     run = SagemakerSubmittedRun(training_job_name, sagemaker_client, log_client)
-    wandb.termlog(
+    tracklab.termlog(
         f"{LOG_PREFIX}Run job submitted with arn: {resp.get('TrainingJobArn')}"
     )
     url = f"https://{sagemaker_client.meta.region_name}.console.aws.amazon.com/sagemaker/home?region={sagemaker_client.meta.region_name}#/jobs/{training_job_name}"
-    wandb.termlog(f"{LOG_PREFIX}See training job status at: {url}")
+    tracklab.termlog(f"{LOG_PREFIX}See training job status at: {url}")
     return run
 
 

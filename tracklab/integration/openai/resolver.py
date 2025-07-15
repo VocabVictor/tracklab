@@ -22,7 +22,7 @@ class UsageMetrics:
 @dataclass
 class Metrics:
     usage: UsageMetrics = None
-    stats: wandb.Table = None
+    stats: tracklab.Table = None
     trace: trace_tree.WBTraceTree = None
 
 
@@ -46,7 +46,7 @@ class OpenAIRequestResponseResolver:
         if not self.define_metrics_called:
             # define metrics on first call
             for key in usage_metric_keys:
-                wandb.define_metric(key, step_metric="_timestamp")
+                tracklab.define_metric(key, step_metric="_timestamp")
             self.define_metrics_called = True
 
         try:
@@ -214,11 +214,11 @@ class OpenAIRequestResponseResolver:
                 ),
                 "request_id": response.get("id", None),
                 "api_type": response.get("api_type", "openai"),
-                "session_id": wandb.run.id,
+                "session_id": tracklab.run.id,
             }
             row.update(asdict(usage_metrics))
             usage.append(row)
-        usage_table = wandb.Table(
+        usage_table = tracklab.Table(
             columns=list(usage[0].keys()),
             data=[(item.values()) for item in usage],
         )

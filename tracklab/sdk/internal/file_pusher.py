@@ -101,7 +101,7 @@ class FilePusher:
             line = f" {summary.uploaded_bytes / 1048576.0:.2f}MB of {summary.total_bytes / 1048576.0:.2f}MB uploaded ({summary.deduped_bytes / 1048576.0:.2f}MB deduped)\r"
             line = spinner_states[step % 4] + line
             step += 1
-            wandb.termlog(line, newline=False, prefix=prefix)
+            tracklab.termlog(line, newline=False, prefix=prefix)
             if stop:
                 break
             time.sleep(0.25)
@@ -111,13 +111,13 @@ class FilePusher:
             else 0
         )
         if dedupe_fraction > 0.01:
-            wandb.termlog(
+            tracklab.termlog(
                 "W&B sync reduced upload amount by %.1f%%             "
                 % (dedupe_fraction * 100),
                 prefix=prefix,
             )
         # clear progress line.
-        wandb.termlog(" " * 79, prefix=prefix)
+        tracklab.termlog(" " * 79, prefix=prefix)
 
     def file_counts_by_category(self) -> stats.FileCountsByCategory:
         return self._stats.file_counts_by_category()

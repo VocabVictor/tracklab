@@ -21,7 +21,7 @@ import tracklab.util
 from tracklab.proto.tracklab_deprecated import Deprecated
 from tracklab.sdk.lib import deprecate
 
-langchain = wandb.util.get_module(
+langchain = tracklab.util.get_module(
     name="langchain",
     required="To use the LangChain WandbTracer you need to have the `langchain` python "
     "package installed. Please install it with `pip install langchain`.",

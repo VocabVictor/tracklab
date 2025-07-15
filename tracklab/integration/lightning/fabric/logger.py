@@ -27,7 +27,7 @@ try:
     from torch.nn import Module
 
     if version.parse(lightning.__version__) > version.parse("2.1.3"):
-        wandb.termwarn(
+        tracklab.termwarn(
             """This integration is tested and supported for lightning Fabric 2.1.3.
             Please report any issues to https://github.com/wandb/wandb/issues with the tag `lightning-fabric`.""",
             repeat=False,
@@ -37,11 +37,11 @@ try:
         from lightning.pytorch.callbacks.model_checkpoint import ModelCheckpoint
 
 except ImportError as e:
-    wandb.Error(e)
+    tracklab.Error(e)
 
 
 class WandbLogger(Logger):
-    r"""Log using `Weights and Biases <https://docs.wandb.ai/integrations/lightning>`_.
+    r"""Log using `Weights and Biases <https://docs.tracklab.ai/integrations/lightning>`_.
 
     **Installation and set-up**
 
@@ -65,7 +65,7 @@ class WandbLogger(Logger):
 
         trainer = Trainer(logger=wandb_logger)
 
-    A new W&B run will be created when training starts if you have not created one manually before with `wandb.init()`.
+    A new W&B run will be created when training starts if you have not created one manually before with `tracklab.init()`.
 
     **Log metrics**
 
@@ -81,7 +81,7 @@ class WandbLogger(Logger):
 
     .. code-block:: python
 
-        wandb.log({"train/loss": loss})
+        tracklab.log({"train/loss": loss})
 
     **Log hyper-parameters**
 
@@ -104,8 +104,8 @@ class WandbLogger(Logger):
         wandb_logger.experiment.config.update({key1: val1, key2: val2})
 
         # use directly wandb module
-        wandb.config["key"] = value
-        wandb.config.update()
+        tracklab.config["key"] = value
+        tracklab.config.update()
 
     **Log gradients, parameters and model topology**
 
@@ -163,7 +163,7 @@ class WandbLogger(Logger):
         checkpoint_reference = "USER/PROJECT/MODEL-RUN_ID:VERSION"
 
         # download checkpoint locally (if not already cached)
-        run = wandb.init(project="MNIST")
+        run = tracklab.init(project="MNIST")
         artifact = run.use_artifact(checkpoint_reference, type="model")
         artifact_dir = artifact.download()
 
@@ -200,11 +200,11 @@ class WandbLogger(Logger):
         wandb_logger.log_image(key="samples", images=["img_1.jpg", "img_2.jpg"])
 
     More arguments can be passed for logging segmentation masks and bounding boxes. Refer to
-    `Image Overlays documentation <https://docs.wandb.ai/guides/track/log/media#image-overlays>`_.
+    `Image Overlays documentation <https://docs.tracklab.ai/guides/track/log/media#image-overlays>`_.
 
     **Log Tables**
 
-    `W&B Tables <https://docs.wandb.ai/guides/tables/visualize-tables>`_ can be used to log,
+    `W&B Tables <https://docs.tracklab.ai/guides/tables/visualize-tables>`_ can be used to log,
     query and analyze tabular data.
 
     They support any type of media (text, image, video, audio, molecule, html, etc) and are great for storing,
@@ -214,8 +214,8 @@ class WandbLogger(Logger):
 
         columns = ["caption", "image", "sound"]
         data = [
-            ["cheese", wandb.Image(img_1), wandb.Audio(snd_1)],
-            ["wine", wandb.Image(img_2), wandb.Audio(snd_2)],
+            ["cheese", tracklab.Image(img_1), tracklab.Audio(snd_1)],
+            ["wine", tracklab.Image(img_2), tracklab.Audio(snd_2)],
         ]
         wandb_logger.log_table(key="samples", columns=columns, data=data)
 
@@ -245,8 +245,8 @@ class WandbLogger(Logger):
         wandb_logger.use_artifact(artifact="path/to/artifact")
 
     See Also:
-        - `Demo in Google Colab <http://wandb.me/lightning>`__ with hyperparameter search and model logging
-        - `W&B Documentation <https://docs.wandb.ai/integrations/lightning>`__
+        - `Demo in Google Colab <http://tracklab.me/lightning>`__ with hyperparameter search and model logging
+        - `W&B Documentation <https://docs.tracklab.ai/integrations/lightning>`__
 
     Args:
         name: Display name for the run.
@@ -272,7 +272,7 @@ class WandbLogger(Logger):
         checkpoint_name: Name of the model checkpoint artifact being logged.
         log_checkpoint_on: When to log model checkpoints as W&B artifacts. Only used if ``log_model`` is ``True``.
             Options: ``"success"``, ``"all"``. Default: ``"success"``.
-        \**kwargs: Arguments passed to :func:`wandb.init` like `entity`, `group`, `tags`, etc.
+        \**kwargs: Arguments passed to :func:`tracklab.init` like `entity`, `group`, `tags`, etc.
 
     Raises:
         ModuleNotFoundError:
@@ -380,19 +380,19 @@ class WandbLogger(Logger):
                 os.environ["WANDB_MODE"] = "dryrun"
 
             attach_id = getattr(self, "_attach_id", None)
-            if wandb.run is not None:
+            if tracklab.run is not None:
                 # wandb process already created in this instance
                 rank_zero_warn(
                     "There is a wandb run already in progress and newly created instances of `WandbLogger` will reuse"
-                    " this run. If this is not desired, call `wandb.finish()` before instantiating `WandbLogger`."
+                    " this run. If this is not desired, call `tracklab.finish()` before instantiating `WandbLogger`."
                 )
-                self._experiment = wandb.run
+                self._experiment = tracklab.run
             elif attach_id is not None and hasattr(wandb, "_attach"):
                 # attach to wandb process referenced
-                self._experiment = wandb._attach(attach_id)
+                self._experiment = tracklab._attach(attach_id)
             else:
                 # create new wandb process
-                self._experiment = wandb.init(**self._tracklab_init)
+                self._experiment = tracklab.init(**self._tracklab_init)
 
                 # define default x-axis
                 if isinstance(self._experiment, Run) and getattr(
@@ -451,7 +451,7 @@ class WandbLogger(Logger):
         Can be defined either with `columns` and `data` or with `dataframe`.
 
         """
-        metrics = {key: wandb.Table(columns=columns, data=data, dataframe=dataframe)}
+        metrics = {key: tracklab.Table(columns=columns, data=data, dataframe=dataframe)}
         self.log_metrics(metrics, step)
 
     @rank_zero_only
@@ -488,7 +488,7 @@ class WandbLogger(Logger):
         kwarg_list = [{k: kwargs[k][i] for k in kwargs} for i in range(n)]
 
         metrics = {
-            key: [wandb.Html(html, **kwarg) for html, kwarg in zip(htmls, kwarg_list)]
+            key: [tracklab.Html(html, **kwarg) for html, kwarg in zip(htmls, kwarg_list)]
         }
         self.log_metrics(metrics, step)  # type: ignore[arg-type]
 
@@ -510,7 +510,7 @@ class WandbLogger(Logger):
         kwarg_list = [{k: kwargs[k][i] for k in kwargs} for i in range(n)]
 
         metrics = {
-            key: [wandb.Image(img, **kwarg) for img, kwarg in zip(images, kwarg_list)]
+            key: [tracklab.Image(img, **kwarg) for img, kwarg in zip(images, kwarg_list)]
         }
         self.log_metrics(metrics, step)  # type: ignore[arg-type]
 
@@ -539,7 +539,7 @@ class WandbLogger(Logger):
 
         metrics = {
             key: [
-                wandb.Audio(audio, **kwarg) for audio, kwarg in zip(audios, kwarg_list)
+                tracklab.Audio(audio, **kwarg) for audio, kwarg in zip(audios, kwarg_list)
             ]
         }
         self.log_metrics(metrics, step)  # type: ignore[arg-type]
@@ -569,7 +569,7 @@ class WandbLogger(Logger):
 
         metrics = {
             key: [
-                wandb.Video(video, **kwarg) for video, kwarg in zip(videos, kwarg_list)
+                tracklab.Video(video, **kwarg) for video, kwarg in zip(videos, kwarg_list)
             ]
         }
         self.log_metrics(metrics, step)  # type: ignore[arg-type]
@@ -591,7 +591,7 @@ class WandbLogger(Logger):
         """The project name of this experiment.
 
         Returns:
-            The name of the project the current experiment belongs to. This name is not the same as `wandb.Run`'s
+            The name of the project the current experiment belongs to. This name is not the same as `tracklab.Run`'s
             name. To access wandb's internal experiment name, use ``logger.experiment.name`` instead.
 
         """
@@ -677,10 +677,10 @@ class WandbLogger(Logger):
             The path to the downloaded artifact.
 
         """
-        if wandb.run is not None and use_artifact:
-            artifact = wandb.run.use_artifact(artifact)
+        if tracklab.run is not None and use_artifact:
+            artifact = tracklab.run.use_artifact(artifact)
         else:
-            api = wandb.Api()
+            api = tracklab.Api()
             artifact = api.artifact(artifact, type=artifact_type)
 
         save_dir = None if save_dir is None else os.fspath(save_dir)
@@ -750,7 +750,7 @@ class WandbLogger(Logger):
             }
             if not self._checkpoint_name:
                 self._checkpoint_name = f"model-{self.experiment.id}"
-            artifact = wandb.Artifact(
+            artifact = tracklab.Artifact(
                 name=self._checkpoint_name, type="model", metadata=metadata
             )
             artifact.add_file(p, name="model.ckpt")
