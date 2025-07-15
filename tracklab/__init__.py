@@ -10,7 +10,7 @@ For reference documentation, see https://docs.tracklab.com/ref/python.
 """
 from __future__ import annotations
 
-__version__ = "0.21.1.dev1"
+__version__ = "0.0.2"
 
 # Setup vendor module paths before any other imports
 import sys

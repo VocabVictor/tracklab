@@ -104,6 +104,16 @@ path = "tracklab/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["tracklab"]
+include = [
+    "tracklab/ui/dist/**/*",
+    "tracklab/ui/package.json",
+    "tracklab/ui/vite.config.ts",
+    "tracklab/ui/tailwind.config.js",
+    "tracklab/ui/tsconfig.json",
+    "tracklab/ui/index.html",
+    "tracklab/ui/src/**/*",
+    "tracklab/ui/public/**/*",
+]
 
 [tool.hatch.build.targets.sdist]
 include = [

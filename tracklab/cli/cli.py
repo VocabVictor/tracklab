@@ -41,6 +41,7 @@ from tracklab.sdk.lib import filesystem
 from tracklab.sync import SyncManager, get_run_from_path, get_runs
 
 from .beta import beta
+from .ui import ui
 
 # Send cli logs to wandb/debug-cli.<username>.log by default and fallback to a temp dir.
 _wandb_dir = tracklab.old.core.wandb_dir(env.get_dir())
@@ -2757,3 +2758,8 @@ def verify(host):
 
 
 cli.add_command(beta)
+cli.add_command(ui)
+
+
+if __name__ == "__main__":
+    cli()
