@@ -1,0 +1,22 @@
+id: 0.ui_backend.02-api-server
+plugin:
+  - wandb
+tag:
+  platforms:
+    - linux
+    - mac
+    - win
+depend:
+  requirements:
+    - fastapi
+    - uvicorn
+    - httpx
+    - requests
+command:
+  program: t2_ui_backend_api.py
+assert:
+  - :wandb:runs_len: 1
+  - :wandb:runs[0][config][experiment_type]: api_test
+  - :wandb:runs[0][config][version]: "1.0"
+  - :wandb:runs[0][summary][test_status]: passed
+  - :wandb:runs[0][exitcode]: 0

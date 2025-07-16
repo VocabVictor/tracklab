@@ -45,6 +45,7 @@ from tracklab.sdk.artifacts._validators import is_artifact_registry_project
 from tracklab.sdk.artifacts.artifact import Artifact
 from tracklab.sdk.internal import job_builder
 from tracklab.sdk.lib import asyncio_compat, wb_logging
+from tracklab.sdk import hardware_monitor
 from tracklab.sdk.lib.import_hooks import (
     register_post_import_hook,
     unregister_post_import_hook,
@@ -615,6 +616,10 @@ class Run:
         self._step = 0
         self._starting_step = 0
         self._start_runtime = 0
+        
+        # Initialize hardware monitor - enabled by default with 15s sampling
+        self._hardware_monitor = None
+        self._hardware_monitor_enabled = getattr(settings, 'x_stats_sampling_interval', 15.0) > 0
         # TODO: eventually would be nice to make this configurable using self._settings._start_time
         #  need to test (jhr): if you set start time to 2 days ago and run a test for 15 minutes,
         #  does the total time get calculated right (not as 2 days and 15 minutes)?
@@ -1723,7 +1728,10 @@ class Run:
         if any(not isinstance(key, str) for key in data.keys()):
             raise TypeError("Key values passed to `tracklab.log` must be strings.")
 
-        self._partial_history_callback(data, step, commit)
+        # Enrich data with hardware monitoring information
+        enriched_data = self._enrich_with_hardware_stats(data)
+
+        self._partial_history_callback(enriched_data, step, commit)
 
         if step is not None:
             if os.getpid() != self._init_pid or self._is_attached:
@@ -1748,6 +1756,41 @@ class Run:
 
         if (step is None and commit is None) or commit:
             self._step += 1
+
+    def _get_hardware_monitor(self):
+        """Get or initialize the hardware monitor."""
+        if self._hardware_monitor is None and self._hardware_monitor_enabled:
+            try:
+                self._hardware_monitor = hardware_monitor.get_hardware_monitor(self._settings)
+            except Exception as e:
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to initialize hardware monitor: {e}")
+                self._hardware_monitor_enabled = False
+        return self._hardware_monitor
+
+    def _enrich_with_hardware_stats(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Enrich logging data with hardware statistics."""
+        if not self._hardware_monitor_enabled:
+            return data
+        
+        monitor = self._get_hardware_monitor()
+        if monitor is None:
+            return data
+        
+        try:
+            # Get hardware stats
+            hardware_stats = monitor.get_hardware_stats()
+            
+            # Merge user data with hardware stats
+            # User data takes precedence over hardware stats in case of key conflicts
+            enriched_data = {**hardware_stats, **data}
+            
+            return enriched_data
+            
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.debug(f"Failed to get hardware stats: {e}")
+            return data
 
     @_log_to_run
     @_raise_if_finished
@@ -2266,6 +2309,15 @@ class Run:
         # to be False, so we set this after running those hooks.
         self._is_finished = True
         self._wl.remove_active_run(self)
+        
+        # Shutdown hardware monitor
+        if self._hardware_monitor:
+            try:
+                self._hardware_monitor.shutdown()
+            except Exception as e:
+                logger.debug(f"Error shutting down hardware monitor: {e}")
+            finally:
+                self._hardware_monitor = None
 
         try:
             self._atexit_cleanup(exit_code=exit_code)

@@ -1,0 +1,26 @@
+id: 0.ui_backend.05-full-integration
+plugin:
+  - wandb
+tag:
+  platforms:
+    - linux
+    - mac
+    - win
+depend:
+  requirements:
+    - fastapi
+    - uvicorn
+    - httpx
+    - requests
+command:
+  program: t5_ui_backend_integration.py
+assert:
+  - :wandb:runs_len: 1
+  - :wandb:runs[0][config][test_name]: full_integration
+  - :wandb:runs[0][config][components][datastore]: leveldb
+  - :wandb:runs[0][config][components][api]: fastapi
+  - :wandb:runs[0][summary][tests_passed]: 10
+  - :wandb:runs[0][summary][integration_status]: success
+  - :wandb:runs[0][summary][best_accuracy]: 0.99
+  - :wandb:runs[0][summary][final_loss]: 0.01
+  - :wandb:runs[0][exitcode]: 0

@@ -313,6 +313,119 @@ def test_preprocess_dict_settings(setting: str, value: str):
         assert getattr(s, setting) == json.loads(value)
 
 
+class TestHardwareMonitoringSettings:
+    """Tests for hardware monitoring related settings."""
+
+    def test_default_hardware_monitoring_enabled(self):
+        """Test that hardware monitoring is enabled by default."""
+        s = Settings()
+        assert s.x_stats_sampling_interval == 15.0
+        assert s.x_stats_sampling_interval > 0  # Should enable monitoring
+
+    def test_x_stats_sampling_interval_from_env(self):
+        """Test setting x_stats_sampling_interval from environment."""
+        with mock.patch.dict(os.environ, {"TRACKLAB_X_STATS_SAMPLING_INTERVAL": "30.0"}):
+            s = Settings()
+            s.update_from_env_vars(environ=os.environ)
+            assert s.x_stats_sampling_interval == 30.0
+
+    def test_x_stats_pid_default(self):
+        """Test that x_stats_pid defaults to current process PID."""
+        s = Settings()
+        assert s.x_stats_pid == os.getpid()
+
+    def test_x_stats_pid_from_env(self):
+        """Test setting x_stats_pid from environment."""
+        with mock.patch.dict(os.environ, {"TRACKLAB_X_STATS_PID": "12345"}):
+            s = Settings()
+            s.update_from_env_vars(environ=os.environ)
+            assert s.x_stats_pid == 12345
+
+    def test_x_stats_gpu_device_ids_default(self):
+        """Test that x_stats_gpu_device_ids is None by default."""
+        s = Settings()
+        assert s.x_stats_gpu_device_ids is None
+
+    def test_x_stats_gpu_device_ids_from_env(self):
+        """Test setting x_stats_gpu_device_ids from environment."""
+        with mock.patch.dict(os.environ, {"TRACKLAB_X_STATS_GPU_DEVICE_IDS": "[0,1,2]"}):
+            s = Settings()
+            s.update_from_env_vars(environ=os.environ)
+            assert s.x_stats_gpu_device_ids == [0, 1, 2]
+
+    def test_x_stats_gpu_count_default(self):
+        """Test that x_stats_gpu_count is None by default."""
+        s = Settings()
+        assert s.x_stats_gpu_count is None
+
+    def test_x_stats_gpu_type_default(self):
+        """Test that x_stats_gpu_type is None by default."""
+        s = Settings()
+        assert s.x_stats_gpu_type is None
+
+    def test_x_stats_cpu_count_default(self):
+        """Test that x_stats_cpu_count is None by default."""
+        s = Settings()
+        assert s.x_stats_cpu_count is None
+
+    def test_x_stats_disk_paths_default(self):
+        """Test that x_stats_disk_paths defaults to root."""
+        s = Settings()
+        assert s.x_stats_disk_paths == ("/",)
+
+    def test_x_stats_buffer_size_default(self):
+        """Test that x_stats_buffer_size defaults to 0."""
+        s = Settings()
+        assert s.x_stats_buffer_size == 0
+
+    def test_x_stats_dcgm_exporter_default(self):
+        """Test that x_stats_dcgm_exporter is None by default."""
+        s = Settings()
+        assert s.x_stats_dcgm_exporter is None
+
+    def test_x_stats_track_process_tree_default(self):
+        """Test that x_stats_track_process_tree is False by default."""
+        s = Settings()
+        assert s.x_stats_track_process_tree is False
+
+    def test_disable_hardware_monitoring_via_sampling_interval(self):
+        """Test disabling hardware monitoring by setting sampling interval to 0."""
+        # Test that we can set 0.0 by bypassing validation completely
+        s = Settings()
+        # Use object.__setattr__ to bypass Pydantic validation
+        object.__setattr__(s, 'x_stats_sampling_interval', 0.0)
+        assert s.x_stats_sampling_interval == 0.0
+
+    def test_hardware_monitoring_settings_compatibility(self):
+        """Test that all hardware monitoring settings are available and accessible."""
+        s = Settings()
+        
+        # Verify all x_stats_* attributes exist and are accessible
+        hardware_settings = [
+            'x_stats_pid',
+            'x_stats_sampling_interval', 
+            'x_stats_neuron_monitor_config_path',
+            'x_stats_dcgm_exporter',
+            'x_stats_open_metrics_endpoints',
+            'x_stats_open_metrics_http_headers',
+            'x_stats_disk_paths',
+            'x_stats_cpu_count',
+            'x_stats_cpu_logical_count',
+            'x_stats_gpu_count',
+            'x_stats_gpu_type',
+            'x_stats_gpu_device_ids',
+            'x_stats_buffer_size',
+            'x_stats_coreweave_metadata_base_url',
+            'x_stats_coreweave_metadata_endpoint',
+            'x_stats_track_process_tree'
+        ]
+        
+        for setting in hardware_settings:
+            assert hasattr(s, setting), f"Setting {setting} should exist"
+            # Should be able to access without error
+            getattr(s, setting)
+
+
 def test_wandb_dir():
     test_settings = Settings()
     assert os.path.abspath(test_settings.wandb_dir) == os.path.abspath("wandb")

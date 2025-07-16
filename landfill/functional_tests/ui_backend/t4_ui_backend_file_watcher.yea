@@ -1,0 +1,23 @@
+id: 0.ui_backend.04-file-watcher
+plugin:
+  - wandb
+tag:
+  platforms:
+    - linux
+    - mac
+    - win
+depend:
+  requirements:
+    - fastapi
+    - uvicorn
+    - watchdog
+command:
+  program: t4_ui_backend_file_watcher.py
+assert:
+  - :wandb:runs_len: 2
+  - :wandb:runs[0][config][run_type]: initial
+  - :wandb:runs[1][config][run_type]: update
+  - :wandb:runs[0][summary][initial_metric]: 100
+  - :wandb:runs[1][summary][updated_metric]: 204
+  - :wandb:runs[0][exitcode]: 0
+  - :wandb:runs[1][exitcode]: 0

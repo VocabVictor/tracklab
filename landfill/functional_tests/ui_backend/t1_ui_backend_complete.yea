@@ -1,0 +1,24 @@
+id: 0.ui_backend.01-complete-leveldb-test
+plugin:
+  - wandb
+tag:
+  platforms:
+    - linux
+    - mac
+    - win
+depend:
+  requirements:
+    - fastapi
+    - uvicorn
+    - watchdog
+command:
+  program: t1_ui_backend_complete.py
+assert:
+  - :wandb:runs_len: 1
+  - :wandb:runs[0][config][test_name]: complete_ui_backend_test
+  - :wandb:runs[0][config][test_components]: ["datastore", "api", "metrics"]
+  - :wandb:runs[0][summary][datastore_test]: passed
+  - :wandb:runs[0][summary][api_test]: passed
+  - :wandb:runs[0][summary][metrics_count]: 100
+  - :wandb:runs[0][summary][total_tests_passed]: 3
+  - :wandb:runs[0][exitcode]: 0

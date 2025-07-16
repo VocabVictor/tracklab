@@ -1,0 +1,22 @@
+id: 0.ui_backend.03-websocket-updates
+plugin:
+  - wandb
+tag:
+  platforms:
+    - linux
+    - mac
+    - win
+depend:
+  requirements:
+    - fastapi
+    - uvicorn
+    - httpx
+    - websockets
+command:
+  program: t3_ui_backend_websocket.py
+assert:
+  - :wandb:runs_len: 1
+  - :wandb:runs[0][config][test_type]: websocket
+  - :wandb:runs[0][config][real_time]: true
+  - :wandb:runs[0][summary][websocket_test]: passed
+  - :wandb:runs[0][exitcode]: 0
