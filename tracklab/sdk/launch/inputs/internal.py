@@ -17,7 +17,7 @@ import tracklab
 import tracklab.data_types
 from tracklab.sdk.launch.errors import LaunchError
 from tracklab.sdk.launch.inputs.schema import META_SCHEMA
-from tracklab.sdk.tracklab_run import Run
+from tracklab.sdk.run import Run
 from tracklab.util import get_module
 
 from .files import config_path_is_valid, override_file

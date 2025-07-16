@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
 from tracklab import util
-from tracklab.sdk import tracklab_setup
+from tracklab.sdk import setup
 
 if TYPE_CHECKING:  # pragma: no cover
     from tracklab.sdk.artifacts.artifact import Artifact

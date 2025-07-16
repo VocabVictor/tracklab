@@ -15,67 +15,77 @@ TrackLab UI是一个完全模仿wandb的前端界面，专为本地机器学习�
 
 ## 🚀 快速开始
 
-### 1. 构建UI
+### 1. 一键启动
 
 ```bash
-# 方法1：使用TrackLab CLI
-python -m tracklab.cli.cli ui build
+# 直接启动UI和后端（自动打开浏览器）
+tracklab ui
 
-# 方法2：直接使用npm（开发模式）
-cd tracklab/ui
-npm install
-npm run build
+# 自定义端口
+tracklab ui --port 9000
+
+# 不自动打开浏览器
+tracklab ui --no-browser
+
+# 开发模式
+tracklab ui --dev
 ```
 
-### 2. 启动服务器
+### 2. 访问界面
+
+浏览器会自动打开: http://localhost:8000
+
+### 3. 高级使用
 
 ```bash
-# 启动生产服务器
-python -m tracklab.cli.cli ui start
+# 首次使用需要构建UI
+tracklab ui build
 
-# 启动开发服务器
-python -m tracklab.cli.cli ui dev
+# 手动构建前端资源
+cd tracklab/ui && npm install && npm run build
 ```
-
-### 3. 访问界面
-
-打开浏览器访问: http://localhost:8000
 
 ## 🔧 CLI 命令
 
 ### 基本命令
 
 ```bash
+# 直接启动UI和后端（推荐）
+tracklab ui
+
 # 查看帮助
-python -m tracklab.cli.cli ui --help
+tracklab ui --help
 
 # 构建UI
-python -m tracklab.cli.cli ui build
+tracklab ui build
 
-# 启动服务器
-python -m tracklab.cli.cli ui start
+# 启动服务器（与直接运行tracklab ui相同）
+tracklab ui start
 
 # 开发模式
-python -m tracklab.cli.cli ui dev
+tracklab ui dev
 
 # 检查服务器状态
-python -m tracklab.cli.cli ui status
+tracklab ui status
 
 # 清理构建文件
-python -m tracklab.cli.cli ui clean
+tracklab ui clean
 ```
 
 ### 高级选项
 
 ```bash
 # 自定义端口和主机
-python -m tracklab.cli.cli ui start --port 9000 --host 0.0.0.0
+tracklab ui --port 9000 --host 0.0.0.0
 
 # 不自动打开浏览器
-python -m tracklab.cli.cli ui start --no-browser
+tracklab ui --no-browser
+
+# 开发模式
+tracklab ui --dev
 
 # 构建时安装依赖
-python -m tracklab.cli.cli ui build --install-deps
+tracklab ui build --install-deps
 ```
 
 ## 📊 功能特性
@@ -161,8 +171,8 @@ npm run dev
 # 启动API服务器
 python -m tracklab.ui.server
 
-# 或者使用CLI
-python -m tracklab.cli.cli ui dev
+# 或者使用CLI（推荐）
+tracklab ui dev
 ```
 
 ### 项目结构
@@ -249,10 +259,10 @@ ws.onmessage = (event) => {
 
 ```bash
 # 构建生产版本
-python -m tracklab.cli.cli ui build
+tracklab ui build
 
 # 启动生产服务器
-python -m tracklab.cli.cli ui start --host 0.0.0.0 --port 8000
+tracklab ui --host 0.0.0.0 --port 8000 --no-browser
 ```
 
 ### Docker部署
@@ -264,10 +274,10 @@ WORKDIR /app
 COPY . .
 
 RUN pip install -e .
-RUN python -m tracklab.cli.cli ui build
+RUN tracklab ui build
 
 EXPOSE 8000
-CMD ["python", "-m", "tracklab.cli.cli", "ui", "start", "--host", "0.0.0.0"]
+CMD ["tracklab", "ui", "--host", "0.0.0.0", "--no-browser"]
 ```
 
 ## 🤝 贡献指南

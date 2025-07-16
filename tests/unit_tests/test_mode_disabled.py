@@ -6,8 +6,8 @@ import tracklab
 
 
 def test_mode_disabled():
-    """Test that the user can access all attributes of a Run object in disabled mode."""
-    run = tracklab.init(mode="disabled")
+    """Test that the user can access all attributes of a Run object (TrackLab is now local-only)."""
+    run = tracklab.init()
     symbols = [s for s in dir(run) if not s.startswith("_") and s != "log"]
 
     # try logging some stuff
@@ -29,16 +29,15 @@ def test_mode_disabled():
 
 
 def test_disabled_can_pickle():
-    # This case comes up when using wandb in disabled mode, with keras
-    # https://tracklab.atlassian.net/browse/WB-3981
-    run = tracklab.init(mode="disabled")
+    # This case comes up when using tracklab locally, with keras
+    run = tracklab.init()
 
     with tempfile.NamedTemporaryFile() as temp_file:
         pickle.dump(run, temp_file)
 
 
 def test_disabled_context_manager():
-    with tracklab.init(mode="disabled") as run:
+    with tracklab.init() as run:
         run.log({"a": 1})
         run.summary.update({"b": 2})
         run.config.update({"c": 3})

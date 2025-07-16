@@ -19,7 +19,7 @@ from requests.compat import urljoin
 
 import tracklab
 import tracklab.util
-from tracklab.sdk import tracklab_run, tracklab_setup
+from tracklab.sdk import run, tracklab_setup
 from tracklab.sdk.lib import filesystem
 
 logger = logging.getLogger(__name__)

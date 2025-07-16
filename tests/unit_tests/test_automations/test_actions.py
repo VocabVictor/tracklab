@@ -6,7 +6,7 @@ from pytest import mark
 from tracklab._pydantic import IS_PYDANTIC_V2
 from tracklab.automations import ActionType, SendNotification, SendWebhook
 from tracklab.automations._generated import AlertSeverity, TriggeredActionType
-from tracklab.sdk.tracklab_alerts import AlertLevel
+from tracklab.sdk.alerts import AlertLevel
 
 from ._strategies import gql_ids, jsonables, printable_text
 

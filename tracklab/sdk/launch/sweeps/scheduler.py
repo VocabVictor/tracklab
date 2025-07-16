@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     import tracklab.apis.public as public
     from tracklab.apis.internal import Api
     from tracklab.apis.public import QueuedRun, Run
-    from tracklab.sdk.tracklab_run import Run as SdkRun
+    from tracklab.sdk.run import Run as SdkRun
 
 
 _logger = logging.getLogger(__name__)

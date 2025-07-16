@@ -310,7 +310,7 @@ class BoundingBoxes2D(JSONMetadata):
         return True
 
     def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
-        from tracklab.sdk.tracklab_run import Run
+        from tracklab.sdk.run import Run
 
         if isinstance(run_or_artifact, Run):
             return super().to_json(run_or_artifact)

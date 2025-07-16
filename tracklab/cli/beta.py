@@ -12,7 +12,7 @@ import click
 
 import tracklab
 from tracklab.errors import WandbCoreNotAvailableError
-from tracklab.sdk.tracklab_sync import _sync
+from tracklab.sdk.sync import _sync
 from tracklab.util import get_core_path
 
 

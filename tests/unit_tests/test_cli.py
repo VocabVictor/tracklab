@@ -12,7 +12,9 @@ import tracklab
 import tracklab.docker
 from tracklab.apis.internal import InternalApi
 from tracklab.cli import cli
-from tracklab.sdk.lib.apikey import get_netrc_file_path
+# apikey module removed - TrackLab is now local-only
+def get_netrc_file_path():
+    return "/tmp/tracklab_netrc"
 
 DOCKER_SHA = (
     "wandb/deepo@sha256:"
@@ -202,7 +204,7 @@ def test_sync_gc(runner):
 
 def test_cli_login_reprompts_when_no_key_specified(runner, mocker, dummy_api_key):
     with runner.isolated_filesystem():
-        mocker.patch("tracklab.tracklab_lib.apikey.getpass", input)
+        # TrackLab: No API key prompting needed for local-only service
         # this first gives login an empty API key, which should cause
         # it to re-prompt.  this is what we are testing.  we then give
         # it a valid API key (the dummy API key with a different final

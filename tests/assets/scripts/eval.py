@@ -10,7 +10,6 @@ def main(attach_id: str, eval_step: int, project: str):
         id=attach_id,
         project=project,
         settings=tracklab.Settings(
-            mode="shared",
             console="off",
             _disable_machine_info=True,
             _disable_stats=True,

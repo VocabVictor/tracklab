@@ -25,7 +25,7 @@ import git
 import pytest
 import tracklab
 import tracklab.old.settings
-import tracklab.sdk.lib.apikey
+# apikey module removed - TrackLab is now local-only
 import tracklab.util
 from click.testing import CliRunner
 from tracklab import Api
@@ -305,9 +305,7 @@ def dummy_api_key() -> str:
 
 @pytest.fixture
 def patch_apikey(mocker: MockerFixture, dummy_api_key: str):
-    mocker.patch.object(tracklab.sdk.lib.apikey, "isatty", return_value=True)
-    mocker.patch.object(tracklab.sdk.lib.apikey, "input", return_value=1)
-    mocker.patch.object(tracklab.sdk.lib.apikey, "getpass", return_value=dummy_api_key)
+    # TrackLab: No API key needed for local-only service
     yield
 
 
@@ -316,11 +314,7 @@ def patch_prompt(monkeypatch):
     monkeypatch.setattr(
         tracklab.util, "prompt_choices", lambda x, input_timeout=None, jupyter=False: x[0]
     )
-    monkeypatch.setattr(
-        tracklab.tracklab_lib.apikey,
-        "prompt_choices",
-        lambda x, input_timeout=None, jupyter=False: x[0],
-    )
+    # TrackLab: No API key prompting needed for local-only service
 
 
 @pytest.fixture
@@ -421,7 +415,7 @@ def test_settings():
 def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
     """Create a Run object with a stubbed out 'backend'.
 
-    This is similar to using `tracklab.init(mode="offline")`, but much faster
+    This is similar to using `tracklab.init()`, but much faster
     as it does not start up a service process.
 
     This is intended for tests that need to exercise surface-level Python logic
@@ -429,13 +423,13 @@ def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
     own unit-tested module instead.
     """
 
-    def mock_run_fn(use_magic_mock=False, **kwargs: Any) -> tracklab.sdk.wandb_run.Run:
+    def mock_run_fn(use_magic_mock=False, **kwargs: Any) -> tracklab.sdk.run.Run:
         kwargs_settings = kwargs.pop("settings", dict())
         kwargs_settings = {
             "run_id": runid.generate_id(),
             **dict(kwargs_settings),
         }
-        run = tracklab.sdk.wandb_run.Run(
+        run = tracklab.sdk.run.Run(
             settings=test_settings(kwargs_settings), **kwargs
         )
         run._set_backend(

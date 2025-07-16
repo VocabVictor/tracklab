@@ -50,7 +50,8 @@ from tracklab.sdk.internal.thread_local_settings import _thread_local_api_settin
 from tracklab.sdk.lib.gql_request import GraphQLSession
 from tracklab.sdk.lib.hashutil import B64MD5, md5_file_b64
 
-from ..lib import credentials, retry
+from ..lib import retry
+# credentials module removed - TrackLab is now local-only
 from ..lib.filenames import DIFF_FNAME, METADATA_FNAME
 from ..lib.gitlib import GitRepo
 from . import context
@@ -229,7 +230,7 @@ class Api:
         self,
         default_settings: Optional[
             Union[
-                "tracklab.sdk.tracklab_settings.Settings",
+                "tracklab.sdk.settings.Settings",
                 "tracklab.sdk.internal.settings_static.SettingsStatic",
                 Settings,
                 dict,
@@ -457,11 +458,8 @@ class Api:
         if not token_file.exists():
             raise AuthenticationError(f"Identity token file not found: {token_file}")
 
-        base_url = self.settings("base_url")
-        credentials_file = env.get_credentials_file(
-            str(credentials.DEFAULT_TRACKLAB_CREDENTIALS_FILE), self._environ
-        )
-        return credentials.access_token(base_url, token_file, credentials_file)
+        # TrackLab: No credentials needed for local-only service
+        return None
 
     @property
     def api_url(self) -> str:

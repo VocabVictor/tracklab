@@ -538,7 +538,7 @@ class Image(BatchableMedia):
 
         <!-- lazydoc-ignore: internal -->
         """
-        from tracklab.sdk.tracklab_run import Run
+        from tracklab.sdk.run import Run
 
         json_dict = super().to_json(run_or_artifact)
         json_dict["_type"] = Image._log_type

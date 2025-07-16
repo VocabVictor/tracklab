@@ -8,7 +8,7 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 from tracklab.sdk.interface.interface import InterfaceBase
-from tracklab.sdk.tracklab_settings import Settings
+from tracklab.sdk.settings import Settings
 
 if TYPE_CHECKING:
     from tracklab.sdk.lib.service import service_connection

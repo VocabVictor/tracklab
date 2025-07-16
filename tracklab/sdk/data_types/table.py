@@ -727,7 +727,7 @@ class Table(Media):
                 }
             )
 
-        if isinstance(run_or_artifact, tracklab.sdk.tracklab_run.Run):
+        if isinstance(run_or_artifact, tracklab.sdk.run.Run):
             if self.log_mode == "INCREMENTAL":
                 wbvalue_type = "incremental-table-file"
             else:
@@ -1107,7 +1107,7 @@ class PartitionedTable(Media):
         json_obj = {
             "_type": PartitionedTable._log_type,
         }
-        if isinstance(artifact_or_run, tracklab.sdk.tracklab_run.Run):
+        if isinstance(artifact_or_run, tracklab.sdk.run.Run):
             artifact_entry_url = self._get_artifact_entry_ref_url()
             if artifact_entry_url is None:
                 raise ValueError(
@@ -1262,7 +1262,7 @@ class JoinedTable(Media):
         json_obj = {
             "_type": JoinedTable._log_type,
         }
-        if isinstance(artifact_or_run, tracklab.sdk.tracklab_run.Run):
+        if isinstance(artifact_or_run, tracklab.sdk.run.Run):
             artifact_entry_url = self._get_artifact_entry_ref_url()
             if artifact_entry_url is None:
                 raise ValueError(

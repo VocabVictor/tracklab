@@ -35,7 +35,8 @@ from tracklab._pydantic import (
 from tracklab.errors import UsageError
 from tracklab.proto import tracklab_settings_pb2
 
-from .lib import apikey, credentials, ipython
+from .lib import ipython
+# apikey and credentials modules removed - TrackLab is now local-only
 from .lib.gitlib import GitRepo
 from .lib.run_moment import RunMoment
 
@@ -251,7 +252,7 @@ class Settings(BaseModel, validate_assignment=True):
     """Whether to produce multipart console log files."""
 
     credentials_file: str = Field(
-        default_factory=lambda: str(credentials.DEFAULT_TRACKLAB_CREDENTIALS_FILE)
+        default_factory=lambda: "/tmp/tracklab_credentials"
     )
     """Path to file for writing temporary access tokens."""
 
@@ -346,11 +347,7 @@ class Settings(BaseModel, validate_assignment=True):
     login_timeout: Optional[float] = None
     """Time in seconds to wait for login operations before timing out."""
 
-    mode: Literal["online", "offline", "shared", "disabled", "dryrun", "run"] = Field(
-        default="online",
-        validate_default=True,
-    )
-    """The operating mode for W&B logging and synchronization."""
+    # TrackLab: No mode needed for local-only service
 
     notebook_name: Optional[str] = None
     """Name of the notebook if running in a Jupyter-like environment."""
@@ -1369,7 +1366,8 @@ class Settings(BaseModel, validate_assignment=True):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def _noop(self) -> bool:
-        return self.mode == "disabled"
+        # TrackLab: Always return False for local-only service
+        return False
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -1379,7 +1377,8 @@ class Settings(BaseModel, validate_assignment=True):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def _offline(self) -> bool:
-        return self.mode in ("offline", "dryrun")
+        # TrackLab: Always offline for local-only service
+        return True
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -1402,10 +1401,9 @@ class Settings(BaseModel, validate_assignment=True):
     def _shared(self) -> bool:
         """Whether we are in shared mode.
 
-        In "shared" mode, multiple processes can write to the same run,
-        for example from different machines.
+        TrackLab: Always False for local-only service.
         """
-        return self.mode == "shared"
+        return False
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -1596,18 +1594,18 @@ class Settings(BaseModel, validate_assignment=True):
 
     def update_from_env_vars(self, environ: Dict[str, Any]):
         """Update settings from environment variables."""
-        env_prefix: str = "WANDB_"
+        env_prefix: str = "TRACKLAB_"
         private_env_prefix: str = env_prefix + "_"
         special_env_var_names = {
-            "WANDB_SERVICE_TRANSPORT": "x_service_transport",
-            "WANDB_DIR": "root_dir",
-            "WANDB_NAME": "run_name",
-            "WANDB_NOTES": "run_notes",
-            "WANDB_TAGS": "run_tags",
-            "WANDB_JOB_TYPE": "run_job_type",
-            "WANDB_HTTP_TIMEOUT": "x_graphql_timeout_seconds",
-            "WANDB_FILE_PUSHER_TIMEOUT": "x_file_transfer_timeout_seconds",
-            "WANDB_USER_EMAIL": "email",
+            "TRACKLAB_SERVICE_TRANSPORT": "x_service_transport",
+            "TRACKLAB_DIR": "root_dir",
+            "TRACKLAB_NAME": "run_name",
+            "TRACKLAB_NOTES": "run_notes",
+            "TRACKLAB_TAGS": "run_tags",
+            "TRACKLAB_JOB_TYPE": "run_job_type",
+            "TRACKLAB_HTTP_TIMEOUT": "x_graphql_timeout_seconds",
+            "TRACKLAB_FILE_PUSHER_TIMEOUT": "x_file_transfer_timeout_seconds",
+            "TRACKLAB_USER_EMAIL": "email",
         }
         env = dict()
         for setting, value in environ.items():
@@ -1881,9 +1879,8 @@ class Settings(BaseModel, validate_assignment=True):
         if self.anonymous not in ["allow", "must"]:
             return ""
 
-        api_key = apikey.api_key(settings=self)
-
-        return f"?{urlencode({'apiKey': api_key})}"
+        # TrackLab: No API key needed for local-only service
+        return ""
 
     @staticmethod
     def _runmoment_preprocessor(

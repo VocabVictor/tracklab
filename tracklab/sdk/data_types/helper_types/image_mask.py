@@ -209,7 +209,7 @@ class ImageMask(Media):
         )
 
     def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
-        from tracklab.sdk.tracklab_run import Run
+        from tracklab.sdk.run import Run
 
         json_dict = super().to_json(run_or_artifact)
 

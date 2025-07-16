@@ -11,7 +11,7 @@ FileSubtypes = Literal["warning", "error"]
 class RunQueueItemFileSaver:
     def __init__(
         self,
-        agent_run: Optional["tracklab.sdk.tracklab_run.Run"],
+        agent_run: Optional["tracklab.sdk.run.Run"],
         run_queue_item_id: str,
     ):
         self.run_queue_item_id = run_queue_item_id
@@ -20,7 +20,7 @@ class RunQueueItemFileSaver:
     def save_contents(
         self, contents: str, fname: str, file_sub_type: FileSubtypes
     ) -> Optional[List[str]]:
-        if not isinstance(self.run, tracklab.sdk.tracklab_run.Run):
+        if not isinstance(self.run, tracklab.sdk.run.Run):
             tracklab.termwarn("Not saving file contents because agent has no run")
             return None
         root_dir = self.run._settings.files_dir

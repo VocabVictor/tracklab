@@ -18,7 +18,7 @@ from tracklab.apis.internal import Api
 from tracklab.sdk.launch.errors import LaunchError
 from tracklab.sdk.launch.git_reference import GitReference
 from tracklab.sdk.launch.tracklab_reference import WandbReference
-from tracklab.sdk.tracklab_config import Config
+from tracklab.sdk.config import Config
 
 from .builder.templates._tracklab_bootstrap import (
     FAILED_PACKAGES_POSTFIX,

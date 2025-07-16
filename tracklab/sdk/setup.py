@@ -35,13 +35,13 @@ import tracklab.integration.sagemaker as sagemaker
 from tracklab.env import CONFIG_DIR
 from tracklab.sdk.lib import import_hooks, wb_logging
 
-from . import tracklab_settings
+from .settings import Settings
 from .lib import config_util, server
 
 if TYPE_CHECKING:
-    from tracklab.sdk import tracklab_run
+    from tracklab.sdk import run
     from tracklab.sdk.lib.service.service_connection import ServiceConnection
-    from tracklab.sdk.tracklab_settings import Settings
+    # Settings already imported above
 
 
 class _EarlyLogger:
@@ -163,8 +163,8 @@ class _WandbSetup:
     def _settings_setup(
         self,
         settings: Settings | None,
-    ) -> tracklab_settings.Settings:
-        s = tracklab_settings.Settings()
+    ) -> Settings:
+        s = Settings()
 
         # the pid of the process to monitor for system stats
         pid = os.getpid()
@@ -320,9 +320,8 @@ class _WandbSetup:
         if self._connection:
             return self._connection
 
-        from tracklab.sdk.lib.service import service_connection
-
-        self._connection = service_connection.connect_to_service(self._settings)
+        # TrackLab: No service connection needed for local-only operation
+        self._connection = None
         return self._connection
 
     def assert_service(self) -> ServiceConnection:
@@ -331,9 +330,7 @@ class _WandbSetup:
         Unlike ensure_service(), this will not start up a service process
         if it didn't already exist.
         """
-        if not self._connection:
-            raise AssertionError("Expected service process to exist.")
-
+        # TrackLab: No service needed for local-only operation
         return self._connection
 
 

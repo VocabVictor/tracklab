@@ -4,7 +4,7 @@ from typing import Any, Iterable
 
 from tracklab.proto import tracklab_settings_pb2
 from tracklab.sdk.lib import RunMoment
-from tracklab.sdk.tracklab_settings import Settings
+from tracklab.sdk.settings import Settings
 
 
 class SettingsStatic(Settings):

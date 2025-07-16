@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 import tracklab
 from tracklab.sdk.lib import filesystem
-from tracklab.sdk.tracklab_settings import Settings
+from tracklab.sdk.settings import Settings
 
 
 class TrackLabUIServer:

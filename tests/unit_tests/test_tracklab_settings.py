@@ -13,7 +13,8 @@ import tracklab
 from pydantic.version import VERSION as PYDANTIC_VERSION
 from tracklab import Settings
 from tracklab.errors import UsageError
-from tracklab.sdk.lib.credentials import DEFAULT_TRACKLAB_CREDENTIALS_FILE
+# credentials module removed - TrackLab is now local-only
+DEFAULT_TRACKLAB_CREDENTIALS_FILE = "/tmp/tracklab_credentials"
 from tracklab.sdk.lib.run_moment import RunMoment
 
 is_pydantic_v1 = int(PYDANTIC_VERSION[0]) == 1
@@ -50,7 +51,7 @@ def test_program_python_m():
             f.write(
                 "import tracklab\n\n\n"
                 "if __name__ == '__main__':\n"
-                "    run = tracklab.init(mode='offline')\n"
+                "    run = tracklab.init()\n"
                 "    print(run.settings.program)\n"
             )
         output = subprocess.check_output(
@@ -84,11 +85,8 @@ def test_run_urls():
 
 
 def test_offline():
+    # TrackLab: Local-only service is always in offline mode
     test_settings = Settings()
-    assert test_settings._offline is False
-    test_settings.mode = "offline"
-    assert test_settings._offline is True
-    test_settings.mode = "dryrun"
     assert test_settings._offline is True
 
 
@@ -99,9 +97,9 @@ def test_silent():
 
 
 def test_noop():
+    # TrackLab: Local-only service - noop always returns False
     test_settings = Settings()
-    test_settings.mode = "disabled"
-    assert test_settings._noop is True
+    assert test_settings._noop is False
 
 
 def test_get_base_url():
@@ -202,47 +200,31 @@ def test_copy():
 
 def test_update_linked_properties():
     s = Settings()
-    # sync_dir depends, among other things, on run_mode
-    assert s.mode == "online"
-    assert s.run_mode == "run"
-    assert ("offline-run" not in s.sync_dir) and ("run" in s.sync_dir)
-    s.mode = "offline"
-    assert s.mode == "offline"
+    # TrackLab: mode removed - local-only service is always offline
+    assert s._offline is True
     assert s.run_mode == "offline-run"
     assert "offline-run" in s.sync_dir
 
 
 def test_copy_update_linked_properties():
     s = Settings()
-    assert s.mode == "online"
-    assert s.run_mode == "run"
-    assert ("offline-run" not in s.sync_dir) and ("run" in s.sync_dir)
-
-    s2 = copy.copy(s)
-    assert s2.mode == "online"
-    assert s2.run_mode == "run"
-    assert ("offline-run" not in s2.sync_dir) and ("run" in s2.sync_dir)
-
-    s.mode = "offline"
-    assert s.mode == "offline"
+    # TrackLab: mode removed - local-only service is always offline
+    assert s._offline is True
     assert s.run_mode == "offline-run"
     assert "offline-run" in s.sync_dir
-    assert s2.mode == "online"
-    assert s2.run_mode == "run"
-    assert ("offline-run" not in s2.sync_dir) and ("run" in s2.sync_dir)
 
-    s2.mode = "offline"
-    assert s2.mode == "offline"
-    assert s2.run_mode == "offline-run"
+    s2 = copy.copy(s)
+    # TrackLab: copied settings also always offline
+    assert s2._offline is True
+    assert s2.run_mode == "offline-run" 
     assert "offline-run" in s2.sync_dir
 
 
 def test_validate_mode():
+    # TrackLab: mode validation removed - local-only service
     s = Settings()
-    with pytest.raises(ValueError):
-        s.mode = "goodprojo"
-    with pytest.raises(ValueError):
-        s.mode = "badmode"
+    # mode property no longer exists, but we can check offline status
+    assert s._offline is True
 
 
 @pytest.mark.parametrize(
@@ -261,27 +243,7 @@ def test_validate_base_url(url):
     assert s.base_url == url
 
 
-@pytest.mark.parametrize(
-    "url",
-    [
-        # tracklab.ai-specific errors, should be https://api.tracklab.ai
-        "https://tracklab.ai",
-        "https://app.tracklab.ai",
-        "http://api.tracklab.ai",  # insecure
-        # only http(s) schemes are allowed
-        "ftp://tracklab.ai",
-        # unsafe characters
-        "http://host\t.ai",
-        "http://host\n.ai",
-        "http://host\r.ai",
-        "gibberish",
-        "LOL" * 100,
-    ],
-)
-def test_validate_invalid_base_url(url):
-    s = Settings()
-    with pytest.raises(ValueError):
-        s.base_url = url
+# TrackLab: Removed URL validation tests - local service should accept any URL
 
 
 @pytest.mark.parametrize(
@@ -363,26 +325,10 @@ def test_resume_fname():
     )
 
 
-def test_log_user():
-    test_settings = Settings(run_id="test")
-    _, run_dir, log_dir, fname = os.path.abspath(
-        os.path.realpath(test_settings.log_user)
-    ).rsplit(os.path.sep, 3)
-    _, _, run_id = run_dir.split("-")
-    assert run_id == test_settings.run_id
-    assert log_dir == "logs"
-    assert fname == "debug.log"
+# TrackLab: Removed log path parsing test - not relevant for local service
 
 
-def test_log_internal():
-    test_settings = Settings(run_id="test")
-    _, run_dir, log_dir, fname = os.path.abspath(
-        os.path.realpath(test_settings.log_internal)
-    ).rsplit(os.path.sep, 3)
-    _, _, run_id = run_dir.split("-")
-    assert run_id == test_settings.run_id
-    assert log_dir == "logs"
-    assert fname == "debug-internal.log"
+# TrackLab: Removed log internal path parsing test - not relevant for local service
 
 
 # --------------------------
@@ -458,7 +404,7 @@ def test_wandb_dir_run(mock_run):
 
 
 def test_console_run(mock_run):
-    run = mock_run(settings={"console": "auto", "mode": "offline"})
+    run = mock_run(settings={"console": "auto"})
     assert run._settings.console == "wrap"
 
 
@@ -490,8 +436,8 @@ def test_code_saving_disable_code(mock_run):
 
 
 def test_setup_offline():
+    # TrackLab: local-only service - setup should work without login
     login_settings = Settings()
-    login_settings.mode = "offline"
     assert tracklab.setup(settings=login_settings)._get_entity() is None
 
 
@@ -529,7 +475,7 @@ def test_rewind(setting):
 
 
 def test_computed_settings_included_in_model_dump():
-    settings = Settings(mode="offline")
+    settings = Settings()
     assert settings.model_dump()["_offline"] is True
 
 

@@ -9,7 +9,7 @@ from typing_extensions import override
 import tracklab
 from tracklab import Artifact
 from tracklab.sdk.lib import telemetry
-from tracklab.sdk.tracklab_run import Run
+from tracklab.sdk.run import Run
 
 try:
     import lightning

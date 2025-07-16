@@ -10,7 +10,7 @@ For reference documentation, see https://docs.tracklab.com/ref/python.
 """
 from __future__ import annotations
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 # Setup vendor module paths before any other imports
 import sys
@@ -45,7 +45,7 @@ _sync = tracklab_sdk._sync
 teardown = _teardown = tracklab_sdk.teardown
 finish = tracklab_sdk.finish
 join = finish
-login = tracklab_sdk.login
+# Login functionality removed - TrackLab is now local-only
 helper = tracklab_sdk.helper
 sweep = tracklab_sdk.sweep
 controller = tracklab_sdk.controller
@@ -122,38 +122,38 @@ def _assert_is_user_process():
 # globals
 Api = PublicApi
 api = InternalApi()
-run: tracklab_sdk.tracklab_run.Run | None = None
-config = _preinit.PreInitObject("tracklab.config", tracklab_sdk.tracklab_config.Config)
-summary = _preinit.PreInitObject("tracklab.summary", tracklab_sdk.tracklab_summary.Summary)
-log = _preinit.PreInitCallable("tracklab.log", tracklab_sdk.tracklab_run.Run.log)  # type: ignore
-watch = _preinit.PreInitCallable("tracklab.watch", tracklab_sdk.tracklab_run.Run.watch)  # type: ignore
-unwatch = _preinit.PreInitCallable("tracklab.unwatch", tracklab_sdk.tracklab_run.Run.unwatch)  # type: ignore
-save = _preinit.PreInitCallable("tracklab.save", tracklab_sdk.tracklab_run.Run.save)  # type: ignore
-restore = tracklab_sdk.tracklab_run.restore
+run: tracklab_sdk.run.Run | None = None
+config = _preinit.PreInitObject("tracklab.config", tracklab_sdk.config.Config)
+summary = _preinit.PreInitObject("tracklab.summary", tracklab_sdk.summary.Summary)
+log = _preinit.PreInitCallable("tracklab.log", tracklab_sdk.run.Run.log)  # type: ignore
+watch = _preinit.PreInitCallable("tracklab.watch", tracklab_sdk.run.Run.watch)  # type: ignore
+unwatch = _preinit.PreInitCallable("tracklab.unwatch", tracklab_sdk.run.Run.unwatch)  # type: ignore
+save = _preinit.PreInitCallable("tracklab.save", tracklab_sdk.run.Run.save)  # type: ignore
+restore = tracklab_sdk.run.restore
 use_artifact = _preinit.PreInitCallable(
-    "tracklab.use_artifact", tracklab_sdk.tracklab_run.Run.use_artifact  # type: ignore
+    "tracklab.use_artifact", tracklab_sdk.run.Run.use_artifact  # type: ignore
 )
 log_artifact = _preinit.PreInitCallable(
-    "tracklab.log_artifact", tracklab_sdk.tracklab_run.Run.log_artifact  # type: ignore
+    "tracklab.log_artifact", tracklab_sdk.run.Run.log_artifact  # type: ignore
 )
 log_model = _preinit.PreInitCallable(
-    "tracklab.log_model", tracklab_sdk.tracklab_run.Run.log_model  # type: ignore
+    "tracklab.log_model", tracklab_sdk.run.Run.log_model  # type: ignore
 )
 use_model = _preinit.PreInitCallable(
-    "tracklab.use_model", tracklab_sdk.tracklab_run.Run.use_model  # type: ignore
+    "tracklab.use_model", tracklab_sdk.run.Run.use_model  # type: ignore
 )
 link_model = _preinit.PreInitCallable(
-    "tracklab.link_model", tracklab_sdk.tracklab_run.Run.link_model  # type: ignore
+    "tracklab.link_model", tracklab_sdk.run.Run.link_model  # type: ignore
 )
 define_metric = _preinit.PreInitCallable(
-    "tracklab.define_metric", tracklab_sdk.tracklab_run.Run.define_metric  # type: ignore
+    "tracklab.define_metric", tracklab_sdk.run.Run.define_metric  # type: ignore
 )
 
 mark_preempting = _preinit.PreInitCallable(
-    "tracklab.mark_preempting", tracklab_sdk.tracklab_run.Run.mark_preempting  # type: ignore
+    "tracklab.mark_preempting", tracklab_sdk.run.Run.mark_preempting  # type: ignore
 )
 
-alert = _preinit.PreInitCallable("tracklab.alert", tracklab_sdk.tracklab_run.Run.alert)  # type: ignore
+alert = _preinit.PreInitCallable("tracklab.alert", tracklab_sdk.run.Run.alert)  # type: ignore
 
 # record of patched libraries
 patched = {"tensorboard": [], "keras": [], "gym": []}  # type: ignore

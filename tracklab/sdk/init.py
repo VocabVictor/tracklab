@@ -38,14 +38,15 @@ from tracklab.sdk.lib import progress, runid, wb_logging
 from tracklab.sdk.lib.paths import StrPath
 from tracklab.util import _is_artifact_representation
 
-from . import tracklab_login, tracklab_setup
+from . import setup
 from .backend.backend import Backend
 from .lib import SummaryDisabled, filesystem, module, paths, printer, telemetry
 from .lib.deprecate import deprecate
 from .mailbox import wait_with_progress
-from .tracklab_helper import parse_config
-from .tracklab_run import Run, TeardownHook, TeardownStage
-from .tracklab_settings import Settings
+from .config import Config
+from .helper import parse_config
+from .run import Run, TeardownHook, TeardownStage
+from .settings import Settings
 
 if TYPE_CHECKING:
     import tracklab.jupyter
@@ -142,7 +143,7 @@ def _concat_printer_callbacks(
 class _WandbInit:
     def __init__(
         self,
-        wl: tracklab_setup._WandbSetup,
+        wl: setup._WandbSetup,
         telemetry: telemetry.TelemetryRecord,
     ) -> None:
         self._wl = wl
@@ -163,7 +164,7 @@ class _WandbInit:
         self.deprecated_features_used: dict[str, str] = dict()
 
     @property
-    def _logger(self) -> tracklab_setup.Logger:
+    def _logger(self) -> setup.Logger:
         return self._wl._get_logger()
 
     def maybe_login(self, init_settings: Settings) -> None:
@@ -185,23 +186,12 @@ class _WandbInit:
         # NOTE: _noop or _offline can become true after _login().
         #   _noop happens if _login hits a timeout.
         #   _offline can be selected by the user at the login prompt.
-        #   TrackLab modification: Default to local mode for better user experience
-        if run_settings._noop or run_settings._offline:
-            return
+        # TrackLab: Skip login for local-only service
+        return
 
-        # TrackLab: Skip login for local-first experience
-        # Only attempt login if explicitly requested via API key or force flag
-        if not run_settings.force and not os.getenv("TRACKLAB_API_KEY"):
-            # Default to offline mode for local-first experience
-            return
-
-        tracklab_login._login(
-            anonymous=run_settings.anonymous,
-            host=run_settings.base_url,
-            force=run_settings.force,
-            _disable_warning=True,
-            _silent=run_settings.quiet or run_settings.silent,
-        )
+        # TrackLab: Always skip login for local-first experience
+        # No login or authentication required
+        return
 
     def warn_env_vars_change_after_setup(self) -> _PrinterCallback:
         """Warn if environment variables changed after `tracklab.setup()`.
@@ -213,7 +203,7 @@ class _WandbInit:
         # check if environment variables have changed
         singleton_env = {
             k: v
-            for k, v in tracklab_setup.singleton()._environ.items()
+            for k, v in setup.singleton()._environ.items()
             if k.startswith("WANDB_") and k not in exclude_env_vars
         }
         os_env = {
@@ -731,7 +721,7 @@ class _WandbInit:
         run_id = runid.generate_id()
         drun = Run(
             settings=Settings(
-                mode="disabled",
+                # TrackLab: Local-only service
                 x_files_dir=tempfile.gettempdir(),
                 run_id=run_id,
                 run_tags=tuple(),
@@ -743,7 +733,7 @@ class _WandbInit:
             )
         )
         # config, summary, and metadata objects
-        drun._config = tracklab.sdk.tracklab_config.Config()
+        drun._config = Config()
         drun._config.update(config.sweep_no_artifacts)
         drun._config.update(config.base_no_artifacts)
         drun.summary = SummaryDisabled()  # type: ignore
@@ -752,7 +742,7 @@ class _WandbInit:
         drun.log = lambda data, *_, **__: drun.summary.update(data)  # type: ignore[method-assign]
         drun.finish = lambda *_, **__: module.unset_globals()  # type: ignore[method-assign]
         drun.join = drun.finish  # type: ignore[method-assign]
-        drun.define_metric = lambda *_, **__: tracklab.sdk.tracklab_metric.Metric("dummy")  # type: ignore[method-assign]
+        drun.define_metric = lambda *_, **__: tracklab.sdk.metric.Metric("dummy")  # type: ignore[method-assign]
         drun.save = lambda *_, **__: False  # type: ignore[method-assign]
         for symbol in (
             "alert",
@@ -875,20 +865,9 @@ class _WandbInit:
 
                 return previous_run
 
-        self._logger.info("starting backend")
-
-        service = self._wl.ensure_service()
-        self._logger.info("sending inform_init request")
-        service.inform_init(
-            settings=settings.to_proto(),
-            run_id=settings.run_id,  # type: ignore
-        )
-
-        backend = Backend(settings=settings, service=service)
-        backend.ensure_launched()
-        self._logger.info("backend started and connected")
-
-        # resuming needs access to the server, check server_status()?
+        # TrackLab: Local-only run - no service or backend needed
+        self._logger.info("creating local run")
+        
         run = Run(
             config=config.base_no_artifacts,
             settings=settings,
@@ -960,11 +939,8 @@ class _WandbInit:
         self._logger.info("updated telemetry")
 
         run._set_library(self._wl)
-        run._set_backend(backend)
+        # TrackLab: No backend needed for local-only run
         run._set_teardown_hooks(self._teardown_hooks)
-
-        assert backend.interface
-        backend.interface.publish_header()
 
         # Using GitRepo() blocks & can be slow, depending on user's current git setup.
         # We don't want to block run initialization/start request, so populate run's git
@@ -972,88 +948,21 @@ class _WandbInit:
         if not (settings.disable_git or settings.x_disable_machine_info):
             run._populate_git_info()
 
-        if settings._offline and settings.resume:
-            tracklab.termwarn(
-                "`resume` will be ignored since W&B syncing is set to `offline`. "
-                f"Starting a new run with run id {run.id}."
-            )
-        error: tracklab.Error | None = None
+        # TrackLab: Local-only initialization - no backend communication needed
+        self._logger.info("initializing local run")
 
-        timeout = settings.init_timeout
+        # TrackLab: Local run setup
 
-        self._logger.info(
-            f"communicating run to backend with {timeout} second timeout",
-        )
+        # TrackLab: No wait/timeout needed for local run
 
-        run_init_handle = backend.interface.deliver_run(run)
+        # TrackLab: Local run is ready
 
-        async def display_init_message() -> None:
-            assert backend.interface
-
-            with progress.progress_printer(
-                run_printer,
-                default_text="Waiting for tracklab.init()...",
-            ) as progress_printer:
-                await progress.loop_printing_operation_stats(
-                    progress_printer,
-                    backend.interface,
-                )
-
-        try:
-            result = wait_with_progress(
-                run_init_handle,
-                timeout=timeout,
-                progress_after=1,
-                display_progress=display_init_message,
-            )
-
-        except TimeoutError:
-            run_init_handle.cancel(backend.interface)
-
-            # This may either be an issue with the W&B server (a CommError)
-            # or a bug in the SDK (an Error). We cannot distinguish between
-            # the two causes here.
-            raise CommError(
-                f"Run initialization has timed out after {timeout} sec."
-                " Please try increasing the timeout with the `init_timeout`"
-                " setting: `tracklab.init(settings=tracklab.Settings(init_timeout=120))`."
-            )
-
-        assert result.run_result
-
-        if error := ProtobufErrorHandler.to_exception(result.run_result.error):
-            raise error
-
-        if not result.run_result.HasField("run"):
-            raise Error("Assertion failed: run_result is missing the run field")
-
-        if result.run_result.run.resumed:
-            self._logger.info("run resumed")
-            with telemetry.context(run=run) as tel:
-                tel.feature.resumed = result.run_result.run.resumed
-        run._set_run_obj(result.run_result.run)
-
-        self._logger.info("starting run threads in backend")
-        # initiate run (stats and metadata probing)
-
-        if service:
-            assert settings.run_id
-            service.inform_start(
-                settings=settings.to_proto(),
-                run_id=settings.run_id,
-            )
-
-        assert backend.interface
-
-        run_start_handle = backend.interface.deliver_run_start(run)
-        try:
-            # TODO: add progress to let user know we are doing something
-            run_start_handle.wait_or(timeout=30)
-        except TimeoutError:
-            pass
-
+        # TrackLab: Set up local run
         assert self._wl is not None
         self.run = run
+        
+        # Display run info
+        run_printer.display(f"TrackLab initialized run: {run.name}")
 
         run._handle_launch_artifact_overrides()
         if (
@@ -1073,7 +982,7 @@ class _WandbInit:
         if job_artifact:
             run.use_artifact(job_artifact)
 
-        self.backend = backend
+        # TrackLab: No backend needed for local-only service
 
         if settings.reinit != "create_new":
             _set_global_run(run)
@@ -1109,7 +1018,7 @@ def _attach(
         )
     tracklab._assert_is_user_process()  # type: ignore
 
-    _wl = tracklab_setup.singleton()
+    _wl = setup.singleton()
     logger = _wl._get_logger()
 
     service = _wl.ensure_service()
@@ -1125,7 +1034,7 @@ def _attach(
         {
             "run_id": attach_id,
             "x_start_time": attach_settings.x_start_time.value,
-            "mode": attach_settings.mode.value,
+            # TrackLab: No mode needed
         }
     )
 
@@ -1265,7 +1174,7 @@ def init(  # noqa: C901
     allow_val_change: bool | None = None,
     group: str | None = None,
     job_type: str | None = None,
-    mode: Literal["online", "offline", "disabled"] | None = None,
+    # TrackLab: Local-only service, no mode parameter needed
     force: bool | None = None,
     anonymous: Literal["never", "allow", "must"] | None = None,
     reinit: (
@@ -1287,22 +1196,18 @@ def init(  # noqa: C901
     monitor_gym: bool | None = None,
     settings: Settings | dict[str, Any] | None = None,
 ) -> Run:
-    r"""Start a new run to track and log to W&B.
+    r"""Start a new run to track experiments locally.
 
     In an ML training pipeline, you could add `tracklab.init()` to the beginning of
     your training script as well as your evaluation script, and each piece would
-    be tracked as a run in W&B.
+    be tracked as a run locally.
 
-    `tracklab.init()` spawns a new background process to log data to a run, and it
-    also syncs data to https://tracklab.ai by default, so you can see your results
-    in real-time.
+    `tracklab.init()` creates a local run to track your experiments locally on your machine.
+    All data is stored locally without requiring any cloud services or authentication.
 
     Call `tracklab.init()` to start a run before logging data with `tracklab.log()`.
     When you're done logging data, call `tracklab.finish()` to end the run. If you
     don't call `tracklab.finish()`, the run will end when your script exits.
-
-    For more on using `tracklab.init()`, including detailed examples, check out our
-    [guide and FAQs](https://docs.tracklab.ai/guides/track/launch).
 
     Examples:
         ### Explicitly set the entity and project and choose a name for the run:
@@ -1403,18 +1308,8 @@ def init(  # noqa: C901
             you might label runs with job types such as "train" and "eval".
             Defining job types enables you to easily filter and group similar runs
             in the UI, facilitating direct comparisons.
-        mode: Specifies how run data is managed, with the following options:
-            - `"online"` (default): Enables live syncing with W&B when a network
-                connection is available, with real-time updates to visualizations.
-            - `"offline"`: Suitable for air-gapped or offline environments; data
-                is saved locally and can be synced later. Ensure the run folder
-                is preserved to enable future syncing.
-            - `"disabled"`: Disables all W&B functionality, making the run’s methods
-                no-ops. Typically used in testing to bypass W&B operations.
-        force: Determines if a W&B login is required to run the script. If `True`,
-            the user must be logged in to W&B; otherwise, the script will not
-            proceed. If `False` (default), the script can proceed without a login,
-            switching to offline mode if the user is not logged in.
+        # TrackLab: Local-only service, no mode or force parameters needed
+        force: Not applicable for TrackLab local-only service.
         anonymous: Specifies the level of control over anonymous data logging.
             Available options are:
             - `"never"` (default): Requires you to link your W&B account before
@@ -1522,8 +1417,7 @@ def init(  # noqa: C901
         init_settings.run_notes = notes
     if anonymous is not None:
         init_settings.anonymous = anonymous  # type: ignore
-    if mode is not None:
-        init_settings.mode = mode  # type: ignore
+    # TrackLab: No mode parameter needed for local-only service
     if resume is not None:
         init_settings.resume = resume  # type: ignore
     if force is not None:
@@ -1542,21 +1436,15 @@ def init(  # noqa: C901
     if resume_from is not None:
         init_settings.resume_from = resume_from  # type: ignore
 
-    # TrackLab: Default to disabled mode for local-first experience
-    # Only use online mode if explicitly requested via API key or force flag
-    if (init_settings.mode == "online" and 
-        mode is None and  # User didn't explicitly set mode
-        not force and 
-        not os.getenv("TRACKLAB_API_KEY")):
-        init_settings.mode = "disabled"
+    # TrackLab: Local-only service configuration
 
     if config is not None:
         init_telemetry.feature.set_init_config = True
 
-    wl: tracklab_setup._WandbSetup | None = None
+    wl: setup._WandbSetup | None = None
 
     try:
-        wl = tracklab_setup.singleton()
+        wl = setup.singleton()
 
         wi = _WandbInit(wl, init_telemetry)
 

@@ -12,20 +12,25 @@ import click
 from tracklab.ui.server import TrackLabUIServer
 
 
-@click.group()
-def ui():
-    """TrackLab UI commands"""
-    pass
-
-
-@ui.command()
+@click.group(invoke_without_command=True)
 @click.option('--port', '-p', default=8000, help='Port to run the server on')
 @click.option('--host', '-h', default='localhost', help='Host to bind the server to')
 @click.option('--no-browser', is_flag=True, help='Don\'t open browser automatically')
 @click.option('--dev', is_flag=True, help='Development mode with hot reload')
-def start(port, host, no_browser, dev):
-    """Start the TrackLab UI server"""
+@click.pass_context
+def ui(ctx, port, host, no_browser, dev):
+    """TrackLab UI - Launch local ML experiment tracking interface
     
+    Run 'tracklab ui' to start the web interface directly.
+    Use subcommands for advanced operations like build, dev, etc.
+    """
+    if ctx.invoked_subcommand is None:
+        # 没有子命令时，直接启动UI服务器
+        _start_ui_server(port, host, no_browser, dev)
+
+
+def _start_ui_server(port, host, no_browser, dev):
+    """启动UI服务器的内部函数"""
     if dev:
         # 开发模式：检查前端开发服务器
         ui_dir = Path(__file__).parent.parent / "ui"
@@ -57,6 +62,7 @@ def start(port, host, no_browser, dev):
         click.echo("🚀 Starting TrackLab UI...")
         click.echo(f"📊 Dashboard: http://{host}:{port}")
         click.echo(f"🔧 API: http://{host}:{port}/api")
+        click.echo("🎯 Press Ctrl+C to stop the server")
         
         # 启动集成服务器
         server = TrackLabUIServer(port=port, host=host)
@@ -67,6 +73,16 @@ def start(port, host, no_browser, dev):
             webbrowser.open(f"http://{host}:{port}")
         
         server.run()
+
+
+@ui.command()
+@click.option('--port', '-p', default=8000, help='Port to run the server on')
+@click.option('--host', '-h', default='localhost', help='Host to bind the server to')
+@click.option('--no-browser', is_flag=True, help='Don\'t open browser automatically')
+@click.option('--dev', is_flag=True, help='Development mode with hot reload')
+def start(port, host, no_browser, dev):
+    """Start the TrackLab UI server (same as running 'tracklab ui')"""
+    _start_ui_server(port, host, no_browser, dev)
 
 
 @ui.command()

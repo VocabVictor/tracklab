@@ -14,7 +14,7 @@ import tracklab
 from tracklab import util
 from tracklab.data_types import Table
 from tracklab.sdk.lib import telemetry
-from tracklab.sdk.tracklab_run import Run
+from tracklab.sdk.run import Run
 
 openai = util.get_module(
     name="openai",

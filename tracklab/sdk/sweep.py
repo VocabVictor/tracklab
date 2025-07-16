@@ -6,7 +6,7 @@ from tracklab import env
 from tracklab.apis import InternalApi
 from tracklab.sdk.launch.sweeps.utils import handle_sweep_config_violations
 
-from . import tracklab_login
+# Login functionality removed - TrackLab is now local-only
 
 if TYPE_CHECKING:
     from tracklab.wandb_controller import _WandbController
@@ -79,9 +79,8 @@ def sweep(
     if project:
         env.set_project(project)
 
-    # Make sure we are logged in
-    if tracklab.run is None:
-        tracklab_login._login(_silent=True)
+    # TrackLab: Skip login - local-only service
+    # No authentication required for local tracking
     api = InternalApi()
     sweep_id, warnings = api.upsert_sweep(sweep, prior_runs=prior_runs)
     handle_sweep_config_violations(warnings)

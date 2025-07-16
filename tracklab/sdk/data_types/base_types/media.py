@@ -223,7 +223,7 @@ class Media(WBValue):
         # into Media itself we should get rid of them
         from tracklab import Image
         from tracklab.data_types import Audio
-        from tracklab.sdk.tracklab_run import Run
+        from tracklab.sdk.run import Run
 
         json_obj: Dict[str, Any] = {}
 

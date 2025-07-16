@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 import tracklab
 import tracklab.data_types as data_types
 from tracklab.data_types import _SavedModel
-from tracklab.sdk import tracklab_setup
+from tracklab.sdk import setup
 from tracklab.sdk.artifacts.artifact import Artifact
 from tracklab.sdk.artifacts.artifact_manifest_entry import ArtifactManifestEntry
 

@@ -2,7 +2,7 @@ import os
 
 import tracklab
 from tracklab import env
-from tracklab.sdk import tracklab_setup
+from tracklab.sdk import setup
 
 
 def sagemaker_auth(overrides=None, path=".", api_key=None):

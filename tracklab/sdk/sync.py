@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 from tracklab import util
 from tracklab.errors.term import termerror, termlog
 
-from . import tracklab_setup
+from . import setup
 from .backend.backend import Backend
 from .lib.runid import generate_id
 
@@ -21,7 +21,7 @@ def _sync(
     append: Optional[bool] = None,
     skip_console: Optional[bool] = None,
 ) -> "tracklab_internal_pb2.SyncResponse":
-    wl = tracklab_setup.setup()
+    wl = setup.setup()
     assert wl is not None
 
     stream_id = generate_id()

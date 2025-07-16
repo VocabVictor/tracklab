@@ -10,7 +10,7 @@ from tracklab.util import (
     json_friendly_val,
 )
 
-from . import tracklab_helper
+from . import helper
 from .lib import config_util
 
 logger = logging.getLogger("wandb")
@@ -172,7 +172,7 @@ class Config:
         return key in self._items
 
     def _update(self, d, allow_val_change=None, ignore_locked=None):
-        parsed_dict = tracklab_helper.parse_config(d)
+        parsed_dict = helper.parse_config(d)
         locked_keys = set()
         for key in list(parsed_dict):
             if self._check_locked(key, ignore_locked=ignore_locked):
@@ -197,7 +197,7 @@ class Config:
             self._callback(data=self._as_dict())
 
     def setdefaults(self, d):
-        d = tracklab_helper.parse_config(d)
+        d = helper.parse_config(d)
         # strip out keys already configured
         d = {k: v for k, v in d.items() if k not in self._items}
         d = self._sanitize_dict(d)

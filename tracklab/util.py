@@ -68,7 +68,7 @@ from tracklab.sdk.lib.paths import FilePathStr, StrPath
 
 if TYPE_CHECKING:
     import tracklab.sdk.internal.settings_static
-    import tracklab.sdk.tracklab_settings
+    import tracklab.sdk.settings
     from tracklab.sdk.artifacts.artifact import Artifact
 
 CheckRetryFnType = Callable[[Exception], Union[bool, timedelta]]

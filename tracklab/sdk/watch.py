@@ -17,7 +17,7 @@ from .lib import telemetry
 if TYPE_CHECKING:
     import torch  # type: ignore [import-not-found]
 
-    from tracklab.sdk.tracklab_run import Run
+    from tracklab.sdk.run import Run
 
 logger = logging.getLogger("wandb")
 
@@ -39,7 +39,7 @@ def _watch(
     extended to support arbitrary machine learning models in the future.
 
     Args:
-        run (tracklab.sdk.tracklab_run.Run): The run object to log to.
+        run (tracklab.sdk.run.Run): The run object to log to.
         models (Union[torch.nn.Module, Sequence[torch.nn.Module]]):
             A single model or a sequence of models to be monitored.
         criterion (Optional[torch.F]):
@@ -127,7 +127,7 @@ def _unwatch(
     """Remove pytorch model topology, gradient and parameter hooks.
 
     Args:
-        run (tracklab.sdk.tracklab_run.Run):
+        run (tracklab.sdk.run.Run):
             The run object to log to.
         models (torch.nn.Module | Sequence[torch.nn.Module]):
             Optional list of pytorch models that have had watch called on them

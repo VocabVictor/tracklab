@@ -28,7 +28,7 @@ from tracklab import Config, Error, env, util, tracklab_agent, tracklab_sdk
 from tracklab.apis import InternalApi, PublicApi
 from tracklab.apis.public import RunQueue
 from tracklab.errors.links import url_registry
-from tracklab.sdk import tracklab_setup
+from tracklab.sdk import setup
 from tracklab.sdk.artifacts._validators import is_artifact_registry_project
 from tracklab.sdk.artifacts.artifact_file_cache import get_artifact_file_cache
 from tracklab.sdk.internal.internal_api import Api as SDKInternalApi
@@ -127,7 +127,7 @@ def _get_cling_api(reset=None):
     if _api is None:
         # TODO(jhr): make a settings object that is better for non runs.
         # only override the necessary setting
-        tracklab_setup.singleton().settings.x_cli_only_mode = True
+        setup.singleton().settings.x_cli_only_mode = True
         _api = InternalApi()
     return _api
 
@@ -212,45 +212,7 @@ def projects(entity, display=True):
     return projects
 
 
-@cli.command(context_settings=CONTEXT, help="Login to Weights & Biases")
-@click.argument("key", nargs=-1)
-@click.option("--cloud", is_flag=True, help="Login to the cloud instead of local")
-@click.option(
-    "--host", "--base-url", default=None, help="Login to a specific instance of W&B"
-)
-@click.option(
-    "--relogin", default=None, is_flag=True, help="Force relogin if already logged in."
-)
-@click.option("--anonymously", default=False, is_flag=True, help="Log in anonymously")
-@click.option(
-    "--verify/--no-verify",
-    default=False,
-    is_flag=True,
-    help="Verify login credentials",
-)
-@display_error
-def login(key, host, cloud, relogin, anonymously, verify, no_offline=False):
-    # TODO: handle no_offline
-    anon_mode = "must" if anonymously else "never"
-
-    tracklab_sdk.tracklab_login._handle_host_wandb_setting(host, cloud)
-    # A change in click or the test harness means key can be none...
-    key = key[0] if key is not None and len(key) > 0 else None
-    relogin = True if key or relogin else False
-
-    global_settings = tracklab_setup.singleton().settings
-    global_settings.x_cli_only_mode = True
-    global_settings.x_disable_viewer = relogin and not verify
-
-    tracklab.login(
-        anonymous=anon_mode,
-        force=True,
-        host=host,
-        key=key,
-        relogin=relogin,
-        verify=verify,
-        referrer="models",
-    )
+# Login functionality removed - TrackLab runs in local-only mode
 
 
 @cli.command(
@@ -306,9 +268,7 @@ def init(ctx, project, entity, reset, mode):
             click.style("Let's setup this directory for W&B!", fg="green", bold=True)
         )
     api = _get_cling_api()
-    if api.api_key is None:
-        ctx.invoke(login)
-        api = _get_cling_api(reset=True)
+    # TrackLab runs in local-only mode, no login required
 
     viewer = api.viewer()
 
@@ -322,8 +282,8 @@ def init(ctx, project, entity, reset, mode):
                 bold=True,
             )
         )
-        ctx.invoke(login)
-        api = _get_cling_api(reset=True)
+        # TrackLab runs in local-only mode, no login required
+        pass
 
     # This shouldn't happen.
     viewer = api.viewer()
@@ -482,10 +442,7 @@ def sync(
     skip_console=None,
 ):
     api = _get_cling_api()
-    if not api.is_authenticated:
-        tracklab.termlog("Login to W&B to sync offline runs")
-        ctx.invoke(login, no_offline=True)
-        api = _get_cling_api(reset=True)
+    # TrackLab runs in local-only mode, no authentication required
 
     if ignore:
         exclude_globs = ignore
@@ -720,10 +677,7 @@ def sweep(
     elif is_state_change_command == 1:
         sweep_id = config_yaml_or_sweep_id
         api = _get_cling_api()
-        if not api.is_authenticated:
-            tracklab.termlog("Login to W&B to use the sweep feature")
-            ctx.invoke(login, no_offline=True)
-            api = _get_cling_api(reset=True)
+        # TrackLab runs in local-only mode, no authentication required
         parts = dict(entity=entity, project=project, name=sweep_id)
         err = sweep_utils.parse_sweep_id(parts)
         if err:
@@ -763,10 +717,7 @@ def sweep(
         return ret
 
     api = _get_cling_api()
-    if not api.is_authenticated:
-        tracklab.termlog("Login to W&B to use the sweep feature")
-        ctx.invoke(login, no_offline=True)
-        api = _get_cling_api(reset=True)
+    # TrackLab runs in local-only mode, no authentication required
 
     sweep_obj_id = None
     if update:
@@ -940,10 +891,7 @@ def launch_sweep(
 ):
     api = _get_cling_api()
     env = os.environ
-    if not api.is_authenticated:
-        tracklab.termlog("Login to W&B to use the sweep feature")
-        ctx.invoke(login, no_offline=True)
-        api = _get_cling_api(reset=True)
+    # TrackLab runs in local-only mode, no authentication required
 
     entity = entity or env.get("TRACKLAB_ENTITY") or api.settings("entity")
     if entity is None:
@@ -1630,10 +1578,7 @@ def launch_agent(
 @display_error
 def agent(ctx, project, entity, count, sweep_id):
     api = _get_cling_api()
-    if not api.is_authenticated:
-        tracklab.termlog("Login to W&B to use the sweep agent feature")
-        ctx.invoke(login, no_offline=True)
-        api = _get_cling_api(reset=True)
+    # TrackLab runs in local-only mode, no authentication required
 
     tracklab.termlog("Starting wandb agent 🕵️")
     tracklab_agent.agent(sweep_id, entity=entity, project=project, count=count)
@@ -1654,10 +1599,7 @@ def scheduler(
     sweep_id,
 ):
     api = InternalApi()
-    if not api.is_authenticated:
-        tracklab.termlog("Login to W&B to use the sweep scheduler feature")
-        ctx.invoke(login, no_offline=True)
-        api = InternalApi(reset=True)
+    # TrackLab runs in local-only mode, no authentication required
 
     tracklab._sentry.configure_scope(process_context="sweep_scheduler")
     tracklab.termlog("Starting a Launch Scheduler 🚀")
@@ -1930,7 +1872,7 @@ def controller(verbose, sweep_id):
 @click.pass_context
 @click.argument("docker_run_args", nargs=-1)
 def docker_run(ctx, docker_run_args):
-    """Wrap `docker run` and adds TRACKLAB_API_KEY and TRACKLAB_DOCKER environment variables.
+    """Wrap `docker run` and adds TRACKLAB_DOCKER environment variables.
 
     This will also set the runtime to nvidia if the nvidia-docker executable is present
     on the system and --runtime wasn't set.
@@ -1957,12 +1899,8 @@ def docker_run(ctx, docker_run_args):
         tracklab.termlog(
             "Couldn't detect image argument, running command without the TRACKLAB_DOCKER env variable"
         )
-    if api.api_key:
-        args = ["-e", f"TRACKLAB_API_KEY={api.api_key}"] + args
-    else:
-        tracklab.termlog(
-            "Not logged in, run `wandb login` from the host machine to enable result logging"
-        )
+    # TrackLab runs in local-only mode, no API key required
+    pass
     subprocess.call(["docker", "run"] + args)
 
 
@@ -2011,7 +1949,7 @@ def docker(
     """Run your code in a docker container.
 
     W&B docker lets you run your code in a docker image ensuring wandb is configured. It
-    adds the TRACKLAB_DOCKER and TRACKLAB_API_KEY environment variables to your container and
+    adds the TRACKLAB_DOCKER environment variables to your container and
     mounts the current directory in /app by default.  You can pass additional args which
     will be added to `docker run` before the image name is declared, we'll choose a
     default image for you if one isn't passed:
@@ -2084,12 +2022,8 @@ def docker(
     if not no_dir:
         #  TODO: We should default to the working directory if defined
         command.extend(["-v", cwd + ":" + dir, "-w", dir])
-    if api.api_key:
-        command.extend(["-e", f"TRACKLAB_API_KEY={api.api_key}"])
-    else:
-        tracklab.termlog(
-            "Couldn't find TRACKLAB_API_KEY, run `wandb login` to enable streaming metrics"
-        )
+    # TrackLab runs in local-only mode, no API key required
+    pass
     if jupyter:
         command.extend(["-e", "TRACKLAB_ENSURE_JUPYTER=1", "-p", port + ":8888"])
         no_tty = True
@@ -2224,10 +2158,8 @@ def start(ctx, port, env, daemon, upgrade, edge):
         else:
             tracklab.termlog(f"W&B server started at http://localhost:{port} \U0001f680")
             tracklab.termlog("You can stop the server by running `wandb server stop`")
-            if not api.api_key:
-                # Let the server start before potentially launching a browser
-                time.sleep(2)
-                ctx.invoke(login, host=host)
+            # TrackLab runs in local-only mode, no login required
+            pass
 
 
 @server.command(context_settings=RUN_CONTEXT, help="Stop a local W&B server")
@@ -2607,46 +2539,7 @@ Run `git clone {repo}` and restore from there or pass the --no-git flag."""
     return commit, json_config, patch_content, repo, metadata
 
 
-@cli.command("online", help="Enable W&B sync")
-@display_error
-def online():
-    api = InternalApi()
-    try:
-        api.clear_setting("mode", persist=True)
-    except configparser.Error:
-        pass
-    click.echo(
-        "W&B online. Running your script from this directory will now sync to the cloud."
-    )
-
-
-@cli.command("offline", help="Disable W&B sync")
-@display_error
-def offline():
-    api = InternalApi()
-    try:
-        api.set_setting("mode", "offline", persist=True)
-        click.echo(
-            "W&B offline. Running your script from this directory will only write metadata locally. Use wandb disabled to completely turn off W&B."
-        )
-    except configparser.Error:
-        click.echo(
-            "Unable to write config, copy and paste the following in your terminal to turn off W&B:\nexport TRACKLAB_MODE=offline"
-        )
-
-
-@cli.command("on", hidden=True)
-@click.pass_context
-@display_error
-def on(ctx):
-    ctx.invoke(online)
-
-
-@cli.command("off", hidden=True)
-@click.pass_context
-@display_error
-def off(ctx):
-    ctx.invoke(offline)
+# TrackLab: Online/offline commands removed - local-only service
 
 
 @cli.command("status", help="Show configuration settings")
@@ -2663,42 +2556,7 @@ def status(settings):
         )
 
 
-@cli.command("disabled", help="Disable W&B.")
-@click.option(
-    "--service",
-    is_flag=True,
-    show_default=True,
-    default=True,
-    help="Disable W&B service",
-)
-def disabled(service):
-    api = InternalApi()
-    try:
-        api.set_setting("mode", "disabled", persist=True)
-        click.echo("W&B disabled.")
-    except configparser.Error:
-        click.echo(
-            "Unable to write config, copy and paste the following in your terminal to turn off W&B:\nexport TRACKLAB_MODE=disabled"
-        )
-
-
-@cli.command("enabled", help="Enable W&B.")
-@click.option(
-    "--service",
-    is_flag=True,
-    show_default=True,
-    default=True,
-    help="Enable W&B service",
-)
-def enabled(service):
-    api = InternalApi()
-    try:
-        api.set_setting("mode", "online", persist=True)
-        click.echo("W&B enabled.")
-    except configparser.Error:
-        click.echo(
-            "Unable to write config, copy and paste the following in your terminal to turn on W&B:\nexport TRACKLAB_MODE=online"
-        )
+# TrackLab: Disabled/enabled commands removed - local-only service
 
 
 @cli.command(context_settings=CONTEXT, help="Verify your local instance")

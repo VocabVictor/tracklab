@@ -76,7 +76,7 @@ def test_log_avoids_mutation(mock_run):
 
 
 def test_display(mock_run):
-    run = mock_run(settings=tracklab.Settings(mode="offline"))
+    run = mock_run(settings=tracklab.Settings())
     assert run.display() is False
 
 
@@ -106,6 +106,7 @@ def test_run_config(mock_run, config, sweep_config, expected_config):
 
 
 def test_run_urls(mock_run):
+    # TrackLab: URLs are not available in local-only offline mode
     base_url = "https://my.cool.site.com"
     entity = "me"
     project = "lol"
@@ -118,8 +119,9 @@ def test_run_urls(mock_run):
             run_id=run_id,
         )
     )
-    assert run.get_project_url() == f"{base_url}/{entity}/{project}"
-    assert run.get_url() == f"{base_url}/{entity}/{project}/runs/{run.id}"
+    # TrackLab: Local service runs in offline mode, so URLs are None
+    assert run.get_project_url() is None
+    assert run.get_url() is None
 
 
 def test_run_publish_config(mock_run, parse_records, record_q):
@@ -219,7 +221,7 @@ def test_run_pub_history(mock_run, record_q, parse_records):
 
 
 def test_use_artifact_offline(mock_run):
-    run = mock_run(settings=tracklab.Settings(mode="offline"))
+    run = mock_run(settings=tracklab.Settings())
     with pytest.raises(Exception) as e_info:
         run.use_artifact("boom-data")
         assert str(e_info.value) == "Cannot use artifact when in offline mode."
@@ -237,7 +239,7 @@ def test_run_basic():
             a=list(range(10)), b=tuple(range(10, 20)), c=set(range(20, 30))
         ),
     )
-    run = tracklab_sdk.wandb_run.Run(settings=s, config=c)
+    run = tracklab_sdk.run.Run(settings=s, config=c)
     assert dict(run.config) == dict(
         param1=2,
         param2=4,
@@ -254,7 +256,7 @@ def test_run_sweep():
     s = tracklab.Settings()
     c = dict(param1=2, param2=4)
     sw = dict(param3=9)
-    run = tracklab_sdk.wandb_run.Run(settings=s, config=c, sweep_config=sw)
+    run = tracklab_sdk.run.Run(settings=s, config=c, sweep_config=sw)
     assert dict(run.config) == dict(param1=2, param2=4, param3=9)
 
 
@@ -262,14 +264,14 @@ def test_run_sweep_overlap():
     s = tracklab.Settings()
     c = dict(param1=2, param2=4)
     sw = dict(param2=8, param3=9)
-    run = tracklab_sdk.wandb_run.Run(settings=s, config=c, sweep_config=sw)
+    run = tracklab_sdk.run.Run(settings=s, config=c, sweep_config=sw)
     assert dict(run.config) == dict(param1=2, param2=8, param3=9)
 
 
 def test_run_deepcopy():
     s = tracklab.Settings()
     c = dict(param1=2, param2=4)
-    run = tracklab_sdk.wandb_run.Run(settings=s, config=c)
+    run = tracklab_sdk.run.Run(settings=s, config=c)
     run2 = copy.deepcopy(run)
     assert id(run) == id(run2)
 
@@ -290,7 +292,7 @@ def test_resumed_run_resume_file_state(mocker, mock_run, tmp_path, settings, exp
     tmp_file = tmp_path / "test_resume.json"
     tmp_file.write_text("{'run_id': 'test'}")
 
-    mocker.patch("tracklab.sdk.wandb_settings.Settings.resume_fname", tmp_file)
+    mocker.patch("tracklab.sdk.settings.Settings.resume_fname", tmp_file)
 
     run = mock_run(use_magic_mock=True, settings=settings)
     run._on_ready()

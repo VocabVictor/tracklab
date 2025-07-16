@@ -58,7 +58,7 @@ import yaml
 
 from tracklab import env
 from tracklab.apis import InternalApi
-from tracklab.sdk import tracklab_sweep
+from tracklab.sdk import sweep
 from tracklab.sdk.launch.sweeps.utils import (
     handle_sweep_config_violations,
     sweep_config_err_text_from_jsonschema_violations,

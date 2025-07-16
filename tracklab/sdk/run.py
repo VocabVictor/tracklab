@@ -60,7 +60,7 @@ from tracklab.util import (
     parse_artifact_string,
 )
 
-from . import tracklab_config, tracklab_metric, tracklab_summary
+from . import config as config_module, metric, summary
 from .artifacts._validators import (
     MAX_ARTIFACT_METADATA_KEYS,
     ArtifactPath,
@@ -91,9 +91,9 @@ from .mailbox import (
     MailboxHandle,
     wait_with_progress,
 )
-from .tracklab_alerts import AlertLevel
-from .tracklab_settings import Settings
-from .tracklab_setup import _WandbSetup
+from .alerts import AlertLevel
+from .settings import Settings
+from .setup import _WandbSetup
 
 if TYPE_CHECKING:
     from typing import TypedDict
@@ -563,7 +563,7 @@ class Run:
     _launch_artifacts: dict[str, Any] | None
     _printer: printer.Printer
 
-    summary: tracklab_summary.Summary
+    summary: summary.Summary
 
     def __init__(
         self,
@@ -597,7 +597,7 @@ class Run:
     ) -> None:
         self._settings = settings
 
-        self._config = tracklab_config.Config()
+        self._config = config_module.Config()
         self._config._set_callback(self._config_callback)
         self._config._set_artifact_callback(self._config_artifact_callback)
         self._config._set_settings(self._settings)
@@ -607,7 +607,7 @@ class Run:
         self._config._update({wandb_key: dict()})
 
         # TODO: perhaps this should be a property that is a noop on a finished run
-        self.summary = tracklab_summary.Summary(
+        self.summary = summary.Summary(
             self._summary_get_current_summary_callback,
         )
         self.summary._set_update_callback(self._summary_update_callback)
@@ -827,16 +827,16 @@ class Run:
     @property
     @_log_to_run
     @_attach
-    def config(self) -> tracklab_config.Config:
+    def config(self) -> config_module.Config:
         """Config object associated with this run."""
         return self._config
 
     @property
     @_log_to_run
     @_attach
-    def config_static(self) -> tracklab_config.ConfigStatic:
+    def config_static(self) -> config_module.ConfigStatic:
         """Static config object associated with this run."""
-        return tracklab_config.ConfigStatic(self._config)
+        return config_module.ConfigStatic(self._config)
 
     @property
     @_log_to_run
@@ -2280,9 +2280,9 @@ class Run:
             # Inform the service that we're done sending messages for this run.
             #
             # TODO: Why not do this in _atexit_cleanup()?
+            # TrackLab: No service to inform for local-only operation
             if self._settings.run_id:
-                service = self._wl.assert_service()
-                service.inform_finish(run_id=self._settings.run_id)
+                pass  # Local run finished
 
         finally:
             if tracklab.run is self:
@@ -2772,13 +2772,13 @@ class Run:
     def define_metric(
         self,
         name: str,
-        step_metric: str | tracklab_metric.Metric | None = None,
+        step_metric: str | metric.Metric | None = None,
         step_sync: bool | None = None,
         hidden: bool | None = None,
         summary: str | None = None,
         goal: str | None = None,
         overwrite: bool | None = None,
-    ) -> tracklab_metric.Metric:
+    ) -> metric.Metric:
         """Customize metrics logged with `tracklab.log()`.
 
         Args:
@@ -2833,16 +2833,16 @@ class Run:
     def _define_metric(
         self,
         name: str,
-        step_metric: str | tracklab_metric.Metric | None = None,
+        step_metric: str | metric.Metric | None = None,
         step_sync: bool | None = None,
         hidden: bool | None = None,
         summary: str | None = None,
         goal: str | None = None,
         overwrite: bool | None = None,
-    ) -> tracklab_metric.Metric:
+    ) -> metric.Metric:
         if not name:
             raise tracklab.Error("define_metric() requires non-empty name argument")
-        if isinstance(step_metric, tracklab_metric.Metric):
+        if isinstance(step_metric, metric.Metric):
             step_metric = step_metric.name
         for arg_name, arg_val, exp_type in (
             ("name", name, str),
@@ -2895,7 +2895,7 @@ class Run:
         with telemetry.context(run=self) as tel:
             tel.feature.metric = True
 
-        m = tracklab_metric.Metric(
+        m = metric.Metric(
             name=name,
             step_metric=step_metric,
             step_sync=step_sync,
