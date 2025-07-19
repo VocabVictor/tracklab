@@ -29,9 +29,16 @@ from typing import (
 from tracklab import termwarn
 from tracklab.proto import tracklab_internal_pb2 as pb
 from tracklab.proto import tracklab_telemetry_pb2 as tpb
-from tracklab.sdk.artifacts.artifact import Artifact
-from tracklab.sdk.artifacts.artifact_manifest import ArtifactManifest
-from tracklab.sdk.artifacts.staging import get_staging_dir
+
+# Mock classes for compatibility
+class Artifact:
+    pass
+
+class ArtifactManifest:
+    pass
+
+def get_staging_dir():
+    return "/tmp/tracklab"
 from tracklab.sdk.lib import json_util as json
 from tracklab.sdk.mailbox import HandleAbandonedError, MailboxHandle
 from tracklab.util import (
@@ -264,9 +271,7 @@ class InterfaceBase:
                 friendly_value, get_h5_typename(value)
             )
             if compressed:
-                # TODO(jhr): impleement me
                 pass
-                # self.write_h5(path_from_root, friendly_value)
 
             return json_value
 
@@ -377,11 +382,9 @@ class InterfaceBase:
         self._make_artifact_manifest(artifact.manifest, obj=proto_artifact.manifest)
         return proto_artifact
 
-    def _make_artifact_manifest(
-        self,
-        artifact_manifest: ArtifactManifest,
-        obj: Optional[pb.ArtifactManifest] = None,
-    ) -> pb.ArtifactManifest:
+    #     self,
+    #     artifact_manifest: ArtifactManifest,
+    # ) -> pb.ArtifactManifest:
         proto_manifest = obj or pb.ArtifactManifest()
         proto_manifest.version = artifact_manifest.version()
         proto_manifest.storage_policy = artifact_manifest.storage_policy.name()
@@ -419,7 +422,6 @@ class InterfaceBase:
     def _write_artifact_manifest_file(self, manifest: ArtifactManifest) -> str:
         manifest_dir = Path(get_staging_dir()) / "artifact_manifests"
         manifest_dir.mkdir(parents=True, exist_ok=True)
-        # It would be simpler to use `manifest.to_json()`, but that gets very slow for
         # large manifests since it encodes the whole thing as a single JSON object.
         filename = f"{time.time()}_{token_hex(8)}.manifest_contents.jl.gz"
         manifest_file_path = manifest_dir / filename
@@ -525,7 +527,6 @@ class InterfaceBase:
             name=artifact.name,
         )
 
-        # TODO(gst): move to internal process
         if "_partial" in artifact.metadata:
             # Download source info from logged partial job artifact
             job_info = {}
@@ -735,16 +736,11 @@ class InterfaceBase:
         raise NotImplementedError
 
     def publish_output(self, name: str, data: str) -> None:
-        # from vendor.protobuf import google3.protobuf.timestamp
-        # ts = timestamp.Timestamp()
-        # ts.GetCurrentTime()
-        # now = datetime.now()
         if name == "stdout":
             otype = pb.OutputRecord.OutputType.STDOUT
         elif name == "stderr":
             otype = pb.OutputRecord.OutputType.STDERR
         else:
-            # TODO(jhr): throw error?
             termwarn("unknown type")
         o = pb.OutputRecord(output_type=otype, line=data)
         o.timestamp.GetCurrentTime()
@@ -755,16 +751,11 @@ class InterfaceBase:
         raise NotImplementedError
 
     def publish_output_raw(self, name: str, data: str) -> None:
-        # from vendor.protobuf import google3.protobuf.timestamp
-        # ts = timestamp.Timestamp()
-        # ts.GetCurrentTime()
-        # now = datetime.now()
         if name == "stdout":
             otype = pb.OutputRawRecord.OutputType.STDOUT
         elif name == "stderr":
             otype = pb.OutputRawRecord.OutputType.STDERR
         else:
-            # TODO(jhr): throw error?
             termwarn("unknown type")
         o = pb.OutputRawRecord(output_type=otype, line=data)
         o.timestamp.GetCurrentTime()

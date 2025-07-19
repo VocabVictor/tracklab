@@ -1,4 +1,3 @@
-# tracklab.integrations.data_logging.py
 #
 # Contains common utility functions that enable
 # logging datasets and predictions to tracklab.
@@ -272,7 +271,6 @@ def _infer_single_example_keyed_processor(
         )
         # TODO: Consider adding back if users ask
         # processors["min_class"] = lambda n, d, p: class_labels_table.index_ref(  # type: ignore
-        #     np.argmin(d)
         # )
 
         values = np.unique(example)
@@ -305,7 +303,6 @@ def _infer_single_example_keyed_processor(
         )
         # This could be anything
         if shape[0] <= 10:
-            # if less than 10, fan out the results
             # processors["node"] = lambda n, d, p: {i: d[i] for i in range(shape[0])}
             processors["node"] = lambda n, d, p: [
                 d[i].tolist() if hasattr(d[i], "tolist") else d[i]

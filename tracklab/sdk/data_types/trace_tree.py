@@ -19,8 +19,7 @@ from tracklab.sdk.data_types.base_types.media import Media
 from tracklab.sdk.data_types.utils import _json_helper
 
 if TYPE_CHECKING:  # pragma: no cover
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
 
@@ -104,7 +103,7 @@ class WBTraceTree(Media):
     def get_media_subdir(cls) -> str:
         return "media/wb_trace_tree"
 
-    def to_json(self, run: Optional[Union["LocalRun", "Artifact"]]) -> dict:
+    def to_json(self, run: Optional[Any]) -> dict:
         res = {"_type": self._log_type}
         # Here we use `dumps` to put things into string format. This is because
         # the complex data structures create problems for gorilla history to parquet.
@@ -431,8 +430,6 @@ class Trace:
             name: The name of the trace to be logged
         """
         trace_tree = WBTraceTree(self._span, self._model_dict)
-        # NOTE: Does not work for reinit="create_new" runs.
-        #   This method should be deprecated and users should call run.log().
         assert tracklab.run is not None, (
             "You must call tracklab.init() before logging a trace"
         )

@@ -11,7 +11,6 @@ export interface Run {
   createdAt: string
   updatedAt: string
   duration?: number
-  user?: string
   host?: string
   command?: string
   pythonVersion?: string
@@ -57,16 +56,106 @@ export interface Artifact {
   metadata?: Record<string, any>
 }
 
+// 硬件加速器类型
+export type AcceleratorType = 'gpu' | 'npu' | 'tpu' | 'other'
+
+// CPU 核心信息
+export interface CPUCore {
+  id: number
+  usage: number
+  frequency: number
+  temperature?: number
+}
+
+// 加速器设备信息
+export interface AcceleratorDevice {
+  id: number
+  type: AcceleratorType
+  name: string
+  utilization: number
+  memory: {
+    used: number
+    total: number
+    percentage: number
+  }
+  temperature: number
+  power?: number
+  fanSpeed?: number
+}
+
+// 节点信息
+export interface NodeInfo {
+  id: string
+  name: string
+  hostname: string
+  ip: string
+  role: 'master' | 'worker' | 'standalone'
+  status: 'online' | 'offline' | 'degraded'
+  lastHeartbeat: number
+}
+
+// 扩展的系统指标
 export interface SystemMetrics {
-  cpu: number
-  memory: number
-  disk: number
-  gpu?: {
-    utilization: number
-    memory: number
-    temperature: number
-  }[]
+  nodeId: string
   timestamp: number
+  
+  // CPU 信息
+  cpu: {
+    overall: number
+    cores: CPUCore[]
+    loadAverage: number[]
+    processes: number
+    threads: number
+  }
+  
+  // 内存信息
+  memory: {
+    usage: number
+    used: number
+    total: number
+    swap: {
+      used: number
+      total: number
+      percentage: number
+    }
+  }
+  
+  // 磁盘信息
+  disk: {
+    usage: number
+    used: number
+    total: number
+    ioRead: number
+    ioWrite: number
+    iops: number
+  }
+  
+  // 网络信息
+  network: {
+    bytesIn: number
+    bytesOut: number
+    packetsIn: number
+    packetsOut: number
+    connections: number
+  }
+  
+  // 加速器设备
+  accelerators: AcceleratorDevice[]
+}
+
+// 分布式集群信息
+export interface ClusterInfo {
+  nodes: NodeInfo[]
+  totalResources: {
+    cpu: number
+    memory: number
+    accelerators: number
+  }
+  usedResources: {
+    cpu: number
+    memory: number
+    accelerators: number
+  }
 }
 
 // UI 状态类型

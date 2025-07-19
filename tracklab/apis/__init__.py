@@ -38,11 +38,9 @@ if env.ssl_disabled():
     _disable_ssl()
 
 
-# reset_path = util.vendor_setup()  # Vendor setup moved to main __init__.py
 
 from .internal import Api as InternalApi  # noqa
 from .public import Api as PublicApi  # noqa
 
-# reset_path()  # Disabled - vendor setup moved to main module
 
 __all__ = ["InternalApi", "PublicApi"]

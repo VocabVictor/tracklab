@@ -1,14 +1,22 @@
-import React from 'react'
-import { Server, Cpu, HardDrive, MemoryStick, Zap } from 'lucide-react'
+import React, { useState } from 'react'
+import { Server, Cpu, HardDrive, MemoryStick, Zap, Monitor } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
-import { useSystemInfo, useSystemMetrics } from '@/hooks/useApi'
+import { useSystemInfo, useSystemMetrics, useClusterInfo, useClusterMetrics } from '@/hooks/useApi'
 import { cn } from '@/utils'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import { SystemOverview, CPUMonitor, AcceleratorMonitor, NodeMonitor } from '@/components/System'
+import { ClusterInfo } from '@/types'
+
+type TabType = 'overview' | 'cpu' | 'accelerator' | 'cluster'
 
 const SystemPage: React.FC = () => {
   const { animationsEnabled } = useAppStore()
+  const [activeTab, setActiveTab] = useState<TabType>('overview')
+  
   const { data: systemInfo, loading: infoLoading } = useSystemInfo()
   const { data: systemMetrics, loading: metricsLoading } = useSystemMetrics()
+  const { data: clusterInfo } = useClusterInfo()
+  const { data: clusterMetrics } = useClusterMetrics()
 
   const currentMetrics = systemMetrics?.length > 0 ? systemMetrics[systemMetrics.length - 1] : null
 
@@ -20,6 +28,67 @@ const SystemPage: React.FC = () => {
     )
   }
 
+  const tabs = [
+    { id: 'overview', label: '总览', icon: Monitor },
+    { id: 'cpu', label: 'CPU', icon: Cpu },
+    { id: 'accelerator', label: '加速器', icon: Zap },
+    { id: 'cluster', label: '集群', icon: Server }
+  ] as const
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <SystemOverview 
+            metrics={systemMetrics || []} 
+            animationsEnabled={animationsEnabled}
+          />
+        )
+      case 'cpu':
+        return currentMetrics?.cpu ? (
+          <CPUMonitor 
+            overall={currentMetrics.cpu.overall}
+            cores={currentMetrics.cpu.cores}
+            loadAverage={currentMetrics.cpu.loadAverage}
+            processes={currentMetrics.cpu.processes}
+            threads={currentMetrics.cpu.threads}
+            animationsEnabled={animationsEnabled}
+          />
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="text-center text-gray-500">
+              <Cpu className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>暂无 CPU 监控数据</p>
+            </div>
+          </div>
+        )
+      case 'accelerator':
+        return (
+          <AcceleratorMonitor 
+            devices={currentMetrics?.accelerators || []}
+            animationsEnabled={animationsEnabled}
+          />
+        )
+      case 'cluster':
+        return clusterInfo && clusterMetrics ? (
+          <NodeMonitor 
+            clusterInfo={clusterInfo as ClusterInfo}
+            nodeMetrics={clusterMetrics}
+            animationsEnabled={animationsEnabled}
+          />
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="text-center text-gray-500">
+              <Server className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>暂无集群监控数据</p>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
@@ -28,34 +97,34 @@ const SystemPage: React.FC = () => {
         animationsEnabled && 'animate-fade-in'
       )}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">System</h1>
+          <h1 className="text-2xl font-bold text-gray-900">系统监控</h1>
           <p className="text-gray-600 mt-1">
-            Monitor system performance and resources
+            监控系统性能和资源使用情况
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <button className="btn btn-secondary">
-            Export Data
+            导出数据
           </button>
           <button className="btn btn-primary">
-            Refresh
+            刷新
           </button>
         </div>
       </div>
 
-      {/* 系统信息 */}
+      {/* 系统信息概览 */}
       <div className={cn(
-        'card p-6',
+        'bg-white rounded-lg border border-gray-200 p-6',
         animationsEnabled && 'animate-fade-in'
       )}>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          System Information
+          系统信息
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex items-center space-x-3">
             <Server className="w-8 h-8 text-blue-500" />
             <div>
-              <p className="text-sm text-gray-600">Platform</p>
+              <p className="text-sm text-gray-600">平台</p>
               <p className="font-medium">
                 {systemInfo && typeof systemInfo === 'object' && 'platform' in systemInfo ? String(systemInfo.platform) : 'Unknown'}
               </p>
@@ -64,7 +133,7 @@ const SystemPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <Cpu className="w-8 h-8 text-green-500" />
             <div>
-              <p className="text-sm text-gray-600">CPU</p>
+              <p className="text-sm text-gray-600">处理器</p>
               <p className="font-medium">
                 {systemInfo && typeof systemInfo === 'object' && 'cpu' in systemInfo ? String(systemInfo.cpu) : 'Unknown'}
               </p>
@@ -73,7 +142,7 @@ const SystemPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <MemoryStick className="w-8 h-8 text-purple-500" />
             <div>
-              <p className="text-sm text-gray-600">Memory</p>
+              <p className="text-sm text-gray-600">内存</p>
               <p className="font-medium">
                 {systemInfo && typeof systemInfo === 'object' && 'memory' in systemInfo ? String(systemInfo.memory) : 'Unknown'}
               </p>
@@ -82,7 +151,7 @@ const SystemPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <HardDrive className="w-8 h-8 text-orange-500" />
             <div>
-              <p className="text-sm text-gray-600">Storage</p>
+              <p className="text-sm text-gray-600">存储</p>
               <p className="font-medium">
                 {systemInfo && typeof systemInfo === 'object' && 'storage' in systemInfo ? String(systemInfo.storage) : 'Unknown'}
               </p>
@@ -91,118 +160,37 @@ const SystemPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 实时监控 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* CPU 使用率 */}
-        <div className={cn(
-          'card p-6',
-          animationsEnabled && 'animate-fade-in'
-        )}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">CPU Usage</h3>
-            <Cpu className="w-5 h-5 text-gray-400" />
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
-              {currentMetrics?.cpu || 0}%
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${currentMetrics?.cpu || 0}%` }}
-              />
-            </div>
-          </div>
+      {/* 标签页导航 */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm',
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    animationsEnabled && 'transition-all duration-200'
+                  )}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
+          </nav>
         </div>
 
-        {/* 内存使用率 */}
-        <div className={cn(
-          'card p-6',
-          animationsEnabled && 'animate-fade-in'
-        )}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Memory Usage</h3>
-            <MemoryStick className="w-5 h-5 text-gray-400" />
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">
-              {currentMetrics?.memory || 0}%
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${currentMetrics?.memory || 0}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* 磁盘使用率 */}
-        <div className={cn(
-          'card p-6',
-          animationsEnabled && 'animate-fade-in'
-        )}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Disk Usage</h3>
-            <HardDrive className="w-5 h-5 text-gray-400" />
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">
-              {currentMetrics?.disk || 0}%
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-purple-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${currentMetrics?.disk || 0}%` }}
-              />
-            </div>
-          </div>
+        {/* 标签页内容 */}
+        <div className="p-6">
+          {renderTabContent()}
         </div>
       </div>
-
-      {/* GPU 信息（如果有） */}
-      {currentMetrics?.gpu && (
-        <div className={cn(
-          'card p-6',
-          animationsEnabled && 'animate-fade-in'
-        )}>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            GPU Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {currentMetrics.gpu.map((gpu: any, index: number) => (
-              <div key={index} className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-900">
-                    GPU {index + 1}
-                  </h4>
-                  <Zap className="w-4 h-4 text-yellow-500" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Utilization</span>
-                    <span className="text-sm font-medium">
-                      {gpu.utilization}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Memory</span>
-                    <span className="text-sm font-medium">
-                      {gpu.memory}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Temperature</span>
-                    <span className="text-sm font-medium">
-                      {gpu.temperature}°C
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

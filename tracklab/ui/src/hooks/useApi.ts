@@ -122,6 +122,36 @@ export function useSystemMetrics() {
   return { data: metrics, loading, error }
 }
 
+// 集群相关 API
+export function useClusterInfo() {
+  return useApi('/cluster/info')
+}
+
+export function useClusterMetrics() {
+  const [metrics, setMetrics] = useState<{ [nodeId: string]: any }>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      const result = await apiRequest<{ [nodeId: string]: any }>('/cluster/metrics')
+      if (result.success) {
+        setMetrics(result.data || {})
+      } else {
+        setError(result.error || 'Failed to fetch cluster metrics')
+      }
+      setLoading(false)
+    }
+
+    fetchMetrics()
+    const interval = setInterval(fetchMetrics, 5000) // 每5秒更新一次
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return { data: metrics, loading, error }
+}
+
 // 自定义 API 操作 hooks
 export function useApiActions() {
   const [loading, setLoading] = useState(false)

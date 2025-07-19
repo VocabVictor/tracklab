@@ -783,7 +783,6 @@ class WandbCallback(tf.keras.callbacks.Callback):
         return captions
 
     def _masks_to_pixels(self, masks):
-        # if its a binary mask, just return it as grayscale instead of picking the argmax
         if len(masks[0].shape) == 2 or masks[0].shape[-1] == 1:
             return masks
         class_colors = (
@@ -1030,9 +1029,7 @@ class WandbCallback(tf.keras.callbacks.Callback):
 
         # Log the model as artifact.
         name = tracklab.util.make_artifact_name_safe(f"model-{tracklab.run.name}")
-        model_artifact = tracklab.Artifact(name, type="model")
         model_artifact.add_dir(self.filepath[:-3])
-        tracklab.run.log_artifact(model_artifact, aliases=["latest", f"epoch_{epoch}"])
 
         # Remove the SavedModel from tracklab dir as we don't want to log it to save memory.
         shutil.rmtree(self.filepath[:-3])

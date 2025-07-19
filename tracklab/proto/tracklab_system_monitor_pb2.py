@@ -17,7 +17,6 @@ _runtime_version.ValidateProtobufRuntimeVersion(
     '',
     'tracklab_system_monitor.proto'
 )
-# @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 

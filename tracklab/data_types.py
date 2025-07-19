@@ -32,9 +32,7 @@ from .sdk.data_types.table import JoinedTable, PartitionedTable, Table
 from .sdk.data_types.trace_tree import WBTraceTree
 from .sdk.data_types.video import Video
 
-# Note: we are importing everything from the sdk/data_types to maintain a namespace for now.
 # Once we fully type this file and move it all into sdk, then we will need to clean up the
-# other internal imports
 
 __all__ = [
     # Untyped Exports

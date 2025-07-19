@@ -173,7 +173,19 @@ class TrackLabUIApp:
                 # Send to WebSocket clients
                 if metrics:
                     await self.websocket_manager.send_system_metrics(metrics[0])
-                    
+                
+                # Get cluster metrics if available
+                cluster_metrics = await self.datastore_service.get_cluster_metrics()
+                if cluster_metrics:
+                    await self.websocket_manager.send_cluster_metrics(cluster_metrics)
+                
+                # Check for hardware updates
+                accelerator_info = await self.datastore_service.get_accelerator_info()
+                if accelerator_info:
+                    await self.websocket_manager.send_hardware_update({
+                        "accelerators": accelerator_info
+                    })
+                
                 # Wait 5 seconds before next update
                 await asyncio.sleep(5)
                 

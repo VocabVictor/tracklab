@@ -7,7 +7,6 @@ import pytest
 from tracklab.sdk.lib.paths import LogicalPath
 from tracklab.util import to_forward_slash_path
 
-
 # Once upon a time I used hypothesis and fspaths to generate test cases. This was a good
 # thing, and unearthed many many corner cases I had not accounted for. But it was a bad
 # thing as well, because it found them over time, one by one, and generally on CI,
@@ -19,7 +18,6 @@ def pathological_path_strings(max_length=6, alphabet="./\\C:"):
         for seq in itertools.product(alphabet, repeat=n):
             yield "".join(seq)
 
-
 def pathological_paths(max_length=6, alphabet="./\\x", include_bytes=True):
     for path_str in pathological_path_strings(max_length, alphabet):
         yield path_str
@@ -28,7 +26,6 @@ def pathological_paths(max_length=6, alphabet="./\\x", include_bytes=True):
         yield Path(path_str)
         yield PurePosixPath(path_str)
         yield PureWindowsPath(path_str)
-
 
 @pytest.mark.parametrize(
     "target,posix,windows,_bytes",
@@ -44,7 +41,6 @@ def test_path_groups(target, posix, windows, _bytes):
     assert target == LogicalPath(PurePosixPath(posix))
     assert target == LogicalPath(PureWindowsPath(windows))
     assert target == LogicalPath(_bytes)
-
 
 def forward_slash_path_conversion(path):
     # For compatibility, we want to enforce output identical to `to_forward_slash_path`.
@@ -98,7 +94,6 @@ def forward_slash_path_conversion(path):
 
     return canonical
 
-
 def test_path_conversion():
     for path in pathological_paths():
         logical_path = LogicalPath(path)
@@ -120,7 +115,6 @@ def test_path_conversion():
         if platform.system() == "Windows":
             assert "\\" not in logical_path
 
-
 def test_logical_path_matches_to_posix_path():
     # If PurePosixPath can be constructed it should be the same as the LogicalPath.
     for path in pathological_paths(include_bytes=False):
@@ -130,7 +124,6 @@ def test_logical_path_matches_to_posix_path():
         assert posix_path == logical_path.to_path()
         assert str(posix_path) == logical_path
 
-
 def test_logical_path_is_idempotent():
     for path in pathological_paths():
         logical_path = LogicalPath(path)
@@ -139,7 +132,6 @@ def test_logical_path_is_idempotent():
             assert logical_path == LogicalPath(to_forward_slash_path(path))
             assert logical_path == to_forward_slash_path(logical_path)
 
-
 def test_logical_path_round_trip():
     for path in pathological_paths():
         logical_path = LogicalPath(path)
@@ -147,7 +139,6 @@ def test_logical_path_round_trip():
         assert isinstance(posix_path, PurePosixPath)
         assert posix_path == LogicalPath(posix_path).to_path()
         assert str(posix_path) == LogicalPath(posix_path) or not path
-
 
 def test_logical_path_acts_like_posix_path():
     for path in pathological_paths(include_bytes=False):
@@ -168,7 +159,6 @@ def test_logical_path_acts_like_posix_path():
         itself = lp.joinpath("bar").parent
         assert isinstance(itself, LogicalPath)
         assert PurePosixPath(itself) == ppp
-
 
 def test_logical_path_joins_like_pathlib():
     base_path_set = pathological_path_strings(max_length=3)

@@ -416,7 +416,6 @@ class Graph(Media):
                 if not hasattr(inbound, "__len__"):
                     inbound = [inbound]
                 if (len(v) > 1) or (len(v) == 1 and len(inbound) > 1):
-                    # if the model has multiple nodes
                     # or if the nodes have multiple inbound_layers
                     # the model is no longer sequential
                     sequential_like = False

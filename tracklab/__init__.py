@@ -12,7 +12,6 @@ from __future__ import annotations
 
 __version__ = "0.0.3"
 
-# Setup vendor module paths before any other imports
 import sys
 import os
 _vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
@@ -41,17 +40,11 @@ wandb_lib = tracklab_sdk.lib  # type: ignore
 init = tracklab_sdk.init
 setup = tracklab_sdk.setup
 attach = _attach = tracklab_sdk._attach
-_sync = tracklab_sdk._sync
 teardown = _teardown = tracklab_sdk.teardown
 finish = tracklab_sdk.finish
 join = finish
-# Login functionality removed - TrackLab is now local-only
 helper = tracklab_sdk.helper
-sweep = tracklab_sdk.sweep
-controller = tracklab_sdk.controller
 require = tracklab_sdk.require
-Artifact = tracklab_sdk.Artifact
-AlertLevel = tracklab_sdk.AlertLevel
 Settings = tracklab_sdk.Settings
 Config = tracklab_sdk.Config
 
@@ -72,7 +65,6 @@ from tracklab.data_types import Graph
 from tracklab.data_types import Image
 from tracklab.data_types import Plotly
 
-# from tracklab.data_types import Bokeh # keeping out of top level for now since Bokeh plots have poor UI
 from tracklab.data_types import Video
 from tracklab.data_types import Audio
 from tracklab.data_types import Table
@@ -84,14 +76,12 @@ from tracklab.data_types import Histogram
 from tracklab.data_types import Classes
 from tracklab.data_types import JoinedTable
 
-from tracklab.tracklab_agent import agent
 
-from tracklab.plot import visualize, plot_table
+visualize = None
+plot_table = None
 from tracklab.integration.sagemaker import sagemaker_auth
 from tracklab.sdk.internal import profiler
 
-# Artifact import types
-from tracklab.sdk.artifacts.artifact_ttl import ArtifactTTL
 
 # Used to make sure we don't use some code in the incorrect process context
 _IS_INTERNAL_PROCESS = False
@@ -130,12 +120,6 @@ watch = _preinit.PreInitCallable("tracklab.watch", tracklab_sdk.run.Run.watch)  
 unwatch = _preinit.PreInitCallable("tracklab.unwatch", tracklab_sdk.run.Run.unwatch)  # type: ignore
 save = _preinit.PreInitCallable("tracklab.save", tracklab_sdk.run.Run.save)  # type: ignore
 restore = tracklab_sdk.run.restore
-use_artifact = _preinit.PreInitCallable(
-    "tracklab.use_artifact", tracklab_sdk.run.Run.use_artifact  # type: ignore
-)
-log_artifact = _preinit.PreInitCallable(
-    "tracklab.log_artifact", tracklab_sdk.run.Run.log_artifact  # type: ignore
-)
 log_model = _preinit.PreInitCallable(
     "tracklab.log_model", tracklab_sdk.run.Run.log_model  # type: ignore
 )
@@ -188,7 +172,6 @@ def ensure_configured():
 def set_trace():
     import pdb  # TODO: support other debuggers
 
-    #  frame = sys._getframe().f_back
     pdb.set_trace()  # TODO: pass the parent stack...
 
 
@@ -224,9 +207,6 @@ __all__ = (
     "finish",
     "setup",
     "save",
-    "sweep",
-    "controller",
-    "agent",
     "config",
     "log",
     "summary",
@@ -243,9 +223,6 @@ __all__ = (
     "Object3D",
     "Molecule",
     "Histogram",
-    "ArtifactTTL",
-    "log_artifact",
-    "use_artifact",
     "log_model",
     "use_model",
     "link_model",
@@ -253,4 +230,5 @@ __all__ = (
     "watch",
     "unwatch",
     "plot_table",
+    "system_monitor",
 )

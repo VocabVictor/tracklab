@@ -181,10 +181,8 @@ class AutologAPI:
         #   regardless of whether there is a tracklab.run or not,
         #   we only track if the run was created by autolog
         #    - todo: autolog(init: dict | run = run) would use the user-provided run
-        # - autolog() uses the tracklab.run if there is one, otherwise it calls tracklab.init()
         if init:
             _tracklab_run = tracklab.run
-            # we delegate dealing with the init dict to tracklab.init()
             self._run = tracklab.init(**init)
             if _tracklab_run != self._run:
                 self.__run_created_by_autolog = True

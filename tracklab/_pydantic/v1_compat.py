@@ -73,8 +73,6 @@ def allowed_arg_names(func: Callable) -> set[str]:
 # Pydantic BaseModels are defined with a custom metaclass, but its namespace
 # has changed between pydantic versions.
 #
-# In v1, it can be imported as `from pydantic.main import ModelMetaclass`
-# In v2, it's defined in an internal module so we avoid directly importing it.
 PydanticModelMetaclass: type = type(pydantic.BaseModel)
 
 
@@ -88,13 +86,8 @@ class V1MixinMetaclass(PydanticModelMetaclass):
     ):
         # In the class definition, convert the model config, if any:
         #     # BEFORE
-        #     class MyModel(BaseModel):  # v2 model with `ConfigDict`
-        #         model_config = ConfigDict(populate_by_name=True)
         #
         #     # AFTER
-        #     class MyModel(BaseModel):  # v1 model with inner `Config` class
-        #         class Config:
-        #             allow_population_by_field_name = True
         if config_dict := namespace.pop("model_config", None):
             namespace["Config"] = type("Config", (), convert_v2_config(config_dict))
         return super().__new__(cls, name, bases, namespace, **kwargs)
@@ -115,7 +108,6 @@ class V1Mixin(metaclass=V1MixinMetaclass):
     @classmethod
     def _dump_json_vals(cls, values: dict[str, Any], by_alias: bool) -> dict[str, Any]:
         """Reserialize values from `Json`-typed fields after dumping the model to dict."""
-        # Get the expected keys (after `.model_dump()`) for `Json`-typed fields.
         # Note: In v1, `Json` fields have `ModelField.parse_json == True`
         json_fields = (f for f in cls.__fields__.values() if f.parse_json)  # type: ignore[deprecated]
         get_key = attrgetter("alias" if by_alias else "name")
@@ -230,16 +222,13 @@ else:
         **_: Any,
     ) -> Callable:
         if mode == "after":
-            # Patch the behavior for `@model_validator(mode="after")` in v1.  This is
             # necessarily complicated because:
-            # - `@model_validator(mode="after")` decorates an instance method in pydantic v2
             # - `@root_validator(pre=False)` always decorates a classmethod in pydantic v1
             def _decorator(v2_method: Callable) -> Any:
                 def v1_method(
                     cls: type[V1Model], values: dict[str, Any]
                 ) -> dict[str, Any]:
                     # Note: Since this is an "after" validator, the values should already be
-                    # validated, so `.construct()` in v1 (`.model_construct()` in v2)
                     # should create a valid object to pass to the **original** decorated instance method.
                     validated = v2_method(cls.construct(**values))
 

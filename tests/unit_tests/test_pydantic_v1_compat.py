@@ -32,7 +32,6 @@ from tracklab._pydantic import (
 )
 from tracklab.sdk.artifacts._generated import ArtifactVersionFiles
 
-
 def test_field_validator_before():
     class Model(CompatBaseModel):
         name: str
@@ -45,7 +44,6 @@ def test_field_validator_before():
     obj = Model(name="test")
     assert obj.name == "TEST"
 
-
 def test_field_validator_after():
     class Model(CompatBaseModel):
         name: str
@@ -57,7 +55,6 @@ def test_field_validator_after():
 
     obj = Model(name="TEST")
     assert obj.name == "test"
-
 
 def test_model_validator_before():
     class Model(CompatBaseModel):
@@ -75,7 +72,6 @@ def test_model_validator_before():
     assert obj.x == 2
     assert obj.y == 3
 
-
 def test_model_validator_after():
     class Model(CompatBaseModel):
         x: int
@@ -91,7 +87,6 @@ def test_model_validator_after():
     assert obj.x == 2
     assert obj.y == 3
 
-
 def test_computed_field_method():
     class Model(CompatBaseModel):
         x: int
@@ -103,7 +98,6 @@ def test_computed_field_method():
 
     obj = Model(x=1, y=2)
     assert obj.sum == 3
-
 
 def test_computed_field_property():
     class Model(CompatBaseModel):
@@ -117,7 +111,6 @@ def test_computed_field_property():
 
     obj = Model(x=1, y=2)
     assert obj.sum == 3
-
 
 def test_alias_choices():
     from contextlib import nullcontext as does_not_raise
@@ -140,14 +133,12 @@ def test_alias_choices():
         obj2 = Model.model_validate({"v": "test"})
         assert obj2.value == "test"
 
-
 def test_model_fields_class_property():
     class Model(CompatBaseModel):
         x: int
         y: str
 
     assert set(Model.model_fields.keys()) == {"x", "y"}
-
 
 def test_model_fields_set_property():
     class Model(CompatBaseModel):
@@ -158,7 +149,6 @@ def test_model_fields_set_property():
 
     obj = Model(x=1)
     assert obj.model_fields_set == {"x"}
-
 
 def test_model_validation_methods():
     class Model(CompatBaseModel):
@@ -175,7 +165,6 @@ def test_model_validation_methods():
     assert obj2.x == 2
     assert obj2.y == "test2"
 
-
 def test_model_dump_methods():
     class Model(CompatBaseModel):
         x: int
@@ -185,7 +174,6 @@ def test_model_dump_methods():
 
     assert obj.model_dump() == {"x": 1, "y": "test"}
     assert json.loads(obj.model_dump_json()) == {"x": 1, "y": "test"}
-
 
 def test_model_copy():
     class Model(CompatBaseModel):
@@ -199,7 +187,6 @@ def test_model_copy():
     assert copy.y == orig.y
     assert copy is not orig
 
-
 def test_model_config_conversion():
     class Model(CompatBaseModel):
         model_config = ConfigDict(
@@ -211,7 +198,6 @@ def test_model_config_conversion():
 
     obj = Model(value="TEST")
     assert obj.value == "test"
-
 
 def test_model_dump_methods_with_json_fields():
     class Model(CompatBaseModel):
@@ -254,7 +240,6 @@ def test_model_dump_methods_with_json_fields():
     # Check that `.model_dump_json(round_trip=True)` behavior is consistent.
     rt_json = obj.model_dump_json(round_trip=True)
     assert json.loads(rt_json) == obj.model_dump(round_trip=True)
-
 
 # ------------------------------------------------------------------------------
 def test_generated_pydantic_fragment_validates_response_data():

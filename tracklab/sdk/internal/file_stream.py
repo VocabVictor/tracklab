@@ -64,7 +64,6 @@ class DefaultFilePolicy:
         self._chunk_id += len(chunks)
         return {"offset": chunk_id, "content": [c.data for c in chunks]}
 
-    # TODO: this is very inefficient, this is meant for temporary debugging and will be removed in future releases
     def _debug_log(self, data: Any):
         if self.has_debug_log or not os.environ.get("WANDB_DEBUG_FILESTREAM_LOG"):
             return
@@ -576,7 +575,6 @@ class FileStreamApi:
         """
         self._queue.put(Chunk(filename, data))
 
-    def push_success(self, artifact_id: str, save_name: str) -> None:
         """Notification that a file upload has been successfully completed.
 
         Args:
@@ -595,7 +593,6 @@ class FileStreamApi:
         """
         logger.info("file stream finish called")
         self._queue.put(self.Finish(exitcode))
-        # TODO(jhr): join on a thread which exited with an exception is a noop, clean up this path
         self._thread.join()
         logger.info("file stream finish is done")
         if self._exc_info:

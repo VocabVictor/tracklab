@@ -93,8 +93,6 @@ else:
     # `Field(...)` used in the field assignment AND `Annotated[...]`.
     # This is a problem for codegen, which can currently outputs e.g.
     #
-    #   class MyModel(GQLBase):
-    #       my_id: GQLId = Field(alias="myID")
     #
     GQLId = StrictStr  # type: ignore[misc]
 

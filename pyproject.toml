@@ -43,6 +43,7 @@ dependencies = [
     "uvicorn[standard]>=0.15.0",
     "sqlalchemy>=1.4.0",
     "aiofiles>=0.7.0",
+    "aiohttp>=3.8.0",
     "python-multipart>=0.0.5",
     "websockets>=10.0",
     "plotly>=5.18.0",
@@ -113,12 +114,19 @@ include = [
     "tracklab/ui/index.html",
     "tracklab/ui/src/**/*",
     "tracklab/ui/public/**/*",
+    "tracklab/bin/**/*",
 ]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "scripts/hatch_build.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
     "tracklab/",
     "tests/",
+    "system_monitor/",
+    "scripts/build_system_monitor.py",
+    "scripts/hatch_build.py",
     "README.md",
     "LICENSE",
     "pyproject.toml",

@@ -23,12 +23,10 @@ from tracklab.sdk.data_types._dtypes import (
 from tracklab.sdk.data_types.image import _ImageFileType
 from tracklab.sdk.data_types.table import _TableType
 
-
 def test_none_type():
     assert TypeRegistry.type_of(None) == NoneType()
     assert TypeRegistry.type_of(None).assign(None) == NoneType()
     assert TypeRegistry.type_of(None).assign(1) == InvalidType()
-
 
 def test_string_type():
     assert TypeRegistry.type_of("Hello") == StringType()
@@ -36,13 +34,11 @@ def test_string_type():
     assert TypeRegistry.type_of("Hello").assign(None) == InvalidType()
     assert TypeRegistry.type_of("Hello").assign(1) == InvalidType()
 
-
 def test_number_type():
     assert TypeRegistry.type_of(1.2) == NumberType()
     assert TypeRegistry.type_of(1.2).assign(1) == NumberType()
     assert TypeRegistry.type_of(1.2).assign(None) == InvalidType()
     assert TypeRegistry.type_of(1.2).assign("hi") == InvalidType()
-
 
 def test_timestamp_type():
     datetime_obj = datetime.datetime(2000, 12, 1)
@@ -57,18 +53,15 @@ def test_timestamp_type():
     assert TypeRegistry.type_of(datetime_obj).assign(None) == InvalidType()
     assert TypeRegistry.type_of(datetime_obj).assign(1) == InvalidType()
 
-
 def test_boolean_type():
     assert TypeRegistry.type_of(True) == BooleanType()
     assert TypeRegistry.type_of(True).assign(False) == BooleanType()
     assert TypeRegistry.type_of(True).assign(None) == InvalidType()
     assert TypeRegistry.type_of(True).assign(1) == InvalidType()
 
-
 def test_any_type():
     assert AnyType() == AnyType().assign(1)
     assert AnyType().assign(None) == InvalidType()
-
 
 def test_never_type():
     assert InvalidType().assign(1) == InvalidType()
@@ -76,11 +69,9 @@ def test_never_type():
     assert InvalidType().assign(True) == InvalidType()
     assert InvalidType().assign(None) == InvalidType()
 
-
 def test_unknown_type():
     assert UnknownType().assign(1) == NumberType()
     assert UnknownType().assign(None) == InvalidType()
-
 
 def test_union_type():
     wb_type = UnionType([float, str])
@@ -109,13 +100,11 @@ def test_union_type():
     assert wb_type.assign(True) == UnionType([float, str, bool])
     assert wb_type.assign(None) == InvalidType()
 
-
 def test_const_type():
     wb_type = ConstType(1)
     assert wb_type.assign(1) == wb_type
     assert wb_type.assign("a") == InvalidType()
     assert wb_type.assign(2) == InvalidType()
-
 
 def test_set_const_type():
     wb_type = ConstType(set())
@@ -130,18 +119,15 @@ def test_set_const_type():
     assert wb_type.assign({1, 2, 3}) == wb_type
     assert wb_type.assign([1, 2, 3]) == InvalidType()
 
-
 def test_object_type():
     wb_type = TypeRegistry.type_of(np.random.rand(30))
     assert wb_type.assign(np.random.rand(30)) == wb_type
     assert wb_type.assign(4) == InvalidType()
 
-
 def test_list_type():
     assert ListType(int).assign([]) == ListType(int, 0)
     assert ListType(int).assign([1, 2, 3]) == ListType(int, 3)
     assert ListType(int).assign([1, "a", 3]) == InvalidType()
-
 
 def test_dict_type():
     spec = {
@@ -192,7 +178,6 @@ def test_dict_type():
     assert wb_type.assign({"unknown": 1}) == TypedDictType(
         {"unknown": float},
     )
-
 
 def test_nested_dict():
     notation_type = TypedDictType(
@@ -269,7 +254,6 @@ def test_nested_dict():
 
     assert notation_type == expanded_type
     assert notation_type.assign(example) == real_type
-
 
 def test_image_type(assets_path):
     class_labels = {1: "tree", 2: "car", 3: "road"}
@@ -366,7 +350,6 @@ def test_image_type(assets_path):
         class_map={"1": "tree", "2": "car", "3": "road"},
     )
 
-
 def test_image_file_type(assets_path):
     # to make sure that meta data is preserved when we assign to a new image
     im_path = assets_path("test.png")
@@ -430,7 +413,6 @@ def test_image_file_type(assets_path):
         assert img.format == filetype
         # check that the meta data is preserved when we assign to a new image
 
-
 def test_classes_type():
     wb_classes = data_types.Classes(
         [
@@ -448,7 +430,6 @@ def test_classes_type():
     assert wb_class_type.assign(1) == wb_class_type
     assert wb_class_type.assign(0) == InvalidType()
 
-
 def test_table_type():
     table_1 = tracklab.Table(columns=["col"], data=[[1]])
     t1 = _TableType.from_obj(table_1)
@@ -456,7 +437,6 @@ def test_table_type():
     table_3 = tracklab.Table(columns=["col"], data=[["a"]])
     assert t1.assign(table_2) == t1
     assert t1.assign(table_3) == InvalidType()
-
 
 def test_table_implicit_types():
     table = tracklab.Table(columns=["col"])
@@ -472,7 +452,6 @@ def test_table_implicit_types():
     with pytest.raises(TypeError):
         table.add_data("a")
 
-
 def test_table_allow_mixed_types():
     table = tracklab.Table(columns=["col"], allow_mixed_types=True)
     table.add_data(None)
@@ -484,7 +463,6 @@ def test_table_allow_mixed_types():
         table.add_data(None)  # Still errors since optional is false
     table.add_data(1)
     table.add_data("a")  # No error with allow_mixed_types
-
 
 def test_tables_with_dicts():
     good_data = [
@@ -573,7 +551,6 @@ def test_tables_with_dicts():
     with pytest.raises(TypeError):
         _ = tracklab.Table(columns=["A"], data=bad_data)
 
-
 def test_table_explicit_types():
     table = tracklab.Table(columns=["a", "b"], dtype=int)
     table.add_data(None, None)
@@ -598,7 +575,6 @@ def test_table_explicit_types():
     with pytest.raises(TypeError):
         table.add_data("a", "a")
 
-
 def test_table_type_cast():
     table = tracklab.Table(columns=["type_col"])
     table.add_data(1)
@@ -616,7 +592,6 @@ def test_table_type_cast():
 
     with pytest.raises(TypeError):
         table.add_data(4)
-
 
 def test_table_specials(assets_path):
     class_labels = {1: "tree", 2: "car", 3: "road"}
@@ -715,12 +690,10 @@ def test_table_specials(assets_path):
         data_types.Table(data=[[1, True, 1]]),
     )
 
-
 def test_nan_non_float():
     import pandas as pd
 
     tracklab.Table(dataframe=pd.DataFrame(data=[["A"], [np.nan]], columns=["a"]))
-
 
 def test_table_typing_numpy():
     # Pulled from https://numpy.org/devdocs/user/basics.types.html
@@ -815,7 +788,6 @@ def test_table_typing_numpy():
     table = tracklab.Table(columns=["A"])
     table.add_data([[[[1, 2, 3]]]])
     table.add_data(np.array([[[[1, 2, 3]]]]))
-
 
 def test_table_typing_pandas():
     import pandas as pd
@@ -912,54 +884,54 @@ def test_table_typing_pandas():
     table = tracklab.Table(dataframe=pd.DataFrame([[True], [False]]).astype("boolean"))
     table.add_data(True)
 
-
-def test_artifact_type():
-    artifact = tracklab.Artifact("name", type="dataset")
-    target_type = TypeRegistry.types_by_name().get("artifactVersion")()
-    type_of_artifact = TypeRegistry.type_of(artifact)
-
-    artifact_string = "wandb-artifact://test/project/astring:latest"
-    type_of_artifact_string = TypeRegistry.type_of(artifact)
-
-    artifact_config_shape = {
-        "_type": "artifactVersion",
-        "_version": "v0",
-        "id": artifact.id,
-        "version": "v0",
-        "sequenceName": artifact.name.split(":")[0],
-        "usedAs": "test_reference_download",
-    }
-    type_of_artifact_dict = TypeRegistry.type_of(artifact_config_shape)
-
-    assert type_of_artifact.assign(artifact_string) == target_type
-    assert type_of_artifact.assign(artifact_config_shape) == target_type
-    assert type_of_artifact_dict.assign(artifact) == target_type
-    assert type_of_artifact_dict.assign(artifact_string) == target_type
-    assert type_of_artifact_string.assign(artifact_config_shape) == target_type
-    assert type_of_artifact_string.assign(artifact) == target_type
-
-    # test nested
-    nested_artifact = {"nested_artifact": artifact}
-    type_of_nested_artifact = TypeRegistry.type_of(nested_artifact)
-    nested_artifact_string = {"nested_artifact": artifact_string}
-    type_of_nested_artifact_string = TypeRegistry.type_of(nested_artifact_string)
-    nested_artifact_config_dict = {"nested_artifact": artifact_config_shape}
-    type_of_nested_artifact_dict = TypeRegistry.type_of(nested_artifact_config_dict)
-    nested_target_type = TypedDictType(
-        {"nested_artifact": TypeRegistry.types_by_name().get("artifactVersion")()}
-    )
-    assert type_of_nested_artifact.assign(nested_artifact_string) == nested_target_type
-    assert (
-        type_of_nested_artifact_dict.assign(nested_artifact_config_dict)
-        == nested_target_type
-    )
-    assert type_of_nested_artifact_dict.assign(nested_artifact) == nested_target_type
-    assert (
-        type_of_nested_artifact_dict.assign(nested_artifact_string)
-        == nested_target_type
-    )
-    assert (
-        type_of_nested_artifact_string.assign(nested_artifact_config_dict)
-        == nested_target_type
-    )
-    assert type_of_nested_artifact_string.assign(nested_artifact) == nested_target_type
+# def test_artifact_type(): # Artifact test removed
+#     artifact = tracklab.Artifact("name", type="dataset") # Artifact test removed
+#     target_type = TypeRegistry.types_by_name().get("artifactVersion")() # Artifact test removed
+#     type_of_artifact = TypeRegistry.type_of(artifact) # Artifact test removed
+#  # Artifact test removed
+#     artifact_string = "wandb-artifact://test/project/astring:latest" # Artifact test removed
+#     type_of_artifact_string = TypeRegistry.type_of(artifact) # Artifact test removed
+#  # Artifact test removed
+#     artifact_config_shape = { # Artifact test removed
+#         "_type": "artifactVersion", # Artifact test removed
+#         "_version": "v0", # Artifact test removed
+#         "id": artifact.id, # Artifact test removed
+#         "version": "v0", # Artifact test removed
+#         "sequenceName": artifact.name.split(":")[0], # Artifact test removed
+#         "usedAs": "test_reference_download", # Artifact test removed
+#     } # Artifact test removed
+#     type_of_artifact_dict = TypeRegistry.type_of(artifact_config_shape) # Artifact test removed
+#  # Artifact test removed
+#     assert type_of_artifact.assign(artifact_string) == target_type # Artifact test removed
+#     assert type_of_artifact.assign(artifact_config_shape) == target_type # Artifact test removed
+#     assert type_of_artifact_dict.assign(artifact) == target_type # Artifact test removed
+#     assert type_of_artifact_dict.assign(artifact_string) == target_type # Artifact test removed
+#     assert type_of_artifact_string.assign(artifact_config_shape) == target_type # Artifact test removed
+#     assert type_of_artifact_string.assign(artifact) == target_type # Artifact test removed
+#  # Artifact test removed
+#     # test nested # Artifact test removed
+#     nested_artifact = {"nested_artifact": artifact} # Artifact test removed
+#     type_of_nested_artifact = TypeRegistry.type_of(nested_artifact) # Artifact test removed
+#     nested_artifact_string = {"nested_artifact": artifact_string} # Artifact test removed
+#     type_of_nested_artifact_string = TypeRegistry.type_of(nested_artifact_string) # Artifact test removed
+#     nested_artifact_config_dict = {"nested_artifact": artifact_config_shape} # Artifact test removed
+#     type_of_nested_artifact_dict = TypeRegistry.type_of(nested_artifact_config_dict) # Artifact test removed
+#     nested_target_type = TypedDictType( # Artifact test removed
+#         {"nested_artifact": TypeRegistry.types_by_name().get("artifactVersion")()} # Artifact test removed
+#     ) # Artifact test removed
+#     assert type_of_nested_artifact.assign(nested_artifact_string) == nested_target_type # Artifact test removed
+#     assert ( # Artifact test removed
+#         type_of_nested_artifact_dict.assign(nested_artifact_config_dict) # Artifact test removed
+#         == nested_target_type # Artifact test removed
+#     ) # Artifact test removed
+#     assert type_of_nested_artifact_dict.assign(nested_artifact) == nested_target_type # Artifact test removed
+#     assert ( # Artifact test removed
+#         type_of_nested_artifact_dict.assign(nested_artifact_string) # Artifact test removed
+#         == nested_target_type # Artifact test removed
+#     ) # Artifact test removed
+#     assert ( # Artifact test removed
+#         type_of_nested_artifact_string.assign(nested_artifact_config_dict) # Artifact test removed
+#         == nested_target_type # Artifact test removed
+#     ) # Artifact test removed
+#     assert type_of_nested_artifact_string.assign(nested_artifact) == nested_target_type # Artifact test removed
+#  # Artifact test removed

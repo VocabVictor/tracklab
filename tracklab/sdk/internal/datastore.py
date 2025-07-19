@@ -55,12 +55,9 @@ try:
         """Strtobytes."""
         return bytes(x, "iso8859-1")
 
-    # def bytestostr(x):
-    #     return str(x, 'iso8859-1')
 
 except Exception:
     strtobytes = str
-    # bytestostr = str
 
 
 class DataStore:
@@ -119,7 +116,6 @@ class DataStore:
 
     def scan_record(self):
         assert self._opened_for_scan, "file not open for scanning"
-        # TODO(jhr): handle some assertions as file corruption issues
         # assume we have enough room to read header, checked by caller?
         header = self._fp.read(LEVELDBLOG_HEADER_LEN)
         if len(header) == 0:
@@ -140,7 +136,6 @@ class DataStore:
         return dtype, data
 
     def scan_data(self):
-        # TODO(jhr): handle some assertions as file corruption issues
         # how much left in the block.  if less than header len, read as pad,
         offset = self._index % LEVELDBLOG_BLOCK_LEN
         space_left = LEVELDBLOG_BLOCK_LEN - offset
@@ -213,10 +208,7 @@ class DataStore:
 
         dlength = len(s)
         dtype = dtype or LEVELDBLOG_FULL
-        # print("record: length={} type={}".format(dlength, dtype))
         checksum = zlib.crc32(s, self._crc[dtype]) & 0xFFFFFFFF
-        # logger.info("write_record: index=%d len=%d dtype=%d",
-        #     self._index, dlength, dtype)
         self._fp.write(struct.pack("<IHB", checksum, dlength, dtype))
         if dlength:
             self._fp.write(s)
@@ -229,8 +221,6 @@ class DataStore:
         space_left = LEVELDBLOG_BLOCK_LEN - offset
         data_used = 0
         data_left = len(s)
-        # logger.info("write_data: index=%d offset=%d len=%d",
-        #     self._index, offset, data_left)
         if space_left < LEVELDBLOG_HEADER_LEN:
             pad = "\x00" * space_left
             self._fp.write(strtobytes(pad))

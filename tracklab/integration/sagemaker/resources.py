@@ -20,7 +20,6 @@ def set_run_id(run_settings: tracklab.Settings) -> bool:
     #
     # Prevents SageMaker from overriding the run ID configured
     # in environment variables. Note, however, that it will still
-    # override a run ID passed explicitly to `tracklab.init()`.
     if os.getenv("WANDB_RUN_ID"):
         return False
 

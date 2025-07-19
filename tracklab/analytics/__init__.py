@@ -1,3 +1,5 @@
-__all__ = ("Sentry",)
+__all__ = ("Sentry", "LocalAnalytics")
 
-from .sentry import Sentry
+# Use the adapter for backward compatibility
+from .sentry_adapter import Sentry
+from .local_analytics import LocalAnalytics

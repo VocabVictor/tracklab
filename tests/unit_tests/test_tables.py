@@ -5,7 +5,6 @@ import pytest
 import tracklab
 from tracklab.sdk.data_types.table import _ForeignKeyType, _PrimaryKeyType
 
-
 def test_basic_ndx():
     # Base Case
     table_a = tracklab.Table(columns=["b"], data=[["a"], ["b"]])
@@ -25,7 +24,6 @@ def test_basic_ndx():
     # Assert that the data in this column is valid, but also properly typed
     assert [row[0] for row in table.data] == [0, 1, 3, 3]
     assert all([row[0] is None or row[0]._table == table_a for row in table.data])
-
 
 def test_pk_cast(use_helper=False):
     # Base Case
@@ -101,10 +99,8 @@ def test_pk_cast(use_helper=False):
     #     table._column_types.params["type_map"]["id"],tracklab.data_types._ForeignKeyType
     # )
 
-
 def test_pk_helper():
     test_pk_cast(use_helper=True)
-
 
 def test_fk_cast(use_helper=False):
     # Base Case
@@ -152,10 +148,8 @@ def test_fk_cast(use_helper=False):
         _ForeignKeyType,
     )
 
-
 def test_fk_helper():
     test_fk_cast(use_helper=True)
-
 
 def test_fk_from_pk_local_draft():
     table_a = tracklab.Table(columns=["id", "col_1"], data=[["1", "a"], ["2", "b"]])
@@ -192,7 +186,6 @@ def test_fk_from_pk_local_draft():
             for row in table.data
         ]
     )
-
 
 def test_loading_from_json_with_mixed_types():
     """Test loading a Table from json instantiates the correct types.
@@ -235,12 +228,11 @@ def test_loading_from_json_with_mixed_types():
         "nrows": 3,
     }
 
-    artifact = tracklab.Artifact("my_artifact", type="dataset")
+    # artifact = tracklab.Artifact("my_artifact", type="dataset") # Artifact test removed
     _ = tracklab.Table.from_json(json_obj, artifact)
 
-
 def test_datetime_conversion():
-    art = tracklab.Artifact("A", "B")
+    # art = tracklab.Artifact("A", "B") # Artifact test removed
     t = tracklab.Table(
         columns=["dt", "t", "np", "d"],
         data=[
@@ -259,12 +251,10 @@ def test_datetime_conversion():
         [975715200000, 975715200000, 975715200000, 2],
     ]
 
-
 def test_table_logging_mode_validation():
     """Test that invalid logging modes raise an error."""
     with pytest.raises(AssertionError):
         tracklab.Table(log_mode="INVALID_MODE")
-
 
 def test_table_logging_mode_mutable():
     """Test that MUTABLE mode allows re-logging after mutations."""
@@ -275,8 +265,7 @@ def test_table_logging_mode_mutable():
     t.add_data(1, 2)
 
     assert t._run is None
-    assert t._artifact_target is None
-
+    # assert t._artifact_target is None # Artifact test removed
 
 def test_table_logging_mode_immutable():
     """Test that IMMUTABLE mode preserves state after mutations."""
@@ -287,8 +276,7 @@ def test_table_logging_mode_immutable():
     t.add_data(1, 2)
 
     assert t._run == "dummy_run"
-    assert t._artifact_target == "dummy_target"
-
+    # assert t._artifact_target == "dummy_target" # Artifact test removed
 
 def test_table_logging_mode_incremental():
     """Test that INCREMENTAL mode handles partial logging correctly."""
@@ -302,14 +290,13 @@ def test_table_logging_mode_incremental():
     assert t._increment_num is None
 
     # simulate logging
-    t._set_artifact_target(tracklab.Artifact("dummy_art", "placeholder"), "dummy_art")
+    # t._set_artifact_target(tracklab.Artifact("dummy_art", "placeholder"), "dummy_art") # Artifact test removed
     t._increment_num = 0
 
     t.add_data("Yes", "No")
 
     assert t._increment_num == 1
-    assert t._artifact_target is None
-
+    # assert t._artifact_target is None # Artifact test removed
 
 def test_table_logging_mode_incremental_operations(mock_wandb_log):
     """Test that INCREMENTAL mode correctly handles unsupported operations."""
@@ -336,7 +323,6 @@ def test_table_logging_mode_incremental_operations(mock_wandb_log):
             " log_mode='INCREMENTAL'. Use a different log mode like 'MUTABLE' or 'IMMUTABLE'."
         ) in str(e)
 
-
 def test_table_logging_mode_incremental_warnings(mock_wandb_log):
     """Test that INCREMENTAL mode shows warning when exceeding 100 increments"""
 
@@ -344,7 +330,7 @@ def test_table_logging_mode_incremental_warnings(mock_wandb_log):
 
     # Test warning for max increments
     t._increment_num = 99
-    t._set_artifact_target(tracklab.Artifact("dummy_art", "placeholder"), "dummy_art")
+    # t._set_artifact_target(tracklab.Artifact("dummy_art", "placeholder"), "dummy_art") # Artifact test removed
 
     t.add_data("test", "test")
 

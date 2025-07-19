@@ -143,7 +143,6 @@ class WandbModelCheckpoint(callbacks.ModelCheckpoint):
         """Log model checkpoint as  W&B Artifact."""
         try:
             assert tracklab.run is not None
-            model_checkpoint_artifact = tracklab.Artifact(
                 f"run_{tracklab.run.id}_model", type="model"
             )
             if os.path.isfile(filepath):
@@ -152,7 +151,6 @@ class WandbModelCheckpoint(callbacks.ModelCheckpoint):
                 model_checkpoint_artifact.add_dir(filepath)
             else:
                 raise FileNotFoundError(f"No such file or directory {filepath}")
-            tracklab.log_artifact(model_checkpoint_artifact, aliases=aliases or [])
         except ValueError:
             # This error occurs when `save_best_only=True` and the model
             # checkpoint is not saved for that epoch/batch. Since TF/Keras

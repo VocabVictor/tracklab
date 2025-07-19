@@ -4,7 +4,6 @@ import pytest
 import tracklab
 from tracklab.beta.workflows import _add_any, use_model
 
-
 def test_use_model():
     # path is an alias, must contain ":"
     with pytest.raises(ValueError):
@@ -14,9 +13,8 @@ def test_use_model():
     with pytest.raises(ValueError):
         use_model("wandb:latest")
 
-
 def test_add_any():
-    artifact = tracklab.Artifact(name="test-name", type="test-type")
+    # artifact = tracklab.Artifact(name="test-name", type="test-type") # Artifact test removed
     with tempfile.TemporaryDirectory() as tmpdir:
         _add_any(artifact, tmpdir, "temp-dir")
         with open("tracklab.txt", "w") as f:

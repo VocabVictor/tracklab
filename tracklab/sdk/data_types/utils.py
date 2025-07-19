@@ -126,12 +126,10 @@ def val_to_json(
 
             return items[0].seq_to_json(items, run, key, namespace)
         else:
-            # TODO(adrian): Good idea to pass on the same key here? Maybe include
             # the array index?
             # There is a bug here: if this array contains two arrays of the same type of
             # anonymous media objects, their eventual names will collide.
             # This used to happen. The frontend doesn't handle heterogeneous arrays
-            # raise ValueError(
             #    "Mixed media types in the same list aren't supported")
             return [
                 val_to_json(
@@ -181,8 +179,7 @@ def _log_table_artifact(val: "Media", key: str, run: "LocalRun") -> None:
         key: The key used to log val.
         run: The LocalRun used to log val.
     """
-    from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
-
+    
     if isinstance(val, tracklab.Table) and val.log_mode == "INCREMENTAL":
         if (
             run.resumed
@@ -225,7 +222,6 @@ def _json_helper(val, artifact):
     if hasattr(val, "tolist"):
         py_val = val.tolist()
         if val.__class__.__name__ == "datetime64" and isinstance(py_val, int):
-            # when numpy datetime64 .tolist() returns an int, it is nanoseconds.
             # need to convert to milliseconds
             return _json_helper(py_val / int(1e6), artifact)
         return _json_helper(py_val, artifact)

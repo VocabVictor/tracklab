@@ -104,14 +104,12 @@ def get_schema(list_data_dict, struct, array_dict_types):
                 if isinstance(v, list):
                     if len(v) > 0 and isinstance(v[0], list):
                         # nested list coordinate structure
-                        # if the value in the item is currently None, then update
                         if v is not None:
                             struct[k] = type(v)  # type list
                     elif len(v) > 0 and not (
                         isinstance(v[0], list) or isinstance(v[0], dict)
                     ):
                         # single list with values
-                        # if the value in the item is currently None, then update
                         if v is not None:
                             struct[k] = type(v)  # type list
                     else:
@@ -128,7 +126,6 @@ def get_schema(list_data_dict, struct, array_dict_types):
                     # merge cur_struct and struct[k], remove duplicates
                     struct[k] = merge(struct[k], cur_struct)
                 else:
-                    # if the value in the item is currently None, then update
                     if v is not None:
                         struct[k] = type(v)
 
@@ -194,7 +191,6 @@ def create_table(data):
     # Convert to dictionary format to maintain order during processing
     matrix = table_df.to_dict(orient="records")
 
-    # Import en_core_web_md if exists
     en_core_web_md = util.get_module(
         "en_core_web_md",
         required="part_of_speech requires `en_core_web_md` library, install with `python -m spacy download en_core_web_md`",

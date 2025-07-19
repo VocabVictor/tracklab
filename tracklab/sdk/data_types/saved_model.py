@@ -22,7 +22,6 @@ if TYPE_CHECKING:
     import torch  # type: ignore
     from typing_extensions import Self
 
-    from tracklab.sdk.artifacts.artifact import Artifact
     from tracklab.sdk.run import Run as LocalRun
 
 
@@ -30,7 +29,7 @@ DEBUG_MODE = False
 
 
 def _add_deterministic_dir_to_artifact(
-    artifact: Artifact, dir_name: str, target_dir_root: str
+    artifact: Any, dir_name: str, target_dir_root: str
 ) -> str:
     file_paths = []
     for dirpath, _, filenames in os.walk(dir_name, topdown=True):
@@ -42,7 +41,7 @@ def _add_deterministic_dir_to_artifact(
     return target_path
 
 
-def _load_dir_from_artifact(source_artifact: Artifact, path: str) -> str:
+def _load_dir_from_artifact(source_artifact: Any, path: str) -> str:
     dl_path = None
 
     # Look through the entire manifest to find all of the files in the directory.
@@ -102,8 +101,6 @@ class _SavedModel(WBValue, Generic[SavedModelObjType]):
         # provided was a path, then both self._path and self._model_obj
         # are copies of the user-provided data. However, if the input
         # was a model object, then we want to clear the model object. The first
-        # accessing of the model object (via .model_obj()) will load the model
-        # from the temp path.
 
         if not input_is_path:
             self._unset_obj()
@@ -119,7 +116,7 @@ class _SavedModel(WBValue, Generic[SavedModelObjType]):
 
     @classmethod
     def from_json(
-        cls: type[_SavedModel], json_obj: dict, source_artifact: Artifact
+        cls: type[_SavedModel], json_obj: dict, source_artifact: Any
     ) -> _SavedModel:
         path = json_obj["path"]
 
@@ -313,7 +310,7 @@ class _PicklingSavedModel(_SavedModel[SavedModelObjType]):
                     raise ValueError(f"Invalid dependency file: {extra_file}")
 
     @classmethod
-    def from_json(cls, json_obj: dict, source_artifact: Artifact) -> Self:
+    def from_json(cls, json_obj: dict, source_artifact: Any) -> Self:
         backup_path = [p for p in sys.path]
         if (
             "dep_py_files_path" in json_obj

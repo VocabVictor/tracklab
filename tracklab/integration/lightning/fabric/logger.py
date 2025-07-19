@@ -7,7 +7,6 @@ from packaging import version
 from typing_extensions import override
 
 import tracklab
-from tracklab import Artifact
 from tracklab.sdk.lib import telemetry
 from tracklab.sdk.run import Run
 
@@ -164,7 +163,6 @@ class WandbLogger(Logger):
 
         # download checkpoint locally (if not already cached)
         run = tracklab.init(project="MNIST")
-        artifact = run.use_artifact(checkpoint_reference, type="model")
         artifact_dir = artifact.download()
 
         # load checkpoint
@@ -227,7 +225,6 @@ class WandbLogger(Logger):
 
     .. code-block:: python
 
-        artifact_dir = wandb_logger.download_artifact(artifact="path/to/artifact")
 
     To download an artifact and link it to an ongoing run call the ``download_artifact``
     function on the logger instance:
@@ -236,13 +233,11 @@ class WandbLogger(Logger):
 
         class MyModule(LightningModule):
             def any_lightning_module_function_or_hook(self):
-                self.logger.download_artifact(artifact="path/to/artifact")
 
     To link an artifact from a previous run you can use ``use_artifact`` function:
 
     .. code-block:: python
 
-        wandb_logger.use_artifact(artifact="path/to/artifact")
 
     See Also:
         - `Demo in Google Colab <http://tracklab.me/lightning>`__ with hyperparameter search and model logging
@@ -678,7 +673,6 @@ class WandbLogger(Logger):
 
         """
         if tracklab.run is not None and use_artifact:
-            artifact = tracklab.run.use_artifact(artifact)
         else:
             api = tracklab.Api()
             artifact = api.artifact(artifact, type=artifact_type)
@@ -699,7 +693,6 @@ class WandbLogger(Logger):
             wandb Artifact object for the artifact.
 
         """
-        return self.experiment.use_artifact(artifact, type=artifact_type)
 
     @override
     @rank_zero_only
@@ -750,7 +743,6 @@ class WandbLogger(Logger):
             }
             if not self._checkpoint_name:
                 self._checkpoint_name = f"model-{self.experiment.id}"
-            artifact = tracklab.Artifact(
                 name=self._checkpoint_name, type="model", metadata=metadata
             )
             artifact.add_file(p, name="model.ckpt")

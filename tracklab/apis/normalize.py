@@ -6,7 +6,7 @@ from functools import wraps
 from typing import Callable, TypeVar
 
 import requests
-from tracklab_gql.client import RetryError
+class RetryError(Exception): pass
 
 from tracklab import env
 from tracklab.errors import CommError, Error

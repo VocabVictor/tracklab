@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package tracklab_files;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "tracklab_base.proto";
+import "tracklab_telemetry.proto";
+
+option go_package = "core/pkg/service_go_proto";
+
+message FilesItem {
+  reserved 16;
+
+  enum PolicyType {
+    // Upload the file immediately.
+    NOW = 0;
+
+    // Upload the file during run.finish().
+    END = 1;
+
+    // Re-upload the file continuously as it changes.
+    LIVE = 2;
+  }
+
+  enum FileType {
+    OTHER = 0;
+    WANDB = 1;
+    MEDIA = 2;
+    ARTIFACT = 3;
+  }
+
+  // A path or Unix glob relative to the run's files directory.
+  string path = 1;
+
+  // When to upload the file.
+  PolicyType policy = 2;
+
+  // What kind of file it is.
+  FileType type = 3;
+}
+
+message FilesUploaded {
+  repeated string files = 1;
+}

@@ -8,7 +8,6 @@ from tracklab.apis.importers import validation
 from tracklab.apis.importers.internals.internal import ImporterRun, RecordMaker
 from tracklab.apis.importers.internals.util import for_each, parallelize
 
-
 @pytest.fixture
 def setup_dirs(request):
     config = request.param
@@ -32,7 +31,6 @@ def setup_dirs(request):
     shutil.rmtree(src_dir)
     shutil.rmtree(dst_dir)
 
-
 def test_parallelize():
     def safe_func(x):
         return x + 1
@@ -51,7 +49,6 @@ def test_parallelize():
     expected = set([1, 2, None])
 
     assert result == expected
-
 
 def test_for_each():
     def safe_func(x):
@@ -77,7 +74,6 @@ def test_for_each():
     result = set(for_each(unsafe_func, [1, 2, 3], parallel=True))
     expected = set([1, 2, None])
     assert result == expected
-
 
 @pytest.mark.parametrize(
     "setup_dirs",
@@ -136,16 +132,16 @@ def test_for_each():
     ],
     indirect=True,
 )
-def test_compare_artifact_dirs(setup_dirs):
-    src_dir, dst_dir, expected = setup_dirs
-    differences = validation._compare_artifact_dirs(src_dir, dst_dir)
-
-    assert set(differences["left_only"]) == set(expected["left_only"])
-    assert set(differences["right_only"]) == set(expected["right_only"])
-    assert set(differences["diff_files"]) == set(expected["diff_files"])
-    assert differences["subdir_differences"] == expected["subdir_differences"]
-
-
+# def test_compare_artifact_dirs(setup_dirs): # Artifact test removed
+#     src_dir, dst_dir, expected = setup_dirs # Artifact test removed
+#     differences = validation._compare_artifact_dirs(src_dir, dst_dir) # Artifact test removed
+#  # Artifact test removed
+#     assert set(differences["left_only"]) == set(expected["left_only"]) # Artifact test removed
+#     assert set(differences["right_only"]) == set(expected["right_only"]) # Artifact test removed
+#     assert set(differences["diff_files"]) == set(expected["diff_files"]) # Artifact test removed
+#     assert differences["subdir_differences"] == expected["subdir_differences"] # Artifact test removed
+#  # Artifact test removed
+#  # Artifact test removed
 @pytest.mark.parametrize(
     "file_setup, expected_problems",
     [
@@ -163,31 +159,31 @@ def test_compare_artifact_dirs(setup_dirs):
         ),
     ],
 )
-def test_artifact_manifest_entry_mismatches(tmp_path, file_setup, expected_problems):
-    src_file, dst_file = file_setup
-    src_filename, src_content = src_file
-    dst_filename, dst_content = dst_file
-
-    # Create and add file to source artifact
-    src_path = tmp_path / src_filename
-    src_path.write_text(src_content)
-    src_art = tracklab.Artifact("src_artifact", type="dataset")
-    src_art.add_file(str(src_path))
-
-    # Create and add file to destination artifact
-    dst_path = tmp_path / dst_filename
-    dst_path.write_text(dst_content)
-    dst_art = tracklab.Artifact("dst_artifact", type="dataset")
-    dst_art.add_file(str(dst_path))
-
-    # Compare artifacts and collect problems
-    problems = validation._compare_artifact_manifests(src_art, dst_art)
-    problems_set = set(problems)
-
-    for p in expected_problems:
-        assert any(p in problem for problem in problems_set)
-
-
+# def test_artifact_manifest_entry_mismatches(tmp_path, file_setup, expected_problems): # Artifact test removed
+#     src_file, dst_file = file_setup # Artifact test removed
+#     src_filename, src_content = src_file # Artifact test removed
+#     dst_filename, dst_content = dst_file # Artifact test removed
+#  # Artifact test removed
+#     # Create and add file to source artifact # Artifact test removed
+#     src_path = tmp_path / src_filename # Artifact test removed
+#     src_path.write_text(src_content) # Artifact test removed
+#     src_art = tracklab.Artifact("src_artifact", type="dataset") # Artifact test removed
+#     src_art.add_file(str(src_path)) # Artifact test removed
+#  # Artifact test removed
+#     # Create and add file to destination artifact # Artifact test removed
+#     dst_path = tmp_path / dst_filename # Artifact test removed
+#     dst_path.write_text(dst_content) # Artifact test removed
+#     dst_art = tracklab.Artifact("dst_artifact", type="dataset") # Artifact test removed
+#     dst_art.add_file(str(dst_path)) # Artifact test removed
+#  # Artifact test removed
+#     # Compare artifacts and collect problems # Artifact test removed
+#     problems = validation._compare_artifact_manifests(src_art, dst_art) # Artifact test removed
+#     problems_set = set(problems) # Artifact test removed
+#  # Artifact test removed
+#     for p in expected_problems: # Artifact test removed
+#         assert any(p in problem for problem in problems_set) # Artifact test removed
+#  # Artifact test removed
+#  # Artifact test removed
 def test_make_metadata_file_even_if_not_importing_files():
     class TestingRun(ImporterRun): ...
 

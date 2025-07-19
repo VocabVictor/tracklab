@@ -19,8 +19,6 @@ from typing import (
 )
 
 import tracklab
-from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
-from tracklab.sdk.artifacts.artifact import Artifact
 from tracklab.sdk.data_types._dtypes import TypeRegistry
 from tracklab.sdk.internal.internal_api import Api
 from tracklab.sdk.lib.filenames import DIFF_FNAME, METADATA_FNAME, REQUIREMENTS_FNAME
@@ -31,7 +29,7 @@ from .settings_static import SettingsStatic
 _logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from tracklab.proto.tracklab_internal_pb2 import ArtifactRecord
+    pass
 
 FROZEN_REQUIREMENTS_FNAME = "requirements.frozen.txt"
 JOB_FNAME = "wandb-job.json"
@@ -90,12 +88,11 @@ class GitSourceDict(TypedDict):
     dockerfile: Optional[str]
 
 
-class ArtifactSourceDict(TypedDict):
-    artifact: str
-    entrypoint: List[str]
-    notebook: bool
-    build_context: Optional[str]
-    dockerfile: Optional[str]
+#     artifact: str
+#     entrypoint: List[str]
+#     notebook: bool
+#     build_context: Optional[str]
+#     dockerfile: Optional[str]
 
 
 class ImageSourceDict(TypedDict):
@@ -105,19 +102,18 @@ class ImageSourceDict(TypedDict):
 class JobSourceDict(TypedDict, total=False):
     _version: str
     source_type: str
-    source: Union[GitSourceDict, ArtifactSourceDict, ImageSourceDict]
+    source: Union[GitSourceDict, ImageSourceDict]  # Artifact functionality removed
     input_types: Dict[str, Any]
     output_types: Dict[str, Any]
     runtime: Optional[str]
 
 
-class ArtifactInfoForJob(TypedDict):
-    id: str
-    name: str
+#     id: str
+#     name: str
 
 
 def get_min_supported_for_source_dict(
-    source: Union[GitSourceDict, ArtifactSourceDict, ImageSourceDict],
+    source: Union[GitSourceDict, ImageSourceDict],  # Artifact functionality removed
 ) -> Optional[Version]:
     """Get the minimum supported wandb version the source dict of wandb-job.json."""
     min_seen = None
@@ -135,7 +131,7 @@ class JobBuilder:
     _requirements_path: Optional[str]
     _config: Optional[Dict[str, Any]]
     _summary: Optional[Dict[str, Any]]
-    _logged_code_artifact: Optional[ArtifactInfoForJob]
+    _logged_code_artifact: Optional[Dict[str, str]]  # Artifact functionality removed
     _disable: bool
     _partial_source_id: Optional[str]  # Partial job source artifact id.
     _aliases: List[str]
@@ -188,29 +184,13 @@ class JobBuilder:
     def set_partial_source_id(self, source_id: str) -> None:
         self._partial_source_id = source_id
 
-    def _handle_server_artifact(
-        self, res: Optional[Dict], artifact: "ArtifactRecord"
-    ) -> None:
-        if artifact.type == "job" and res is not None:
-            try:
-                if res["artifactSequence"]["latestArtifact"] is None:
-                    self._job_version_alias = "v0"
-                elif res["artifactSequence"]["latestArtifact"]["id"] == res["id"]:
-                    self._job_version_alias = (
-                        f"v{res['artifactSequence']['latestArtifact']['versionIndex']}"
-                    )
-                else:
-                    self._job_version_alias = f"v{res['artifactSequence']['latestArtifact']['versionIndex'] + 1}"
-                self._job_seq_id = res["artifactSequence"]["id"]
-            except KeyError as e:
-                _logger.info(f"Malformed response from ArtifactSaver.save {e}")
-        if artifact.type == "code" and res is not None:
-            self._logged_code_artifact = ArtifactInfoForJob(
-                {
-                    "id": res["id"],
-                    "name": artifact.name,
-                }
-            )
+    #     self, res: Optional[Dict], artifact: "ArtifactRecord"
+    # ) -> None:
+    #             {
+    #                 "id": res["id"],
+    #                 "name": artifact.name,
+    #             }
+    #         )
 
     def _build_repo_job_source(
         self,
@@ -242,7 +222,6 @@ class JobBuilder:
                 program_relpath,
             )
             full_program_path = os.path.normpath(full_program_path)
-            # if the notebook server is started above the git repo need to clear all the ..s
             if full_program_path.startswith(".."):
                 split_path = full_program_path.split("/")
                 count_dots = 0
@@ -285,12 +264,11 @@ class JobBuilder:
         self,
         program_relpath: str,
         metadata: Dict[str, Any],
-    ) -> Tuple[Optional[ArtifactSourceDict], Optional[str]]:
+    ) -> Tuple[Optional[Dict], Optional[str]]:  # ArtifactSourceDict replaced with Dict
         assert isinstance(self._logged_code_artifact, dict)
         # TODO: should we just always exit early if the path doesn't exist?
         if self._is_notebook_run and not self._is_colab_run():
             full_program_relpath = os.path.relpath(program_relpath, os.getcwd())
-            # if the resolved path doesn't exist, then we shouldn't make a job because it will fail
             if not os.path.exists(full_program_relpath):
                 # when users call log code in a notebook the code artifact starts
                 # at the directory the notebook is in instead of the jupyter core
@@ -307,7 +285,7 @@ class JobBuilder:
 
         entrypoint = self._get_entrypoint(full_program_relpath, metadata)
         # TODO: update executable to a method that supports pex
-        source: ArtifactSourceDict = {
+        source: Dict = {  # ArtifactSourceDict replaced with Dict
             "entrypoint": entrypoint,
             "notebook": self._is_notebook_run,
             "artifact": f"wandb-artifact://_id/{self._logged_code_artifact['id']}",
@@ -329,7 +307,6 @@ class JobBuilder:
         if ":" in image_name:
             tag = image_name.split(":")[-1]
 
-            # if tag looks properly formatted, assume its a tag
             # regex: alphanumeric and "_" "-" "."
             if re.fullmatch(r"([a-zA-Z0-9_\-\.]+)", tag):
                 raw_image_name = raw_image_name.replace(f":{tag}", "")
@@ -354,7 +331,6 @@ class JobBuilder:
         program_relpath: str,
         metadata: Dict[str, Any],
     ) -> List[str]:
-        # if building a partial job from CLI, overwrite entrypoint and notebook
         # should already be in metadata from create_job
         if self._partial:
             if metadata.get("entrypoint"):
@@ -377,7 +353,7 @@ class JobBuilder:
         program_relpath: Optional[str],
         metadata: Dict[str, Any],
     ) -> Tuple[
-        Union[GitSourceDict, ArtifactSourceDict, ImageSourceDict, None],
+        Union[GitSourceDict, ImageSourceDict, None],  # Artifact functionality removed
         Optional[str],
     ]:
         """Construct a job source dict and name from the current run.
@@ -388,7 +364,6 @@ class JobBuilder:
         """
         source: Union[
             GitSourceDict,
-            ArtifactSourceDict,
             ImageSourceDict,
             None,
         ] = None
@@ -426,7 +401,7 @@ class JobBuilder:
         build_context: Optional[str] = None,
         dockerfile: Optional[str] = None,
         base_image: Optional[str] = None,
-    ) -> Optional[Artifact]:
+    ) -> None:  # Artifact functionality removed - returns None now
         """Build a job artifact from the current run.
 
         Args:
@@ -439,7 +414,7 @@ class JobBuilder:
             base_image (Optional[str]): The base image used to run the job code.
 
         Returns:
-            Optional[Artifact]: The job artifact if it was successfully built,
+#             Optional[Artifact]: The job artifact if it was successfully built, # Artifact functionality removed
             otherwise None.
         """
         _logger.info("Attempting to build job artifact")
@@ -492,8 +467,6 @@ class JobBuilder:
         # configure job from environment
         source_type = self._get_source_type(metadata)
         if not source_type:
-            # if source_type is None, then we don't have enough information to build a job
-            # if the user intended to create a job, warn.
             if (
                 self._settings.job_name
                 or self._settings.job_source
@@ -547,26 +520,16 @@ class JobBuilder:
         assert source_info is not None
         assert name is not None
 
-        artifact = InternalArtifact(name, JOB_ARTIFACT_TYPE)
-
-        _logger.info("adding wandb-job metadata file")
-        with artifact.new_file("wandb-job.json") as f:
-            f.write(json.dumps(source_info, indent=4))
-
-        artifact.add_file(
-            os.path.join(self._settings.files_dir, REQUIREMENTS_FNAME),
-            name=FROZEN_REQUIREMENTS_FNAME,
-        )
-
-        if source_type == "repo":
-            # add diff
-            if os.path.exists(os.path.join(self._settings.files_dir, DIFF_FNAME)):
-                artifact.add_file(
-                    os.path.join(self._settings.files_dir, DIFF_FNAME),
-                    name=DIFF_FNAME,
-                )
-
-        return artifact
+        #
+        #
+        # )
+        #
+        #     # add diff
+        #         )
+        #
+        
+        _logger.info("Artifact functionality removed - job creation skipped")
+        return None
 
     def _get_source_type(self, metadata: Dict[str, Any]) -> Optional[str]:
         if self._source_type:
@@ -603,7 +566,6 @@ class JobBuilder:
             return program
 
         if source_type == "artifact" or self._settings.job_source == "artifact":
-            # if the job is set to be an artifact, use relpath guaranteed
             # to be correct. 'codePath' uses the root path when in git repo
             # fallback to codePath if strictly local relpath not present
             return metadata.get("codePathLocal") or metadata.get("codePath")

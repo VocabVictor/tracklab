@@ -27,10 +27,8 @@ def nested_shape(array_or_tuple, seen=None):
     if seen is None:
         seen = set()
     if hasattr(array_or_tuple, "size"):
-        # pytorch tensors use V.size() to get size of tensor
         return list(array_or_tuple.size())
     elif hasattr(array_or_tuple, "get_shape"):
-        # tensorflow uses V.get_shape() to get size of tensor
         return array_or_tuple.get_shape().as_list()
     elif hasattr(array_or_tuple, "shape"):
         return array_or_tuple.shape
@@ -90,7 +88,6 @@ class TorchHistory:
         log parameters after a forward pass
         log_freq - log gradients/parameters every N batches.
         """
-        # if name is not None:
         prefix = prefix + name
 
         if not hasattr(module, "_wandb_hook_names"):
@@ -100,7 +97,6 @@ class TorchHistory:
             if not log_track_update(log_track):
                 return
             for name, parameter in module.named_parameters():
-                # for pytorch 0.3 Variables
                 if isinstance(parameter, torch.autograd.Variable):
                     data = parameter.data
                 else:
@@ -136,7 +132,6 @@ class TorchHistory:
             prefix: str - the prefix to add to the name
             log_freq: log gradients/parameters every N batches
         """
-        # if name is not None:
         prefix = prefix + name
 
         if not hasattr(module, "_wandb_hook_names"):
@@ -217,7 +212,6 @@ class TorchHistory:
             tmin = 0 if tmin > 0 else tmin
             tmax = 0 if tmax < 0 else tmax
         # Anecdotally, this can somehow happen sometimes. Maybe a precision error
-        # in min()/max() above. Swap here to prevent a runtime error.
         # If all values are equal, just return a single bin.
         if tmin > tmax:
             tmin, tmax = tmax, tmin
@@ -387,8 +381,6 @@ class TorchGraph(tracklab.data_types.Graph):
             # Trying to support torch >0.3 making this code complicated
             # We want a list of types that we should recurse into
             # Torch 0.3   uses containers
-            #       0.4   has ModuleList
-            #       0.4.1 has ModuleDict
             module_types = [
                 getattr(torch.nn, module_classname)
                 for module_classname in (

@@ -193,12 +193,10 @@ class WandbEvalCallback(Callback, abc.ABC):
             table_name: (str) The name of the table as will be displayed in the UI.
                 (default is 'val_data').
         """
-        data_artifact = tracklab.Artifact(name, type=type)
         data_artifact.add(self.data_table, table_name)
 
         # Calling `use_artifact` uploads the data to W&B.
         assert tracklab.run is not None
-        tracklab.run.use_artifact(data_artifact)
         data_artifact.wait()
 
         # We get the reference table.
@@ -223,6 +221,4 @@ class WandbEvalCallback(Callback, abc.ABC):
             aliases: (List[str]) List of aliases for the prediction table.
         """
         assert tracklab.run is not None
-        pred_artifact = tracklab.Artifact(f"run_{tracklab.run.id}_pred", type=type)
         pred_artifact.add(self.pred_table, table_name)
-        tracklab.run.log_artifact(pred_artifact, aliases=aliases or ["latest"])

@@ -176,14 +176,11 @@ class _WandbInit:
             init_settings: Settings passed to `tracklab.init()` or set via
                 keyword arguments.
         """
-        # Allow settings passed to init() to override inferred values.
         #
-        # Calling login() may change settings on the singleton,
         # so these may not be the final run settings.
         run_settings = self._wl.settings.model_copy()
         run_settings.update_from_settings(init_settings)
 
-        # NOTE: _noop or _offline can become true after _login().
         #   _noop happens if _login hits a timeout.
         #   _offline can be selected by the user at the login prompt.
         # TrackLab: Skip login for local-only service
@@ -291,7 +288,6 @@ class _WandbInit:
         # Inherit global settings.
         settings = self._wl.settings.model_copy()
 
-        # Apply settings from tracklab.init() call.
         settings.update_from_settings(init_settings)
 
         # Infer the run ID from SageMaker.
@@ -308,7 +304,6 @@ class _WandbInit:
                 settings.update_from_dict(user_settings)
 
         # ensure that user settings don't set saving to true
-        # if user explicitly set these to false in UI
         if save_code_pre_user_settings is False:
             settings.save_code = False
 
@@ -316,7 +311,6 @@ class _WandbInit:
         # fix to make sure that we use the same project name for wandb-core.
         # The reason this is not going through the settings object is to
         # avoid failure cases in other parts of the code that will be
-        # removed with the switch to wandb-core.
         if settings.project is None:
             settings.project = tracklab.util.auto_project_name(settings.program)
 
@@ -324,7 +318,6 @@ class _WandbInit:
 
         # In shared mode, generate a unique label if not provided.
         # The label is used to distinguish between system metrics and console logs
-        # from different writers to the same run.
         if settings._shared and not settings.x_label:
             # TODO: If executed in a known distributed environment (e.g. Ray or SLURM),
             #   use the env vars to generate a label (e.g. SLURM_JOB_ID or RANK)
@@ -541,7 +534,6 @@ class _WandbInit:
     def _safe_symlink(
         self, base: str, target: str, name: str, delete: bool = False
     ) -> None:
-        # TODO(jhr): do this with relpaths, but i can't figure it out on no sleep
         if not hasattr(os, "symlink"):
             return
 
@@ -781,7 +773,6 @@ class _WandbInit:
 
         class _ChainableNoOpField:
             # This is used to chain arbitrary attributes and method calls.
-            # For example, `run.log_artifact().state` will work in disabled mode.
             def __init__(self) -> None:
                 self._value = None
 
@@ -837,7 +828,6 @@ class _WandbInit:
         if previous_run := self._wl.most_recent_active_run:
             if (
                 settings.reinit in (True, "finish_previous")
-                # calling tracklab.init() in notebooks finishes previous runs
                 # by default for user convenience.
                 or (settings.reinit == "default" and wb_ipython.in_notebook())
             ):
@@ -942,7 +932,6 @@ class _WandbInit:
         # TrackLab: No backend needed for local-only run
         run._set_teardown_hooks(self._teardown_hooks)
 
-        # Using GitRepo() blocks & can be slow, depending on user's current git setup.
         # We don't want to block run initialization/start request, so populate run's git
         # info beforehand.
         if not (settings.disable_git or settings.x_disable_machine_info):
@@ -1038,7 +1027,6 @@ def _attach(
         }
     )
 
-    # TODO: consolidate this codepath with tracklab.init()
     backend = Backend(settings=settings, service=service)
     backend.ensure_launched()
     logger.info("attach backend started and connected")

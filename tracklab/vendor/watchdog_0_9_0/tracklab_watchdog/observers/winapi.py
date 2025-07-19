@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# winapi.py: Windows API-Python interface (removes dependency on pywin32)
 #
 # Copyright (C) 2007 Thomas Heller <theller@ctypes.org>
 # Copyright (C) 2010 Will McGugan <will@willmcgugan.com>
@@ -260,7 +259,6 @@ def _parse_event_buffer(readBuffer, nBytes):
     while nBytes > 0:
         fni = ctypes.cast(readBuffer, LPFNI)[0]
         ptr = ctypes.addressof(fni) + FILE_NOTIFY_INFORMATION.FileName.offset
-        #filename = ctypes.wstring_at(ptr, fni.FileNameLength)
         filename = ctypes.string_at(ptr, fni.FileNameLength)
         results.append((fni.Action, filename.decode('utf-16')))
         numToSkip = fni.NextEntryOffset

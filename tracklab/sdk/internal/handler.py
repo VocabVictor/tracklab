@@ -249,7 +249,6 @@ class HandleManager:
         history: HistoryRecord,
     ) -> None:
         for item in history.item:
-            # TODO(jhr) save nested keys?
             k = item.key
             v = json.loads(item.value_json)
             if isinstance(v, numbers.Real):
@@ -360,7 +359,6 @@ class HandleManager:
     ) -> bool:
         metric_key = ".".join([k.replace(".", "\\.") for k in kl])
         d = self._metric_defines.get(metric_key, d)
-        # if the dict has _type key, it's a wandb table object
         if isinstance(v, dict) and not handler_util.metric_is_wandb_dict(v):
             updated = False
             for nk, nv in v.items():
@@ -489,7 +487,6 @@ class HandleManager:
         history: HistoryRecord,
         history_dict: Dict[str, Any],
     ) -> None:
-        #  if syncing an old run, we can skip this logic
         if history_dict.get("_step") is None:
             self._history_assign_step(history, history_dict)
 
@@ -816,7 +813,6 @@ class HandleManager:
         self._dispatch_record(record, always_send=True)
 
     def handle_request_shutdown(self, record: Record) -> None:
-        # TODO(jhr): should we drain things and stop new requests from coming in?
         result = proto_util._result_from_record(record)
         self._respond_result(result)
         self._stopped.set()
@@ -829,7 +825,6 @@ class HandleManager:
         logger.info("shutting down handler")
         if self._tb_watcher:
             self._tb_watcher.finish()
-        # self._context_keeper._debug_print_orphans()
 
     def __next__(self) -> Record:
         return self._record_q.get(block=True)
@@ -844,7 +839,6 @@ class HandleManager:
         # _runtime calculation is meaningless if there is no _timestamp
         if "_timestamp" not in history_dict:
             return
-        # if it is offline sync, self._run_start_time is None
         # in that case set it to the first tfevent timestamp
         if self._run_start_time is None:
             self._run_start_time = history_dict["_timestamp"]

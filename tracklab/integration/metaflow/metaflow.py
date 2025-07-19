@@ -51,7 +51,6 @@ try:
             return "datasets" if datasets else None
 
         if datasets:
-            run.use_artifact(f"{name}:latest")
             tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
     @dispatch
@@ -68,10 +67,8 @@ try:
             return "pd.DataFrame" if datasets else None
 
         if datasets:
-            artifact = tracklab.Artifact(name, type="dataset")
             with artifact.new_file(f"{name}.parquet", "wb") as f:
                 data.to_parquet(f, engine="pyarrow")
-            run.log_artifact(artifact)
             tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 except ImportError:
@@ -97,7 +94,6 @@ try:
             return "models" if models else None
 
         if models:
-            run.use_artifact(f"{name}:latest")
             tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
     @dispatch
@@ -114,10 +110,8 @@ try:
             return "nn.Module" if models else None
 
         if models:
-            artifact = tracklab.Artifact(name, type="model")
             with artifact.new_file(f"{name}.pkl", "wb") as f:
                 torch.save(data, f)
-            run.log_artifact(artifact)
             tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 except ImportError:
@@ -142,7 +136,6 @@ try:
             return "models" if models else None
 
         if models:
-            run.use_artifact(f"{name}:latest")
             tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
     @dispatch
@@ -159,10 +152,8 @@ try:
             return "BaseEstimator" if models else None
 
         if models:
-            artifact = tracklab.Artifact(name, type="model")
             with artifact.new_file(f"{name}.pkl", "wb") as f:
                 pickle.dump(data, f)
-            run.log_artifact(artifact)
             tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 except ImportError:
@@ -217,12 +208,10 @@ def wandb_track(
         return "Path" if datasets else None
 
     if datasets:
-        artifact = tracklab.Artifact(name, type="dataset")
         if data.is_dir():
             artifact.add_dir(data)
         elif data.is_file():
             artifact.add_file(data)
-        run.log_artifact(artifact)
         tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 
@@ -235,10 +224,8 @@ def wandb_track(
         return "generic" if others else None
 
     if others:
-        artifact = tracklab.Artifact(name, type="other")
         with artifact.new_file(f"{name}.pkl", "wb") as f:
             pickle.dump(data, f)
-        run.log_artifact(artifact)
         tracklab.termlog(f"Logging artifact: {name} ({type(data)})")
 
 
@@ -269,7 +256,6 @@ def _wandb_use(
         return "datasets" if datasets else None
 
     if datasets:
-        run.use_artifact(f"{name}:latest")
         tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
 
@@ -279,7 +265,6 @@ def _wandb_use(name: str, data, others=False, run=None, testing=False, *args, **
         return "others" if others else None
 
     if others:
-        run.use_artifact(f"{name}:latest")
         tracklab.termlog(f"Using artifact: {name} ({type(data)})")
 
 

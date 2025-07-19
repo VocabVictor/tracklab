@@ -9,7 +9,7 @@ import json
 import re
 import urllib
 
-from tracklab_gql import gql
+from tracklab.sdk.internal.internal_api import gql
 
 import tracklab
 from tracklab.apis import public

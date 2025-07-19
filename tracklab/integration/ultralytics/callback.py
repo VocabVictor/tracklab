@@ -239,7 +239,6 @@ class WandBUltralyticsCallback:
         self.predictor.args.verbose = None
 
     def _save_model(self, trainer: TRAINER_TYPE):
-        model_checkpoint_artifact = tracklab.Artifact(f"run_{tracklab.run.id}_model", "model")
         checkpoint_dict = {
             "epoch": trainer.epoch,
             "best_fitness": trainer.best_fitness,
@@ -254,7 +253,6 @@ class WandBUltralyticsCallback:
         checkpoint_path = trainer.wdir / f"epoch{trainer.epoch}.pt"
         torch.save(checkpoint_dict, checkpoint_path, pickle_module=pickle)
         model_checkpoint_artifact.add_file(checkpoint_path)
-        tracklab.log_artifact(
             model_checkpoint_artifact, aliases=[f"epoch_{trainer.epoch}"]
         )
 

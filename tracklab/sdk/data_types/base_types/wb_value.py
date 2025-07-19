@@ -4,8 +4,7 @@ from tracklab import util
 from tracklab.sdk import setup
 
 if TYPE_CHECKING:  # pragma: no cover
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ...tracklab_run import Run as LocalRun
 
     TypeMappingType = Dict[str, Type["WBValue"]]
@@ -26,13 +25,11 @@ def _is_maybe_offline() -> bool:
 
     # First check: if there's a run, check if it is offline.
     #
-    # This covers uses like `tracklab.init(mode="offline")` which don't modify
     # the singleton's settings.
     if run := singleton.most_recent_active_run:
         return run.offline
 
     # Second check: default to global defaults derived from environment
-    # variables or passed explicitly to `tracklab.setup()`.
     return singleton.settings._offline
 
 
@@ -71,7 +68,7 @@ class _WBValueArtifactSource:
     artifact: "Artifact"
     name: Optional[str]
 
-    def __init__(self, artifact: "Artifact", name: Optional[str] = None) -> None:
+    def __init__(self, artifact: Any, name: Optional[str] = None) -> None:
         self.artifact = artifact
         self.name = name
 
@@ -80,7 +77,7 @@ class _WBValueArtifactTarget:
     artifact: "Artifact"
     name: Optional[str]
 
-    def __init__(self, artifact: "Artifact", name: Optional[str] = None) -> None:
+    def __init__(self, artifact: Any, name: Optional[str] = None) -> None:
         self.artifact = artifact
         self.name = name
 
@@ -105,7 +102,7 @@ class WBValue:
         self._artifact_source = None
         self._artifact_target = None
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         """Serialize the object into a JSON blob.
 
         Uses current run or artifact to store additional data.
@@ -121,7 +118,7 @@ class WBValue:
         raise NotImplementedError
 
     @classmethod
-    def from_json(cls, json_obj: dict, source_artifact: "Artifact") -> "WBValue":
+    def from_json(cls, json_obj: dict, source_artifact: Any) -> "WBValue":
         """Deserialize a `json_obj` into it's class representation.
 
         If additional resources were stored in the `run_or_artifact` artifact during the
@@ -156,7 +153,7 @@ class WBValue:
 
     @staticmethod
     def init_from_json(
-        json_obj: dict, source_artifact: "Artifact"
+        json_obj: dict, source_artifact: Any
     ) -> Optional["WBValue"]:
         """Initialize a `WBValue` from a JSON blob based on the class that created it.
 
@@ -216,7 +213,7 @@ class WBValue:
         raise NotImplementedError
 
     def _set_artifact_source(
-        self, artifact: "Artifact", name: Optional[str] = None
+        self, artifact: Any, name: Optional[str] = None
     ) -> None:
         assert self._artifact_source is None, (
             f"Cannot update artifact_source. Existing source: {self._artifact_source.artifact}/{self._artifact_source.name}"
@@ -224,7 +221,7 @@ class WBValue:
         self._artifact_source = _WBValueArtifactSource(artifact, name)
 
     def _set_artifact_target(
-        self, artifact: "Artifact", name: Optional[str] = None
+        self, artifact: Any, name: Optional[str] = None
     ) -> None:
         assert self._artifact_target is None, (
             f"Cannot update artifact_target. Existing target: {self._artifact_target.artifact}/{self._artifact_target.name}"
@@ -249,7 +246,6 @@ class WBValue:
             return f"wandb-client-artifact://{self._artifact_target.artifact._client_id}/{type(self).with_suffix(self._artifact_target.name)}"
         # Else if we do not support client IDs, but online, then block on upload
         # Note: this is old behavior just to stay backwards compatible
-        # with older server versions. This code path should be removed
         # once those versions are no longer supported. This path uses a .wait
         # which blocks the user process on artifact upload.
         elif (
@@ -277,7 +273,6 @@ class WBValue:
             return f"wandb-client-artifact://{self._artifact_target.artifact._sequence_client_id}:latest/{type(self).with_suffix(self._artifact_target.name)}"
         # Else if we do not support client IDs, then block on upload
         # Note: this is old behavior just to stay backwards compatible
-        # with older server versions. This code path should be removed
         # once those versions are no longer supported. This path uses a .wait
         # which blocks the user process on artifact upload.
         elif (

@@ -5,11 +5,13 @@ Provides high-level interface to LevelDB datastore operations.
 
 import asyncio
 import logging
+import json
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
 
 from ..core.datastore_reader import DatastoreReader
+from .system_monitor import get_system_monitor, SystemMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -172,48 +174,46 @@ class DatastoreService:
         
         return formatted_metrics
     
-    async def get_system_metrics(self) -> List[Dict[str, Any]]:
+    async def get_system_metrics(self, node_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get current system metrics.
+        
+        Args:
+            node_id: Optional node ID for cluster environments
         
         Returns:
             List of recent system metrics
         """
-        import psutil
+        monitor = get_system_monitor()
         
-        # Get current system stats
-        cpu_percent = psutil.cpu_percent(interval=1)
-        memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        # Get current metrics
+        current_metrics = await monitor.get_current_metrics()
         
-        # Try to get GPU stats
-        gpu_data = None
-        try:
-            import GPUtil
-            gpus = GPUtil.getGPUs()
-            if gpus:
-                gpu_data = []
-                for i, gpu in enumerate(gpus):
-                    gpu_data.append({
-                        "id": i,
-                        "name": gpu.name,
-                        "utilization": gpu.load * 100,
-                        "memory": gpu.memoryUtil * 100,
-                        "temperature": gpu.temperature
-                    })
-        except ImportError:
-            pass
+        # Convert to frontend format
+        formatted_metrics = monitor.to_dict(current_metrics)
         
-        current_metric = {
-            "cpu": cpu_percent,
-            "memory": memory.percent,
-            "disk": disk.percent,
-            "gpu": gpu_data,
-            "timestamp": datetime.now().isoformat()
-        }
+        # Store in local history (implement persistent storage later)
+        self._store_metrics_history(formatted_metrics)
         
-        # In a real implementation, we would store historical data
-        # For now, just return current metric
-        return [current_metric]
+        # Return list of recent metrics (for now just current)
+        return [formatted_metrics]
+    
+    def _store_metrics_history(self, metrics: Dict[str, Any]):
+        """Store metrics in local history.
+        
+        Args:
+            metrics: Metrics data to store
+        """
+        # TODO: Implement persistent storage to LevelDB
+        # For now, just keep in memory cache
+        history_key = f"metrics_history:{metrics['nodeId']}"
+        if history_key not in self._cache:
+            self._cache[history_key] = []
+        
+        self._cache[history_key].append(metrics)
+        
+        # Keep only last 100 entries
+        if len(self._cache[history_key]) > 100:
+            self._cache[history_key] = self._cache[history_key][-100:]
     
     async def get_system_info(self) -> Dict[str, Any]:
         """Get system information.
@@ -221,24 +221,117 @@ class DatastoreService:
         Returns:
             System information dictionary
         """
-        import platform
-        import psutil
+        monitor = get_system_monitor()
+        return await monitor.get_system_info()
+    
+    async def get_cluster_info(self) -> Dict[str, Any]:
+        """Get cluster information.
         
-        try:
-            import GPUtil
-            gpus = GPUtil.getGPUs()
-            gpu_info = f"{len(gpus)} GPU(s)" if gpus else "No GPU"
-        except ImportError:
-            gpu_info = "GPU info not available"
+        Returns:
+            Cluster information including nodes and resources
+        """
+        monitor = get_system_monitor()
+        
+        # For single-node setup, create a mock cluster
+        if not monitor.is_cluster_mode:
+            system_info = await monitor.get_system_info()
+            current_metrics = await monitor.get_current_metrics()
+            
+            return {
+                "nodes": [
+                    {
+                        "id": monitor.node_id,
+                        "name": monitor.node_id,
+                        "hostname": system_info.get("hostname", "localhost"),
+                        "ip": system_info.get("ip_address", "127.0.0.1"),
+                        "role": "standalone",
+                        "status": "online",
+                        "lastHeartbeat": current_metrics.timestamp
+                    }
+                ],
+                "totalResources": {
+                    "cpu": system_info.get("cpu_threads", 1),
+                    "memory": system_info.get("memory_total", 0),
+                    "accelerators": len(current_metrics.accelerators)
+                },
+                "usedResources": {
+                    "cpu": int(current_metrics.cpu_overall / 100 * system_info.get("cpu_threads", 1)),
+                    "memory": current_metrics.memory_used,
+                    "accelerators": sum(1 for acc in current_metrics.accelerators if acc.utilization > 10)
+                }
+            }
+        
+        # TODO: Implement actual cluster info gathering
+        return {"nodes": [], "totalResources": {}, "usedResources": {}}
+    
+    async def get_cluster_metrics(self) -> Dict[str, Any]:
+        """Get cluster-wide metrics.
+        
+        Returns:
+            Metrics for all nodes in cluster
+        """
+        monitor = get_system_monitor()
+        
+        # For single-node setup
+        if not monitor.is_cluster_mode:
+            current_metrics = await monitor.get_current_metrics()
+            return {
+                monitor.node_id: monitor.to_dict(current_metrics)
+            }
+        
+        # TODO: Implement actual cluster metrics gathering
+        return {}
+    
+    async def get_accelerator_info(self) -> List[Dict[str, Any]]:
+        """Get detailed accelerator information.
+        
+        Returns:
+            List of accelerator devices with detailed info
+        """
+        monitor = get_system_monitor()
+        current_metrics = await monitor.get_current_metrics()
+        
+        return [
+            {
+                "id": acc.id,
+                "type": acc.type,
+                "name": acc.name,
+                "utilization": acc.utilization,
+                "memory": {
+                    "used": acc.memory_used,
+                    "total": acc.memory_total,
+                    "percentage": acc.memory_percentage
+                },
+                "temperature": acc.temperature,
+                "power": acc.power,
+                "fanSpeed": acc.fan_speed
+            }
+            for acc in current_metrics.accelerators
+        ]
+    
+    async def get_cpu_info(self) -> Dict[str, Any]:
+        """Get detailed CPU information.
+        
+        Returns:
+            CPU information with per-core details
+        """
+        monitor = get_system_monitor()
+        current_metrics = await monitor.get_current_metrics()
         
         return {
-            "platform": f"{platform.system()} {platform.release()}",
-            "cpu": f"{psutil.cpu_count()} cores",
-            "memory": f"{psutil.virtual_memory().total // (1024**3)} GB",
-            "storage": f"{psutil.disk_usage('/').total // (1024**3)} GB",
-            "gpu": gpu_info,
-            "python": platform.python_version(),
-            "tracklab_version": "0.0.1"  # TODO: Get from package
+            "overall": current_metrics.cpu_overall,
+            "cores": [
+                {
+                    "id": core.id,
+                    "usage": core.usage,
+                    "frequency": core.frequency,
+                    "temperature": core.temperature
+                }
+                for core in current_metrics.cpu_cores
+            ],
+            "loadAverage": current_metrics.load_average,
+            "processes": current_metrics.processes,
+            "threads": current_metrics.threads
         }
     
     def _calculate_duration(self, run_data: Dict[str, Any]) -> Optional[int]:

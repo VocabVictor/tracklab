@@ -1,5 +1,5 @@
 import sys
-from typing import TYPE_CHECKING, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Sequence, Tuple, Union, Any
 
 from tracklab import util
 
@@ -8,8 +8,7 @@ from .base_types.wb_value import WBValue
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
     NumpyHistogram = Tuple[np.ndarray, np.ndarray]
@@ -91,7 +90,7 @@ class Histogram(WBValue):
         if len(self.histogram) + 1 != len(self.bins):
             raise ValueError("len(bins) must be len(histogram) + 1")
 
-    def to_json(self, run: Optional[Union["LocalRun", "Artifact"]] = None) -> dict:
+    def to_json(self, run: Optional[Any] = None) -> dict:
         """Returns the JSON representation expected by the backend.
 
         <!-- lazydoc-ignore: internal -->

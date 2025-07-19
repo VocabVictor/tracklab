@@ -5,37 +5,26 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tracklab import Table
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
 ART_TYPE = "wandb-run-incremental-table"
 
 
-def _get_artifact_name(run: LocalRun, key: str) -> str:
-    from tracklab.sdk.artifacts._internal_artifact import sanitize_artifact_name
-
-    return sanitize_artifact_name(f"run-{run.id}-incr-{key}")
 
 
-def init_artifact(run: LocalRun, sanitized_key: str) -> Artifact:
-    """Initialize a new artifact for an incremental table.
-
-    Args:
-        run: The wandb run associated with this artifact
-        sanitized_key: Sanitized string key to identify the table
-
-    Returns:
-        A wandb Artifact configured for incremental table storage
-    """
-    from tracklab.sdk.artifacts._internal_artifact import InternalArtifact
-
-    artifact = InternalArtifact(
-        _get_artifact_name(run, sanitized_key),
-        ART_TYPE,
-        incremental=True,
-    )
-    return artifact
+#     """Initialize a new artifact for an incremental table.
+#
+#     Args:
+#         run: The wandb run associated with this artifact
+#         sanitized_key: Sanitized string key to identify the table
+#
+#     Returns:
+#         A wandb Artifact configured for incremental table storage
+#     """
+#     
+#         ART_TYPE,
+#     )
 
 
 def get_entry_name(incr_table: Table, key: str) -> str:

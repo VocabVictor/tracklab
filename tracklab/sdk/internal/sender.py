@@ -32,9 +32,7 @@ import tracklab
 from tracklab import util
 from tracklab.errors import CommError, UsageError
 from tracklab.errors.util import ProtobufErrorHandler
-from tracklab.filesync.dir_watcher import DirWatcher
 from tracklab.proto import tracklab_internal_pb2
-from tracklab.sdk.artifacts.artifact_saver import ArtifactSaver
 from tracklab.sdk.interface import interface
 from tracklab.sdk.interface.interface_queue import InterfaceQueue
 from tracklab.sdk.internal import (
@@ -100,7 +98,6 @@ def _framework_priority() -> Generator[Tuple[str, str], None, None]:
     ]
 
 
-def _manifest_json_from_proto(manifest: "ArtifactManifest") -> Dict:
     if manifest.version == 1:
         if manifest.manifest_file_path:
             contents = {}
@@ -128,7 +125,6 @@ def _manifest_json_from_proto(manifest: "ArtifactManifest") -> Dict:
     }
 
 
-def _manifest_entry_from_proto(entry: "ArtifactManifestEntry") -> Dict:
     birth_artifact_id = entry.birth_artifact_id if entry.birth_artifact_id else None
     return {
         "digest": entry.digest,
@@ -218,7 +214,6 @@ class SendManager:
     _run: Optional["RunRecord"]
     _entity: Optional[str]
     _project: Optional[str]
-    _dir_watcher: Optional["DirWatcher"]
     _pusher: Optional["FilePusher"]
     _record_exit: Optional["Record"]
     _exit_result: Optional["RunExitResult"]
@@ -255,7 +250,6 @@ class SendManager:
 
         self._fs = None
         self._pusher = None
-        self._dir_watcher = None
 
         # State updated by login
         self._entity = None
@@ -301,7 +295,6 @@ class SendManager:
         # do we need to debounce?
         self._config_needs_debounce: bool = False
 
-        # TODO(jhr): do something better, why do we need to send full lines?
         self._partial_output = dict()
 
         self._exit_code = 0
@@ -331,9 +324,7 @@ class SendManager:
         settings = tracklab.Settings(
             x_files_dir=files_dir,
             root_dir=root_dir,
-            # _start_time=0,
             resume=resume,
-            # ignore_globs=(),
             x_sync=True,
             disable_job_creation=False,
             x_file_stream_timeout_seconds=0,
@@ -453,7 +444,6 @@ class SendManager:
             self._ds = datastore.DataStore()
             self._ds.open_for_scan(self._settings.sync_file)
 
-        # TODO(cancel_paused): implement cancel_set logic
         # The idea is that there is an active request to cancel a
         # message that is being read from the transaction log below
 
@@ -526,7 +516,6 @@ class SendManager:
 
     def _debounce_config(self) -> None:
         config_value_dict = self._config_backend_dict()
-        # TODO(jhr): check result of upsert_run?
         if self._run:
             self._api.upsert_run(
                 name=self._run.run_id,
@@ -592,16 +581,12 @@ class SendManager:
             self._flush_run()
             transition_state()
         elif state == defer.FLUSH_STATS:
-            # NOTE: this is handled in handler.py:handle_request_defer()
             transition_state()
         elif state == defer.FLUSH_PARTIAL_HISTORY:
-            # NOTE: this is handled in handler.py:handle_request_defer()
             transition_state()
         elif state == defer.FLUSH_TB:
-            # NOTE: this is handled in handler.py:handle_request_defer()
             transition_state()
         elif state == defer.FLUSH_SUM:
-            # NOTE: this is handled in handler.py:handle_request_defer()
             transition_state()
         elif state == defer.FLUSH_DEBOUNCER:
             self.debounce(final=True)
@@ -613,9 +598,6 @@ class SendManager:
             self._flush_job()
             transition_state()
         elif state == defer.FLUSH_DIR:
-            if self._dir_watcher:
-                self._dir_watcher.finish()
-                self._dir_watcher = None
             transition_state()
         elif state == defer.FLUSH_FP:
             if self._pusher:
@@ -632,7 +614,6 @@ class SendManager:
             transition_state()
         elif state == defer.FLUSH_FS:
             if self._fs:
-                # TODO(jhr): now is a good time to output pending output lines
                 self._fs.finish(self._exit_code)
                 self._fs = None
             transition_state()
@@ -940,7 +921,6 @@ class SendManager:
             self._config_save(config_value_dict)
 
         # handle empty config
-        # TODO(jhr): consolidate the 4 ways config is built:
         #            (passed config, empty config, resume config, send_config)
         if not config_value_dict:
             config_value_dict = self._config_backend_dict()
@@ -1127,7 +1107,6 @@ class SendManager:
 
         self._fs.start()
         self._pusher = FilePusher(self._api, self._fs, settings=self._settings)
-        self._dir_watcher = DirWatcher(self._settings, self._pusher, file_dir)
         logger.info(
             "run started: %s with start time %s",
             self._run.run_id,
@@ -1164,7 +1143,6 @@ class SendManager:
         json_summary = json.dumps(self._consolidated_summary)
         if self._fs:
             self._fs.push(filenames.SUMMARY_FNAME, json_summary)
-        # TODO(jhr): we should only write this at the end of the script
         summary_path = os.path.join(self._settings.files_dir, filenames.SUMMARY_FNAME)
         with open(summary_path, "w") as f:
             f.write(json_summary)
@@ -1192,7 +1170,6 @@ class SendManager:
         row["_timestamp"] = now_us / 1e6
         row["_runtime"] = (now_us - start_us) / 1e6
         self._fs.push(filenames.EVENTS_FNAME, json.dumps(row))
-        # TODO(jhr): check fs.push results?
 
     def _output_raw_finish(self) -> None:
         for stream, output_raw in self._output_raw_streams.items():
@@ -1321,14 +1298,10 @@ class SendManager:
             if line.startswith("\r"):
                 # TODO: maybe we shouldn't just drop this, what if there was some \ns in the partial
                 # that should probably be the check instead of not line.endswith(\n")
-                # logger.info(f"Dropping data {self._partial_output[stream]}")
                 self._partial_output[stream] = ""
             self._partial_output[stream] += line
-            # TODO(jhr): how do we make sure this gets flushed?
             # we might need this for other stuff like telemetry
         else:
-            # TODO(jhr): use time from timestamp proto
-            # TODO(jhr): do we need to make sure we write full lines?
             # seems to be some issues with line breaks
             cur_time = time.time()
             timestamp = datetime.utcfromtimestamp(cur_time).isoformat() + " "
@@ -1398,13 +1371,10 @@ class SendManager:
         self, fname: interface.GlobStr, policy: "interface.PolicyName" = "end"
     ) -> None:
         logger.info("saving file %s with policy %s", fname, policy)
-        if self._dir_watcher:
-            self._dir_watcher.update_policy(fname, policy)
 
     def send_files(self, record: "Record") -> None:
         files = record.files
         for k in files.files:
-            # TODO(jhr): fix paths with directories
             self._save_file(
                 interface.GlobStr(glob.escape(k.path)),
                 interface.file_enum_to_policy(k.policy),
@@ -1437,7 +1407,6 @@ class SendManager:
 
         self._save_file(interface.GlobStr(filenames.METADATA_FNAME), policy="now")
 
-    def send_request_link_artifact(self, record: "Record") -> None:
         if not (record.control.req_resp or record.control.mailbox_slot):
             raise ValueError(
                 f"Expected either `req_resp` or `mailbox_slot`, got: {record.control!r}"
@@ -1479,7 +1448,6 @@ class SendManager:
                 logger.warning("Failed to link artifact to portfolio: %s", e)
         self._respond_result(result)
 
-    def send_use_artifact(self, record: "Record") -> None:
         """Pretend to send a used artifact.
 
         This function doesn't actually send anything, it is just used internally.
@@ -1492,7 +1460,6 @@ class SendManager:
             # job is partial, let job builder rebuild job, set job source dict
             self._job_builder.set_partial_source_id(use.id)
 
-    def send_request_log_artifact(self, record: "Record") -> None:
         result = proto_util._result_from_record(record)
         artifact = record.request.log_artifact.artifact
         history_step = record.request.log_artifact.history_step
@@ -1509,7 +1476,6 @@ class SendManager:
 
         self._respond_result(result)
 
-    def send_artifact(self, record: "Record") -> None:
         artifact = record.artifact
         try:
             res = self._send_artifact(artifact)
@@ -1519,7 +1485,6 @@ class SendManager:
                 f'send_artifact: failed for artifact "{artifact.type}/{artifact.name}"'
             )
 
-    def _send_artifact(
         self, artifact: "ArtifactRecord", history_step: Optional[int] = None
     ) -> Optional[Dict]:
         from packaging.version import parse
@@ -1593,12 +1558,7 @@ class SendManager:
 
     def finish(self) -> None:
         logger.info("shutting down sender")
-        # if self._tb_watcher:
-        #     self._tb_watcher.finish()
         self._output_raw_finish()
-        if self._dir_watcher:
-            self._dir_watcher.finish()
-            self._dir_watcher = None
         if self._pusher:
             self._pusher.finish()
             self._pusher.join()
@@ -1673,7 +1633,6 @@ class SendManager:
             proto_artifact.run_id = self._run.run_id
             proto_artifact.project = self._run.project
             proto_artifact.entity = self._run.entity
-            # TODO: this should be removed when the latest tag is handled
             # by the backend (WB-12116)
             proto_artifact.aliases.append("latest")
             # add docker image tag

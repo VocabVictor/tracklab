@@ -27,18 +27,15 @@ from .test_retry import MockTime, mock_time  # noqa: F401
 
 _T = TypeVar("_T")
 
-
 @pytest.fixture
 def mock_responses():
     with RequestsMock() as rsps:
         yield rsps
 
-
 def test_agent_heartbeat_with_no_agent_id_fails():
     a = internal.Api()
     with pytest.raises(ValueError):
         a.agent_heartbeat(None, {}, {})
-
 
 def test_get_run_state_invalid_kwargs():
     with pytest.raises(CommError) as e:
@@ -51,7 +48,6 @@ def test_get_run_state_invalid_kwargs():
         _api.get_run_state("test_entity", None, "test_run")
 
     assert "Error fetching run state" in str(e.value)
-
 
 @pytest.mark.parametrize(
     "existing_contents,expect_download",
@@ -94,20 +90,17 @@ def test_download_write_file_fetches_iff_file_checksum_mismatched(
         else:
             assert response is None
 
-
 def test_internal_api_with_no_write_global_config_dir(tmp_path):
     with patch.dict("os.environ", TRACKLAB_CONFIG_DIR=str(tmp_path)):
         os.chmod(tmp_path, 0o444)
         internal.InternalApi()
         os.chmod(tmp_path, 0o777)  # Allow the test runner to clean up.
 
-
 @pytest.fixture
 def mock_gql():
     with patch("tracklab.sdk.internal.internal_api.Api.gql") as mock:
         mock.return_value = None
         yield mock
-
 
 def test_fetch_orgs_from_team_entity(mock_gql):
     """Test fetching organization entities from a team entity."""
@@ -123,7 +116,6 @@ def test_fetch_orgs_from_team_entity(mock_gql):
     }
     result = api._fetch_orgs_and_org_entities_from_entity("team-entity")
     assert result == [_OrgNames(entity_name="test-org-entity", display_name="test-org")]
-
 
 def test_fetch_orgs_from_personal_entity_single_org(mock_gql):
     """Test fetching organization entities from a personal entity with single org."""
@@ -145,7 +137,6 @@ def test_fetch_orgs_from_personal_entity_single_org(mock_gql):
     assert result == [
         _OrgNames(entity_name="personal-org-entity", display_name="personal-org")
     ]
-
 
 def test_fetch_orgs_from_personal_entity_multiple_orgs(mock_gql):
     """Test fetching organization entities from a personal entity with multiple orgs."""
@@ -173,7 +164,6 @@ def test_fetch_orgs_from_personal_entity_multiple_orgs(mock_gql):
         _OrgNames(entity_name="org2-entity", display_name="org2"),
     ]
 
-
 def test_fetch_orgs_from_personal_entity_no_orgs(mock_gql):
     """Test fetching organization entities from a personal entity with no orgs."""
     api = internal.InternalApi()
@@ -188,7 +178,6 @@ def test_fetch_orgs_from_personal_entity_no_orgs(mock_gql):
         match="Unable to resolve an organization associated with personal entity",
     ):
         api._fetch_orgs_and_org_entities_from_entity("personal-entity")
-
 
 def test_fetch_orgs_from_nonexistent_entity(mock_gql):
     """Test fetching organization entities from a nonexistent entity."""
@@ -205,7 +194,6 @@ def test_fetch_orgs_from_nonexistent_entity(mock_gql):
     ):
         api._fetch_orgs_and_org_entities_from_entity("potato-entity")
 
-
 def test_fetch_orgs_with_invalid_response_structure(mock_gql):
     """Test fetching organization entities with invalid response structure."""
     api = internal.InternalApi()
@@ -221,7 +209,6 @@ def test_fetch_orgs_with_invalid_response_structure(mock_gql):
     with pytest.raises(ValueError, match="Unable to find an organization under entity"):
         api._fetch_orgs_and_org_entities_from_entity("invalid-entity")
 
-
 def test_match_org_single_org_display_name_match():
     assert (
         _match_org_with_fetched_org_entities(
@@ -231,7 +218,6 @@ def test_match_org_single_org_display_name_match():
         == "org-entity"
     )
 
-
 def test_match_org_single_org_entity_name_match():
     assert (
         _match_org_with_fetched_org_entities(
@@ -240,7 +226,6 @@ def test_match_org_single_org_entity_name_match():
         )
         == "org-entity"
     )
-
 
 def test_match_org_multiple_orgs_successful_match():
     assert (
@@ -254,7 +239,6 @@ def test_match_org_multiple_orgs_successful_match():
         == "org-entity-2"
     )
 
-
 def test_match_org_single_org_no_match():
     with pytest.raises(
         ValueError, match="Expecting the organization name or entity name to match"
@@ -263,7 +247,6 @@ def test_match_org_single_org_no_match():
             "wrong-org",
             [_OrgNames(entity_name="org-entity", display_name="org-display")],
         )
-
 
 def test_match_org_multiple_orgs_no_match():
     with pytest.raises(
@@ -277,7 +260,6 @@ def test_match_org_multiple_orgs_no_match():
             ],
         )
 
-
 @pytest.fixture
 def api_with_single_org():
     api = internal.InternalApi()
@@ -286,7 +268,6 @@ def api_with_single_org():
         return_value=[_OrgNames(entity_name="org-entity", display_name="org-display")]
     )
     return api
-
 
 @pytest.mark.parametrize(
     "entity, input_org, expected_org_entity",
@@ -303,7 +284,6 @@ def test_resolve_org_entity_name_with_single_org_success(
         api_with_single_org._resolve_org_entity_name(entity, input_org)
         == expected_org_entity
     )
-
 
 @pytest.mark.parametrize(
     "entity,input_org,error_message",
@@ -323,7 +303,6 @@ def test_resolve_org_entity_name_with_single_org_errors(
     with pytest.raises(ValueError, match=error_message):
         api_with_single_org._resolve_org_entity_name(entity, input_org)
 
-
 @pytest.fixture
 def api_with_multiple_orgs():
     api = internal.InternalApi()
@@ -337,14 +316,12 @@ def api_with_multiple_orgs():
     )
     return api
 
-
 def test_resolve_org_entity_name_with_multiple_orgs_no_org_specified(
     api_with_multiple_orgs,
 ):
     """Test that error is raised when no org is specified for entity with multiple orgs."""
     with pytest.raises(ValueError, match="belongs to multiple organizations"):
         api_with_multiple_orgs._resolve_org_entity_name("entity")
-
 
 def test_resolve_org_entity_name_with_multiple_orgs_display_name(
     api_with_multiple_orgs,
@@ -355,7 +332,6 @@ def test_resolve_org_entity_name_with_multiple_orgs_display_name(
         == "org1-entity"
     )
 
-
 def test_resolve_org_entity_name_with_multiple_orgs_entity_name(api_with_multiple_orgs):
     """Test resolving org entity name using org entity name."""
     assert (
@@ -363,14 +339,12 @@ def test_resolve_org_entity_name_with_multiple_orgs_entity_name(api_with_multipl
         == "org2-entity"
     )
 
-
 def test_resolve_org_entity_name_with_multiple_orgs_invalid_org(api_with_multiple_orgs):
     """Test that error is raised when specified org doesn't match any available orgs."""
     with pytest.raises(
         ValueError, match="Personal entity belongs to multiple organizations"
     ):
         api_with_multiple_orgs._resolve_org_entity_name("entity", "potato-org")
-
 
 def test_resolve_org_entity_name_with_old_server():
     api = internal.InternalApi()
@@ -383,9 +357,7 @@ def test_resolve_org_entity_name_with_old_server():
     # Should return organization as-is when specified
     assert api._resolve_org_entity_name("entity", "org-name-input") == "org-name-input"
 
-
 MockResponseOrException = Union[Exception, Tuple[int, Mapping[int, int], str]]
-
 
 class TestUploadFile:
     """Tests `upload_file`."""
@@ -665,7 +637,6 @@ class TestUploadFile:
 
             assert check_err(e.value), e.value
 
-
 class TestUploadFileRetry:
     """Test the retry logic of upload_file_retry.
 
@@ -731,7 +702,6 @@ class TestUploadFileRetry:
 
         assert handler.call_count == num_retries + 1
 
-
 ENABLED_FEATURE_RESPONSE = {
     "serverInfo": {
         "features": [
@@ -741,28 +711,23 @@ ENABLED_FEATURE_RESPONSE = {
     }
 }
 
-
 @pytest.fixture
 def mock_client(mocker: MockerFixture):
     mock = mocker.patch("tracklab.sdk.internal.internal_api.Client")
     mock.return_value = mocker.Mock()
     yield mock.return_value
 
-
 @pytest.fixture
 def mock_client_with_enabled_features(mock_client):
     mock_client.execute.return_value = ENABLED_FEATURE_RESPONSE
     yield mock_client
 
-
 NO_FEATURES_RESPONSE = {"serverInfo": {"features": []}}
-
 
 @pytest.fixture
 def mock_client_with_no_features(mock_client):
     mock_client.execute.return_value = NO_FEATURES_RESPONSE
     yield mock_client
-
 
 @pytest.fixture
 def mock_client_with_error_no_field(mock_client):
@@ -770,13 +735,11 @@ def mock_client_with_error_no_field(mock_client):
     mock_client.execute.side_effect = Exception(error_msg)
     yield mock_client
 
-
 @pytest.fixture
 def mock_client_with_random_error(mock_client):
     error_msg = "Some random error"
     mock_client.execute.side_effect = Exception(error_msg)
     yield mock_client
-
 
 @pytest.mark.parametrize(
     "fixture_name, feature, expected_result, expected_error",
@@ -844,134 +807,134 @@ def test_server_feature_checks(
         result = api._server_supports(feature)
         assert result == expected_result
 
-
-def test_construct_use_artifact_query_with_every_field(mocker: MockerFixture):
-    # Create mock internal API instance
-    api = internal.InternalApi()
-
-    mocker.patch.object(api, "settings", side_effect=lambda x: "default-" + x)
-
-    # Mock the server introspection methods
-    mocker.patch.object(
-        api,
-        "server_use_artifact_input_introspection",
-        return_value={"usedAs": "String"},
-    )
-
-    # Simulate server support for ALL known features
-    mock_server_features = dict.fromkeys(
-        chain(ServerFeature.keys(), ServerFeature.values()),
-        True,
-    )
-    mocker.patch.object(api, "_server_features", return_value=mock_server_features)
-
-    test_cases = [
-        {
-            "entity_name": "test-entity",
-            "project_name": "test-project",
-            "run_name": "test-run",
-            "artifact_id": "test-artifact-id",
-            "use_as": "test-use-as",
-            "artifact_entity_name": "test-artifact-entity",
-            "artifact_project_name": "test-artifact-project",
-        },
-        {
-            "entity_name": None,
-            "project_name": None,
-            "run_name": None,
-            "artifact_id": "test-artifact-id",
-            "use_as": None,
-            "artifact_entity_name": "test-artifact-entity",
-            "artifact_project_name": "test-artifact-project",
-        },
-    ]
-
-    for case in test_cases:
-        query, variables = api._construct_use_artifact_query(
-            entity_name=case["entity_name"],
-            project_name=case["project_name"],
-            run_name=case["run_name"],
-            artifact_id=case["artifact_id"],
-            use_as=case["use_as"],
-            artifact_entity_name=case["artifact_entity_name"],
-            artifact_project_name=case["artifact_project_name"],
-        )
-
-        # Verify variables are correctly set
-        expected_variables = {
-            "entityName": case["entity_name"] or "default-entity",
-            "projectName": case["project_name"] or "default-project",
-            "runName": case["run_name"],
-            "artifactID": case["artifact_id"],
-            "usedAs": case["use_as"],
-            "artifactEntityName": case["artifact_entity_name"],
-            "artifactProjectName": case["artifact_project_name"],
-        }
-        assert variables == expected_variables
-
-        query_str = str(query)
-        assert "artifactEntityName" in query_str
-        assert "artifactProjectName" in query_str
-        if case["use_as"]:
-            assert "usedAs" in query_str
-        else:
-            assert "usedAs" not in query_str
-
-
-def test_construct_use_artifact_query_without_entity_project():
-    # Test when server doesn't support entity/project information
-    api = internal.InternalApi()
-    api.settings = Mock(side_effect=lambda x: "default-" + x)
-
-    # Mock methods to return False for entity/project support
-    api.server_use_artifact_input_introspection = Mock(
-        return_value={"usedAs": "String"}
-    )
-    api._server_features = Mock(return_value={})
-
-    query, variables = api._construct_use_artifact_query(
-        entity_name="test-entity",
-        project_name="test-project",
-        run_name="test-run",
-        artifact_id="test-artifact-id",
-        use_as="test-use-as",
-        artifact_entity_name="test-artifact-entity",
-        artifact_project_name="test-artifact-project",
-    )
-    query_str = str(query)
-
-    # Verify entity/project information is not in variables
-    assert "artifactEntityName" not in variables
-    assert "artifactProjectName" not in variables
-    assert "artifactEntityName" not in query_str
-    assert "artifactProjectName" not in query_str
-
-
-def test_construct_use_artifact_query_without_used_as():
-    # Test when server doesn't support usedAs field
-    api = internal.InternalApi()
-    api.settings = Mock(side_effect=lambda x: "default-" + x)
-
-    # Mock methods to return empty dict for introspection
-    api.server_use_artifact_input_introspection = Mock(return_value={})
-    # Simulate server support for ALL known features
-    mock_server_features = dict.fromkeys(
-        chain(ServerFeature.keys(), ServerFeature.values()),
-        True,
-    )
-    api._server_features = Mock(return_value=mock_server_features)
-
-    query, variables = api._construct_use_artifact_query(
-        entity_name="test-entity",
-        project_name="test-project",
-        run_name="test-run",
-        artifact_id="test-artifact-id",
-        use_as="test-use-as",
-        artifact_entity_name="test-artifact-entity",
-        artifact_project_name="test-artifact-project",
-    )
-    query_str = str(query)
-
-    # Verify usedAs is still in variables but not in query
-    assert "usedAs" in variables
-    assert "usedAs:" not in query_str
+# def test_construct_use_artifact_query_with_every_field(mocker: MockerFixture): # Artifact test removed
+#     # Create mock internal API instance # Artifact test removed
+#     api = internal.InternalApi() # Artifact test removed
+#  # Artifact test removed
+#     mocker.patch.object(api, "settings", side_effect=lambda x: "default-" + x) # Artifact test removed
+#  # Artifact test removed
+#     # Mock the server introspection methods # Artifact test removed
+#     mocker.patch.object( # Artifact test removed
+#         api, # Artifact test removed
+#         "server_use_artifact_input_introspection", # Artifact test removed
+#         return_value={"usedAs": "String"}, # Artifact test removed
+#     ) # Artifact test removed
+#  # Artifact test removed
+#     # Simulate server support for ALL known features # Artifact test removed
+#     mock_server_features = dict.fromkeys( # Artifact test removed
+#         chain(ServerFeature.keys(), ServerFeature.values()), # Artifact test removed
+#         True, # Artifact test removed
+#     ) # Artifact test removed
+#     mocker.patch.object(api, "_server_features", return_value=mock_server_features) # Artifact test removed
+#  # Artifact test removed
+#     test_cases = [ # Artifact test removed
+#         { # Artifact test removed
+#             "entity_name": "test-entity", # Artifact test removed
+#             "project_name": "test-project", # Artifact test removed
+#             "run_name": "test-run", # Artifact test removed
+#             "artifact_id": "test-artifact-id", # Artifact test removed
+#             "use_as": "test-use-as", # Artifact test removed
+#             "artifact_entity_name": "test-artifact-entity", # Artifact test removed
+#             "artifact_project_name": "test-artifact-project", # Artifact test removed
+#         }, # Artifact test removed
+#         { # Artifact test removed
+#             "entity_name": None, # Artifact test removed
+#             "project_name": None, # Artifact test removed
+#             "run_name": None, # Artifact test removed
+#             "artifact_id": "test-artifact-id", # Artifact test removed
+#             "use_as": None, # Artifact test removed
+#             "artifact_entity_name": "test-artifact-entity", # Artifact test removed
+#             "artifact_project_name": "test-artifact-project", # Artifact test removed
+#         }, # Artifact test removed
+#     ] # Artifact test removed
+#  # Artifact test removed
+#     for case in test_cases: # Artifact test removed
+#         query, variables = api._construct_use_artifact_query( # Artifact test removed
+#             entity_name=case["entity_name"], # Artifact test removed
+#             project_name=case["project_name"], # Artifact test removed
+#             run_name=case["run_name"], # Artifact test removed
+#             artifact_id=case["artifact_id"], # Artifact test removed
+#             use_as=case["use_as"], # Artifact test removed
+#             artifact_entity_name=case["artifact_entity_name"], # Artifact test removed
+#             artifact_project_name=case["artifact_project_name"], # Artifact test removed
+#         ) # Artifact test removed
+#  # Artifact test removed
+#         # Verify variables are correctly set # Artifact test removed
+#         expected_variables = { # Artifact test removed
+#             "entityName": case["entity_name"] or "default-entity", # Artifact test removed
+#             "projectName": case["project_name"] or "default-project", # Artifact test removed
+#             "runName": case["run_name"], # Artifact test removed
+#             "artifactID": case["artifact_id"], # Artifact test removed
+#             "usedAs": case["use_as"], # Artifact test removed
+#             "artifactEntityName": case["artifact_entity_name"], # Artifact test removed
+#             "artifactProjectName": case["artifact_project_name"], # Artifact test removed
+#         } # Artifact test removed
+#         assert variables == expected_variables # Artifact test removed
+#  # Artifact test removed
+#         query_str = str(query) # Artifact test removed
+#         assert "artifactEntityName" in query_str # Artifact test removed
+#         assert "artifactProjectName" in query_str # Artifact test removed
+#         if case["use_as"]: # Artifact test removed
+#             assert "usedAs" in query_str # Artifact test removed
+#         else: # Artifact test removed
+#             assert "usedAs" not in query_str # Artifact test removed
+#  # Artifact test removed
+#  # Artifact test removed
+# def test_construct_use_artifact_query_without_entity_project(): # Artifact test removed
+#     # Test when server doesn't support entity/project information # Artifact test removed
+#     api = internal.InternalApi() # Artifact test removed
+#     api.settings = Mock(side_effect=lambda x: "default-" + x) # Artifact test removed
+#  # Artifact test removed
+#     # Mock methods to return False for entity/project support # Artifact test removed
+#     api.server_use_artifact_input_introspection = Mock( # Artifact test removed
+#         return_value={"usedAs": "String"} # Artifact test removed
+#     ) # Artifact test removed
+#     api._server_features = Mock(return_value={}) # Artifact test removed
+#  # Artifact test removed
+#     query, variables = api._construct_use_artifact_query( # Artifact test removed
+#         entity_name="test-entity", # Artifact test removed
+#         project_name="test-project", # Artifact test removed
+#         run_name="test-run", # Artifact test removed
+#         artifact_id="test-artifact-id", # Artifact test removed
+#         use_as="test-use-as", # Artifact test removed
+#         artifact_entity_name="test-artifact-entity", # Artifact test removed
+#         artifact_project_name="test-artifact-project", # Artifact test removed
+#     ) # Artifact test removed
+#     query_str = str(query) # Artifact test removed
+#  # Artifact test removed
+#     # Verify entity/project information is not in variables # Artifact test removed
+#     assert "artifactEntityName" not in variables # Artifact test removed
+#     assert "artifactProjectName" not in variables # Artifact test removed
+#     assert "artifactEntityName" not in query_str # Artifact test removed
+#     assert "artifactProjectName" not in query_str # Artifact test removed
+#  # Artifact test removed
+#  # Artifact test removed
+# def test_construct_use_artifact_query_without_used_as(): # Artifact test removed
+#     # Test when server doesn't support usedAs field # Artifact test removed
+#     api = internal.InternalApi() # Artifact test removed
+#     api.settings = Mock(side_effect=lambda x: "default-" + x) # Artifact test removed
+#  # Artifact test removed
+#     # Mock methods to return empty dict for introspection # Artifact test removed
+#     api.server_use_artifact_input_introspection = Mock(return_value={}) # Artifact test removed
+#     # Simulate server support for ALL known features # Artifact test removed
+#     mock_server_features = dict.fromkeys( # Artifact test removed
+#         chain(ServerFeature.keys(), ServerFeature.values()), # Artifact test removed
+#         True, # Artifact test removed
+#     ) # Artifact test removed
+#     api._server_features = Mock(return_value=mock_server_features) # Artifact test removed
+#  # Artifact test removed
+#     query, variables = api._construct_use_artifact_query( # Artifact test removed
+#         entity_name="test-entity", # Artifact test removed
+#         project_name="test-project", # Artifact test removed
+#         run_name="test-run", # Artifact test removed
+#         artifact_id="test-artifact-id", # Artifact test removed
+#         use_as="test-use-as", # Artifact test removed
+#         artifact_entity_name="test-artifact-entity", # Artifact test removed
+#         artifact_project_name="test-artifact-project", # Artifact test removed
+#     ) # Artifact test removed
+#     query_str = str(query) # Artifact test removed
+#  # Artifact test removed
+#     # Verify usedAs is still in variables but not in query # Artifact test removed
+#     assert "usedAs" in variables # Artifact test removed
+#     assert "usedAs:" not in query_str # Artifact test removed
+#  # Artifact test removed

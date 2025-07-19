@@ -1,7 +1,7 @@
 import io
 import os
 import pathlib
-from typing import TYPE_CHECKING, Optional, Sequence, Type, Union
+from typing import TYPE_CHECKING, Optional, Sequence, Type, Union, Any
 
 from tracklab import util
 from tracklab.sdk.lib import runid
@@ -11,12 +11,11 @@ from ._private import MEDIA_TMP
 from .base_types.media import BatchableMedia, Media
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typing import TextIO
+    from typing import TextIO, Any
 
     import rdkit.Chem  # type: ignore
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
     RDKitDataType = Union[str, "rdkit.Chem.rdchem.Mol"]
@@ -55,7 +54,6 @@ class Molecule(BatchableMedia):
         super().__init__(caption=caption)
 
         if hasattr(data_or_path, "name"):
-            # if the file has a path, we just detect the type and copy it from there
             data_or_path = data_or_path.name
 
         if hasattr(data_or_path, "read"):
@@ -208,7 +206,7 @@ class Molecule(BatchableMedia):
         """
         return os.path.join("media", "molecule")
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         """Returns the JSON representation expected by the backend.
 
         <!-- lazydoc-ignore: internal -->

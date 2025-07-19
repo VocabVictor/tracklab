@@ -1,6 +1,6 @@
 import codecs
 import os
-from typing import TYPE_CHECKING, Sequence, Type, Union
+from typing import TYPE_CHECKING, Sequence, Type, Union, Any
 
 from tracklab import util
 from tracklab.sdk.lib import runid
@@ -15,8 +15,7 @@ if TYPE_CHECKING:  # pragma: no cover
     import pandas as pd
     import plotly  # type: ignore
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
     ValToJsonType = Union[
@@ -85,7 +84,7 @@ class Plotly(Media):
         """
         return os.path.join("media", "plotly")
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         """Convert the Plotly object to a JSON representation.
 
         <!-- lazydoc-ignore: internal -->

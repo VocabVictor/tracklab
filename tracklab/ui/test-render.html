@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Render Error</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const TestComponent = () => {
+            const cpuObject = {
+                overall: 10,
+                cores: [],
+                loadAverage: [1, 2, 3],
+                processes: 5,
+                threads: 10
+            };
+            
+            // This will cause React error #31
+            return (
+                <div>
+                    <h1>Test Rendering</h1>
+                    <p>This is fine: {cpuObject.overall}%</p>
+                    <p>This will error: {cpuObject}</p>
+                </div>
+            );
+        };
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(<TestComponent />);
+    </script>
+</body>
+</html>

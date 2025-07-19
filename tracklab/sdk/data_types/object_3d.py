@@ -4,6 +4,7 @@ import json
 import os
 import pathlib
 from typing import (
+    Any,
     TYPE_CHECKING,
     ClassVar,
     Literal,
@@ -30,8 +31,7 @@ if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
     import numpy.typing as npt
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
     numeric = Union[int, float, np.integer, np.float64]
@@ -222,7 +222,6 @@ class Object3D(BatchableMedia):
         super().__init__(caption=caption)
 
         if hasattr(data_or_path, "name") and not isinstance(data_or_path, pathlib.Path):
-            # if the file has a path, we just detect the type and copy it from there.
             # this does not work for pathlib.Path objects,
             # where `.name` returns the last directory in the path.
             data_or_path = data_or_path.name
@@ -350,8 +349,6 @@ class Object3D(BatchableMedia):
 
         <!-- lazydoc-ignore-classmethod: internal -->
         """
-        # if file_type is not None and file_type not in cls.SUPPORTED_TYPES:
-        #     raise ValueError(
         #         f"Unsupported file type: {file_type}. Supported types are: {cls.SUPPORTED_TYPES}"
         #     )
         return cls(data_or_path, file_type=file_type)
@@ -397,7 +394,6 @@ class Object3D(BatchableMedia):
         boxes: Sequence["Box3D"],
         vectors: Optional[Sequence["Vector3D"]] = None,
         point_cloud_type: "PointCloudType" = "lidar/beta",
-        # camera: Optional[Camera] = None,
     ) -> "Object3D":
         """Initializes Object3D from a python object.
 
@@ -436,7 +432,7 @@ class Object3D(BatchableMedia):
         """
         return os.path.join("media", "object3D")
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         """Returns the JSON representation expected by the backend.
 
         <!-- lazydoc-ignore: internal -->

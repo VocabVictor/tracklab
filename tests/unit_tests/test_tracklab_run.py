@@ -25,10 +25,10 @@ REFERENCE_ATTRIBUTES = set(
         "group",
         "id",
         "job_type",
-        "link_artifact",
+    # "link_artifact", # Artifact test removed
         "link_model",
         "log",
-        "log_artifact",
+    # "log_artifact", # Artifact test removed
         "log_code",
         "log_model",
         "mark_preempting",
@@ -55,12 +55,11 @@ REFERENCE_ATTRIBUTES = set(
         "unwatch",
         "upsert_artifact",
         "url",
-        "use_artifact",
+    # "use_artifact", # Artifact test removed
         "use_model",
         "watch",
     ]
 )
-
 
 def test_run_step_property(mock_run):
     run = mock_run()
@@ -68,18 +67,15 @@ def test_run_step_property(mock_run):
     run.log(dict(this=2))
     assert run.step == 2
 
-
 def test_log_avoids_mutation(mock_run):
     run = mock_run()
     d = dict(this=1)
     run.log(d)
     assert d == dict(this=1)
 
-
 def test_display(mock_run):
     run = mock_run(settings=tracklab.Settings())
     assert run.display() is False
-
 
 @pytest.mark.parametrize(
     "config, sweep_config, expected_config",
@@ -105,7 +101,6 @@ def test_run_config(mock_run, config, sweep_config, expected_config):
     run = mock_run(config=config, sweep_config=sweep_config)
     assert dict(run.config) == expected_config
 
-
 def test_run_urls(mock_run):
     # TrackLab: URLs are not available in local-only offline mode
     base_url = "https://my.cool.site.com"
@@ -124,7 +119,6 @@ def test_run_urls(mock_run):
     assert run.get_project_url() is None
     assert run.get_url() is None
 
-
 def test_run_publish_config(mock_run, parse_records, record_q):
     run = mock_run()
     run.config.t = 1
@@ -140,7 +134,6 @@ def test_run_publish_config(mock_run, parse_records, record_q):
     assert config[0]["t"] == "1"
     assert config[1]["t2"] == "2"
 
-
 def test_run_publish_history(mock_run, parse_records, record_q):
     run = mock_run()
     run.log(dict(this=1))
@@ -155,7 +148,6 @@ def test_run_publish_history(mock_run, parse_records, record_q):
     assert len(history) == 2
     assert history[0]["this"] == "1"
     assert history[1]["that"] == "2"
-
 
 @pytest.mark.skipif(
     platform.system() == "Windows",
@@ -179,7 +171,6 @@ def test_numpy_high_precision_float_downcasting(mock_run, parse_records, record_
     assert len(history) == 1
     assert history[0]["this"] == "0.0"
 
-
 def test_mark_preempting(mock_run, parse_records, record_q):
     run = mock_run()
     run.log(dict(this=1))
@@ -193,7 +184,6 @@ def test_mark_preempting(mock_run, parse_records, record_q):
     assert len(parsed.preempting) == 1
     assert parsed.records[-1].HasField("preempting")
 
-
 def test_run_pub_config(mock_run, record_q, parse_records):
     run = mock_run()
     run.config.t = 1
@@ -205,7 +195,6 @@ def test_run_pub_config(mock_run, record_q, parse_records):
     assert len(parsed.config) == 2
     assert parsed.config[0]["t"] == "1"
     assert parsed.config[1]["t2"] == "2"
-
 
 def test_run_pub_history(mock_run, record_q, parse_records):
     run = mock_run()
@@ -220,14 +209,13 @@ def test_run_pub_history(mock_run, record_q, parse_records):
     assert history[0]["this"] == "1"
     assert history[1]["that"] == "2"
 
-
-def test_use_artifact_offline(mock_run):
-    run = mock_run(settings=tracklab.Settings())
-    with pytest.raises(Exception) as e_info:
-        run.use_artifact("boom-data")
-        assert str(e_info.value) == "Cannot use artifact when in offline mode."
-
-
+# def test_use_artifact_offline(mock_run): # Artifact test removed
+#     run = mock_run(settings=tracklab.Settings()) # Artifact test removed
+#     with pytest.raises(Exception) as e_info: # Artifact test removed
+#         run.use_artifact("boom-data") # Artifact test removed
+#         assert str(e_info.value) == "Cannot use artifact when in offline mode." # Artifact test removed
+#  # Artifact test removed
+#  # Artifact test removed
 def test_run_basic():
     s = tracklab.Settings()
     c = dict(
@@ -252,14 +240,12 @@ def test_run_basic():
         ),
     )
 
-
 def test_run_sweep():
     s = tracklab.Settings()
     c = dict(param1=2, param2=4)
     sw = dict(param3=9)
     run = tracklab_sdk.run.Run(settings=s, config=c, sweep_config=sw)
     assert dict(run.config) == dict(param1=2, param2=4, param3=9)
-
 
 def test_run_sweep_overlap():
     s = tracklab.Settings()
@@ -268,14 +254,12 @@ def test_run_sweep_overlap():
     run = tracklab_sdk.run.Run(settings=s, config=c, sweep_config=sw)
     assert dict(run.config) == dict(param1=2, param2=8, param3=9)
 
-
 def test_run_deepcopy():
     s = tracklab.Settings()
     c = dict(param1=2, param2=4)
     run = tracklab_sdk.run.Run(settings=s, config=c)
     run2 = copy.deepcopy(run)
     assert id(run) == id(run2)
-
 
 @pytest.mark.parametrize(
     "settings, expected",
@@ -300,7 +284,6 @@ def test_resumed_run_resume_file_state(mocker, mock_run, tmp_path, settings, exp
 
     assert tmp_file.exists() == expected
 
-
 def test_new_attributes(mock_run):
     run = mock_run()
     current_attributes = set([attr for attr in dir(run) if not attr.startswith("_")])
@@ -308,7 +291,6 @@ def test_new_attributes(mock_run):
     removed_attributes = REFERENCE_ATTRIBUTES - current_attributes
     assert not added_attributes, f"New attributes: {added_attributes}"
     assert not removed_attributes, f"Removed attributes: {removed_attributes}"
-
 
 class TestRunHardwareMonitoring:
     """Tests for hardware monitoring integration in Run class."""

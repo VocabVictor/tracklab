@@ -150,7 +150,6 @@ class WandbLogger:
                     **kwargs_tracklab_init,
                 )
             else:
-                # if a run exits - created externally
                 cls._run = tracklab.run
 
             if wait_for_job_success:
@@ -330,7 +329,6 @@ class WandbLogger:
     @classmethod
     def _unpack_hyperparameters(cls, hyperparameters: Hyperparameters):
         # `Hyperparameters` object is not unpacking properly using `vars` or `__dict__`,
-        # vars(hyperparameters) return {n_epochs: n} only.
         hyperparams = {}
         try:
             hyperparams["n_epochs"] = hyperparameters.n_epochs
@@ -387,7 +385,6 @@ class WandbLogger:
 
         # fine-tune details
         fine_tune_id = fine_tune.id
-        artifact = tracklab.Artifact(
             model_artifact_name,
             type=model_artifact_type,
             metadata=dict(fine_tune),
@@ -401,7 +398,6 @@ class WandbLogger:
             dict_fine_tune["error"] = cls.sanitize(dict_fine_tune["error"])
             dict_fine_tune = cls.sanitize(dict_fine_tune)
             json.dump(dict_fine_tune, f, indent=2)
-        cls._run.log_artifact(
             artifact,
             aliases=["latest", fine_tune_id],
         )
@@ -437,7 +433,6 @@ class WandbLogger:
                 )
                 return
 
-            artifact = tracklab.Artifact(artifact_name, type=artifact_type)
             with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
                 tmp_file.write(file_content.content)
                 tmp_file_path = tmp_file.name
@@ -462,7 +457,6 @@ class WandbLogger:
             # log number of items
             cls._run.config.update({f"n_{prefix}": artifact.metadata.get("items")})
 
-        cls._run.use_artifact(artifact, aliases=["latest", artifact_alias])
 
     @classmethod
     def _make_table(cls, file_content: str) -> Tuple[Table, int]:

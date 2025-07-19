@@ -33,8 +33,8 @@ SYMBOLS_ROOT_SDK = {
     "login",
     "init",
     "log",
-    "log_artifact",
-    "use_artifact",
+    # "log_artifact", # Artifact test removed
+    # "use_artifact", # Artifact test removed
     "log_model",
     "use_model",
     "link_model",
@@ -46,7 +46,6 @@ SYMBOLS_ROOT_SDK = {
     "watch",
     "unwatch",
     "helper",
-    "agent",
     "controller",
     "sweep",
     "mark_preempting",
@@ -69,7 +68,6 @@ SYMBOLS_ROOT_OTHER = {
     "Settings",
     "UsageError",
     "absolute_import",
-    "agents",
     "alert",
     "api",
     "apis",
@@ -83,7 +81,6 @@ SYMBOLS_ROOT_OTHER = {
     "ensure_configured",
     "env",
     "errors",
-    "filesync",
     "gym",
     "integration",
     "jupyter",
@@ -121,7 +118,6 @@ SYMBOLS_ROOT_OTHER = {
     "visualize",
     "viz",
     "wandb",
-    "tracklab_agent",
     "wandb_controller",
     "tracklab_lib",
     "tracklab_sdk",
@@ -151,7 +147,6 @@ SYMBOLS_SERVICE = {"attach", "_attach", "teardown", "_teardown"}
 
 SYMBOLS_ANALYTICS = {"analytics", "_Sentry", "_sentry"}
 
-
 def test_library_root():
     symbol_list = dir(wandb)
     symbol_public_set = {s for s in symbol_list if not s.startswith("_")}
@@ -165,7 +160,6 @@ def test_library_root():
         - SYMBOLS_ANALYTICS
     )
     assert symbol_unknown == set()
-
 
 # normal run symbols
 SYMBOLS_RUN = {
@@ -182,14 +176,14 @@ SYMBOLS_RUN = {
     "config",
     "config_static",
     "log",
-    "log_artifact",
-    "link_artifact",
+    # "log_artifact", # Artifact test removed
+    # "link_artifact", # Artifact test removed
     "log_model",
     "use_model",
     "link_model",
     "upsert_artifact",
     "finish_artifact",
-    "use_artifact",
+    # "use_artifact", # Artifact test removed
     "log_code",
     "alert",
     "define_metric",
@@ -231,7 +225,6 @@ SYMBOLS_RUN_OTHER = {
     "dir",
 }
 
-
 def test_library_run():
     Run = tracklab.sdk.wandb_run.Run  # noqa: N806
     symbol_list = dir(Run)
@@ -245,7 +238,6 @@ def test_library_run():
         - SYMBOLS_SERVICE
     )
     assert symbol_unknown == set()
-
 
 SYMBOLS_CONFIG = {
     "get",
@@ -263,7 +255,6 @@ SYMBOLS_CONFIG_OTHER = {
     "merge_locked",
 }
 
-
 def test_library_config():
     Config = tracklab.sdk.wandb_config.Config  # noqa: N806
     symbol_list = dir(Config)
@@ -272,7 +263,6 @@ def test_library_config():
         symbol_public_set - SYMBOLS_CONFIG - SYMBOLS_CONFIG_OTHER - SYMBOLS_TYPING
     )
     assert symbol_unknown == set()
-
 
 SYMBOLS_TRACKLAB_INIT = {
     "force",
@@ -301,7 +291,6 @@ SYMBOLS_TRACKLAB_INIT = {
     "fork_from",
     "resume_from",
 }
-
 
 def test_library_init():
     init_params = set(inspect.signature(tracklab.init).parameters)

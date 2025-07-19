@@ -26,8 +26,7 @@ if TYPE_CHECKING:  # pragma: no cover
     import torch  # type: ignore
     from PIL.Image import Image as PILImage
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
     ImageDataType = Union[
@@ -350,8 +349,6 @@ class Image(BatchableMedia):
         self._artifact_target = wbimage._artifact_target
 
         # We do not want to implicitly copy boxes or masks, just the image-related data.
-        # self._boxes = wbimage._boxes
-        # self._masks = wbimage._masks
 
     def _initialize_from_path(self, path: str) -> None:
         pil_image = util.get_module(
@@ -442,7 +439,7 @@ class Image(BatchableMedia):
 
     @classmethod
     def from_json(
-        cls: Type["Image"], json_obj: dict, source_artifact: "Artifact"
+        cls: Type["Image"], json_obj: dict, source_artifact: Any
     ) -> "Image":
         """Factory method to create an Audio object from a JSON object.
 
@@ -533,7 +530,7 @@ class Image(BatchableMedia):
                     run, key, step, id_, ignore_copy_err=ignore_copy_err
                 )
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         """Returns the JSON representation expected by the backend.
 
         <!-- lazydoc-ignore: internal -->

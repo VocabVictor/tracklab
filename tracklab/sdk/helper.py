@@ -41,7 +41,6 @@ def _to_dict(params):
     elif not hasattr(params, "__dict__"):
         raise TypeError("config must be a dict or have a __dict__ attribute.")
     elif "__flags" in vars(params):
-        # for older tensorflow flags (pre 1.4)
         if not "__parsed" not in vars(params):
             params._parse_flags()
         params = vars(params)["__flags"]

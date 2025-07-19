@@ -53,7 +53,6 @@ def patch(
             save=save,
             root_logdir=root_logdir,
         )
-    # This is for tensorflow <= 1.15 (tf.compat.v1.summary.FileWriter)
     if py_writer:
         _patch_file_writer(
             writer=py_writer,
@@ -110,7 +109,6 @@ def _patch_tensorflow2(
                 "When using several event log directories, "
                 'please call `tracklab.tensorboard.patch(root_logdir="...")` before `tracklab.init`'
             )
-        # if the logdir contains the hostname, the writer was not given a logdir.
         # In this case, the generated logdir
         # is generated and ends with the hostname, update the root_logdir to match.
         hostname = socket.gethostname()
@@ -140,7 +138,6 @@ def _patch_file_writer(
     save: bool = True,
     root_logdir: str = "",
 ) -> None:
-    # This configures non-TensorFlow Tensorboard logging, or tensorflow <= 1.15
     logdir_hist = []
 
     class TBXEventFileWriter(writer.EventFileWriter):
@@ -153,7 +150,6 @@ def _patch_file_writer(
                     'please call `tracklab.tensorboard.patch(root_logdir="...")` before `tracklab.init`'
                 )
 
-            # if the logdir contains the hostname, the writer was not given a logdir.
             # In this case, the logdir is generated and ends with the hostname,
             # update the root_logdir to match.
             hostname = socket.gethostname()

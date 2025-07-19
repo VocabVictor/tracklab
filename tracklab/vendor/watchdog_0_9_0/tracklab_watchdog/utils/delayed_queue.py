@@ -38,7 +38,6 @@ class DelayedQueue(object):
     def close(self):
         """Close queue, indicating no more items will be added."""
         self._closed = True
-        # Interrupt the blocking _not_empty.wait() call in get
         self._not_empty.acquire()
         self._not_empty.notify()
         self._not_empty.release()
@@ -65,7 +64,6 @@ class DelayedQueue(object):
                 time.sleep(time_left)
                 time_left = insert_time + self.delay - time.time()
 
-            # return element if it's still in the queue
             self._lock.acquire()
             try:
                 if len(self._queue) > 0 and self._queue[0][0] is head:

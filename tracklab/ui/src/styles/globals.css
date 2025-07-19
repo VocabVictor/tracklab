@@ -51,6 +51,22 @@
     animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out forwards;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
   @keyframes pulse-soft {
     0%, 100% {
       opacity: 1;
@@ -58,6 +74,109 @@
     50% {
       opacity: 0.8;
     }
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    to {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+  }
+  
+  /* 系统监控专用样式 */
+  .metric-card {
+    @apply bg-white rounded-lg border border-gray-200 p-4 transition-all duration-300 hover:shadow-md;
+  }
+  
+  .metric-card:hover {
+    @apply shadow-lg border-gray-300;
+  }
+  
+  .progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+  }
+  
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+  
+  .status-indicator {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .status-online {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .status-offline {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  .status-degraded {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .node-card {
+    @apply bg-gray-50 rounded-lg border border-gray-200 p-4 cursor-pointer transition-all duration-300;
+  }
+  
+  .node-card:hover {
+    @apply shadow-md border-gray-300 bg-white;
+  }
+  
+  .node-card.selected {
+    @apply ring-2 ring-blue-500 bg-blue-50;
+  }
+  
+  .accelerator-card {
+    @apply bg-white rounded-lg border border-gray-200 p-6 transition-all duration-300;
+  }
+  
+  .accelerator-card:hover {
+    @apply shadow-lg border-gray-300;
+  }
+  
+  .cpu-core-card {
+    @apply bg-gray-50 rounded-lg border border-gray-100 p-4 transition-all duration-300;
+  }
+  
+  .cpu-core-card:hover {
+    @apply shadow-md bg-white;
   }
 }
 

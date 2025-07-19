@@ -18,7 +18,6 @@ STEPS: Dict[str, Dict[str, Any]] = {
     "": {"step": 0},
     "global": {"step": 0, "last_log": None},
 }
-# TODO(cling): Set these when tensorboard behavior is configured.
 # We support rate limited logging by setting this to number of seconds,
 # can be a floating point.
 RATE_LIMIT_SECONDS: Optional[Union[float, int]] = None
@@ -178,11 +177,6 @@ def tf_summary_to_dict(  # noqa: C901
                 precision = pr_curve_data[-2, :].tolist()
                 recall = pr_curve_data[-1, :].tolist()
                 # TODO: (kdg) implement spec for showing additional info in tool tips
-                # true_pos = pr_curve_data[1,:]
-                # false_pos = pr_curve_data[2,:]
-                # true_neg = pr_curve_data[1,:]
-                # false_neg = pr_curve_data[1,:]
-                # threshold = [1.0 / n for n in range(len(true_pos), 0, -1)]
                 # min of each in case tensorboard ever changes their pr_curve
                 # to allow for different length outputs
                 data = []
@@ -196,21 +190,11 @@ def tf_summary_to_dict(  # noqa: C901
                 data_table = tracklab.Table(data=data, columns=["recall", "precision"])
                 name = namespaced_tag(value.tag, namespace)
 
-                values[name] = tracklab.plot_table(
-                    "wandb/line/v0",
-                    data_table,
-                    {"x": "recall", "y": "precision"},
-                    {"title": f"{name} Precision v. Recall"},
-                )
+                values[name] = data_table
         elif kind == "image":
             img_str = value.image.encoded_image_string
             encode_images([img_str], value)
         # Coming soon...
-        # elif kind == "audio":
-        #     audio = tracklab.Audio(
-        #         six.BytesIO(value.audio.encoded_audio_string),
-        #         sample_rate=value.audio.sample_rate,
-        #         content_type=value.audio.content_type,
         #     )
         elif kind == "histo":
             tag = namespaced_tag(value.tag, namespace)
@@ -244,21 +228,9 @@ def tf_summary_to_dict(  # noqa: C901
                     f"Not logging key {tag!r}. Found a histogram with only 2 bins.",
                     repeat=False,
                 )
-        # TODO(jhr): figure out how to share this between userspace and internal process or dont
-        # elif value.tag == "_hparams_/session_start_info":
-        #     if tracklab.util.get_module("tensorboard.plugins.hparams"):
-        #         from tensorboard.plugins.hparams import plugin_data_pb2
         #
-        #         plugin_data = plugin_data_pb2.HParamsPluginData()        #
-        #         plugin_data.ParseFromString(value.metadata.plugin_data.content)
-        #         for key, param in six.iteritems(plugin_data.session_start_info.hparams):
-        #             if not tracklab.run.config.get(key):
-        #                 tracklab.run.config[key] = (
-        #                     param.number_value or param.string_value or param.bool_value
         #                 )
         #     else:
-        #         tracklab.termerror(
-        #             "Received hparams tf.summary, but could not import "
         #             "the hparams plugin from tensorboard"
         #         )
     return values

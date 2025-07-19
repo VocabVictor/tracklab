@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Callable, Generic
 
 from typing_extensions import TypeVar, override
 
-# Necessary to break an import loop.
 if TYPE_CHECKING:
     from tracklab.sdk.interface import interface
 

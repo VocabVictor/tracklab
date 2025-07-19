@@ -16,8 +16,6 @@ from .lib import config_util
 logger = logging.getLogger("wandb")
 
 
-# TODO(jhr): consider a callback for persisting changes?
-# if this is done right we might make sure this is pickle-able
 # we might be able to do this on other objects like Run?
 class Config:
     """Config object.
@@ -280,7 +278,6 @@ class Config:
         key = key.strip("-")
         if _is_artifact_representation(val):
             val = self._artifact_callback(key, val)
-        # if the user inserts an artifact into the config
         if not isinstance(val, tracklab.Artifact):
             val = json_friendly_val(val)
         if not allow_val_change:

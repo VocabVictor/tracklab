@@ -5,8 +5,7 @@ from .. import _dtypes
 from ..base_types.media import Media
 
 if TYPE_CHECKING:  # pragma: no cover
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ...tracklab_run import Run as LocalRun
 
 
@@ -30,11 +29,11 @@ class Classes(Media):
     def from_json(
         cls: Type["Classes"],
         json_obj: dict,
-        source_artifact: Optional["Artifact"],
+        source_artifact: Optional[Any],
     ) -> "Classes":
         return cls(json_obj.get("class_set"))  # type: ignore
 
-    def to_json(self, run_or_artifact: Optional[Union["LocalRun", "Artifact"]]) -> dict:
+    def to_json(self, run_or_artifact: Optional[Any]) -> dict:
         json_obj = {}
         # This is a bit of a hack to allow _ClassesIdType to
         # be able to operate fully without an artifact in play.
@@ -113,7 +112,7 @@ class _ClassesIdType(_dtypes.Type):
     def from_obj(cls, py_obj: Optional[Any] = None) -> "_dtypes.Type":
         return cls(py_obj)
 
-    def to_json(self, artifact: Optional["Artifact"] = None) -> Dict[str, Any]:
+    def to_json(self, artifact: Optional[Any] = None) -> Dict[str, Any]:
         cl_dict = super().to_json(artifact)
         # TODO (tss): Refactor this block with the similar one in tracklab.Image.
         # This is a bit of a smell that the classes object does not follow
@@ -134,7 +133,7 @@ class _ClassesIdType(_dtypes.Type):
     def from_json(
         cls,
         json_dict: Dict[str, Any],
-        artifact: Optional["Artifact"] = None,
+        artifact: Optional[Any] = None,
     ) -> "_dtypes.Type":
         classes_obj = None
         if (

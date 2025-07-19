@@ -262,3 +262,55 @@ class WebSocketManager:
             "timestamp": datetime.now().isoformat()
         }
         await self.broadcast(message)
+    
+    async def send_cluster_metrics(self, cluster_metrics: dict):
+        """Send cluster metrics to all clients.
+        
+        Args:
+            cluster_metrics: Cluster metric data
+        """
+        message = {
+            "type": "cluster_metrics", 
+            "data": cluster_metrics,
+            "timestamp": datetime.now().isoformat()
+        }
+        await self.broadcast(message)
+    
+    async def send_hardware_update(self, hardware_data: dict):
+        """Send hardware update to all clients.
+        
+        Args:
+            hardware_data: Hardware update data
+        """
+        message = {
+            "type": "hardware_update",
+            "data": hardware_data,
+            "timestamp": datetime.now().isoformat()
+        }
+        await self.broadcast(message)
+    
+    async def send_node_status(self, node_data: dict):
+        """Send node status update to all clients.
+        
+        Args:
+            node_data: Node status data
+        """
+        message = {
+            "type": "node_status",
+            "data": node_data,
+            "timestamp": datetime.now().isoformat()
+        }
+        await self.broadcast(message)
+    
+    async def send_alert(self, alert_data: dict):
+        """Send alert to all clients.
+        
+        Args:
+            alert_data: Alert data
+        """
+        message = {
+            "type": "alert",
+            "data": alert_data,
+            "timestamp": datetime.now().isoformat()
+        }
+        await self.broadcast(message)

@@ -18,6 +18,16 @@ const Dashboard: React.FC = () => {
   const { data: runs, loading: runsLoading } = useRuns()
   const { data: systemMetrics, loading: systemLoading } = useSystemMetrics()
 
+  // Debug logging
+  console.log('systemMetrics:', systemMetrics);
+  if (systemMetrics && systemMetrics.length > 0) {
+    const lastMetric = systemMetrics[systemMetrics.length - 1];
+    console.log('lastMetric:', lastMetric);
+    console.log('cpu:', lastMetric?.cpu);
+    console.log('cpu type:', typeof lastMetric?.cpu);
+    console.log('cpu.overall:', lastMetric?.cpu?.overall);
+  }
+
   const stats = [
     {
       name: 'Total Projects',
@@ -42,7 +52,24 @@ const Dashboard: React.FC = () => {
     },
     {
       name: 'System Load',
-      value: Array.isArray(systemMetrics) && systemMetrics.length > 0 ? `${systemMetrics[systemMetrics.length - 1]?.cpu || 0}%` : '0%',
+      value: (() => {
+        if (!Array.isArray(systemMetrics) || systemMetrics.length === 0) {
+          return '0%';
+        }
+        const lastMetric = systemMetrics[systemMetrics.length - 1];
+        if (!lastMetric || typeof lastMetric !== 'object') {
+          return '0%';
+        }
+        const cpu = lastMetric.cpu;
+        if (!cpu || typeof cpu !== 'object') {
+          return '0%';
+        }
+        const overall = cpu.overall;
+        if (typeof overall !== 'number') {
+          return '0%';
+        }
+        return `${overall.toFixed(1)}%`;
+      })(),
       icon: Server,
       color: 'text-orange-600 bg-orange-50',
       href: '/system'
@@ -202,19 +229,28 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">CPU Usage</span>
                   <span className="text-sm font-medium">
-                    {systemMetrics[systemMetrics.length - 1]?.cpu || 0}%
+                    {(() => {
+                      const val = systemMetrics[systemMetrics.length - 1]?.cpu?.overall;
+                      return typeof val === 'number' ? `${val.toFixed(1)}%` : '0%';
+                    })()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Memory Usage</span>
                   <span className="text-sm font-medium">
-                    {systemMetrics[systemMetrics.length - 1]?.memory || 0}%
+                    {(() => {
+                      const val = systemMetrics[systemMetrics.length - 1]?.memory?.usage;
+                      return typeof val === 'number' ? `${val.toFixed(1)}%` : '0%';
+                    })()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Disk Usage</span>
                   <span className="text-sm font-medium">
-                    {systemMetrics[systemMetrics.length - 1]?.disk || 0}%
+                    {(() => {
+                      const val = systemMetrics[systemMetrics.length - 1]?.disk?.usage;
+                      return typeof val === 'number' ? `${val.toFixed(1)}%` : '0%';
+                    })()}
                   </span>
                 </div>
               </>

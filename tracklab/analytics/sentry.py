@@ -133,7 +133,6 @@ class Sentry:
         except Exception:
             pass
 
-        # if the status is not explicitly set, we'll set it to "crashed" if the exception
         # was unhandled, or "errored" if it was handled
         status = status or ("crashed" if not handled else "errored")  # type: ignore
         self.mark_session(status=status)
@@ -163,7 +162,6 @@ class Sentry:
         # get the current client and scope
         session = self.scope._session
 
-        # if there's no session, start one
         if session is None:
             self.scope.start_session()
 

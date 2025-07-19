@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package tracklab_system;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "tracklab_base.proto";
+import "tracklab_telemetry.proto";
+
+option go_package = "core/pkg/service_go_proto";
+
+message GitSource {
+  GitInfo git_info = 1;
+  repeated string entrypoint = 2;
+  bool notebook = 3;
+  string build_context = 4;
+  string dockerfile = 5;
+}
+
+message ExtraItem {
+  string key = 1;
+  string value_json = 2;
+}
+
+message FileCounts {
+  int32 wandb_count = 1;
+  int32 media_count = 2;
+  int32 artifact_count = 3;
+  int32 other_count = 4;
+}
+
+message ImageSource {
+  string image = 1;
+}
+
+message InternalMessages {
+  repeated string warning = 1;
+}
+
+message JobInputPath {
+  repeated string path = 1;
+}
+
+message JobInputSource {
+  message RunConfigSource {}
+  message ConfigFileSource {
+    string path = 1;
+  }
+  oneof source {
+    RunConfigSource run_config = 1;
+    ConfigFileSource file = 2;
+  }
+}
+
+message JobSource {
+  string _version = 1;
+  string source_type = 2;
+  Source source = 3;
+  string runtime = 4;
+}
+
+message Operation {
+  // A short description for the operation.
+  //
+  // For top-level operations, it should be a present continuous verb phrase,
+  // such as "uploading artifact my-dataset".
+  //
+  // For subtasks, it should be as short as possible while making sense in
+  // the parent operation's context, such as "my_dataset.h5" for a file upload
+  // subtask that's part of an artifact upload operation.
+  //
+  // This does not start with a capital letter and does not end in punctuation.
+  string desc = 1;
+
+  // The number of seconds the operation has been running for.
+  double runtime_seconds = 2;
+
+  // A short description of the operation's progress.
+  //
+  // Examples:
+  //   - "3.1 MB / 100 MB"
+  //   - "4/5 files"
+  string progress = 3;
+
+  // A short message describing the operation's latest problem.
+  //
+  // This does not start with a capital letter and does not end in punctuation.
+  //
+  // Example: "retrying HTTP 500 error".
+  string error_status = 4;
+
+  // The top few most interesting subtasks for this operation.
+  repeated Operation subtasks = 5;
+}
+
+message Source {
+  GitSource git = 1;
+  ArtifactInfo artifact = 2;
+  ImageSource image = 3;
+}

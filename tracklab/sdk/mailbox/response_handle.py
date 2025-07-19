@@ -11,7 +11,6 @@ from tracklab.proto import tracklab_server_pb2 as spb
 
 from .mailbox_handle import HandleAbandonedError, MailboxHandle
 
-# Necessary to break an import loop.
 if TYPE_CHECKING:
     from tracklab.sdk.interface import interface
 

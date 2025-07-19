@@ -179,7 +179,6 @@ class WandbCallback:
 
         if trainer.best.exists():
             assert self.run is not None
-            self.run.log_artifact(
                 str(trainer.best),
                 type="model",
                 name=f"{self.run.name}_{trainer.args.task}.pt",
@@ -189,7 +188,6 @@ class WandbCallback:
     def on_model_save(self, trainer: BaseTrainer) -> None:
         """On model save we log the model as an artifact to Weights & Biases."""
         assert self.run is not None
-        self.run.log_artifact(
             str(trainer.last),
             type="model",
             name=f"{self.run.name}_{trainer.args.task}.pt",

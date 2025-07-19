@@ -73,18 +73,15 @@ elif platform.is_darwin():
             from .kqueue import KqueueObserver as Observer
             # Note: (tim): Commenting out these warnings since the _watchdog_fsevents
             # module is not available unless installed directly.
-            # warnings.warn("Failed to import fsevents. Fall back to kqueue")
         except:
             from .polling import PollingObserver as Observer
             # Note: (tim): Commenting out these warnings since the _watchdog_fsevents
             # module is not available unless installed directly.
-            # warnings.warn("Failed to import fsevents and kqueue. Fall back to polling.")
 
 elif platform.is_bsd():
     from .kqueue import KqueueObserver as Observer
 
 elif platform.is_windows():
-    # TODO: find a reliable way of checking Windows version and import
     # polling explicitly for Windows XP
     try:
         from .read_directory_changes import WindowsApiObserver as Observer

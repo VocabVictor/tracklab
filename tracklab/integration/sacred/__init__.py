@@ -79,9 +79,7 @@ class WandbObserver(RunObserver):
                 elif isinstance(r, dict):
                     tracklab.log(r)
                 elif isinstance(r, object):
-                    artifact = tracklab.Artifact(f"result_{i}.pkl", type="result")
                     artifact.add_file(r)
-                    self.run.log_artifact(artifact)
                 elif isinstance(r, numpy.ndarray):
                     tracklab.log({f"result_{i}": tracklab.Image(r)})
                 else:
@@ -93,9 +91,7 @@ class WandbObserver(RunObserver):
     def artifact_event(self, name, filename, metadata=None, content_type=None):
         if content_type is None:
             content_type = "file"
-        artifact = tracklab.Artifact(name, type=content_type)
         artifact.add_file(filename)
-        self.run.log_artifact(artifact)
 
     def resource_event(self, filename):
         """TODO: Maintain resources list."""

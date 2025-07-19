@@ -142,7 +142,6 @@ def load_class(dotted_path):
             klass = getattr(module, klass_name)
             return klass
             # Finally create and return an instance of the class
-            # return klass(*args, **kwargs)
         else:
             raise AttributeError('Module %s does not have class attribute %s' % (
                                  module_name, klass_name))

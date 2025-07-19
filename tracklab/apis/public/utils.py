@@ -1,14 +1,22 @@
 import re
 from enum import Enum
-from typing import Any, Dict, Iterable, Mapping, Optional, Set
+from typing import Any, Dict, Iterable, Mapping, Optional, Set, Union
 from urllib.parse import urlparse
 
-from tracklab_gql import gql
-from tracklab_graphql.language import ast, visitor
+from tracklab.sdk.internal.internal_api import gql
 
 from tracklab._iterutils import one
-from tracklab.sdk.artifacts._validators import is_artifact_registry_project
 from tracklab.sdk.internal.internal_api import Api as InternalApi
+
+
+def is_artifact_registry_project(project: str) -> bool:
+    """Check if a project name is an artifact registry project.
+    
+    In TrackLab, registry projects follow a specific naming pattern.
+    Since we removed the server dependency, we'll use a simple heuristic.
+    """
+    # Simple heuristic: registry projects contain "registry" in the name
+    return "registry" in project.lower()
 
 
 def parse_s3_url_to_s3_uri(url) -> str:
@@ -54,7 +62,7 @@ class PathType(Enum):
     ARTIFACT = "ARTIFACT"
 
 
-def parse_org_from_registry_path(path: str, path_type: PathType) -> str:
+def parse_org_from_registry_path(path: str, path_type: Union[PathType, str, None]) -> str:
     """Parse the org from a registry path.
 
     Essentially fetching the "entity" from the path but for Registries the entity is actually the org.
@@ -64,13 +72,35 @@ def parse_org_from_registry_path(path: str, path_type: PathType) -> str:
         artifact path like <entity>/<project>/<artifact> or <project>/<artifact> or <artifact>
         path_type (PathType): The type of path to parse.
     """
+    # Handle None or empty path_type
+    if not path_type or not path:
+        return ""
+    
+    # Convert string to PathType if needed
+    if isinstance(path_type, str):
+        path_type = path_type.upper()
+        if path_type not in ["PROJECT", "ARTIFACT"]:
+            return ""
+    else:
+        path_type = path_type.value if hasattr(path_type, 'value') else str(path_type)
+        
     parts = path.split("/")
-    expected_parts = 3 if path_type == PathType.ARTIFACT else 2
-
-    if len(parts) >= expected_parts:
+    
+    # For project paths, we expect exactly 2 parts
+    # For artifact paths, we expect exactly 3 parts
+    if path_type == "PROJECT":
+        if len(parts) != 2:
+            return ""
+        org, project = parts
+        if is_artifact_registry_project(project):
+            return org
+    elif path_type == "ARTIFACT":
+        if len(parts) != 3:
+            return ""
         org, project = parts[:2]
         if is_artifact_registry_project(project):
             return org
+    
     return ""
 
 
@@ -107,104 +137,3 @@ def fetch_org_from_settings_or_entity(
     return organization
 
 
-class _GQLCompatRewriter(visitor.Visitor):
-    """GraphQL AST visitor to rewrite queries/mutations to be compatible with older server versions."""
-
-    omit_variables: Set[str]
-    omit_fragments: Set[str]
-    omit_fields: Set[str]
-    rename_fields: Dict[str, str]
-
-    def __init__(
-        self,
-        omit_variables: Optional[Iterable[str]] = None,
-        omit_fragments: Optional[Iterable[str]] = None,
-        omit_fields: Optional[Iterable[str]] = None,
-        rename_fields: Optional[Mapping[str, str]] = None,
-    ):
-        self.omit_variables = set(omit_variables or ())
-        self.omit_fragments = set(omit_fragments or ())
-        self.omit_fields = set(omit_fields or ())
-        self.rename_fields = dict(rename_fields or {})
-
-    def enter_VariableDefinition(self, node: ast.VariableDefinition, *_, **__) -> Any:  # noqa: N802
-        if node.variable.name.value in self.omit_variables:
-            return visitor.REMOVE
-        # return node
-
-    def enter_ObjectField(self, node: ast.ObjectField, *_, **__) -> Any:  # noqa: N802
-        # For context, note that e.g.:
-        #
-        #   {description: $description
-        #   ...}
-        #
-        # Is parsed as:
-        #
-        #   ObjectValue(fields=[
-        #     ObjectField(name=Name(value='description'), value=Variable(name=Name(value='description'))),
-        #   ...])
-        if (
-            isinstance(var := node.value, ast.Variable)
-            and var.name.value in self.omit_variables
-        ):
-            return visitor.REMOVE
-
-    def enter_Argument(self, node: ast.Argument, *_, **__) -> Any:  # noqa: N802
-        if node.name.value in self.omit_variables:
-            return visitor.REMOVE
-
-    def enter_FragmentDefinition(self, node: ast.FragmentDefinition, *_, **__) -> Any:  # noqa: N802
-        if node.name.value in self.omit_fragments:
-            return visitor.REMOVE
-
-    def enter_FragmentSpread(self, node: ast.FragmentSpread, *_, **__) -> Any:  # noqa: N802
-        if node.name.value in self.omit_fragments:
-            return visitor.REMOVE
-
-    def enter_Field(self, node: ast.Field, *_, **__) -> Any:  # noqa: N802
-        if node.name.value in self.omit_fields:
-            return visitor.REMOVE
-        if new_name := self.rename_fields.get(node.name.value):
-            node.name.value = new_name
-            return node
-
-    def leave_Field(self, node: ast.Field, *_, **__) -> Any:  # noqa: N802
-        # If the field had a selection set, but now it's empty, remove the field entirely
-        if (node.selection_set is not None) and (not node.selection_set.selections):
-            return visitor.REMOVE
-
-
-def gql_compat(
-    request_string: str,
-    omit_variables: Optional[Iterable[str]] = None,
-    omit_fragments: Optional[Iterable[str]] = None,
-    omit_fields: Optional[Iterable[str]] = None,
-    rename_fields: Optional[Mapping[str, str]] = None,
-) -> ast.Document:
-    """Rewrite a GraphQL request string to ensure compatibility with older server versions.
-
-    Args:
-        request_string (str): The GraphQL request string to rewrite.
-        omit_variables (Iterable[str] | None): Names of variables to remove from the request string.
-        omit_fragments (Iterable[str] | None): Names of fragments to remove from the request string.
-        omit_fields (Iterable[str] | None): Names of fields to remove from the request string.
-        rename_fields (Mapping[str, str] | None):
-            A mapping of fields to rename in the request string, given as `{old_name -> new_name}`.
-
-    Returns:
-        str: Modified GraphQL request string with fragments on omitted types removed.
-    """
-    # Parse the request into a GraphQL AST
-    doc = gql(request_string)
-
-    if not (omit_variables or omit_fragments or omit_fields or rename_fields):
-        return doc
-
-    # Visit the AST with our visitor to filter out unwanted fragments
-    rewriter = _GQLCompatRewriter(
-        omit_variables=omit_variables,
-        omit_fragments=omit_fragments,
-        omit_fields=omit_fields,
-        rename_fields=rename_fields,
-    )
-    return visitor.visit(doc, rewriter)

@@ -111,26 +111,10 @@ class FSEventsEmitter(EventEmitter):
             def callback(pathnames, flags, emitter=self):
                 emitter.queue_events(emitter.timeout)
 
-            # for pathname, flag in zip(pathnames, flags):
-            # if emitter.watch.is_recursive: # and pathname != emitter.watch.path:
-            #    new_sub_snapshot = DirectorySnapshot(pathname, True)
-            #    old_sub_snapshot = self.snapshot.copy(pathname)
-            #    diff = new_sub_snapshot - old_sub_snapshot
-            #    self.snapshot += new_subsnapshot
             # else:
-            #    new_snapshot = DirectorySnapshot(emitter.watch.path, False)
-            #    diff = new_snapshot - emitter.snapshot
-            #    emitter.snapshot = new_snapshot
 
             # INFO: FSEvents reports directory notifications recursively
             # by default, so we do not need to add subdirectory paths.
-            #pathnames = set([self.watch.path])
-            # if self.watch.is_recursive:
-            #    for root, directory_names, _ in os.walk(self.watch.path):
-            #        for directory_name in directory_names:
-            #            full_path = absolute_path(
-            #                            os.path.join(root, directory_name))
-            #            pathnames.add(full_path)
             self.pathnames = [self.watch.path]
             _fsevents.add_watch(self,
                                 self.watch,
@@ -157,7 +141,6 @@ class FSEventsObserver(BaseObserver):
         # Fix for issue #26: Trace/BPT error when given a unicode path
         # string. https://github.com/gorakhargosh/watchdog/issues#issue/26
         if isinstance(path, str_class):
-            #path = unicode(path, 'utf-8')
             path = unicodedata.normalize('NFC', path)
             # We only encode the path in Python 2 for backwards compatibility.
             # On Python 3 we want the path to stay as unicode if possible for
@@ -165,7 +148,6 @@ class FSEventsObserver(BaseObserver):
             # bytes API instead of strings. The _watchdog_fsevent.so code for
             # Python 3 can handle both str and bytes paths, which is why we
             # do not HAVE to encode it with Python 3. The Python 2 code in
-            # _watchdog_fsevents.so was not changed for the sake of backwards
             # compatibility.
             if sys.version_info < (3,):
                 path = path.encode('utf-8')

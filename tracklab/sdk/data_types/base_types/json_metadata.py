@@ -1,6 +1,6 @@
 import codecs
 import os
-from typing import TYPE_CHECKING, Type, Union
+from typing import TYPE_CHECKING, Type, Union, Any
 
 from tracklab import util
 from tracklab.sdk.lib import runid
@@ -9,8 +9,7 @@ from .._private import MEDIA_TMP
 from .media import Media
 
 if TYPE_CHECKING:  # pragma: no cover
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ...tracklab_run import Run as LocalRun
 
 
@@ -40,7 +39,7 @@ class JSONMetadata(Media):
     def get_media_subdir(cls: Type["JSONMetadata"]) -> str:
         return os.path.join("media", "metadata", cls.type_name())
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         json_dict = super().to_json(run_or_artifact)
         json_dict["_type"] = self.type_name()
 

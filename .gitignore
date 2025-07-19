@@ -162,3 +162,18 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Rust build artifacts
+/system_monitor/target/
+/gpu_stats/target/
+/rust/**/target/
+*.rlib
+
+# Compiled binaries
+tracklab/bin/
+*.so
+*.dylib
+*.dll
+*.exe
+system_monitor
+!system_monitor/

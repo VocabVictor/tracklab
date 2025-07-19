@@ -16,7 +16,7 @@ from typing import (
 import tracklab
 
 if TYPE_CHECKING:
-    from tracklab_graphql.language.ast import Document
+    pass
 
 T = TypeVar("T")
 

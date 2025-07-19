@@ -16,8 +16,7 @@ from .wb_value import WBValue
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ...tracklab_run import Run as LocalRun
 
 
@@ -205,7 +204,7 @@ class Media(WBValue):
             self._path = new_path
             run._publish_file(media_path)
 
-    def to_json(self, run: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run: Any) -> dict:
         """Serialize the object into a JSON blob.
 
         Uses run or artifact to store additional data. If `run_or_artifact` is a
@@ -318,7 +317,7 @@ class Media(WBValue):
 
     @classmethod
     def from_json(
-        cls: Type["Media"], json_obj: dict, source_artifact: "Artifact"
+        cls: Type["Media"], json_obj: dict, source_artifact: Any
     ) -> "Media":
         """Likely will need to override for any more complicated media objects."""
         return cls(source_artifact.get_entry(json_obj["path"]).download())

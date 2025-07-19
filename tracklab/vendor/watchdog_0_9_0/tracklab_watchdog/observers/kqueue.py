@@ -87,8 +87,6 @@ import stat
 import os
 
 # See the notes for this module in the documentation above ^.
-#import select
-# if not has_attribute(select, 'kqueue') or sys.version_info < (2, 7, 0):
 if sys.version_info < (2, 7, 0):
     import select_backport as select
 else:
@@ -483,13 +481,7 @@ class KqueueEmitter(EventEmitter):
                 # and then quickly deleted before we could open
                 # a descriptor for it. Therefore, simply queue a sequence
                 # of created and deleted events for the path.
-                #path = absolute_path(path)
-                # if is_directory:
-                #    self.queue_event(DirCreatedEvent(path))
-                #    self.queue_event(DirDeletedEvent(path))
                 # else:
-                #    self.queue_event(FileCreatedEvent(path))
-                #    self.queue_event(FileDeletedEvent(path))
 
                 # TODO: We could simply ignore these files.
                 # Locked files cause the python process to die with
@@ -522,7 +514,6 @@ class KqueueEmitter(EventEmitter):
         # Handles all the book keeping for queued events.
         # We do not need to fire moved/deleted events for all subitems in
         # a directory tree here, because this function is called by kqueue
-        # for all those events anyway.
         EventEmitter.queue_event(self, event)
         if event.event_type == EVENT_TYPE_CREATED:
             self._register_kevent(event.src_path, event.is_directory)
@@ -618,7 +609,6 @@ class KqueueEmitter(EventEmitter):
         except KeyError:
             # Probably caught a temporary file/directory that was renamed
             # and deleted. Fires a sequence of created and deleted events
-            # for the path.
             if is_directory:
                 self.queue_event(DirCreatedEvent(src_path))
                 self.queue_event(DirDeletedEvent(src_path))
@@ -707,7 +697,6 @@ class KqueueEmitter(EventEmitter):
                                               new_snapshot)
             except OSError as e:
                 if e.errno == errno.EBADF:
-                    # logging.debug(e)
                     pass
                 else:
                     raise

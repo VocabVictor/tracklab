@@ -90,7 +90,6 @@ class QueryGenerator:
             else:
                 order = "-" + order
             orders.append(order)
-        # return ",".join(orders)
         return orders
 
     def order_to_keys(self, order):
@@ -147,13 +146,11 @@ class QueryGenerator:
 
     def mongo_to_filter(self, filter):
         """Returns dictionary with MongoDB filter converted to filter format."""
-        # Returns {"op": "OR", "filters": [{"op": "AND", "filters": []}]}
         if filter is None:
             return None  # this covers the case where self.filter_to_mongo returns None.
 
         group_op = None
         for key in filter.keys():
-            # if self.MONGO_TO_GROUP_OP[key]:
             if key in self.MONGO_TO_GROUP_OP:
                 group_op = key
                 break

@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package tracklab_run;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "tracklab_base.proto";
+import "tracklab_telemetry.proto";
+
+option go_package = "core/pkg/service_go_proto";
+
+message BranchPoint {
+  // The ID of the run to branch from.
+  string run = 1;
+
+  // The value of the metric to branch at.
+  double value = 2;
+
+  // The name of the metric to use to find a branch point.
+  string metric = 3;
+}
+
+message CheckVersionRequest {
+  string current_version = 1;
+  _RequestInfo _info = 200;
+}
+
+message CheckVersionResponse {
+  string upgrade_message = 1;
+  string yank_message = 2;
+  string delete_message = 3;
+}
+
+message PollExitRequest {
+  _RequestInfo _info = 200;
+}
+
+message PollExitResponse {
+  bool done = 1;
+  RunExitResult exit_result = 2;
+  FilePusherStats pusher_stats = 3;
+  FileCounts file_counts = 4;
+  OperationStats operation_stats = 5;
+}
+
+message RunFinishWithoutExitRequest {
+  _RequestInfo _info = 200;
+}
+
+message RunFinishWithoutExitResponse {}
+
+message RunStartRequest {
+  RunRecord run = 1;
+  _RequestInfo _info = 200;
+}
+
+message RunStartResponse {}
+
+message RunStatusRequest {
+  _RequestInfo _info = 200;
+}
+
+message RunStatusResponse {
+  int64 sync_items_total = 1;
+  int64 sync_items_pending = 2;
+  google.protobuf.Timestamp sync_time = 3;
+  // TODO(flowcontrol): can we give the user an indication of step position
+  // int64 sync_history_step = 3;
+  // google.protobuf.Timestamp sync_history_time = 4;
+}

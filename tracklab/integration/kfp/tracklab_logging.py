@@ -49,9 +49,7 @@ def wandb_log(  # noqa: C901
         tracklab.termlog(f"Setting config: {name} to {data}")
 
     def log_input_artifact(name, data, type, run=None):
-        artifact = tracklab.Artifact(name, type=type)
         artifact.add_file(data)
-        run.use_artifact(artifact)
         tracklab.termlog(f"Using artifact: {name}")
 
     def log_output_scalar(name, data, run=None):
@@ -62,18 +60,14 @@ def wandb_log(  # noqa: C901
             run.log({name: data})
 
     def log_output_artifact(name, data, type, run=None):
-        artifact = tracklab.Artifact(name, type=type)
         artifact.add_file(data)
-        run.log_artifact(artifact)
         tracklab.termlog(f"Logging artifact: {name}")
 
     def _log_component_file(func, run=None):
         name = func.__name__
         output_component_file = f"{name}.yml"
         components._python_op.func_to_component_file(func, output_component_file)
-        artifact = tracklab.Artifact(name, type="kubeflow_component_file")
         artifact.add_file(output_component_file)
-        run.log_artifact(artifact)
         tracklab.termlog(f"Logging component file: {output_component_file}")
 
     # Add `mlpipeline_ui_metadata_path` to signature to show W&B run in "ML Visualizations tab"

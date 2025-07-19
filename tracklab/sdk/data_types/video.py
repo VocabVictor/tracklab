@@ -18,8 +18,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     import numpy as np
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
 
@@ -154,7 +153,6 @@ class Video(BatchableMedia):
                     "tracklab.Video accepts {} formats".format(", ".join(Video.EXTS))
                 )
             self._set_file(data_or_path, is_tmp=False)
-            # ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 data_or_path
         else:
             if hasattr(data_or_path, "numpy"):  # TF data eager tensors
                 self.data = data_or_path.numpy()
@@ -176,7 +174,6 @@ class Video(BatchableMedia):
 
         <!-- lazydoc-ignore: internal -->
         """
-        # import ImageSequenceClip from the appropriate MoviePy module
         mpy = util.get_module(
             "moviepy.video.io.ImageSequenceClip",
             required='tracklab.Video requires moviepy when passing raw data. Install with "pip install wandb[media]"',
@@ -207,7 +204,7 @@ class Video(BatchableMedia):
         """
         return os.path.join("media", "videos")
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         """Returns the JSON representation expected by the backend.
 
         <!-- lazydoc-ignore: internal -->

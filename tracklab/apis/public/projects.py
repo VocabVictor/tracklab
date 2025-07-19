@@ -16,7 +16,7 @@ for project in projects:
     print(f"URL: {project.url}")
 
     # Get artifact types
-    for artifact_type in project.artifacts_types():
+    # for artifact_type in project.artifacts_types(): # Artifact/Automation functionality removed
         print(f"Artifact Type: {artifact_type.name}")
 
     # Get sweeps
@@ -34,7 +34,7 @@ Note:
 from contextlib import suppress
 
 from requests import HTTPError
-from tracklab_gql import gql
+from tracklab.sdk.internal.internal_api import gql
 
 from tracklab.apis import public
 from tracklab.apis.attrs import Attrs
@@ -236,9 +236,7 @@ class Project(Attrs):
         return "<Project {}>".format("/".join(self.path))
 
     @normalize_exceptions
-    def artifacts_types(self, per_page=50):
-        """Returns all artifact types associated with this project."""
-        return public.ArtifactTypes(self.client, self.entity, self.name)
+#         """Returns all artifact types associated with this project."""
 
     @normalize_exceptions
     def sweeps(self):

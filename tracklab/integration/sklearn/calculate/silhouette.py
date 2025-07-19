@@ -15,8 +15,6 @@ def silhouette(clusterer, X, cluster_labels, labels, metric, kmeans):  # noqa: N
     # Run clusterer for n_clusters in range(len(cluster_ranges), get cluster labels
     # TODO - keep/delete once we decide if we should train clusterers
     # or ask for trained models
-    # clusterer.set_params(n_clusters=n_clusters, random_state=42)
-    # cluster_labels = clusterer.fit_predict(X)
     cluster_labels = np.asarray(cluster_labels)
     labels = np.asarray(labels)
 

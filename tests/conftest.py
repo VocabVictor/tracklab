@@ -38,7 +38,6 @@ from tracklab.sdk.lib.paths import StrPath
 # Global pytest configuration
 # --------------------------------
 
-
 @pytest.fixture
 def disable_memray(pytestconfig):
     """Disables the memray plugin for the duration of the test."""
@@ -51,7 +50,6 @@ def disable_memray(pytestconfig):
         yield
         pytestconfig.pluginmanager.register(memray_plugin, "memray_manager")
 
-
 @pytest.fixture(autouse=True)
 def setup_wandb_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
     """Configures wandb env variables to suitable defaults for tests."""
@@ -59,11 +57,9 @@ def setup_wandb_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
     # of triggering flow control logic.
     monkeypatch.setenv("TRACKLAB_X_NETWORK_BUFFER", "1000")
 
-
 # --------------------------------
 # Misc Fixtures utilities
 # --------------------------------
-
 
 @pytest.fixture(scope="session")
 def assets_path() -> Generator[Callable[[StrPath], Path], None, None]:
@@ -73,7 +69,6 @@ def assets_path() -> Generator[Callable[[StrPath], Path], None, None]:
         return assets_dir / path
 
     yield assets_path_fn
-
 
 @pytest.fixture
 def copy_asset(
@@ -87,11 +82,9 @@ def copy_asset(
 
     yield copy_asset_fn
 
-
 # --------------------------------
 # Misc Fixtures
 # --------------------------------
-
 
 @pytest.fixture()
 def wandb_caplog(
@@ -111,13 +104,11 @@ def wandb_caplog(
     finally:
         logger.removeHandler(caplog.handler)
 
-
 @pytest.fixture(autouse=True)
 def reset_logger():
     """Resets the `tracklab.errors.term` module before each test."""
     tracklab.termsetup(tracklab.Settings(silent=False), None)
     term._dynamic_blocks = []
-
 
 class MockWandbTerm:
     """Helper to test tracklab.term*() calls.
@@ -160,7 +151,6 @@ class MockWandbTerm:
             else:
                 yield call.args[0]
 
-
 @pytest.fixture()
 def mock_wandb_log() -> Generator[MockWandbTerm, None, None]:
     """Mocks the tracklab.term*() methods for a test.
@@ -185,7 +175,6 @@ def mock_wandb_log() -> Generator[MockWandbTerm, None, None]:
             patched["termwarn"],
             patched["termerror"],
         )
-
 
 class EmulatedTerminal:
     """The return value of the emulated_terminal fixture."""
@@ -220,7 +209,6 @@ class EmulatedTerminal:
         n_empty_at_end = sum(1 for _ in takewhile(lambda line: not line, lines[::-1]))
         return lines[n_empty_at_start:-n_empty_at_end]
 
-
 @pytest.fixture()
 def emulated_terminal(monkeypatch, capsys) -> EmulatedTerminal:
     """Emulates a terminal for the duration of a test.
@@ -249,7 +237,6 @@ def emulated_terminal(monkeypatch, capsys) -> EmulatedTerminal:
     terminal.reset_capsys()
     return terminal
 
-
 @pytest.fixture(scope="function", autouse=True)
 def filesystem_isolate(tmp_path, monkeypatch):
     # isolated_filesystem() changes the current working directory, which is
@@ -269,7 +256,6 @@ def filesystem_isolate(tmp_path, monkeypatch):
     with CliRunner().isolated_filesystem(temp_dir=tmp_path):
         yield
 
-
 # todo: this fixture should probably be autouse=True
 @pytest.fixture(scope="function", autouse=False)
 def local_settings(filesystem_isolate):
@@ -286,7 +272,6 @@ def local_settings(filesystem_isolate):
     ):
         yield
 
-
 @pytest.fixture(scope="function", autouse=True)
 def local_netrc(filesystem_isolate):
     """Never use our real credentials, put them in their own isolated dir."""
@@ -297,17 +282,14 @@ def local_netrc(filesystem_isolate):
     ):
         yield
 
-
 @pytest.fixture
 def dummy_api_key() -> str:
     return "1824812581259009ca9981580f8f8a9012409eee"
-
 
 @pytest.fixture
 def patch_apikey(mocker: MockerFixture, dummy_api_key: str):
     # TrackLab: No API key needed for local-only service
     yield
-
 
 @pytest.fixture
 def patch_prompt(monkeypatch):
@@ -316,11 +298,9 @@ def patch_prompt(monkeypatch):
     )
     # TrackLab: No API key prompting needed for local-only service
 
-
 @pytest.fixture
 def runner(patch_apikey, patch_prompt):
     return CliRunner()
-
 
 @pytest.fixture
 def git_repo(runner):
@@ -334,14 +314,12 @@ def git_repo(runner):
         repo.index.commit("Initial commit")
         yield GitRepo(lazy=False)
 
-
 @pytest.fixture(scope="function", autouse=True)
 def unset_global_objects():
     from tracklab.sdk.lib.module import unset_globals
 
     yield
     unset_globals()
-
 
 @pytest.fixture(scope="session", autouse=True)
 def env_teardown():
@@ -353,32 +331,26 @@ def env_teardown():
         # subprocess.run(["wandb", "server", "stop"])
         pass
 
-
 @pytest.fixture(scope="function", autouse=True)
 def clean_up():
     yield
     tracklab.teardown()
 
-
 @pytest.fixture
 def api() -> tracklab.PublicApi:
     return Api()
-
 
 # --------------------------------
 # Fixtures for user test point
 # --------------------------------
 
-
 @pytest.fixture()
 def record_q() -> Queue:
     return Queue()
 
-
 @pytest.fixture()
 def mocked_interface(record_q: Queue) -> InterfaceQueue:
     return InterfaceQueue(record_q=record_q)
-
 
 @pytest.fixture
 def mocked_backend(mocked_interface: InterfaceQueue) -> Generator[object, None, None]:
@@ -387,7 +359,6 @@ def mocked_backend(mocked_interface: InterfaceQueue) -> Generator[object, None, 
             self.interface = mocked_interface
 
     yield MockedBackend()
-
 
 @pytest.fixture(scope="function")
 def test_settings():
@@ -409,7 +380,6 @@ def test_settings():
         return settings
 
     yield update_test_settings
-
 
 @pytest.fixture(scope="function")
 def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
@@ -443,8 +413,8 @@ def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
             log=run.log,
             summary=run.summary,
             save=run.save,
-            use_artifact=run.use_artifact,
-            log_artifact=run.log_artifact,
+    # use_artifact=run.use_artifact, # Artifact test removed
+    # log_artifact=run.log_artifact, # Artifact test removed
             define_metric=run.define_metric,
             alert=run.alert,
             watch=run.watch,
@@ -456,13 +426,11 @@ def mock_run(test_settings, mocked_backend) -> Generator[Callable, None, None]:
     yield mock_run_fn
     module.unset_globals()
 
-
 @pytest.fixture
 def example_file(tmp_path: Path) -> Path:
     new_file = tmp_path / "test.txt"
     new_file.write_text("hello")
     return new_file
-
 
 @pytest.fixture
 def example_files(tmp_path: Path) -> Path:

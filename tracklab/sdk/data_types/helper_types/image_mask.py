@@ -1,6 +1,6 @@
 import numbers
 import os
-from typing import TYPE_CHECKING, Optional, Type, Union
+from typing import TYPE_CHECKING, Optional, Type, Union, Any
 
 import tracklab
 from tracklab import util
@@ -10,8 +10,7 @@ from .._private import MEDIA_TMP
 from ..base_types.media import Media
 
 if TYPE_CHECKING:  # pragma: no cover
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ...tracklab_run import Run as LocalRun
 
 
@@ -201,14 +200,14 @@ class ImageMask(Media):
 
     @classmethod
     def from_json(
-        cls: Type["ImageMask"], json_obj: dict, source_artifact: "Artifact"
+        cls: Type["ImageMask"], json_obj: dict, source_artifact: Any
     ) -> "ImageMask":
         return cls(
             {"path": source_artifact.get_entry(json_obj["path"]).download()},
             key="",
         )
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         from tracklab.sdk.run import Run
 
         json_dict = super().to_json(run_or_artifact)

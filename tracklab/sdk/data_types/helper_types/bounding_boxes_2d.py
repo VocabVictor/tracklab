@@ -1,5 +1,5 @@
 import numbers
-from typing import TYPE_CHECKING, Optional, Type, Union
+from typing import TYPE_CHECKING, Optional, Type, Union, Any
 
 import tracklab
 from tracklab import util
@@ -8,8 +8,7 @@ from tracklab.util import has_num
 from ..base_types.json_metadata import JSONMetadata
 
 if TYPE_CHECKING:  # pragma: no cover
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ...tracklab_run import Run as LocalRun
 
 
@@ -309,7 +308,7 @@ class BoundingBoxes2D(JSONMetadata):
                 raise TypeError("A box's caption must be a string")
         return True
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         from tracklab.sdk.run import Run
 
         if isinstance(run_or_artifact, Run):
@@ -324,6 +323,6 @@ class BoundingBoxes2D(JSONMetadata):
 
     @classmethod
     def from_json(
-        cls: Type["BoundingBoxes2D"], json_obj: dict, source_artifact: "Artifact"
+        cls: Type["BoundingBoxes2D"], json_obj: dict, source_artifact: Any
     ) -> "BoundingBoxes2D":
         return cls({"box_data": json_obj}, "")

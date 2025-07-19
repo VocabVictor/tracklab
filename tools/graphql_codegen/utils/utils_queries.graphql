@@ -1,8 +1,0 @@
-query ServerFeaturesQuery {
-  serverInfo {
-    features {
-      name
-      isEnabled
-    }
-  }
-}

@@ -113,7 +113,6 @@ class CohereRequestResponseResolver:
         """
         try:
             # Each of the different endpoints map to one specific response type
-            # We want to 'type check' the response without directly importing the packages type
             # It may make more sense to pass the invoked symbol from the AutologAPI instead
             response_type = str(type(response)).split("'")[1].split(".")[-1]
 

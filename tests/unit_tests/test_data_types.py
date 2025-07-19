@@ -17,11 +17,9 @@ from tracklab import data_types
 from tracklab.sdk.data_types import _dtypes
 from tracklab.sdk.data_types.base_types.media import _numpy_arrays_to_lists
 
-
 def subdict(d, expected_dict):
     """Return a new dict with only the items from `d` whose keys occur in `expected_dict`."""
     return {k: v for k, v in d.items() if k in expected_dict}
-
 
 def matplotlib_multiple_axes_figures(total_plot_count=3, data=(1, 2, 3)):
     """Create a figure containing up to `total_plot_count` axes.
@@ -42,7 +40,6 @@ def matplotlib_multiple_axes_figures(total_plot_count=3, data=(1, 2, 3)):
             yield fig
             plt.close()
 
-
 def matplotlib_with_image():
     """Create a matplotlib figure with an image."""
     fig, ax = plt.subplots(3)
@@ -51,7 +48,6 @@ def matplotlib_with_image():
     ax[2].plot([1, 2, 3])
     return fig
 
-
 def matplotlib_without_image():
     """Create a matplotlib figure without an image."""
     fig, ax = plt.subplots(2)
@@ -59,11 +55,9 @@ def matplotlib_without_image():
     ax[1].plot([1, 2, 3])
     return fig
 
-
 ###############################################################################
 # Test tracklab.Histogram
 ###############################################################################
-
 
 def test_raw_data():
     data = np.random.randint(255, size=(1000))
@@ -71,12 +65,10 @@ def test_raw_data():
     wbhist = tracklab.Histogram(data)
     assert len(wbhist.histogram) == 64
 
-
 def test_np_histogram():
     data = np.random.randint(255, size=(1000))
     wbhist = tracklab.Histogram(np_histogram=np.histogram(data))
     assert len(wbhist.histogram) == 10
-
 
 def test_manual_histogram():
     wbhist = tracklab.Histogram(
@@ -87,7 +79,6 @@ def test_manual_histogram():
     )
     assert len(wbhist.histogram) == 3
 
-
 def test_invalid_histogram():
     with pytest.raises(ValueError):
         tracklab.Histogram(
@@ -97,16 +88,13 @@ def test_invalid_histogram():
             )
         )
 
-
 ###############################################################################
 # Test tracklab.Image
 ###############################################################################
 
-
 @pytest.fixture
 def image():
     yield np.zeros((28, 28))
-
 
 @pytest.fixture
 def full_box():
@@ -121,7 +109,6 @@ def full_box():
         "scores": {"acc": 0.3},
     }
 
-
 @pytest.fixture
 def dissoc():
     # Helper function return a new dictionary with the key removed
@@ -131,7 +118,6 @@ def dissoc():
         return new_d
 
     yield dissoc_fn
-
 
 @pytest.fixture
 def standard_mask():
@@ -152,14 +138,12 @@ def standard_mask():
         },
     }
 
-
 def test_captions(
     image,
 ):
     wbone = tracklab.Image(image, caption="Cool")
     wbtwo = tracklab.Image(image, caption="Nice")
     assert tracklab.Image.all_captions([wbone, wbtwo]) == ["Cool", "Nice"]
-
 
 def test_bind_image(
     mock_run,
@@ -169,12 +153,10 @@ def test_bind_image(
     wb_image.bind_to_run(mock_run(), "stuff", 10)
     assert wb_image.is_bound()
 
-
 def test_image_accepts_other_images():
     image_a = tracklab.Image(np.random.random((300, 300, 3)))
     image_b = tracklab.Image(image_a)
     assert image_a == image_b
-
 
 def test_image_accepts_bounding_boxes(
     mock_run,
@@ -194,7 +176,6 @@ def test_image_accepts_bounding_boxes(
     img_json = img.to_json(run)
     path = img_json["boxes"]["predictions"]["path"]
     assert os.path.exists(os.path.join(run.dir, path))
-
 
 def test_image_accepts_bounding_boxes_optional_args(
     mock_run,
@@ -220,7 +201,6 @@ def test_image_accepts_bounding_boxes_optional_args(
     path = img_json["boxes"]["predictions"]["path"]
     assert os.path.exists(os.path.join(run.dir, path))
 
-
 def test_image_accepts_masks(
     mock_run,
     image,
@@ -237,7 +217,6 @@ def test_image_accepts_masks(
     img_json = img.to_json(run)
     path = img_json["masks"]["overlay"]["path"]
     assert os.path.exists(os.path.join(run.dir, path))
-
 
 def test_image_accepts_masks_without_class_labels(
     mock_run,
@@ -257,7 +236,6 @@ def test_image_accepts_masks_without_class_labels(
     path = img_json["masks"]["overlay"]["path"]
     assert os.path.exists(os.path.join(run.dir, path))
 
-
 def test_image_seq_to_json(
     mock_run,
     image,
@@ -267,7 +245,6 @@ def test_image_seq_to_json(
     wb_image.bind_to_run(run, "test", 0, 0)
     _ = tracklab.Image.seq_to_json([wb_image], run, "test", 0)
     assert os.path.exists(os.path.join(run.dir, "media", "images", "test_0_0.png"))
-
 
 def test_max_images(mock_run):
     run = mock_run()
@@ -290,12 +267,10 @@ def test_max_images(mock_run):
     assert subdict(meta, expected) == expected
     assert os.path.exists(path)
 
-
 @pytest.fixture
 def mock_reference_get_responses():
     with responses.RequestsMock() as rsps:
         yield rsps
-
 
 @pytest.mark.skipif(
     platform.system() == "Windows", reason="Windows doesn't support symlinks"
@@ -308,7 +283,7 @@ def test_image_refs(mock_reference_get_responses):
         headers={"etag": "testEtag", "content-length": "200"},
     )
     image_obj = tracklab.Image("http://nonexistent/puppy.jpg")
-    art = tracklab.Artifact("image_ref_test", "images")
+    # art = tracklab.Artifact("image_ref_test", "images") # Artifact test removed
     art.add(image_obj, "image_ref")
     image_expected = {
         "path": str(Path("media/images/75c13e5a637fb8052da9/puppy.jpg")),
@@ -334,24 +309,20 @@ def test_image_refs(mock_reference_get_responses):
         == manifest_expected
     )
 
-
 def test_guess_mode():
     image = np.random.randint(255, size=(28, 28, 3))
     wbimg = tracklab.Image(image)
     assert wbimg.image.mode == "RGB"
-
 
 def test_pil():
     pil = Image.new("L", (28, 28))
     img = tracklab.Image(pil)
     assert list(img.image.getdata()) == list(pil.getdata())
 
-
 def test_matplotlib_image():
     plt.plot([1, 2, 2, 4])
     img = tracklab.Image(plt)
     assert img.image.width == 640
-
 
 def test_matplotlib_image_with_multiple_axes():
     """Test multiple axis pyplot or figure references.
@@ -366,7 +337,6 @@ def test_matplotlib_image_with_multiple_axes():
     for _ in matplotlib_multiple_axes_figures():
         tracklab.Image(plt)  # this should not error.
 
-
 def test_image_from_matplotlib_with_image():
     """Ensure that tracklab.Image constructor supports a pyplot when an image is passed."""
     # try the figure version
@@ -378,7 +348,6 @@ def test_image_from_matplotlib_with_image():
     fig = matplotlib_with_image()
     tracklab.Image(plt)  # this should not error.
     plt.close()
-
 
 @pytest.mark.skipif(
     platform.system() != "Windows", reason="Failure case is only happening on Windows"
@@ -393,7 +362,6 @@ def test_fail_to_make_file(
     ):
         wb_image = tracklab.Image(image)
         wb_image.bind_to_run(mock_run(), "my key: an identifier", 0)
-
 
 def test_image_bounding_boxes_with_pytorch_tensors():
     image = np.random.randint(255, size=(4, 4, 3))
@@ -411,13 +379,11 @@ def test_image_bounding_boxes_with_pytorch_tensors():
 
     tracklab.Image(image, boxes={"predictions": {"box_data": boxes}})
 
-
 def test_image_masks_with_pytorch_tensors():
     image = np.random.randint(255, size=(4, 4, 3))
     mask = torch.from_numpy(np.array([[1, 0], [0, 1]]))
 
     tracklab.Image(image, masks={"predictions": {"mask_data": mask}})
-
 
 def test_image_normalize_neg1_to_1():
     # Sometimes images are represented with values in range [-1, 1].
@@ -427,7 +393,6 @@ def test_image_normalize_neg1_to_1():
 
     assert transformed_data == [[102, 204]]
 
-
 def test_image_normalize_0_to_1():
     data = np.array([[0.2, 0.3]])
 
@@ -435,14 +400,12 @@ def test_image_normalize_0_to_1():
 
     assert transformed_data == [[51, 76]]
 
-
 def test_image_normalize_clips_bad_range():
     data = np.array([[-9, 0.1, 100, 254.5, 270]])
 
     transformed_data = tracklab.Image(data).to_data_array()
 
     assert transformed_data == [[0, 0, 100, 254, 255]]
-
 
 @pytest.mark.parametrize(
     "scale",
@@ -457,11 +420,9 @@ def test_image_normalization_numpy_pytorch_equal(scale):
 
     assert np.all(np.array(wb_image.image) == np.array(wb_image_torch.image))
 
-
 ################################################################################
 # Test tracklab.Audio
 ################################################################################
-
 
 def test_audio_sample_rates():
     audio1 = np.random.uniform(-1, 1, 44100)
@@ -473,14 +434,12 @@ def test_audio_sample_rates():
     with pytest.raises(ValueError):
         tracklab.Audio(audio1)
 
-
 def test_audio_durations():
     audio1 = np.random.uniform(-1, 1, 44100)
     audio2 = np.random.uniform(-1, 1, 88200)
     wbaudio1 = tracklab.Audio(audio1, sample_rate=44100)
     wbaudio2 = tracklab.Audio(audio2, sample_rate=44100)
     assert tracklab.Audio.durations([wbaudio1, wbaudio2]) == [1.0, 2.0]
-
 
 def test_audio_captions():
     audio = np.random.uniform(-1, 1, 44100)
@@ -499,7 +458,6 @@ def test_audio_captions():
     wbaudio5 = tracklab.Audio(audio, sample_rate=sample_rate)
     wbaudio6 = tracklab.Audio(audio, sample_rate=sample_rate, caption=caption2)
     assert tracklab.Audio.captions([wbaudio5, wbaudio6]) == ["", caption2]
-
 
 def test_audio_to_json(mock_run):
     run = mock_run()
@@ -523,12 +481,11 @@ def test_audio_to_json(mock_run):
     }
     assert subdict(meta["audio"][0], audio_expected) == audio_expected
 
-
 def test_audio_refs():
     audio_obj = tracklab.Audio(
         "https://wandb-artifacts-refs-public-test.s3-us-west-2.amazonaws.com/StarWars3.wav"
     )
-    art = tracklab.Artifact("audio_ref_test", "dataset")
+    # art = tracklab.Artifact("audio_ref_test", "dataset") # Artifact test removed
     art.add(audio_obj, "audio_ref")
 
     audio_expected = {
@@ -536,11 +493,9 @@ def test_audio_refs():
     }
     assert subdict(audio_obj.to_json(art), audio_expected) == audio_expected
 
-
 ################################################################################
 # Test tracklab.Plotly
 ################################################################################
-
 
 def test_matplotlib_plotly_with_multiple_axes():
     """Test creating a tracklab.Plotly object from a matplotlib figure with multiple axes.
@@ -554,7 +509,6 @@ def test_matplotlib_plotly_with_multiple_axes():
 
     for _ in matplotlib_multiple_axes_figures():
         tracklab.Plotly(plt)  # this should not error.
-
 
 def test_plotly_from_matplotlib_with_image():
     """Test erroring when a pyplot with image is passed to tracklab.Plotly."""
@@ -570,7 +524,6 @@ def test_plotly_from_matplotlib_with_image():
         tracklab.Plotly(plt)
     plt.close()
 
-
 def test_make_plot_media_from_matplotlib_without_image():
     """Test creating a plotly object from a matplotlib figure without an image.
 
@@ -584,7 +537,6 @@ def test_make_plot_media_from_matplotlib_without_image():
     fig = matplotlib_without_image()
     assert type(tracklab.Plotly.make_plot_media(plt)) is tracklab.Plotly
     plt.close()
-
 
 def test_make_plot_media_from_matplotlib_with_image():
     """Test getting an image out of a matplotlib figure.
@@ -600,11 +552,9 @@ def test_make_plot_media_from_matplotlib_with_image():
     assert type(tracklab.Plotly.make_plot_media(plt)) is tracklab.Image
     plt.close()
 
-
 ################################################################################
 # Test tracklab.Bokeh
 ################################################################################
-
 
 @pytest.fixture
 def bokeh_plot():
@@ -624,7 +574,6 @@ def bokeh_plot():
 
     yield bokeh_plot_fn
 
-
 def test_create_bokeh_plot(
     mock_run,
     bokeh_plot,
@@ -634,11 +583,9 @@ def test_create_bokeh_plot(
     bp = tracklab.data_types.Bokeh(bp)
     bp.bind_to_run(mock_run(), "bokeh", 0)
 
-
 ################################################################################
 # Test tracklab.Video
 ################################################################################
-
 
 def test_video_numpy_gif(mock_run):
     run = mock_run()
@@ -647,14 +594,12 @@ def test_video_numpy_gif(mock_run):
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".gif")
 
-
 def test_video_numpy_mp4(mock_run):
     run = mock_run()
     video = np.random.randint(255, size=(10, 3, 28, 28))
     vid = tracklab.Video(video, format="mp4")
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".mp4")
-
 
 def test_video_numpy_multi(mock_run):
     run = mock_run()
@@ -663,12 +608,10 @@ def test_video_numpy_multi(mock_run):
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".gif")
 
-
 def test_video_numpy_invalid():
     video = np.random.random(size=(3, 28, 28))
     with pytest.raises(ValueError):
         tracklab.Video(video)
-
 
 def test_video_path(mock_run):
     run = mock_run()
@@ -678,18 +621,15 @@ def test_video_path(mock_run):
     vid.bind_to_run(run, "videos", 0)
     assert vid.to_json(run)["path"].endswith(".mp4")
 
-
 def test_video_path_invalid():
     with open("video.avi", "w") as f:
         f.write("00000")
     with pytest.raises(ValueError):
         tracklab.Video("video.avi")
 
-
 ################################################################################
 # Test tracklab.Molecule
 ################################################################################
-
 
 def test_molecule(mock_run):
     run = mock_run()
@@ -701,7 +641,6 @@ def test_molecule(mock_run):
 
     assert os.path.exists(mol._path)
 
-
 def test_molecule_file(mock_run):
     run = mock_run()
     with open("test.pdb", "w") as f:
@@ -712,7 +651,6 @@ def test_molecule_file(mock_run):
 
     assert os.path.exists(mol._path)
 
-
 def test_molecule_from_smiles(mock_run):
     """Ensure that tracklab.Molecule.from_smiles supports valid SMILES molecule string representations."""
     run = mock_run()
@@ -722,12 +660,10 @@ def test_molecule_from_smiles(mock_run):
 
     assert os.path.exists(mol._path)
 
-
 def test_molecule_from_invalid_smiles():
     """Ensure that tracklab.Molecule.from_smiles errs if passed an invalid SMILES string."""
     with pytest.raises(ValueError):
         tracklab.Molecule.from_smiles("TEST")
-
 
 def test_molecule_from_rdkit_mol_object(mock_run):
     """Ensure that tracklab.Molecule.from_rdkit supports rdkit.Chem.rdchem.Mol objects."""
@@ -737,7 +673,6 @@ def test_molecule_from_rdkit_mol_object(mock_run):
     tracklab.Molecule.seq_to_json([mol], run, "rad", "summary")
 
     assert os.path.exists(mol._path)
-
 
 def test_molecule_from_rdkit_mol_file(mock_run):
     """Ensure that tracklab.Molecule.from_rdkit supports .mol files."""
@@ -751,18 +686,15 @@ def test_molecule_from_rdkit_mol_file(mock_run):
 
     assert os.path.exists(mol._path)
 
-
 def test_molecule_from_rdkit_invalid_input():
     """Ensure that tracklab.Molecule.from_rdkit errs on invalid input."""
     mol_file_name = "test"
     with pytest.raises(ValueError):
         tracklab.Molecule.from_rdkit(mol_file_name)
 
-
 ################################################################################
 # Test tracklab.Html
 ################################################################################
-
 
 def test_html_str(mock_run):
     run = mock_run()
@@ -772,7 +704,6 @@ def test_html_str(mock_run):
     tracklab.Html.seq_to_json([html], run, "rad", "summary")
     assert os.path.exists(html._path)
     assert html == tracklab.Html(html_str)
-
 
 def test_html_styles():
     pre = (
@@ -792,7 +723,6 @@ def test_html_styles():
     html = tracklab.Html("<h1>Hello</h1>", inject=False)
     assert html.html == "<h1>Hello</h1>"
 
-
 def test_html_file(mock_run):
     run = mock_run()
     with open("test.html", "w") as f:
@@ -802,7 +732,6 @@ def test_html_file(mock_run):
     tracklab.Html.seq_to_json([html, html], run, "rad", "summary")
 
     assert os.path.exists(html._path)
-
 
 def test_html_file_path(mock_run):
     run = mock_run()
@@ -814,11 +743,9 @@ def test_html_file_path(mock_run):
 
     assert os.path.exists(html._path)
 
-
 ################################################################################
 # Test tracklab.Table
 ################################################################################
-
 
 @pytest.fixture
 def table_data():
@@ -827,7 +754,6 @@ def table_data():
         ["b", 2, False],
         ["c", 3, True],
     ]
-
 
 def test_table_default():
     table = tracklab.Table()
@@ -850,7 +776,6 @@ def test_table_default():
             "Expected",
         ],
     }
-
 
 @pytest.mark.parametrize(
     ["a", "b"],
@@ -925,7 +850,6 @@ def test_table_eq_debug_mismatch(a, b):
         a._eq_debug(b, True)
     assert a != b
 
-
 def test_table_eq_debug_match():
     a = tracklab.Table(
         data=[
@@ -942,7 +866,6 @@ def test_table_eq_debug_match():
     a._eq_debug(b, True)
     assert a == b
 
-
 def test_table_custom():
     table = tracklab.Table(["Foo", "Bar"])
     table.add_data("So", "Cool")
@@ -954,7 +877,6 @@ def test_table_custom():
     df = pd.DataFrame(columns=["Foo", "Bar"], data=[["So", "Cool"], ["&", "Rad"]])
     table_df = tracklab.Table(dataframe=df)
     assert table._to_table_json() == table_df._to_table_json()
-
 
 def test_table_init():
     table = tracklab.Table(
@@ -973,7 +895,6 @@ def test_table_init():
         ],
     }
 
-
 def test_table_from_list(table_data):
     table = tracklab.Table(data=table_data)
     assert table.data == table_data
@@ -990,7 +911,6 @@ def test_table_from_list(table_data):
     table = tracklab.Table(rows=table_data)
     assert table.data == table_data
 
-
 def test_table_iterator(table_data):
     table = tracklab.Table(data=table_data)
     for ndx, row in table.iterrows():
@@ -998,7 +918,6 @@ def test_table_iterator(table_data):
 
     table = tracklab.Table(data=[])
     assert len([(ndx, row) for ndx, row in table.iterrows()]) == 0
-
 
 def test_table_from_numpy(table_data):
     np_data = np.array(table_data)
@@ -1013,7 +932,6 @@ def test_table_from_numpy(table_data):
         # raises when user uses list in "dataframe"
         table = tracklab.Table(dataframe=np_data)
 
-
 def test_table_from_pandas(table_data):
     pd_data = pd.DataFrame(table_data)
     table = tracklab.Table(data=pd_data)
@@ -1026,7 +944,6 @@ def test_table_from_pandas(table_data):
     # legacy
     table = tracklab.Table(dataframe=pd_data)
     assert table.data == table_data
-
 
 def test_table_column_style():
     # Test Base Cases
@@ -1098,7 +1015,6 @@ def test_table_column_style():
     table3.add_column("table1_fk", table1.get_column("strings"))
     assert table3.get_column("table1_fk")[0]._table == table1
 
-
 def test_ndarrays_in_tables():
     rows = 10
     d = 128
@@ -1146,11 +1062,9 @@ def test_ndarrays_in_tables():
         _dtypes.NDArrayType,
     )
 
-
 ################################################################################
 # Test tracklab.Object3D
 ################################################################################
-
 
 @pytest.fixture
 def point_cloud_1():
@@ -1163,7 +1077,6 @@ def point_cloud_1():
         ]
     )
 
-
 @pytest.fixture
 def point_cloud_2():
     yield np.array(
@@ -1175,7 +1088,6 @@ def point_cloud_2():
         ]
     )
 
-
 @pytest.fixture
 def point_cloud_3():
     yield np.array(
@@ -1186,7 +1098,6 @@ def point_cloud_3():
             [0, 1, 0, 100, 100, 100],
         ]
     )
-
 
 def test_object3d_numpy(
     mock_run,
@@ -1208,7 +1119,6 @@ def test_object3d_numpy(
     assert obj3.to_json(run)["_type"] == "object3D-file"
     assert obj3.to_json(run)["path"].endswith(".pts.json")
 
-
 def test_object3d_from_numpy(
     mock_run,
     point_cloud_1,
@@ -1229,7 +1139,6 @@ def test_object3d_from_numpy(
     assert obj3.to_json(run)["_type"] == "object3D-file"
     assert obj3.to_json(run)["path"].endswith(".pts.json")
 
-
 def test_object3d_dict(mock_run):
     run = mock_run()
     obj = tracklab.Object3D(
@@ -1241,14 +1150,12 @@ def test_object3d_dict(mock_run):
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(".pts.json")
 
-
 def test_object3d_from_point_cloud(mock_run):
     run = mock_run()
     obj = tracklab.Object3D.from_point_cloud([], [], [], "lidar/beta")
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(".pts.json")
-
 
 def test_object3d_from_point_cloud_default_type(mock_run):
     run = mock_run()
@@ -1257,11 +1164,9 @@ def test_object3d_from_point_cloud_default_type(mock_run):
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(".pts.json")
 
-
 def test_object3d_from_point_cloud_invalid():
     with pytest.raises(ValueError):
         tracklab.Object3D.from_point_cloud([], [], [], "invalid point cloud type!")
-
 
 def test_object3d_dict_invalid():
     with pytest.raises(ValueError):
@@ -1272,12 +1177,10 @@ def test_object3d_dict_invalid():
         )
     tracklab.finish()
 
-
 def test_object3d_dict_invalid_string():
     with pytest.raises(ValueError):
         _ = tracklab.Object3D("INVALID")
     tracklab.finish()
-
 
 @pytest.mark.parametrize(
     "file_info",
@@ -1294,7 +1197,6 @@ def test_object3d_obj_open_file(mock_run, assets_path, file_info):
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
-
 
 @pytest.mark.parametrize(
     "file_info",
@@ -1313,7 +1215,6 @@ def test_object3d_from_file_with_path(mock_run, assets_path, file_info):
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
-
 
 @pytest.mark.parametrize(
     "file_info",
@@ -1337,12 +1238,10 @@ def test_object3d_from_file_with_textio(mock_run, assets_path, file_info):
         assert obj.to_json(run)["_type"] == "object3D-file"
         assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
 
-
 def test_object3d_from_file_with_textio_invalid_file_type(assets_path):
     textio = io.StringIO("some text")
     with pytest.raises(ValueError):
         _ = tracklab.Object3D.from_file(textio)
-
 
 def test_object3d_from_file_with_textio_missing_file_type(mock_run, assets_path):
     run = mock_run()
@@ -1352,7 +1251,6 @@ def test_object3d_from_file_with_textio_missing_file_type(mock_run, assets_path)
         obj.bind_to_run(run, "object3D", 0)
         assert obj.to_json(run)["_type"] == "object3D-file"
         assert obj.to_json(run)["path"].endswith(".pts.json")
-
 
 @pytest.mark.parametrize(
     "file_info",
@@ -1372,7 +1270,6 @@ def test_object3d_from_file_with_open_file(mock_run, assets_path, file_info):
         assert obj.to_json(run)["_type"] == "object3D-file"
         assert obj.to_json(run)["path"].endswith(file_info["path_endswith"])
 
-
 def test_object3d_textio(mock_run, assets_path):
     run = mock_run()
     with open(assets_path("Box.gltf")) as f:
@@ -1382,7 +1279,6 @@ def test_object3d_textio(mock_run, assets_path):
     obj.bind_to_run(run, "object3D", 0)
     assert obj.to_json(run)["_type"] == "object3D-file"
     assert obj.to_json(run)["path"].endswith(".obj")
-
 
 @pytest.mark.parametrize(
     "object3d",
@@ -1405,13 +1301,11 @@ def test_object3d_unsupported_numpy(object3d):
     with pytest.raises(ValueError):
         tracklab.Object3D.from_numpy(object3d)
 
-
 def test_object3d_unsupported_io(assets_path):
     with open(assets_path("Box.gltf")) as f:
         io_obj = io.StringIO(f.read())
     with pytest.raises(ValueError):
         tracklab.Object3D(io_obj)
-
 
 def test_object3d_seq_to_json(mock_run, point_cloud_1, assets_path):
     run = mock_run()
@@ -1434,7 +1328,6 @@ def test_object3d_seq_to_json(mock_run, point_cloud_1, assets_path):
     assert obj["_type"] == "object3D"
     assert obj["count"] == 3
 
-
 def test_object3d_label_is_optional(mock_run):
     box_with_label = {
         "corners": [],
@@ -1444,17 +1337,14 @@ def test_object3d_label_is_optional(mock_run):
     box_no_label = {"corners": [], "color": [0, 0, 0]}
     tracklab.Object3D.from_point_cloud(points=[], boxes=[box_no_label, box_with_label])
 
-
 def test_object3d_score_is_optional(mock_run):
     box_with_score = {"corners": [], "score": 95, "color": [0, 0, 0]}
     box_no_score = {"corners": [], "color": [0, 0, 0]}
     tracklab.Object3D.from_point_cloud(points=[], boxes=[box_no_score, box_with_score])
 
-
 ################################################################################
 # Test tracklab.Graph
 ################################################################################
-
 
 def test_graph():
     graph = tracklab.Graph()
@@ -1480,11 +1370,9 @@ def test_graph():
         ],
     }
 
-
 ################################################################################
 # Test tracklab.PartitionedTable
 ################################################################################
-
 
 def test_partitioned_table():
     partition_table = tracklab.data_types.PartitionedTable(parts_path="parts")
@@ -1492,11 +1380,9 @@ def test_partitioned_table():
     assert partition_table == tracklab.data_types.PartitionedTable(parts_path="parts")
     assert partition_table != tracklab.data_types.PartitionedTable(parts_path="parts2")
 
-
 ################################################################################
 # Test tracklab.Html
 ################################################################################
-
 
 def test_wandb_html_with_directory(tmp_path):
     html = tracklab.Html(str(tmp_path), inject=False)
@@ -1506,7 +1392,6 @@ def test_wandb_html_with_directory(tmp_path):
     assert os.path.exists(html._path)
     with open(html._path) as f:
         assert f.read() == str(tmp_path)
-
 
 def test_wandb_html_with_html_file(tmp_path):
     html_file = tmp_path / "index.html"
@@ -1521,7 +1406,6 @@ def test_wandb_html_with_html_file(tmp_path):
     with open(html._path) as f:
         assert f.read() == "Hello, world!"
 
-
 def test_wandb_html_with_html_file_skip_file_check(tmp_path):
     html_file = tmp_path / "index.html"
     html_file.write_text("Hello, world!")
@@ -1533,7 +1417,6 @@ def test_wandb_html_with_html_file_skip_file_check(tmp_path):
     with open(html._path) as f:
         assert f.read() == str(html_file)
 
-
 def test_wandb_html_with_non_html_file(tmp_path):
     file = tmp_path / "index.txt"
     file.write_text("Hello, world!")
@@ -1544,11 +1427,9 @@ def test_wandb_html_with_non_html_file(tmp_path):
     with open(html._path) as f:
         assert f.read() == str(file)
 
-
 ################################################################################
 # Test various data types
 ################################################################################
-
 
 def test_numpy_arrays_to_list():
     conv = _numpy_arrays_to_lists
@@ -1556,7 +1437,6 @@ def test_numpy_arrays_to_list():
     assert conv(np.array((1, 2))) == [1, 2]
     assert conv([np.array((1, 2))]) == [[1, 2]]
     assert conv(np.array(({"a": [np.array((1, 2))]}, 3))) == [{"a": [[1, 2]]}, 3]
-
 
 def test_log_uint8_image():
     pytest.importorskip("torchvision")
@@ -1576,7 +1456,6 @@ def test_log_uint8_image():
 
         path_im, torch_vision = np.array(path_im.image), np.array(torch_vision.image)
         assert np.array_equal(path_im, torch_vision)
-
 
 @pytest.mark.parametrize("file_type", ["jpeg", "jpg"])
 @pytest.mark.parametrize(
@@ -1599,7 +1478,6 @@ def test_init_image_jpeg_removes_transparency(data, file_type, mock_wandb_log):
         "JPEG format does not support transparency. Ignoring alpha channel.",
     )
     assert wandb_img.format == file_type
-
 
 @pytest.mark.parametrize("file_type", ["jpeg", "jpg", "png"])
 def test_wandb_image_with_matplotlib_figure(file_type):

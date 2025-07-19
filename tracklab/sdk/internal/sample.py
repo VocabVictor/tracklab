@@ -56,7 +56,6 @@ class UniformSampleAccumulator:
     def get(self):
         full = []
         sampled = []
-        # self._show()
         for b in range(self._buckets):
             max_num = 2**b
             b = (b + self._buckets_index) % self._buckets

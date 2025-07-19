@@ -12,9 +12,9 @@ from tracklab.util import (
 np = get_module("numpy")  # intentionally not required
 
 if t.TYPE_CHECKING:
-    from tracklab.sdk.artifacts.artifact import Artifact
-
-ConvertibleToType = t.Union["Type", t.Type["Type"], type, t.Any]
+    ConvertibleToType = t.Union["Type", t.Type["Type"], type, t.Any]
+else:
+    ConvertibleToType = t.Any
 
 
 class TypeRegistry:
@@ -73,7 +73,7 @@ class TypeRegistry:
 
     @staticmethod
     def type_from_dict(
-        json_dict: t.Dict[str, t.Any], artifact: t.Optional["Artifact"] = None
+        json_dict: t.Dict[str, t.Any], artifact: t.Optional[t.Any] = None
     ) -> "Type":
         wb_type = json_dict.get("wb_type")
         if wb_type is None:
@@ -131,7 +131,7 @@ class TypeRegistry:
 
 def _params_obj_to_json_obj(
     params_obj: t.Any,
-    artifact: t.Optional["Artifact"] = None,
+    artifact: t.Optional[t.Any] = None,
 ) -> t.Any:
     """Helper method."""
     if params_obj.__class__ is dict:
@@ -148,7 +148,7 @@ def _params_obj_to_json_obj(
 
 
 def _json_obj_to_params_obj(
-    json_obj: t.Any, artifact: t.Optional["Artifact"] = None
+    json_obj: t.Any, artifact: t.Optional[t.Any] = None
 ) -> t.Any:
     """Helper method."""
     if json_obj.__class__ is dict:
@@ -173,7 +173,6 @@ class Type:
     """
 
     # Subclasses must override with a unique name. This is used to identify the
-    # class during serializations and deserializations
     name: t.ClassVar[str] = ""
 
     # List of names by which this class can deserialize
@@ -218,7 +217,7 @@ class Type:
         else:
             return InvalidType()
 
-    def to_json(self, artifact: t.Optional["Artifact"] = None) -> t.Dict[str, t.Any]:
+    def to_json(self, artifact: t.Optional[t.Any] = None) -> t.Dict[str, t.Any]:
         """Generate a jsonable dictionary serialization the type.
 
         If overridden by subclass, ensure that `from_json` is equivalently overridden.
@@ -243,7 +242,7 @@ class Type:
     def from_json(
         cls,
         json_dict: t.Dict[str, t.Any],
-        artifact: t.Optional["Artifact"] = None,
+        artifact: t.Optional[t.Any] = None,
     ) -> "Type":
         """Construct a new instance of the type using a JSON dictionary.
 
@@ -631,9 +630,6 @@ class ListType(Type):
                 _elm_type = elm_type.assign(item)
                 # Commenting this out since we don't want to crash user code at this point, but rather
                 # retain an invalid internal list type.
-                # if isinstance(_elm_type, InvalidType):
-                #     raise TypeError(
-                #         "List contained incompatible types. Item at index {}: \n{}".format(
                 #             ndx, elm_type.explain(item, 1)
                 #         )
                 #     )
@@ -749,7 +745,7 @@ class NDArrayType(Type):
 
         return InvalidType()
 
-    def to_json(self, artifact: t.Optional["Artifact"] = None) -> t.Dict[str, t.Any]:
+    def to_json(self, artifact: t.Optional[t.Any] = None) -> t.Dict[str, t.Any]:
         # custom override to support serialization path outside of params internal dict
         res = {
             "wb_type": self.name,
@@ -774,10 +770,6 @@ class NDArrayType(Type):
 if np:
     NDArrayType.types.append(np.ndarray)
 
-# class KeyPolicy:
-#     EXACT = "E"  # require exact key match
-#     SUBSET = "S"  # all known keys are optional and unknown keys are disallowed
-#     UNRESTRICTED = "U"  # all known keys are optional and unknown keys are Unknown
 
 
 class TypedDictType(Type):

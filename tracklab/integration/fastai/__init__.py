@@ -206,7 +206,6 @@ class WandbCallback(TrackerCallback):
                 # log label and prediction
                 for im, capt in ((pred[0], "Prediction"), (y, "Ground Truth")):
                     # Resize plot to image resolution
-                    # from https://stackoverflow.com/a/13714915
                     my_dpi = 100
                     fig = plt.figure(frameon=False, dpi=my_dpi)
                     h, w = x.size

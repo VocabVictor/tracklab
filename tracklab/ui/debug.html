@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Dashboard</title>
+</head>
+<body>
+    <h1>Debug Dashboard API</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/system/metrics');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = '<h2>API Response:</h2><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // Check the structure
+                if (data.success && data.data && Array.isArray(data.data) && data.data.length > 0) {
+                    const lastMetric = data.data[data.data.length - 1];
+                    resultDiv.innerHTML += '<h2>Last Metric:</h2><pre>' + JSON.stringify(lastMetric, null, 2) + '</pre>';
+                    
+                    // Check CPU structure
+                    if (lastMetric.cpu) {
+                        resultDiv.innerHTML += '<h2>CPU Structure:</h2><pre>' + JSON.stringify(lastMetric.cpu, null, 2) + '</pre>';
+                        resultDiv.innerHTML += '<p>CPU Overall: ' + (lastMetric.cpu.overall || 0) + '%</p>';
+                    }
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<h2>Error:</h2><pre>' + error.toString() + '</pre>';
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>

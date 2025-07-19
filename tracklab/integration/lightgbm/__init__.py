@@ -73,9 +73,7 @@ def _checkpoint_artifact(
 
     model.save_model(model_path, num_iteration=iteration)
 
-    model_artifact = tracklab.Artifact(name=model_name, type="model")
     model_artifact.add_file(str(model_path))
-    tracklab.log_artifact(model_artifact, aliases=aliases)
 
 
 def _log_feature_importance(model: "Booster") -> None:
@@ -86,9 +84,7 @@ def _log_feature_importance(model: "Booster") -> None:
     table = tracklab.Table(data=fi_data, columns=["Feature", "Importance"])
     tracklab.log(
         {
-            "Feature Importance": tracklab.plot.bar(
-                table, "Feature", "Importance", title="Feature Importance"
-            )
+            "Feature Importance": table
         },
         commit=False,
     )
@@ -228,7 +224,6 @@ def log_summary(
     tracklab.run.summary["best_iteration"] = model.best_iteration
     tracklab.run.summary["best_score"] = model.best_score
 
-    # Log feature importance
     if feature_importance:
         _log_feature_importance(model)
 

@@ -125,7 +125,6 @@ class WandbCallback(xgb.callback.TrainingCallback):
         if self.log_model:
             self._log_model_as_artifact(model)
 
-        # Plot feature importance
         if self.log_feature_importance:
             self._log_feature_importance(model)
 
@@ -162,9 +161,7 @@ class WandbCallback(xgb.callback.TrainingCallback):
         model_path = Path(tracklab.run.dir) / model_name  # type: ignore
         model.save_model(str(model_path))
 
-        model_artifact = tracklab.Artifact(name=model_name, type="model")
         model_artifact.add_file(str(model_path))
-        tracklab.log_artifact(model_artifact)
 
     def _log_feature_importance(self, model: Booster) -> None:
         fi = model.get_score(importance_type=self.importance_type)
@@ -172,9 +169,7 @@ class WandbCallback(xgb.callback.TrainingCallback):
         table = tracklab.Table(data=fi_data, columns=["Feature", "Importance"])
         tracklab.log(
             {
-                "Feature Importance": tracklab.plot.bar(
-                    table, "Feature", "Importance", title="Feature Importance"
-                )
+                "Feature Importance": table
             }
         )
 

@@ -1,12 +1,11 @@
-#
-from enum import Enum
+"""Alert level definitions for tracklab."""
 
-"""
-Call run.alert() to generate an email or Slack notification programmatically.
-"""
+from enum import Enum
 
 
 class AlertLevel(Enum):
+    """Alert severity levels."""
+    
     INFO = "INFO"
     WARN = "WARN"
     ERROR = "ERROR"

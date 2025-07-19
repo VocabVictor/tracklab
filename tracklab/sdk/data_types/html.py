@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import TYPE_CHECKING, Sequence, Type, Union
+from typing import TYPE_CHECKING, Sequence, Type, Union, Any
 
 from tracklab.sdk.lib import filesystem, runid
 
@@ -9,10 +9,9 @@ from ._private import MEDIA_TMP
 from .base_types.media import BatchableMedia
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typing import TextIO
+    from typing import TextIO, Any
 
-    from tracklab.sdk.artifacts.artifact import Artifact
-
+    
     from ..tracklab_run import Run as LocalRun
 
 
@@ -115,7 +114,7 @@ class Html(BatchableMedia):
         """
         return os.path.join("media", "html")
 
-    def to_json(self, run_or_artifact: Union["LocalRun", "Artifact"]) -> dict:
+    def to_json(self, run_or_artifact: Any) -> dict:
         """Returns the JSON representation expected by the backend.
 
         <!-- lazydoc-ignore: internal -->
@@ -126,7 +125,7 @@ class Html(BatchableMedia):
 
     @classmethod
     def from_json(
-        cls: Type["Html"], json_obj: dict, source_artifact: "Artifact"
+        cls: Type["Html"], json_obj: dict, source_artifact: Any
     ) -> "Html":
         """Deserialize a JSON object into it's class representation.
 

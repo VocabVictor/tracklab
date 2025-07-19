@@ -41,7 +41,6 @@ from .lib import config_util, server
 if TYPE_CHECKING:
     from tracklab.sdk import run
     from tracklab.sdk.lib.service.service_connection import ServiceConnection
-    # Settings already imported above
 
 
 class _EarlyLogger:
@@ -50,7 +49,6 @@ class _EarlyLogger:
     def __init__(self) -> None:
         self._log: list[tuple] = []
         self._exception: list[tuple] = []
-        # support old warn() as alias of warning()
         self.warn = self.warning
 
     def debug(self, msg: str, *args: Any, **kwargs: Any) -> None:
@@ -104,7 +102,6 @@ class _WandbSetup:
         self._server: server.Server | None = None
         self._pid = pid
 
-        # TODO(jhr): defer strict checks until settings are fully initialized
         #            and logging is ready
         self._logger: Logger = _EarlyLogger()
 
@@ -155,7 +152,6 @@ class _WandbSetup:
         useful pattern. Since `"create_new"` should eventually become the
         default and only behavior, it does not seem worth optimizing.
         """
-        # Take a snapshot as each call to `finish()` modifies `_active_runs`.
         runs_copy = list(self._active_runs)
         for run in runs_copy:
             run.finish()
@@ -289,9 +285,7 @@ class _WandbSetup:
                 sweep_path, must_exist=True
             )
 
-        # if config_paths was set, read in config dict
         if self._settings.config_paths:
-            # TODO(jhr): handle load errors, handle list of files
             for config_path in self._settings.config_paths:
                 config_dict = config_util.dict_from_config_file(config_path)
                 if config_dict is None:
@@ -307,7 +301,6 @@ class _WandbSetup:
         if not self._connection:
             return
 
-        # Reset to None so that setup() creates a new connection.
         connection = self._connection
         self._connection = None
 

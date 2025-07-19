@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import tracklab
 from tracklab import util
-from tracklab.plot import CustomChart
+CustomChart = None
 from tracklab.sdk.interface.interface import GlobStr
 from tracklab.sdk.lib import filesystem
 
@@ -42,7 +42,6 @@ logger = logging.getLogger(__name__)
 def _link_and_save_file(
     path: str, base_path: str, interface: "InterfaceQueue", settings: "SettingsStatic"
 ) -> None:
-    # TODO(jhr): should this logic be merged with Run.save()
     files_dir = settings.files_dir
     file_name = os.path.relpath(path, base_path)
     abs_path = os.path.abspath(path)
@@ -54,7 +53,6 @@ def _link_and_save_file(
         os.symlink(abs_path, wandb_path)
     elif not os.path.exists(wandb_path):
         os.symlink(abs_path, wandb_path)
-    # TODO(jhr): need to figure out policy, live/throttled?
     interface.publish_files(dict(files=[(GlobStr(glob.escape(file_name)), "live")]))
 
 
@@ -121,7 +119,6 @@ class TBWatcher:
         self._interface = interface
         self._run_proto = run_proto
         self._force = force
-        # TODO(jhr): do we need locking in this queue?
         self._watcher_queue = queue.PriorityQueue()
         tracklab.tensorboard.reset_state()  # type: ignore
 
@@ -160,7 +157,6 @@ class TBWatcher:
         if logdir in self._logdirs:
             return
         namespace = self._calculate_namespace(logdir, root_dir)
-        # TODO(jhr): implement the deferred tbdirwatcher to find namespace
 
         if not self._consumer:
             self._consumer = TBEventConsumer(
@@ -197,9 +193,7 @@ class TBDirWatcher:
             "tensorboard.backend.event_processing.directory_watcher",
             required="Please install tensorboard package",
         )
-        # self.event_file_loader = util.get_module(
         #     "tensorboard.backend.event_processing.event_file_loader",
-        #     required="Please install tensorboard package",
         # )
         self.tf_compat = util.get_module(
             "tensorboard.compat", required="Please install tensorboard package"
@@ -306,7 +300,6 @@ class TBDirWatcher:
             time.sleep(1)
 
     def process_event(self, event: "ProtoEvent") -> None:
-        # print("\nEVENT:::", self._logdir, self._namespace, event, "\n")
         if self._first_event_timestamp is None:
             self._first_event_timestamp = event.wall_time
 

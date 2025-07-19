@@ -90,7 +90,6 @@ class HuggingFacePipelineRequestResponseResolver:
         return None
 
     # TODO: This should have a dependency on PreTrainedModel. i.e. isinstance(PreTrainedModel)
-    # from transformers.modeling_utils import PreTrainedModel
     # We do not want this dependency explicitly in our codebase so we make a very general
     # assumption about the structure of the pipeline which may have unintended consequences
     def _get_model(self, pipe) -> Optional[Any]:
@@ -153,7 +152,6 @@ class HuggingFacePipelineRequestResponseResolver:
         formatted_data = []
         for i_text, r_text in zip(input_data, response):
             # Unpack single element responses for better rendering in wandb UI when it is a task without top_k
-            # top_k = 1 would unpack the response into a single element while top_k > 1 would be a list
             # this would cause the UI to not properly concatenate the tables of the same task by omitting the elements past the first
             if (
                 (isinstance(r_text, list))
