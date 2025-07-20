@@ -118,8 +118,7 @@ include = [
     "tracklab/bin/**/*",
 ]
 
-[tool.hatch.build.targets.wheel.hooks.custom]
-path = "scripts/hatch_build.py"
+# Custom build hook removed - no longer needed for simplified architecture
 
 [tool.hatch.build.targets.sdist]
 include = [
