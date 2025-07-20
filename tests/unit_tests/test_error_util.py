@@ -1,14 +1,13 @@
 import pytest
 from tracklab.errors import Error
-from tracklab.errors.util import ProtobufErrorHandler
-from tracklab.proto import tracklab_internal_pb2 as pb
+from tracklab.errors.util import ProtobufErrorHandler, ErrorInfo, ErrorCode
 
 
 @pytest.mark.parametrize(
     "error, expected",
     [
-        (pb.ErrorInfo(), type(None)),
-        (pb.ErrorInfo(code=-2), Error),
+        (ErrorInfo(code=ErrorCode.UNKNOWN, message=""), type(None)),
+        (ErrorInfo(code=ErrorCode.COMMUNICATION, message="test error"), Error),
     ],
 )
 def test_protobuf_error_handler(error, expected):

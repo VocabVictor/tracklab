@@ -7,7 +7,7 @@ class Error(Exception):
     def __init__(self, message, context: Optional[dict] = None) -> None:
         super().__init__(message)
         self.message = message
-        # sentry context capture
+        # local context capture
         if context:
             self.context = context
 

@@ -113,7 +113,7 @@ def json_friendly(obj: Any) -> Tuple[Any, bool]:
     elif isinstance(obj, timedelta):
         return obj.total_seconds(), True
     elif isinstance(obj, Enum):
-        return obj.value, True
+        return obj.name, True
     elif is_dataclass(obj) and not isinstance(obj, type):
         return asdict(obj), True
     elif hasattr(obj, '__dict__'):

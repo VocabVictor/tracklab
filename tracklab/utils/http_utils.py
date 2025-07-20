@@ -160,39 +160,33 @@ def make_check_retry_fn(
 def download_file_from_url(
     dest_path: str, source_url: str, api_key: Optional[str] = None
 ) -> None:
-    """Download a file from a URL to a destination path."""
-    auth = None
-    if not hasattr(_thread_local_api_settings, 'cookies') or not _thread_local_api_settings.cookies:
-        auth = ("api", api_key or "")
+    """Download a file from a URL to a destination path.
     
-    response = requests.get(
-        source_url,
-        auth=auth,
-        cookies=getattr(_thread_local_api_settings, 'cookies', None),
-        stream=True,
-        timeout=30,
-    )
-    response.raise_for_status()
-    
-    with open(dest_path, "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
+    For local TrackLab, this only supports file:// URLs.
+    """
+    if source_url.startswith("file://"):
+        # Local file URL - just copy
+        import shutil
+        source_path = source_url[7:]  # Remove "file://"
+        shutil.copy2(source_path, dest_path)
+    else:
+        # For local-only mode, we don't support remote downloads
+        raise ValueError("Remote downloads not supported in local-only mode")
 
 
 def download_file_into_memory(source_url: str, api_key: Optional[str] = None) -> bytes:
-    """Download a file from a URL into memory."""
-    auth = None
-    if not hasattr(_thread_local_api_settings, 'cookies') or not _thread_local_api_settings.cookies:
-        auth = ("api", api_key or "")
+    """Download a file from a URL into memory.
     
-    response = requests.get(
-        source_url,
-        auth=auth,
-        cookies=getattr(_thread_local_api_settings, 'cookies', None),
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.content
+    For local TrackLab, this only supports file:// URLs.
+    """
+    if source_url.startswith("file://"):
+        # Local file URL - just read
+        source_path = source_url[7:]  # Remove "file://"
+        with open(source_path, "rb") as f:
+            return f.read()
+    else:
+        # For local-only mode, we don't support remote downloads
+        raise ValueError("Remote downloads not supported in local-only mode")
 
 
 __all__ = [

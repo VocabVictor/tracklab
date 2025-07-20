@@ -1,3 +1,3 @@
 from tracklab.cli import cli
 
-cli.cli(prog_name="python -m wandb")
+cli.cli(prog_name="python -m tracklab")

@@ -17,42 +17,6 @@ np = None  # Will be loaded lazily
 pd_available = False  # Will be set based on pandas availability
 
 
-def vendor_setup() -> Callable:
-    """Create a function that restores user paths after vendor imports.
-
-    This enables us to use the vendor directory for packages we don't depend on. Call
-    the returned function after imports are complete. If you don't you may modify the
-    user's path which is never good.
-    """
-    import os
-    import sys
-    
-    paths = list(sys.path)
-    if os.path.isdir(os.path.join(os.path.dirname(__file__), "..", "vendor")):
-        vendor_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "vendor")
-        )
-        sys.path.insert(1, vendor_path)
-        for vendor_pkg in os.listdir(vendor_path):
-            if vendor_pkg.endswith(".dist-info"):
-                continue
-            # Don't stomp on user's installed packages
-            if vendor_pkg not in sys.modules:
-                if os.path.isdir(os.path.join(vendor_path, vendor_pkg)):
-                    sys.path.insert(1, os.path.join(vendor_path, vendor_pkg))
-    
-    def reset_path() -> None:
-        sys.path[:] = paths
-    
-    return reset_path
-
-
-def vendor_import(name: str) -> Any:
-    """Import a module from the vendor directory."""
-    reset_path = vendor_setup()
-    module = import_module(name)
-    reset_path()
-    return module
 
 
 class LazyModuleState:
@@ -276,8 +240,6 @@ _initialize_common_modules()
 
 
 __all__ = [
-    "vendor_setup",
-    "vendor_import", 
     "LazyModuleState",
     "LazyModule",
     "import_module_lazy",

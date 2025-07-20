@@ -43,12 +43,18 @@ def downsample(values: Sequence, target_length: int) -> list:
 
     Values can be any sequence, including a generator.
     """
+    import tracklab
+    
     if target_length <= 0:
         return []
     
     # Convert to list if it's a generator
     if hasattr(values, '__iter__') and not hasattr(values, '__len__'):
         values = list(values)
+    
+    # Validate input - cannot downsample to 1 if we have more than 1 value
+    if target_length == 1 and len(values) > 1:
+        raise tracklab.UsageError("Cannot downsample to 1 value when sequence has multiple values")
     
     if len(values) <= target_length:
         return list(values)

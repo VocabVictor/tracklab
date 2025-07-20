@@ -23,13 +23,7 @@ from tracklab import util
 ###############################################################################
 
 
-def pt_variable(nested_list, requires_grad=True):
-    pytest.importorskip("torch")
-    import torch
-
-    v = torch.autograd.Variable(torch.Tensor(nested_list))
-    v.requires_grad = requires_grad
-    return v
+# PyTorch helper function removed - TrackLab no longer requires PyTorch dependency
 
 
 def nested_list(*shape):
@@ -82,95 +76,16 @@ def test_jsonify_enum():
     assert converted
 
 
-@pytest.mark.parametrize(
-    "array_shape",
-    [
-        (),  # 0d
-        (1,),  # 1d 1x1
-        (3,),  # 1d
-        (300,),  # 1d large
-        (3,) * 2,  # 2d
-        (300,) * 2,  # 2d large
-        (3,) * 3,  # 3d
-        (1,) * 4,  # 4d
-        (1,) * 8,  # 8d
-        (3,) * 8,  # 8d large
-    ],
-)
-def test_pytorch_json_nd(array_shape):
-    pytest.importorskip("torch")
-    import torch
-
-    a = nested_list(*array_shape)
-    json_friendly_test(a, torch.Tensor(a))
-    json_friendly_test(a, pt_variable(a))
+# PyTorch-specific test removed - TrackLab no longer requires PyTorch dependency
 
 
-@pytest.mark.parametrize(
-    "array_shape",
-    [
-        (),  # 0d
-        (1,),  # 1d 1x1
-        (3,),  # 1d
-        (300,),  # 1d large
-        (3,) * 2,  # 2d
-        (300,) * 2,  # 2d large
-        (3,) * 3,  # 3d
-        (1,) * 4,  # 4d
-        (1,) * 8,  # 8d
-        (3,) * 8,  # 8d large
-    ],
-)
-def test_tensorflow_json_nd(array_shape):
-    pytest.importorskip("tensorflow")
-    import tensorflow as tf
-
-    a = nested_list(*array_shape)
-    json_friendly_test(a, tf.convert_to_tensor(a))
-    v = tf.Variable(tf.convert_to_tensor(a))
-    json_friendly_test(a, v)
+# TensorFlow-specific test removed - TrackLab no longer requires TensorFlow dependency
 
 
-@pytest.mark.skipif(
-    platform.system() == "Windows", reason="test suite does not build jaxlib on windows"
-)
-@pytest.mark.parametrize(
-    "array_shape",
-    [
-        (),
-        (1,),
-        (3,),
-        (300,),
-        (300,) * 2,
-        (1,) * 8,
-        (3,) * 8,
-    ],
-)
-def test_jax_json(array_shape):
-    jnp = pytest.importorskip("jax.numpy")
-
-    orig_data = nested_list(*array_shape)
-    jax_array = jnp.asarray(orig_data)
-    json_friendly_test(orig_data, jax_array)
-    assert util.is_jax_tensor_typename(util.get_full_typename(jax_array))
+# JAX-specific test removed - TrackLab no longer requires JAX dependency
 
 
-@pytest.mark.skipif(
-    platform.system() == "Windows", reason="test suite does not build jaxlib on windows"
-)
-def test_bfloat16_to_float():
-    jnp = pytest.importorskip("jax.numpy")
-
-    array = jnp.array(1.0, dtype=jnp.bfloat16)
-    # array to scalar bfloat16
-    array_cast = util.json_friendly(array)
-    assert array_cast[1] is True
-    assert array_cast[0].__class__.__name__ == "bfloat16"
-    # scalar bfloat16 to float
-    array_cast = util.json_friendly(array_cast[0])
-    assert array_cast[0] == 1.0
-    assert array_cast[1] is True
-    assert isinstance(array_cast[0], float)
+# JAX bfloat16 test removed - TrackLab no longer requires JAX dependency
 
 
 ###############################################################################
@@ -224,44 +139,7 @@ def test_make_json_if_not_number():
     assert util.make_json_if_not_number({"a": "1.0"}) == '{"a": "1.0"}'
 
 
-###############################################################################
-# Test util.image_from_docker_args
-###############################################################################
-
-
-def test_image_from_docker_args_simple():
-    image = util.image_from_docker_args(
-        ["run", "-v", "/foo:/bar", "-e", "NICE=foo", "-it", "wandb/deepo", "/bin/bash"]
-    )
-    assert image == "wandb/deepo"
-
-
-def test_image_from_docker_args_simple_no_namespace():
-    image = util.image_from_docker_args(["run", "-e", "NICE=foo", "nginx", "/bin/bash"])
-    assert image == "nginx"
-
-
-def test_image_from_docker_args_simple_no_equals():
-    image = util.image_from_docker_args(
-        ["run", "--runtime=runc", "ufoym/deepo:cpu-all"]
-    )
-    assert image == "ufoym/deepo:cpu-all"
-
-
-def test_image_from_docker_args_bash_simple():
-    image = util.image_from_docker_args(
-        ["run", "ufoym/deepo:cpu-all", "/bin/bash", "-c", "python train.py"]
-    )
-    assert image == "ufoym/deepo:cpu-all"
-
-
-def test_image_from_docker_args_sha():
-    dsha = (
-        "wandb/deepo@sha256:"
-        "3ddd2547d83a056804cac6aac48d46c5394a76df76b672539c4d2476eba38177"
-    )
-    image = util.image_from_docker_args([dsha])
-    assert image == dsha
+# Docker-related tests removed - TrackLab is now a local library without Docker integration
 
 
 ###############################################################################
@@ -464,23 +342,10 @@ def test_make_tarfile():
 ###############################################################################
 
 
-def test_is_tf_tensor():
-    pytest.importorskip("tensorflow")
-    import tensorflow as tf
-
-    assert util.is_tf_tensor(tf.constant(1))
-    assert not util.is_tf_tensor(tf.Variable(1))
-    assert not util.is_tf_tensor(1)
-    assert not util.is_tf_tensor(None)
+# TensorFlow tensor test removed - TrackLab no longer requires TensorFlow dependency
 
 
-def test_is_pytorch_tensor():
-    pytest.importorskip("torch")
-    import torch
-
-    assert util.is_pytorch_tensor(torch.tensor(1))
-    assert not util.is_pytorch_tensor(1)
-    assert not util.is_pytorch_tensor(None)
+# PyTorch tensor test removed - TrackLab no longer requires PyTorch dependency
 
 
 ###############################################################################
@@ -492,14 +357,7 @@ def test_is_pytorch_tensor():
 # Browser launching functionality is not needed for local-only functionality
 
 
-def test_parse_tfjob_config():
-    with mock.patch.dict(
-        "os.environ", {"TF_CONFIG": '{"cluster": {"master": ["foo"]}}'}
-    ):
-        assert util.parse_tfjob_config() == {"cluster": {"master": ["foo"]}}
-    with mock.patch.dict("os.environ", {"TF_CONFIG": "LOL"}):
-        assert util.parse_tfjob_config() is False
-    assert util.parse_tfjob_config() is False
+# TensorFlow distributed training config test removed - TrackLab no longer requires TensorFlow
 
 
 ###############################################################################
@@ -507,145 +365,10 @@ def test_parse_tfjob_config():
 ###############################################################################
 
 
-def test_no_retry_auth():
-    e = mock.MagicMock(spec=requests.HTTPError)
-    e.response = mock.MagicMock(spec=requests.Response)
-    for status_code in (400, 409):
-        e.response.status_code = status_code
-        assert not util.no_retry_auth(e)
-    e.response.status_code = 401
-    e.response.reason = "Unauthorized"
-    with pytest.raises(errors.AuthenticationError):
-        util.no_retry_auth(e)
-    e.response.status_code = 403
-    e.response.reason = "Forbidden"
-    with mock.patch("tracklab.run", mock.MagicMock()):
-        with pytest.raises(tracklab.CommError):
-            util.no_retry_auth(e)
-    e.response.status_code = 404
-    with pytest.raises(LookupError):
-        util.no_retry_auth(e)
-
-    e.response = None
-    assert util.no_retry_auth(e)
-    e = ValueError("foo")
-    assert util.no_retry_auth(e)
+# Cloud service authentication retry test removed - TrackLab is now a local-only library
 
 
-def test_check_retry_conflict():
-    e = mock.MagicMock(spec=requests.HTTPError)
-    e.response = mock.MagicMock(spec=requests.Response)
-
-    e.response.status_code = 400
-    assert util.check_retry_conflict(e) is None
-
-    e.response.status_code = 500
-    assert util.check_retry_conflict(e) is None
-
-    e.response.status_code = 409
-    assert util.check_retry_conflict(e) is True
-
-
-def test_check_retry_conflict_or_gone():
-    e = mock.MagicMock(spec=requests.HTTPError)
-    e.response = mock.MagicMock(spec=requests.Response)
-
-    e.response.status_code = 400
-    assert util.check_retry_conflict_or_gone(e) is None
-
-    e.response.status_code = 410
-    assert util.check_retry_conflict_or_gone(e) is False
-
-    e.response.status_code = 500
-    assert util.check_retry_conflict_or_gone(e) is None
-
-    e.response.status_code = 409
-    assert util.check_retry_conflict_or_gone(e) is True
-
-
-def test_make_check_reply_fn_timeout():
-    """Verify case where secondary check returns a new timeout."""
-    e = mock.MagicMock(spec=requests.HTTPError)
-    e.response = mock.MagicMock(spec=requests.Response)
-
-    check_retry_fn = util.make_check_retry_fn(
-        check_fn=util.check_retry_conflict_or_gone,
-        check_timedelta=datetime.timedelta(minutes=3),
-        fallback_retry_fn=util.no_retry_auth,
-    )
-
-    e.response.status_code = 400
-    check = check_retry_fn(e)
-    assert check is False
-
-    e.response.status_code = 410
-    check = check_retry_fn(e)
-    assert check is False
-
-    e.response.status_code = 500
-    check = check_retry_fn(e)
-    assert check is True
-
-    e.response.status_code = 409
-    check = check_retry_fn(e)
-    assert check
-    assert check == datetime.timedelta(minutes=3)
-
-
-def test_make_check_reply_fn_false():
-    """Verify case where secondary check forces no retry."""
-    e = mock.MagicMock(spec=requests.HTTPError)
-    e.response = mock.MagicMock(spec=requests.Response)
-
-    def is_special(e):
-        if e.response.status_code == 500:
-            return False
-        return None
-
-    check_retry_fn = util.make_check_retry_fn(
-        check_fn=is_special,
-        fallback_retry_fn=util.no_retry_auth,
-    )
-
-    e.response.status_code = 400
-    check = check_retry_fn(e)
-    assert check is False
-
-    e.response.status_code = 500
-    check = check_retry_fn(e)
-    assert check is False
-
-    e.response.status_code = 409
-    check = check_retry_fn(e)
-    assert check is False
-
-
-def test_make_check_reply_fn_true():
-    """Verify case where secondary check allows retry."""
-    e = mock.MagicMock(spec=requests.HTTPError)
-    e.response = mock.MagicMock(spec=requests.Response)
-
-    def is_special(e):
-        if e.response.status_code == 400:
-            return True
-        return None
-
-    check_retry_fn = util.make_check_retry_fn(
-        check_fn=is_special,
-        fallback_retry_fn=util.no_retry_auth,
-    )
-
-    e.response.status_code = 400
-    check = check_retry_fn(e)
-    assert check is True
-
-    e.response.status_code = 500
-    check = check_retry_fn(e)
-    assert check is True
-
-    e.response.status_code = 409
-    check = check_retry_fn(e)
-    assert check is False
+# API retry tests removed - TrackLab is now a local-only library without cloud API calls
 
 
 def test_downsample():
@@ -665,53 +388,16 @@ def test_class_colors():
     assert util.class_colors(3) == [[0, 0, 0], (1.0, 0.0, 0.0), (0.0, 1.0, 1.0)]
 
 
-def test_check_and_warn_old():
-    assert util.check_and_warn_old(["wandb-metadata.json"])
+# Old wandb metadata check test removed - TrackLab is a replacement for wandb
 
 
-def test_is_databricks():
-    assert not util._is_databricks()
-    with mock.patch.dict("sys.modules", {"dbutils": mock.MagicMock()}):
-        dbutils = sys.modules["dbutils"]
-        dbutils.shell = mock.MagicMock()
-        dbutils.shell.sc = mock.MagicMock()
-        dbutils.shell.sc.appName = "Databricks Shell"
-        assert util._is_databricks()
+# Databricks environment test removed - TrackLab is a local-only library
 
 
-def test_parse_entity_project_item():
-    def f(*args, **kwargs):
-        return util._parse_entity_project_item(*args, **kwargs)
-
-    with pytest.raises(ValueError):
-        f("boom/a/b/c")
-
-    item, project, entity = f("myproj/mymodel:latest")
-    assert item == "mymodel:latest"
-    assert project == "myproj"
-    assert entity == ""
-
-    item, project, entity = f("boom")
-    assert item == "boom"
-    assert project == ""
-    assert entity == ""
+# Cloud entity/project parsing test removed - TrackLab is now a local-only library
 
 
-def test_resolve_aliases_requires_iterable():
-    with pytest.raises(ValueError):
-        util._resolve_aliases(5)
-
-
-@pytest.mark.parametrize(
-    "aliases", [["best", "dev"], "boom", None, ("latest"), ["boom", "boom"]]
-)
-def test_resolve_aliases(aliases):
-    result = util._resolve_aliases(aliases)
-    assert isinstance(result, list)
-    assert "latest" in result
-    assert len(set(result)) == len(result)
-    if aliases and not isinstance(aliases, str):
-        assert set(aliases) <= set(result)
+# Artifact alias tests removed - Artifact functionality has been removed from TrackLab
 
 
 # Compute recursive dicts for tests
@@ -753,18 +439,7 @@ def test_sanitize_numpy_keys(dict_input, dict_output):
     assert output == (dict_output or dict_input)
 
 
-def test_make_docker_image_name_safe():
-    assert util.make_docker_image_name_safe("this-name-is-fine") == "this-name-is-fine"
-    assert util.make_docker_image_name_safe("also__ok") == "also__ok"
-    assert (
-        util.make_docker_image_name_safe("github.com/MyUsername/my_repo")
-        == "github.com__myusername__my_repo"
-    )
-    assert (
-        util.make_docker_image_name_safe("./abc.123___def-456---_.")
-        == "abc.123__def-456"
-    )
-    assert util.make_docker_image_name_safe("......") == "image"
+# Docker image name test removed - TrackLab is now a local library without Docker integration
 
 
 def test_sampling_weights():

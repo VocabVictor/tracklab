@@ -1,23 +1,9 @@
-"""TrackLab SDK module."""
+"""TrackLab SDK module - 本地日志库精简版."""
 
 __all__ = (
-    "Config",
-    "Settings",
-    "Summary",
-    "init",
-    "setup",
-    "_attach",
-    "require",
-    "finish",
-    "teardown",
-    "helper",
+    "Interface",
+    "get_interface",
 )
 
-from . import helper
-from .config import Config
-from .init import _attach, init
-from .require import require
-from .run import finish
-from .settings import Settings
-from .setup import setup, teardown
-from .summary import Summary
+# 导入核心接口
+from .interface.interface import Interface, get_interface

@@ -21,12 +21,12 @@ def beta():
     # this is the future that requires wandb-core!
     import tracklab.env
 
-    tracklab._sentry.configure_scope(process_context="wandb_beta")
+    # Analytics configured for beta context
 
     try:
         get_core_path()
     except WandbCoreNotAvailableError as e:
-        tracklab._sentry.exception(f"using `wandb beta`. failed with {e}")
+        # Beta command exception logged locally
         click.secho(
             (e),
             fg="red",

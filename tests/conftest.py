@@ -18,18 +18,18 @@ import pyte.modes
 from pytest_mock import MockerFixture
 from tracklab.errors import term
 
-# Don't write to Sentry in tracklab.
+# Disable error reporting in tests - local-only mode.
 os.environ["TRACKLAB_ERROR_REPORTING"] = "false"
 
 import git
 import pytest
 import tracklab
-import tracklab.old.settings
+# old.settings removed - using new tracklab settings
 # apikey module removed - TrackLab is now local-only
 import tracklab.util
 from click.testing import CliRunner
-from tracklab import Api
-from tracklab.sdk.interface.interface_queue import InterfaceQueue
+# Api import removed - TrackLab is now local-only
+from tracklab.sdk.interface.interface import Interface
 from tracklab.sdk.lib import filesystem, module, runid
 from tracklab.sdk.lib.gitlib import GitRepo
 from tracklab.sdk.lib.paths import StrPath
@@ -263,14 +263,8 @@ def local_settings(filesystem_isolate):
     config_path = os.path.join(os.getcwd(), ".config", "wandb", "settings")
     filesystem.mkdir_exists_ok(os.path.join(".config", "wandb"))
 
-    # todo: this breaks things in unexpected places
-    # todo: get rid of tracklab.old
-    with unittest.mock.patch.object(
-        tracklab.old.settings.Settings,
-        "_global_path",
-        return_value=config_path,
-    ):
-        yield
+    # TrackLab: Simplified local settings - no global config needed
+    yield
 
 @pytest.fixture(scope="function", autouse=True)
 def local_netrc(filesystem_isolate):
@@ -337,8 +331,9 @@ def clean_up():
     tracklab.teardown()
 
 @pytest.fixture
-def api() -> tracklab.PublicApi:
-    return Api()
+def api():
+    # TrackLab: No API needed for local-only service
+    return None
 
 # --------------------------------
 # Fixtures for user test point
@@ -349,11 +344,11 @@ def record_q() -> Queue:
     return Queue()
 
 @pytest.fixture()
-def mocked_interface(record_q: Queue) -> InterfaceQueue:
-    return InterfaceQueue(record_q=record_q)
+def mocked_interface(record_q: Queue) -> Interface:
+    return Interface()
 
 @pytest.fixture
-def mocked_backend(mocked_interface: InterfaceQueue) -> Generator[object, None, None]:
+def mocked_backend(mocked_interface: Interface) -> Generator[object, None, None]:
     class MockedBackend:
         def __init__(self) -> None:
             self.interface = mocked_interface

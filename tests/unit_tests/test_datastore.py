@@ -5,7 +5,7 @@ import os
 
 import pytest
 import tracklab
-from tracklab.proto import tracklab_internal_pb2  # type: ignore
+from tracklab.core import HistoryRecord, Record, HistoryItem
 
 datastore = tracklab.sdk.internal.datastore
 
@@ -65,16 +65,12 @@ def with_datastore(request, force_internal_process):
 
 
 def test_proto_write_partial(force_internal_process):
-    """Serialize a proto into a partial block."""
+    """Serialize a record into a partial block."""
     data = dict(this=2, that=4)
-    history = tracklab_internal_pb2.HistoryRecord()
+    history = HistoryRecord()
     for k, v in data.items():
-        json_data = json.dumps(v)
-        item = history.item.add()
-        item.key = k
-        item.value_json = json_data
-    rec = tracklab_internal_pb2.Record()
-    rec.history.CopyFrom(history)
+        history.add_item(k, v)
+    rec = Record(history=history)
 
     _ = force_internal_process  # required by DataStore
     s = datastore.DataStore()

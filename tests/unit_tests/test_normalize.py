@@ -5,7 +5,7 @@ from typing import NoReturn
 
 import pytest
 import requests
-from tracklab.apis.normalize import normalize_exceptions
+from tracklab.errors.normalize import normalize_exceptions
 from tracklab.errors import CommError
 
 

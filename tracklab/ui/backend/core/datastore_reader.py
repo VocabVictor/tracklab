@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 
 from tracklab.sdk.internal.datastore import DataStore
-from tracklab.proto.tracklab_internal_pb2 import Record
+from tracklab.core import Record
 
 logger = logging.getLogger(__name__)
 
